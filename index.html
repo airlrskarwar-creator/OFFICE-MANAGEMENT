@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>PayBill Dashboard</title>
+    <title>OFFICE MANAGEMENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base target="_top" />
     <!-- font style -->
@@ -2278,7 +2278,7 @@
             data-page="ElectricityPage"
           >
             <i class="material-symbols-outlined">bolt</i>
-            <span>HSD Log</span>
+            <span>Electricity Log</span>
           </button>
 
            <!-- Database -->
@@ -3601,7 +3601,7 @@
             <button onclick="showSheet('ITDB', this)">IT Database</button>
             <button onclick="showSheet('DGlog', this)">DG Log</button>
             <button onclick="showSheet('HSDlog', this)">HSD Log</button>
-            <button onclick="showSheet('Electricitylog', this)">Electricity Log</button>
+            <button onclick="showSheet('EBlog', this)">Electricity Log</button>
           </div>
 
           <div class="DB-Table-Wrapper">
@@ -3617,7 +3617,7 @@
             <table id="ITDB" style="display: none"></table>
             <table id="DGlog" style="display: none"></table>
             <table id="HSDlog" style="display: none"></table>
-            <table id="Electricitylog" style="display: none"></table>
+            <table id="EBlog" style="display: none"></table>
           </div>
         </div>
       </div>
@@ -3647,7 +3647,7 @@
       let commData = {};
       let dgData = {};
       let hsdData = {};
-      let electricityData = {};
+      let ebData = {};
       let currentYear = "";
 
       // Prevent infinite reload loop
@@ -3843,7 +3843,7 @@
           if (api === "comm") commData = result;
           if (api === "dg") dgData = result;
           if (api === "hsd") hsdData = result;
-          if (api === "electricity") electricityData = result;
+          if (api === "eb") ebData = result;
 
           if (!shouldRender) return;
 
@@ -3886,7 +3886,7 @@
           loadTable("it", "ITDB"),
           loadTable("dg", "DGlog"),
           loadTable("hsd", "HSDlog"),
-          loadTable("electricity", "Electricity"),
+          loadTable("eb", "EBlog"),
         ]);
       }
 
@@ -3924,8 +3924,8 @@
         let hsdRes = await fetch(
           "https://office-management-f425.onrender.com/hsd",
         );
-        let electricityRes = await fetch(
-          "https://office-management-f425.onrender.com/electricity",
+        let ebRes = await fetch(
+          "https://office-management-f425.onrender.com/eb",
         );
 
         empData = await empRes.json();
@@ -3939,7 +3939,7 @@
         commData = await commRes.json();
         dgData = await dgRes.json();
         hsdData = await hsdRes.json();
-        electricityData = await electricityRes.json();
+        ebData = await ebRes.json();
       }
 
       /* =========================
