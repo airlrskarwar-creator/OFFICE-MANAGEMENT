@@ -40,7 +40,7 @@ comm_sheet = spreadsheet.worksheet("CommFactDB")
 it_sheet = spreadsheet.worksheet("ITDB")
 dg_sheet = spreadsheet.worksheet("DGlog")
 hsd_sheet = spreadsheet.worksheet("HSDlog")
-electricity_sheet = spreadsheet.worksheet("Electricity")
+eb_sheet = spreadsheet.worksheet("EBlog")
 
 
 # =========================
@@ -114,9 +114,9 @@ def get_hsd():
     return jsonify(sheet_to_json(hsd_sheet))
 
 
-@app.route("/electricity", methods=["GET"])
-def get_electricity():
-    return jsonify(sheet_to_json(electricity_sheet))
+@app.route("/e", methods=["GET"])
+def get_eb():
+    return jsonify(sheet_to_json(eb_sheet))
 
 
 
