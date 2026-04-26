@@ -38,6 +38,8 @@ city_sheet = spreadsheet.worksheet("CityZoneDB")
 qtrs_sheet = spreadsheet.worksheet("QtrsRateDB")
 comm_sheet = spreadsheet.worksheet("CommFactDB")
 it_sheet = spreadsheet.worksheet("ITDB")
+dg_sheet = spreadsheet.worksheet("DGlog")
+hsd_sheet = spreadsheet.worksheet("HSDlog")
 
 
 # =========================
@@ -99,6 +101,14 @@ def get_comm():
 @app.route("/it", methods=["GET"])
 def get_it():
     return jsonify(sheet_to_json(it_sheet))
+
+@app.route("/dg", methods=["GET"])
+def get_dg():
+    return jsonify(sheet_to_json(dg_sheet))
+
+@app.route("/hsd", methods=["GET"])
+def get_hsd():
+    return jsonify(sheet_to_json(hsd_sheet))
 
 
 
