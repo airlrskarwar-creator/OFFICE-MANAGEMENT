@@ -16,6 +16,14 @@
     <link rel="icon" href="data:," />
     <!-- Icon -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
@@ -37,6 +45,9 @@
       src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
       onload="renderMathInElement(document.body)"
     ></script>
+
+    <!-- Chart Display JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
       /* =========================
@@ -379,10 +390,8 @@
         border-radius: 8px 0 0 8px;
       }
 
-      .menu-btn.active i {
+      .menu-btn.active span {
         color: blue;
-        filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.7))
-          drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
       }
 
       /* COLLAPSED ACTIVE */
@@ -395,8 +404,8 @@
         color: blue;
         text-shadow:
           0 0 4px rgba(255, 255, 255, 0.6),
-          0 0 8px rgba(59, 130, 246, 0.6),
-          0 0 12px rgba(59, 130, 246, 0.5);
+          0 0 4px rgba(59, 130, 246, 0.6),
+          0 0 8px rgba(59, 130, 246, 0.5);
         background: white;
       }
 
@@ -1791,9 +1800,265 @@
         font-weight: bold !important;
       }
 
+      /* =========================
+        🔥 CHART CONTAINER (ONLY THIS FIXED HEIGHT)
+        ========================= */
+      .chart-container {
+        height: 300px;
+      }
+
+      /* =========================
+        🔥 MAIN DASHBOARD GRID
+        ========================= */
+      .sbg-dashboard {
+        display: grid;
+        grid-template-columns: 140px 1fr 90px;
+        gap: 6px;
+        height: 100%;
+        padding: 2px;
+      }
+
+      /* toggle bar */
+      .chart-header-bar {
+        display: flex;
+        gap: 8px;
+        margin: 2px;
+        padding: 2px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      /* buttons */
+      .chart-btn {
+        padding: 5px 12px;
+        border: 1px solid #d1d5db;
+        background: #f3f4f6;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: 0.2s;
+      }
+
+      .chart-btn:hover {
+        background: #e5e7eb;
+      }
+
+      .chart-btn.active {
+        background: #2563eb;
+        color: #fff;
+      }
+
+       /* =========================
+        🔥 CENTER AREA
+        ========================= */
+      .chart-layout {
+        display: grid;
+        grid-template-columns: 1.4fr 1.4fr;
+        gap: 6px;
+        height: 100%;
+        min-height: 0; /* 🔥 critical */
+      }
+
+      /* Chart */
+      .chart-box {
+        height: 300px;
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .chart-scroll {
+        height: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      #chartInner {
+        height: 100%;
+      }
+
+      /* =========================
+        🔥 SIDE LISTS
+        ========================= */
+      /* Side list container */
+      .side-list {
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column; /* 🔥 header + scroll area */
+        border: 1px solid #e2e2e2;
+        border-radius: 8px;
+        background: #f0f7ff;
+        overflow: hidden; /* keep header fixed */
+      }
+
+      /* Header */
+      .side-header {
+        position: sticky; /* 🔥 stays visible */
+        top: 0;
+        z-index: 2;
+        padding: 4px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #374151;
+        background: #aad5ff;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+      }
+
+      /* Scrollable items area */
+      .side-items {
+        flex: 1; /* 🔥 take remaining height */
+        min-height: 0; /* 🔥 critical for scroll */
+        overflow-y: auto;
+        padding: 4px;
+      }
+
+      /* Buttons (unchanged) */
+      .side-btn {
+        width: 100%;
+        padding: 4px 6px;
+        margin-bottom: 4px;
+        border: none;
+        border-radius: 6px;
+        background: #f3f4f6;
+        cursor: pointer;
+        text-align: left;
+        font-size: 11px;
+        box-shadow: 0px 0px 1px 1px rgb(168, 168, 168);
+      }
+
+      .side-btn:hover {
+        background: #dbeafe;
+      }
+
+      .side-btn.active {
+        background: #2563eb;
+        color: #fff;
+      }    
+      /* =========================
+        🔥 TABLE (SCROLLABLE)
+        ========================= */
+      .table-box {
+        height: 100%;
+        min-height: 0; /* 🔥 critical */
+        overflow-y: auto; /* 🔥 scroll only table */
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        overflow-x: hidden;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Table styling */
+      .sbg-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+
+      .sbg-table tbody tr {
+        transition:
+          transform 0.1s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.1s ease,
+          background 0.1s ease;
+        will-change: transform;
+        transform-origin: center;
+      }
+
+      /* highlighted row */
+      .sbg-table tbody tr.highlight {
+        background: #dbeafe !important;
+        transform: scaleY(1.12) translateY(-2px);
+        position: relative;
+        z-index: 5;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        font-weight: bold;
+      }
+
+      .sbg-table td.sno {
+        text-align: center;
+      }
+
+      .sbg-table td.sno span {
+        display: inline-block;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 6px;
+        padding: 2px 4px;
+        font-size: 11px;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      /* Base pill */
+      .percent-pill {
+        display: inline-block;
+        min-width: 52px;
+        padding: 3px 4px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        color: #fff;
+        width: 40px;
+      }
+
+      /* Sticky header */
+      .sbg-table th {
+        position: sticky;
+        background: #aad5ff;
+        font-weight: 600;
+        top: 0;
+        z-index: 5;
+      }
+
+      /* Cells */
+      .sbg-table th,
+      .sbg-table td {
+        padding: 5px 6px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+      }
+
+      /* First column left aligned */
+      .sbg-table th:first-child,
+      .sbg-table td:first-child {
+        text-align: left;
+      }
+
+      /* Row hover */
+      .sbg-table tbody tr:hover {
+        background: #f3f4f6;
+      }
+
+      /* Negative values */
+      .sbg-table td.negative {
+        color: #dc2626;
+        font-weight: 500;
+      }
+
+      /* =========================
+        🔥 SCROLLBAR (optional polish)
+        ========================= */
+      .side-list::-webkit-scrollbar,
+      .table-box::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .side-list::-webkit-scrollbar-thumb,
+      .table-box::-webkit-scrollbar-thumb {
+        background: #cbd5f5;
+        border-radius: 4px;
+      }
+
       /* ===============================================
-     RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
-  =================================================== */
+        RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
+      =================================================== */
 
       @media (max-width: 1200px) {
         .SalarySlipTableWrapper {
@@ -1887,6 +2152,32 @@
         .SalarySlipTableWrapper {
           width: 95%;
         }
+
+        .sbg-dashboard {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        .chart-container {
+          height: 350px;
+        }
+
+        .chart-layout {
+          grid-template-columns: 1fr;
+          height: 100%;
+        }
+
+        .side-list {
+          display: flex;
+          overflow-x: auto;
+          overflow-y: hidden;
+          height: auto;
+        }
+
+        .side-btn {
+          min-width: 120px;
+          margin-right: 6px;
+        }
       }
     </style>
   </head>
@@ -1903,73 +2194,109 @@
             data-tooltip="Dashboard"
             data-page="DashBoard"
           >
-            <i data-lucide="layout-dashboard"></i>
+            <i class="material-symbols-outlined">dashboard</i>
             <span>Dashboard</span>
           </button>
 
+          <!-- Employee -->
           <button
             class="menu-btn"
             data-tooltip="Employee Details"
             data-page="EmpPage"
           >
-            <i data-lucide="user"></i>
+            <i class="material-symbols-outlined">group</i>
             <span>Employee Details</span>
           </button>
 
+          <!-- Pay Bill -->
           <button
             class="menu-btn"
             data-tooltip="Pay Bill"
             data-page="PayBillPage"
           >
-            <i data-lucide="file-text"></i>
+            <i class="material-symbols-outlined">description</i>
             <span>Pay Bill</span>
           </button>
 
+          <!-- Salary Slip -->
           <button
             class="menu-btn"
             data-tooltip="Salary Slip"
             data-page="SalarySlipPage"
           >
-            <i data-lucide="receipt"></i>
+            <i class="material-symbols-outlined">receipt_long</i>
             <span>Salary Slip</span>
           </button>
 
+          <!-- Income Tax -->
           <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-            <i data-lucide="calculator"></i>
+            <i class="material-symbols-outlined">calculate</i>
             <span>Income Tax</span>
           </button>
 
+          <!-- Pension -->
           <button
             class="menu-btn"
             data-tooltip="Pensions"
             data-page="PensionPage"
           >
-            <i data-lucide="landmark"></i>
+            <i class="material-symbols-outlined">elderly</i>
             <span>Pensions</span>
           </button>
 
+          <!-- Budget -->
           <button
             class="menu-btn"
             data-tooltip="Budgets"
             data-page="BudgetPage"
           >
-            <i data-lucide="pie-chart"></i>
+            <i class="material-symbols-outlined">pie_chart</i>
             <span>Budgets</span>
           </button>
 
           <button
             class="menu-btn"
+            data-tooltip="DG Log Book"
+            data-page="DGlogPage"
+          >
+            <i class="material-symbols-outlined">electric_meter</i>
+            <span>DG Log</span>
+          </button>
+
+          <button
+            class="menu-btn"
+            data-tooltip="HSD Log Book"
+            data-page="HSDlogPage"
+          >
+            <i class="material-symbols-outlined">local_gas_station</i>
+            <span>HSD Log</span>
+          </button>
+
+          <button
+            class="menu-btn"
+            data-tooltip="Electricity Log Book"
+            data-page="ElectricityPage"
+          >
+            <i class="material-symbols-outlined">bolt</i>
+            <span>HSD Log</span>
+          </button>
+
+           <!-- Database -->
+          <button
+            class="menu-btn"
             data-tooltip="Database"
             data-page="DatabasePage"
           >
-            <i data-lucide="database"></i>
+            <i class="material-symbols-outlined">storage</i>
             <span>Database</span>
           </button>
+
+          <!-- Footer -->
         </div>
 
         <div class="menu-footer">
           <button class="logout-btn" data-tooltip="Logout">
-            <i data-lucide="log-out"></i>
+            <i class="material-symbols-outlined">logout</i>
             <span>Logout</span>
           </button>
         </div>
@@ -1984,6 +2311,44 @@
         <div class="SectionPage" id="DashBoard">
           <div class="header">
             <h2>Office Management</h2>
+          </div>
+          <div class="DashBoardContainer">
+            <div class="DashBoardContainer">
+              <div class="chart-container">
+                <div class="chart-header-bar">
+                  <button id="btnBudget" class="chart-btn active">
+                    Budget
+                  </button>
+                  <button id="btnSalary" class="chart-btn">Salary</button>
+                </div>
+
+                <div class="sbg-dashboard">
+                  <div class="side-list" id="stationList">
+                    <div class="side-header">Select Station</div>
+                    <div class="side-items"></div>
+                  </div>
+
+                  <div class="chart-layout">
+                    <div class="chart-box">
+                      <div class="chart-scroll">
+                        <div id="chartInner">
+                          <canvas id="sbgBarChart"></canvas>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="table-box">
+                      <table id="sbgSideTable" class="sbg-table"></table>
+                    </div>
+                  </div>
+
+                  <div class="side-list" id="yearList">
+                    <div class="side-header">Select FY</div>
+                    <div class="side-items"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3189,6 +3554,24 @@
           </div>
         </div>
 
+        <div class="SectionPage" id="DGlogPage" style="display: none">
+          <div class="header">
+            <h2>DG Log Book</h2>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="HSDlogPage" style="display: none">
+          <div class="header">
+            <h2>HSD Log Book</h2>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="ElectricityPage" style="display: none">
+          <div class="header">
+            <h2>Electricity Log Book</h2>
+          </div>
+        </div>
+
         <div class="SectionPage" id="DatabasePage" style="display: none">
           <div class="header">
             <h2>Database</h2>
@@ -3216,6 +3599,9 @@
               Commutation Factors
             </button>
             <button onclick="showSheet('ITDB', this)">IT Database</button>
+            <button onclick="showSheet('DGlog', this)">DG Log</button>
+            <button onclick="showSheet('HSDlog', this)">HSD Log</button>
+            <button onclick="showSheet('Electricitylog', this)">Electricity Log</button>
           </div>
 
           <div class="DB-Table-Wrapper">
@@ -3229,6 +3615,9 @@
             <table id="CityZoneDB" style="display: none"></table>
             <table id="CommFactDB" style="display: none"></table>
             <table id="ITDB" style="display: none"></table>
+            <table id="DGlog" style="display: none"></table>
+            <table id="HSDlog" style="display: none"></table>
+            <table id="Electricitylog" style="display: none"></table>
           </div>
         </div>
       </div>
@@ -3256,6 +3645,10 @@
       let sbgData = {}; // BudgetDB (SBG)
       let itData = {};
       let commData = {};
+      let dgData = {};
+      let hsdData = {};
+      let electricityData = {};
+      let currentYear = "";
 
       // Prevent infinite reload loop
       if (!sessionStorage.getItem("reloaded")) {
@@ -3282,41 +3675,56 @@
       window.addEventListener("resize", moveIndicator);
 
       document.addEventListener("DOMContentLoaded", async () => {
+        Chart.register(xAxisPillPlugin);
+        Chart.register(columnLabelPlugin);
+        initUI();
+
+        // 🚀 Load data once
+        await loadAllData();
+
+        initAfterData();
+
+        initButtons();
+        initBindings();
+
+        initDefaultView();
+
+        initPostSetup();
+      });
+
+      function initUI() {
         loadSidebarState();
         initMenu();
         renderIcons();
         disableAllButtons();
 
-        // Default page click
-        const firstBtn = qs(".menu-btn");
-        if (firstBtn) firstBtn.click();
+        // default page
+        qs(".menu-btn")?.click();
+      }
 
-        // 🔥 LOAD DATA ONLY ONCE
-        await loadAllData();
-
-        // AFTER data is ready
+      function initAfterData() {
         buildEmpDBWithCalc();
         initFilters();
+        buildSBGMenuListsForChart();
         updateAndRenderDAA();
-
         moveIndicator();
         refreshPBView();
+      }
 
-        // Toggle buttons
-        setupPBToggleButton("PBeditBtn", {
-          defaultText: "Edit",
-          activeText: "Save",
-          defaultIcon: "edit",
-          activeIcon: "upload",
-          className: "upload-mode",
-        });
+      function initButtons() {
+        const configs = [
+          ["PBeditBtn", "Edit", "Save", "edit", "upload"],
+          ["PBaddBtn", "Add", "Save", "plus", "upload"],
+        ];
 
-        setupPBToggleButton("PBaddBtn", {
-          defaultText: "Add",
-          activeText: "Save",
-          defaultIcon: "plus",
-          activeIcon: "upload",
-          className: "upload-mode",
+        configs.forEach(([id, def, act, dIcon, aIcon]) => {
+          setupPBToggleButton(id, {
+            defaultText: def,
+            activeText: act,
+            defaultIcon: dIcon,
+            activeIcon: aIcon,
+            className: "upload-mode",
+          });
         });
 
         setupSBGToggleButton(
@@ -3342,14 +3750,25 @@
           },
           "edit",
         );
+      }
 
+      function initBindings() {
         bindPayBillView(
           "PayBillPage_Station",
           "PayBillPage_FY",
           "PayBillPage_SalMonth",
         );
 
-        // ⚡ Faster than setTimeout
+        on("PayBillPage_SalMonth", "change", () => {
+          setDAPercent();
+          resetDAAInEditTables();
+          updateAndRenderDAA();
+        });
+
+        on("PayBillPage_Station", "change", setDAPercent);
+      }
+
+      function initDefaultView() {
         requestAnimationFrame(() => {
           const station = id("PayBillPage_Station")?.value;
           const fy = id("PayBillPage_FY")?.value;
@@ -3360,27 +3779,26 @@
             setDAPercent();
           }
         });
+      }
 
-        // DA binding
-        on("PayBillPage_SalMonth", "change", () => {
-          setDAPercent();
-          resetDAAInEditTables();
-          updateAndRenderDAA();
-        });
-
-        on("PayBillPage_Station", "change", setDAPercent);
-
-        qsa(".SSaction-group button").forEach((btn) => (btn.disabled = true));
-        qsa(".ITaction-group button").forEach((btn) => (btn.disabled = true));
-        document
-          .querySelectorAll(".Pensionaction-group button")
-          .forEach((btn) => (btn.disabled = true));
+      function initPostSetup() {
+        disableGroups([
+          ".SSaction-group button",
+          ".ITaction-group button",
+          ".Pensionaction-group button",
+        ]);
 
         loadCommutationOptions();
         updatePensionUI();
-      });
+      }
 
-      //🔥🔥🔥🔥 GET DATA FROM SHEET🔥🔥🔥🔥//
+      function disableGroups(selectors) {
+        selectors.forEach((sel) => {
+          qsa(sel).forEach((btn) => (btn.disabled = true));
+        });
+      }
+
+      //============================🔥 GET DATA FROM SHEET🔥===========================//
       async function loadTable(api, tableId, shouldRender = true) {
         console.log("🔥 loadTable:", api);
 
@@ -3423,6 +3841,9 @@
           if (api === "sbgexp") sbgExpData = result;
           if (api === "it") itData = result;
           if (api === "comm") commData = result;
+          if (api === "dg") dgData = result;
+          if (api === "hsd") hsdData = result;
+          if (api === "electricity") electricityData = result;
 
           if (!shouldRender) return;
 
@@ -3463,6 +3884,9 @@
           loadTable("city", "CityZoneDB"),
           loadTable("comm", "CommFactDB"),
           loadTable("it", "ITDB"),
+          loadTable("dg", "DGlog"),
+          loadTable("hsd", "HSDlog"),
+          loadTable("electricity", "Electricity"),
         ]);
       }
 
@@ -3494,6 +3918,15 @@
         let commRes = await fetch(
           "https://office-management-f425.onrender.com/comm",
         );
+        let dgRes = await fetch(
+          "https://office-management-f425.onrender.com/dg",
+        );
+        let hsdRes = await fetch(
+          "https://office-management-f425.onrender.com/hsd",
+        );
+        let electricityRes = await fetch(
+          "https://office-management-f425.onrender.com/electricity",
+        );
 
         empData = await empRes.json();
         sbgData = await sbgRes.json();
@@ -3504,6 +3937,9 @@
         cityData = await cityRes.json();
         itData = await itRes.json();
         commData = await commRes.json();
+        dgData = await dgRes.json();
+        hsdData = await hsdRes.json();
+        electricityData = await electricityRes.json();
       }
 
       /* =========================
@@ -4061,6 +4497,60 @@
         month: ["PayBillPage_SalMonth", "SalSlipPage_SalMonth"],
       };
 
+      function syncSelect(group, value) {
+        selectMap[group].forEach((idStr) => {
+          const el = id(idStr);
+          if (el) el.value = value;
+        });
+      }
+
+      function handleStationChange(sourceId) {
+        enableAllButtons();
+
+        const station = id(sourceId).value;
+        if (!station) return;
+
+        // 🔁 Sync all station dropdowns
+        syncSelect("station", station);
+
+        // 🔄 Filters
+        filters.station = station;
+        applyFilters();
+
+        if (filters.employee) {
+          setValueSelect("employee", filters.employee);
+          fillEmpDetails(filters.employee);
+        }
+
+        // 🌆 Zone logic
+        const zone = getCityZone(station) || {};
+        const daPercent = Number(id("PayBillPage_DA%")?.value) || 0;
+
+        let percent = zone.hra === "X" ? 28 : zone.hra === "Y" ? 18 : 8;
+
+        if (daPercent >= 50) percent += 2;
+        else if (daPercent >= 25) percent += 1;
+
+        // Apply zone values
+        ["PayBillPage", "EmpPage"].forEach((page) => {
+          id(`${page}_TAZone`).value = val(zone.ta);
+          id(`${page}_HRAZone`).value = val(zone.hra);
+        });
+
+        id("PayBillPage_HRA%").value = percent;
+
+        recalculateAllRows();
+        refreshPBView();
+      }
+
+      selectMap.station.forEach((fid) => {
+        on(fid, "change", () => handleStationChange(fid));
+      });
+
+      [...selectMap.fy, ...selectMap.month].forEach((fid) => {
+        on(fid, "change", refreshPBView);
+      });
+
       function getValue(type) {
         for (let elId of selectMap[type]) {
           let el = id(elId); // ✅ correct
@@ -4205,180 +4695,160 @@
       }
 
       function applyFilters() {
-        //console.log("FILTER isAddMode:", isAddMode);
         if (!pbData.headers) return;
 
-        let headers = pbData.headers;
-        let rows = pbData.rows;
+        const { headers, rows } = pbData;
 
-        let stationIndex = headers.indexOf("Pay Drawn Station");
-        let empIndex = headers.indexOf("Employee Name");
-        let monthIndex = headers.indexOf("Salary Month");
+        const idx = {
+          station: headers.indexOf("Pay Drawn Station"),
+          emp: headers.indexOf("Employee Name"),
+          month: headers.indexOf("Salary Month"),
+        };
 
-        let stationSet = new Set();
-        let empSet = new Set();
-        let fySet = new Set();
+        const sets = {
+          station: new Set(),
+          employee: new Set(),
+          fy: new Set(),
+        };
 
-        // ================= BUILD FULL DATA =================
+        const valid = {
+          employee: new Set(),
+          fy: new Set(),
+          month: new Set(),
+        };
+
+        // 🔥 SINGLE LOOP (core optimization)
         rows.forEach((r) => {
-          let station = r[stationIndex];
-          let emp = r[empIndex];
-          let month = r[monthIndex];
-          let fy = getFinancialYear(month);
+          const station = r[idx.station];
+          const emp = r[idx.emp];
+          const month = r[idx.month];
+          const fy = getFinancialYear(month);
 
-          stationSet.add(station);
-          empSet.add(emp);
-          fySet.add(fy);
+          // global sets
+          sets.station.add(station);
+          sets.employee.add(emp);
+          sets.fy.add(fy);
+
+          // filtered sets
+          if (!filters.station || station === filters.station) {
+            valid.employee.add(emp);
+            valid.fy.add(fy);
+          }
+
+          if (
+            (isAddMode && getFinancialYear(filters.month || month) === fy) ||
+            (!isAddMode && fy === filters.fy)
+          ) {
+            valid.month.add(month);
+          }
         });
 
-        // ================= STATION CHANGE =================
+        // ================= FY + EMP VALIDATION =================
         if (filters.station) {
-          let validFY = new Set();
-          let validEmp = new Set();
+          const sortedFY = [...valid.fy].sort(
+            (a, b) => parseInt(a) - parseInt(b),
+          );
 
-          rows.forEach((r) => {
-            let station = r[stationIndex];
-            if (station !== filters.station) return;
-
-            let emp = r[empIndex];
-            let month = r[monthIndex];
-            let fy = getFinancialYear(month);
-
-            validFY.add(fy);
-            validEmp.add(emp);
-          });
-
-          let sortedFY = [...validFY].sort((a, b) => {
-            let [a1] = a.split("-");
-            let [b1] = b.split("-");
-            return parseInt(a1) - parseInt(b1);
-          });
-
-          if (!filters.fy || !validFY.has(filters.fy)) {
-            filters.fy = sortedFY.length ? sortedFY[sortedFY.length - 1] : "";
+          if (!valid.fy.has(filters.fy)) {
+            filters.fy = sortedFY.at(-1) || "";
           }
 
-          if (filters.employee && !validEmp.has(filters.employee)) {
-            filters.employee = [...validEmp].sort().pop() || "";
+          if (!valid.employee.has(filters.employee)) {
+            filters.employee = [...valid.employee].sort().at(-1) || "";
           }
         }
 
-        // ================= MONTH LOGIC =================
-        if (filters.fy || isAddMode) {
-          let validMonths = new Set();
-
-          // 🔹 1. Collect from rows
-          rows.forEach((r) => {
-            let month = r[monthIndex];
-            let fy = getFinancialYear(month);
-
-            if (isAddMode) {
-              if (getFinancialYear(filters.month || month) === fy) {
-                validMonths.add(month);
-              }
-            } else {
-              if (fy === filters.fy) {
-                validMonths.add(month);
-              }
-            }
-          });
-
-          // 🔥 2. FORCE ADD AFTER LOOP (THIS IS THE KEY FIX)
-          if (isAddMode && filters.month) {
-            validMonths.add(String(filters.month).trim());
-          }
-
-          const order = [
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-            "Jan",
-            "Feb",
-          ];
-
-          let sortedMonths = [...validMonths].sort((a, b) => {
-            let [ma, ya] = a.split("-");
-            let [mb, yb] = b.split("-");
-
-            ya = parseInt(ya);
-            yb = parseInt(yb);
-
-            if (ya !== yb) return ya - yb;
-            return order.indexOf(ma) - order.indexOf(mb);
-          });
-
-          // 🔹 Keep selection logic
-          if (!isAddMode) {
-            if (!filters.month || !validMonths.has(filters.month)) {
-              filters.month = sortedMonths.length
-                ? sortedMonths[sortedMonths.length - 1]
-                : "";
-            }
-          }
-
-          // 🔹 Build dropdown
-          selectMap.month.forEach((eid) => {
-            let select = id(eid);
-            if (!select) return;
-
-            select.innerHTML = "<option value='' hidden></option>";
-
-            sortedMonths.forEach((val) => {
-              let sel = val === filters.month ? "selected" : "";
-              select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
-            });
-
-            // 🔥 FORCE SELECT (important)
-            select.value = filters.month;
-          });
+        // ================= MONTH =================
+        if (isAddMode && filters.month) {
+          valid.month.add(String(filters.month).trim());
         }
+
+        const monthOrder = [
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+        ];
+
+        const sortedMonths = [...valid.month].sort((a, b) => {
+          const [ma, ya] = a.split("-");
+          const [mb, yb] = b.split("-");
+          return ya - yb || monthOrder.indexOf(ma) - monthOrder.indexOf(mb);
+        });
+
+        if (!isAddMode && !valid.month.has(filters.month)) {
+          filters.month = sortedMonths.at(-1) || "";
+        }
+
+        updateMonthDropdown(sortedMonths);
 
         // ================= FINAL DROPDOWNS =================
         filters.station = updateAllSelects(
           "station",
-          stationSet,
+          sets.station,
           filters.station,
         );
         filters.employee = updateAllSelects(
           "employee",
-          empSet,
+          sets.employee,
           filters.employee,
         );
-        filters.fy = updateAllSelects("fy", fySet, filters.fy);
+        filters.fy = updateAllSelects("fy", sets.fy, filters.fy);
 
-        const hasStation = !!filters.station;
-        const hasFY = !!filters.fy;
+        toggleDropdowns();
 
-        selectMap.fy.forEach((eid) => {
-          let el = id(eid);
-          if (el) {
+        function updateMonthDropdown(months) {
+          selectMap.month.forEach((eid) => {
+            const select = id(eid);
+            if (!select) return;
+
+            select.innerHTML = "<option value='' hidden></option>";
+
+            months.forEach((val) => {
+              const opt = document.createElement("option");
+              opt.value = val;
+              opt.textContent = val;
+              if (val === filters.month) opt.selected = true;
+              select.appendChild(opt);
+            });
+
+            select.value = filters.month;
+          });
+        }
+
+        function toggleDropdowns() {
+          const hasStation = !!filters.station;
+          const hasFY = !!filters.fy;
+
+          selectMap.fy.forEach((eid) => {
+            const el = id(eid);
+            if (!el) return;
             el.disabled = !hasStation;
             if (!hasStation) el.value = "";
-          }
-        });
+          });
 
-        selectMap.employee.forEach((eid) => {
-          let el = id(eid);
-          if (el) {
+          selectMap.employee.forEach((eid) => {
+            const el = id(eid);
+            if (!el) return;
             el.disabled = !hasStation;
             if (!hasStation) el.value = "";
-          }
-        });
+          });
 
-        selectMap.month.forEach((eid) => {
-          let el = id(eid);
-          if (el) {
+          selectMap.month.forEach((eid) => {
+            const el = id(eid);
+            if (!el) return;
             el.disabled = !hasFY;
             if (!hasFY) el.value = "";
-          }
-        });
+          });
+        }
       }
 
       function updateStationHeaders(station) {
@@ -4388,60 +4858,43 @@
       }
 
       function initGlobalEvents() {
-        Object.keys(selectMap).forEach((type) => {
-          selectMap[type].forEach((eid) => {
-            let el = id(eid);
+        Object.entries(selectMap).forEach(([type, ids]) => {
+          ids.forEach((eid) => {
+            const el = id(eid);
             if (!el) return;
 
             el.addEventListener("change", () => {
-              filters[type] = el.value;
+              const value = el.value;
+              filters[type] = value;
 
-              // 🔥 Sync all same-type dropdowns
-              setValueSelect(type, el.value);
+              // 🔁 Sync all same-type dropdowns
+              setValueSelect(type, value);
 
+              // 🔄 Apply filters once
               applyFilters();
 
-              if (type === "station") {
-                updateStationHeaders(el.value);
-                SyncAllPage();
-              }
+              // 🎯 Type-specific actions
+              handleTypeEffects(type, value);
 
-              if (type === "employee") {
-                fillEmpDetails(filters.employee);
-                SyncAllPage();
-              }
-
-              if (type === "fy") {
-                SyncAllPage();
-              }
-
-              if (type === "month") {
-                SyncAllPage();
-              }
-              console.log(type, el.value);
+              console.log(type, value);
             });
           });
         });
-      }
 
-      function fillSelectSmart(id, dataSet, oldValue) {
-        let select = id(id);
+        function handleTypeEffects(type, value) {
+          switch (type) {
+            case "station":
+              updateStationHeaders(value);
+              break;
 
-        let values = [...dataSet].sort();
+            case "employee":
+              fillEmpDetails(value);
+              break;
+          }
 
-        // check if old value exists
-        let valid = values.includes(oldValue);
-
-        let selected = valid ? oldValue : "";
-
-        select.innerHTML = "<option value=''>All</option>";
-
-        values.forEach((val) => {
-          let sel = val === selected ? "selected" : "";
-          select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
-        });
-
-        return selected; // 🔥 return updated value
+          // 🔥 Call once instead of 4 times
+          SyncAllPage();
+        }
       }
 
       async function initFilters() {
@@ -4449,9 +4902,1253 @@
         applyFilters();
       }
 
-      //================================================================================//
-      //                🔥🔥🔥🔥🔥MAIN PAGE DASHBOARD SCRIPT🔥🔥🔥🔥🔥
-      //=============================================================================//
+      //========================================================================================================================//
+      //                                               🔥🔥🔥🔥🔥MAIN PAGE DASHBOARD SCRIPT🔥🔥🔥🔥🔥
+      //========================================================================================================================//
+
+      // 🔥 X-Axis Pill Plugin (matches table serial style)
+      const xAxisPillPlugin = {
+        id: "xAxisPill",
+
+        afterDraw(chart) {
+          const {
+            ctx,
+            scales: { x },
+          } = chart;
+
+          ctx.save();
+
+          x.ticks.forEach((tick, i) => {
+            const xPos = x.getPixelForTick(i);
+            const yPos = x.bottom; // ✅ below axis
+
+            const text = tick.label.toString();
+
+            ctx.font = "11px sans-serif";
+            const textWidth = ctx.measureText(text).width;
+
+            const width = 20;
+            const height = 18;
+            const radius = 6;
+
+            // pill background
+            ctx.fillStyle = "#2563eb";
+
+            ctx.beginPath();
+            ctx.moveTo(xPos - width / 2 + radius, yPos);
+            ctx.lineTo(xPos + width / 2 - radius, yPos);
+            ctx.quadraticCurveTo(
+              xPos + width / 2,
+              yPos,
+              xPos + width / 2,
+              yPos + radius,
+            );
+            ctx.lineTo(xPos + width / 2, yPos + height - radius);
+            ctx.quadraticCurveTo(
+              xPos + width / 2,
+              yPos + height,
+              xPos + width / 2 - radius,
+              yPos + height,
+            );
+            ctx.lineTo(xPos - width / 2 + radius, yPos + height);
+            ctx.quadraticCurveTo(
+              xPos - width / 2,
+              yPos + height,
+              xPos - width / 2,
+              yPos + height - radius,
+            );
+            ctx.lineTo(xPos - width / 2, yPos + radius);
+            ctx.quadraticCurveTo(
+              xPos - width / 2,
+              yPos,
+              xPos - width / 2 + radius,
+              yPos,
+            );
+            ctx.closePath();
+            ctx.fill();
+
+            // text
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, xPos, yPos + height / 2);
+          });
+
+          ctx.restore();
+        },
+      };
+
+
+
+      const columnLabelPlugin = {
+        id: "columnLabelPlugin",
+
+        afterDatasetsDraw(chart, args, pluginOptions) {
+          if (!pluginOptions || !pluginOptions.enabled) return;
+
+          const { ctx } = chart;
+
+          const {
+            numeratorDatasetIndex = 0,
+            denominatorDatasetIndex = null,
+
+            mode = "percent", // "percent" | "value" | "custom"
+
+            color = "#111827",
+            font = "10px sans-serif",
+
+            minDisplay = 0,
+
+            offsetY = 12,     // 🔥 NEW (control height)
+            rotate = false,   // 🔥 NEW (rotate label)
+
+            formatter
+          } = pluginOptions;
+
+          const numerator = chart.data.datasets[numeratorDatasetIndex];
+          const denominator =
+            denominatorDatasetIndex !== null
+              ? chart.data.datasets[denominatorDatasetIndex]
+              : null;
+
+          const meta = chart.getDatasetMeta(numeratorDatasetIndex);
+
+          ctx.save();
+          ctx.font = font;
+          ctx.fillStyle = color;
+          ctx.textAlign = rotate ? "left" : "center";
+
+          meta.data.forEach((bar, i) => {
+            const num = numerator.data[i] || 0;
+
+            let total = 0;
+
+            if (denominator) {
+              total = num + (denominator.data[i] || 0);
+            } else {
+              total = chart.data.datasets.reduce(
+                (sum, ds) => sum + (ds.data[i] || 0),
+                0
+              );
+            }
+
+            // 🔥 FIX: zero-safe percent
+            let percent = 0;
+            if (total > 0) {
+              percent = (num / total) * 100;
+            }
+
+            if (percent < minDisplay && percent !== 0) return;
+
+            let text = ""; // 🔥 FIX: declare text
+
+            // 🔥 MODE HANDLING
+            if (mode === "percent") {
+              text = percent.toFixed(0) + "%";
+            } else if (mode === "value") {
+              text = num.toLocaleString();
+            } else if (mode === "custom" && formatter) {
+              text = formatter({
+                value: num,
+                percent,
+                index: i,
+                chart
+              });
+            }
+
+            const x = bar.x;
+            const y = chart.scales.y.getPixelForValue(0) - offsetY;
+
+            ctx.save();
+
+            if (rotate) {
+              ctx.translate(x, y);
+              ctx.rotate(-Math.PI / 2);
+              ctx.fillText(text, 0, 0);
+            } else {
+              ctx.fillText(text, x, y);
+            }
+
+            ctx.restore();
+          });
+
+          ctx.restore();
+        }
+      };
+      let currentMode = "budget";
+
+      id("btnBudget").onclick = () => {
+        currentMode = "budget";
+        setActiveBtn("btnBudget");
+
+        buildSBGMenuListsForChart(); // 🔥 now handles FY internally
+
+        setActiveYearButton(currentYear); // 🔥 sync UI
+
+        renderSBGCharts(currentYear, filters.station);
+      };
+
+      
+      id("btnSalary").onclick = () => {
+        currentMode = "salary";
+        setActiveBtn("btnSalary");
+
+        buildSalaryMenuListsForChart();
+
+        setActiveYearButton(currentYear);
+
+        renderSalaryCharts(currentYear, filters.station);
+      };
+
+
+      function getCurrentFinancialYear() {
+        const today = new Date();
+
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1; // Jan = 1
+
+        // 🔥 FY starts from March
+        if (month >= 3) {
+          return `${year}-${String(year + 1).slice(-2)}`;
+        } else {
+          return `${year - 1}-${String(year).slice(-2)}`;
+        }
+      }
+
+
+      function setActiveYearButton(fy) {
+        const yearButtons = qsa("#yearList .side-btn");
+
+        if (!yearButtons.length) return; // 🔥 prevent empty case
+
+        yearButtons.forEach(btn => {
+          btn.classList.remove("active");
+
+          if (btn.textContent.trim() === fy) {
+            btn.classList.add("active");
+          }
+        });
+      }
+
+
+      function setActiveBtn(id) {
+        qsa(".chart-btn").forEach((b) => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+
+      const BAR_WIDTH = 16; // width of bar
+      const GAP = 7; // space between columns
+      const STEP = BAR_WIDTH + GAP;
+
+      function setChartWidth(labels) {
+        const inner = id("chartInner");
+        const scrollBox = qs(".chart-scroll");
+
+        const requiredWidth = labels.length * STEP;
+        const containerWidth = scrollBox.clientWidth;
+
+        inner.style.width =
+          requiredWidth > containerWidth
+            ? requiredWidth + "px" // enable scroll
+            : "100%"; // fit container
+      }
+
+      function attachChartMouseLeave(canvas, highlightFn) {
+        canvas.addEventListener("mouseleave", () => {
+          if (isTableHover) return;
+
+          highlightFn(-1);
+
+          if (!window.barChart) return;
+
+          const chart = window.barChart;
+          chart.setActiveElements([]);
+          chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chart.update("none");
+        });
+      }
+
+      function scrollChartToIndex(index) {
+        if (!window.barChart) return;
+
+        const chart = window.barChart;
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[index];
+
+        if (!bar) return;
+
+        const scrollBox = qs(".chart-scroll");
+
+        const barX = bar.x; // position inside canvas
+        const viewLeft = scrollBox.scrollLeft;
+        const viewRight = viewLeft + scrollBox.clientWidth;
+
+        // 🔥 if bar is outside view → scroll
+        if (barX < viewLeft + 40 || barX > viewRight - 40) {
+          scrollBox.scrollTo({
+            left: barX - scrollBox.clientWidth / 2,
+            behavior: "smooth",
+          });
+        }
+      }
+
+      //=============== Highlight Table row on Chart Bar Hover ===========//
+      function highlightTableRow(index) {
+        const rows = qsa("#sbgSideTable tbody tr");
+        const container = qs(".table-box");
+
+        rows.forEach((r) => r.classList.remove("highlight"));
+
+        if (!rows[index]) return;
+
+        const row = rows[index];
+        row.classList.add("highlight");
+
+        const header = qs("#sbgSideTable thead");
+        const headerHeight = header ? header.offsetHeight : 0;
+
+        const rowTop = row.offsetTop;
+        const rowBottom = rowTop + row.offsetHeight;
+
+        const viewTop = container.scrollTop;
+        const viewBottom = viewTop + container.clientHeight;
+
+        // 🔥 CASE 1: Row hidden behind sticky header (TOP FIX)
+        if (rowTop < viewTop + headerHeight + 10) {
+          container.scrollTo({
+            top: rowTop - headerHeight - 35,
+            behavior: "smooth",
+          });
+        }
+
+        // 🔥 CASE 2: Row below visible area (BOTTOM FIX)
+        else if (rowBottom > viewBottom - 10) {
+          container.scrollTo({
+            top: rowBottom - container.clientHeight + 35,
+            behavior: "smooth",
+          });
+        }
+      }
+
+      //================= Table Row Hover effect on Chart ===============//
+      let isTableHover = false;
+
+      const table =id("sbgSideTable");
+
+      table.addEventListener("mousemove", (e) => {
+        const row = e.target.closest("tr");
+        if (!row || !row.parentElement.matches("tbody")) return;
+
+        isTableHover = true;
+
+        const index = Array.from(row.parentElement.children).indexOf(row);
+
+        if (!window.barChart) return;
+
+        const chart = window.barChart;
+
+        const activeElements = [{ datasetIndex: 0, index }];
+
+        chart.setActiveElements(activeElements);
+
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[index];
+
+        if (bar) {
+          chart.tooltip.setActiveElements(activeElements, {
+            x: bar.x,
+            y: bar.y,
+          });
+        }
+
+        // 🔥 NEW: scroll chart to bar
+        scrollChartToIndex(index);
+
+        chart.update("none");
+      });
+
+      table.addEventListener("mouseleave", () => {
+        isTableHover = false;
+
+        if (!window.barChart) return;
+
+        const chart = window.barChart;
+
+        chart.setActiveElements([]);
+        chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+
+        // 🔥 clear correct table highlight
+        if (currentMode === "budget") {
+          highlightTableRow(-1);
+        } else {
+          highlightSalaryRow(-1);
+        }
+
+        chart.update("none");
+      });
+
+      //=====================SBG Chart Datas =====================================================//
+      function buildSBGMenuListsForChart() {
+        const headers = sbgData.headers;
+        const rows = sbgData.rows;
+
+        const stationRow = rows[0];
+
+        // =========================
+        // 🔹 GET CONTAINERS
+        // =========================
+        const stationContainer = id("stationList");
+        const yearContainer = id("yearList");
+
+        const stationItems = stationContainer.querySelector(".side-items");
+        const yearItems = yearContainer.querySelector(".side-items");
+
+        // 🔥 CLEAR ONLY ITEMS (not header)
+        stationItems.innerHTML = "";
+        yearItems.innerHTML = "";
+
+        // =========================
+        // 🔹 STATIONS
+        // =========================
+        const stations = [
+          ...new Map(
+            stationRow
+              .slice(1)
+              .map((s) => String(s).trim())
+              .filter(Boolean)
+              .map((s) => [s.toLowerCase(), s]),
+          ).values(),
+        ];
+
+        stations.forEach((st) => {
+          const btn = document.createElement("button");
+          btn.className = "side-btn";
+          btn.textContent = st;
+
+          btn.onclick = () => {
+            stationItems
+              .querySelectorAll(".side-btn")
+              .forEach((b) => b.classList.remove("active"));
+
+            btn.classList.add("active");
+
+            filters.station = st;
+            renderSBGCharts(currentYear, st);
+          };
+
+          stationItems.appendChild(btn); // ✅ FIXED
+        });
+
+        // =========================
+        // 🔹 YEARS
+        // =========================
+        const years = [
+          ...new Set(
+            headers
+              .filter((h) => h.includes("(SBG)"))
+              .map((h) => h.match(/\d{4}-\d{2}/)?.[0])
+              .filter(Boolean)
+          ),
+        ].sort((a, b) => b.localeCompare(a)); // 🔥 newest first
+
+        years.forEach((yr) => {
+          const btn = document.createElement("button");
+          btn.className = "side-btn";
+          btn.textContent = yr;
+
+          btn.onclick = () => {
+            yearItems
+              .querySelectorAll(".side-btn")
+              .forEach((b) => b.classList.remove("active"));
+
+            btn.classList.add("active");
+
+            currentYear = yr;
+            renderSBGCharts(currentYear, filters.station);
+          };
+
+          yearItems.appendChild(btn); // ✅ FIXED
+        });
+
+        // =========================
+        // 🔥 DEFAULT
+        // =========================
+       const fy = getCurrentFinancialYear();
+
+        if (years.includes(fy)) {
+          currentYear = fy;
+        } else {
+          currentYear = years[0] || "";
+        }
+
+        // 🔥 DEFAULT STATION (CRITICAL FIX)
+        const firstStationBtn = stationItems.querySelector(".side-btn");
+        if (firstStationBtn) {
+          firstStationBtn.classList.add("active");
+          filters.station = firstStationBtn.textContent.trim(); // ✅ SET VALUE
+        }
+
+        // 🔥 DEFAULT YEAR UI
+        const activeYearBtn = [...yearItems.querySelectorAll(".side-btn")]
+          .find(btn => btn.textContent.trim() === currentYear);
+
+        if (activeYearBtn) {
+          activeYearBtn.classList.add("active");
+        } else {
+          yearItems.querySelector(".side-btn")?.classList.add("active");
+        }
+
+        // 🔥 FINAL RENDER (now station is valid)
+        renderSBGCharts(currentYear, filters.station);
+      }
+
+
+      function getSBGDataforChart(year, station) {
+        const headers = sbgData.headers;
+        const rows = sbgData.rows;
+
+        const stationRow = rows[0];
+        const dataRows = rows.slice(1);
+
+        let sbgIdx = -1;
+        let usedIdx = -1;
+
+        headers.forEach((h, i) => {
+          const fy = h.match(/\d{4}-\d{2}/)?.[0];
+          const clean = h.toLowerCase();
+
+          if (
+            fy === year &&
+            String(stationRow[i]).trim().toLowerCase() === station.toLowerCase()
+          ) {
+            if (clean.includes("(sbg)") && sbgIdx === -1) sbgIdx = i;
+            if (clean.includes("(used)") && usedIdx === -1) usedIdx = i;
+          }
+        });
+
+        if (sbgIdx === -1) return null;
+
+        const labels = [];
+        const sbgArr = [];
+        const usedArr = [];
+
+        dataRows.forEach((r) => {
+          let sbg = Number(r[sbgIdx]) || 0;
+          let used = Number(r[usedIdx]) || 0;
+
+          // 🔥 APPLY ×1000 HERE
+          sbg = sbg * 1000;
+          used = used * 1000;
+
+          if (sbg > 0 || used > 0) {
+            labels.push(r[0]);
+            sbgArr.push(sbg);
+            usedArr.push(used);
+          }
+        });
+
+        return { labels, sbgArr, usedArr };
+      }
+
+      function renderSBGBarChart(year, station) {
+        const data = getSBGDataforChart(year, station);
+        if (!data) return;
+
+        const { labels, sbgArr, usedArr } = data;
+
+        const remainingArr = sbgArr.map((sbg, i) =>
+          Math.max(sbg - usedArr[i], 0),
+        );
+
+        const ctx = id("sbgBarChart");
+
+        if (window.barChart) window.barChart.destroy();
+
+        const serialLabels = labels.map((_, i) => i + 1);
+
+        // 🔥 width control (correct)
+        setChartWidth(labels);
+
+        window.barChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: serialLabels,
+            datasets: [
+              {
+                label: "SBG Utilised",
+                data: usedArr,
+                backgroundColor: "#ff6363",
+                hoverBackgroundColor: "rgba(251,255,0,0.46)",
+                stack: "budget",
+
+                barThickness: BAR_WIDTH,
+                maxBarThickness: BAR_WIDTH,
+              },
+              {
+                label: "SBG Available",
+                data: remainingArr,
+                backgroundColor: "#00ff5e",
+                hoverBackgroundColor: "rgba(251,255,0,0.46)",
+                stack: "budget",
+
+                barThickness: BAR_WIDTH,
+                maxBarThickness: BAR_WIDTH,
+              },
+            ],
+          },
+
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            layout: { padding: { bottom: 30 } },
+
+            interaction: {
+              mode: "nearest",
+              intersect: true,
+            },
+
+            animation: {duration: 800, easing: "easeOutCubic"},
+
+            animations: {
+              y: {
+                from: (ctx) => {
+                  const chart = ctx.chart;
+                  const yScale = chart.scales.y;
+
+                  // 🔥 safe fallback
+                  if (yScale.type === "logarithmic") {
+                    return chart.chartArea.bottom; // start from bottom
+                  }
+
+                  return yScale.getPixelForValue(0); // normal charts
+                },
+
+                delay: (ctx) => ctx.dataIndex * 40,
+                duration: 800,
+                easing: "easeOutCubic"
+              }
+            },
+
+            transitions: {
+              active: {
+                animation: {
+                  duration: 0 // ❌ disable animation on hover/update
+                }
+              },
+              resize: {
+                animation: {
+                  duration: 0
+                }
+              },
+              show: {
+                animation: {
+                  duration: 800 // ✅ only initial load
+                }
+              }
+            },
+
+            // 🔥 hover sync (safe)
+            onHover: (event, elements) => {
+              if (isTableHover) return;
+
+              if (elements.length > 0) {
+                const el = elements[0];
+                highlightTableRow(el.index);
+              } else {
+                highlightTableRow(-1);
+              }
+            },
+
+            plugins: {
+              legend: { position: "top" },
+
+              title: {
+                display: true,
+                text: `${station} - ${year} Budget Overview`,
+                font: { size: 12, weight: "600" },
+              },
+
+              columnLabelPlugin: {
+                enabled: true,
+
+                numeratorDatasetIndex: 0,
+                denominatorDatasetIndex: 1,
+                rotate:true,
+                mode: "percent",
+                offsetY: 14,
+                minDisplay: 3
+              },
+
+              tooltip: {
+                displayColors: false,
+                callbacks: {
+                  title: (ctx) => labels[ctx[0].dataIndex],
+                  label: (ctx) => {
+                    const i = ctx.dataIndex;
+
+                    const sbg = sbgArr[i];
+                    const used = usedArr[i];
+                    const avail = sbg - used;
+                    const percent = sbg > 0 ? (used / sbg) * 100 : 0;
+
+                    return [
+                      `Sanctioned: ${formatCurrency(sbg)}`,
+                      `Utilised: ${formatCurrency(used)}`,
+                      `Available: ${formatCurrency(avail)} (${percent.toFixed(1)}%)`,
+                    ];
+                  },
+                },
+              },
+            },
+
+            scales: {
+              x: {
+                stacked: true,
+                ticks: { display: false },
+                grid: { display: false },
+
+                // 🔥 ensures consistent spacing
+                categoryPercentage: 1.0,
+                barPercentage: 1.0,
+              },
+
+              y: {
+                type: "logarithmic",
+                ticks: {
+                  padding: 8, // 🔥 space from axis
+                  maxTicksLimit: 6,
+                  callback: (v) => {
+                    if (v >= 1e7) return "₹" + v / 1e7 + " Cr";
+                    if (v >= 1e5) return "₹" + v / 1e5 + " L";
+                    if (v >= 1e3) return "₹" + v / 1e3 + " K";
+                    return "₹" + v;
+                  },
+                },
+              },
+            },
+          },
+
+          plugins: [xAxisPillPlugin],
+          plugins: [columnLabelPlugin],
+        });
+        attachChartMouseLeave(ctx, highlightTableRow);
+      }
+
+      function renderSBGSideTable(year, station) {
+        const data = getSBGDataforChart(year, station);
+        if (!data) return;
+
+        const { labels, sbgArr, usedArr } = data;
+
+        const table = id("sbgSideTable");
+
+        let totalSBG = 0;
+        let totalUsed = 0;
+
+        let html = `
+    <colgroup>
+      <col style="width:5%">
+      <col style="width:45%">
+      <col style="width:15%">
+      <col style="width:15%">
+      <col style="width:15%">
+      <col style="width:5%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>#</th> 
+        <th>Budget</th>
+        <th>SBG</th>
+        <th>Used</th>        
+        <th>Available)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+        labels.forEach((label, i) => {
+          const sbg = Math.round(sbgArr[i]);
+          const used = Math.round(usedArr[i]);
+          const available = sbg - used;
+
+          const percent = sbg > 0 ? (used / sbg) * 100 : 0;
+
+          // 🔥 clamp to 0–100 for gradient
+          const clamped = Math.max(0, Math.min(percent, 100));
+
+          // 🔥 direct mapping (green → red)
+          const hue = 120 * (1 - clamped / 100);
+
+          let color1 = `hsl(${hue}, 80%, 55%)`;
+          let color2 = `hsl(${hue}, 80%, 35%)`;
+
+          // 🔥 overflow → strong alert
+          if (percent > 100) {
+            color1 = "#7f1d1d";
+            color2 = "#dc2626";
+          }
+
+          const bg = `linear-gradient(135deg, ${color1}, ${color2})`;
+
+          // 🔥 better readability
+          const textColor = percent >= 60 ? "#fff" : "#111";
+          html += `
+      <tr>
+        <td class="sno"><span>${i + 1}</span></td>  <!-- 🔥 serial -->
+        <td>${label}</td>
+        <td>${formatCurrency(sbg)}</td>
+        <td>${formatCurrency(used)}</td>        
+        <td class="${available < 0 ? "negative" : ""}">
+          ${formatCurrency(available)}
+        </td>
+        <td>
+          <span class="percent-pill"
+            style="background:${bg}; color:${textColor}">
+          ${percent.toFixed(0)}%
+        </span>
+        </td>
+      </tr>
+    `;
+        });
+
+        html += `</tbody>`;
+
+        table.innerHTML = html;
+      }
+
+      function renderSBGCharts(year, station) {
+        renderSBGBarChart(year, station);
+        renderSBGSideTable(year, station);
+      }
+
+      //===============================Salary Chart Datas ==========================================//
+
+      function buildSalaryMenuListsForChart() {
+        if (!pbData?.rows?.length) return;
+
+        const headers = pbData.headers;
+        const rows = pbData.rows;
+
+        const stationIdx = headers.indexOf("Pay Drawn Station");
+        const dateIdx = headers.indexOf("Salary Month");
+
+        // 🔹 Stations
+        const stations = [
+          ...new Set(
+            rows.map((r) => String(r[stationIdx]).trim()).filter(Boolean),
+          ),
+        ];
+
+        const stationDiv = qs("#stationList .side-items");
+        stationDiv.innerHTML = "";
+
+        stations.forEach((st) => {
+          const btn = document.createElement("button");
+          btn.className = "side-btn";
+          btn.textContent = st;
+
+          btn.onclick = () => {
+            document
+              .querySelectorAll("#stationList .side-btn")
+              .forEach((b) => b.classList.remove("active"));
+
+            btn.classList.add("active");
+
+            filters.station = st;
+            renderSalaryCharts(currentYear, st);
+          };
+
+          stationDiv.appendChild(btn);
+        });
+
+        // 🔹 Years (Mar-based FY)
+        const years = [
+          ...new Set(
+            rows.map((r) => getFinancialYear(r[dateIdx])).filter(Boolean),
+          ),
+        ].sort((a, b) => b.localeCompare(a));
+
+        const yearDiv = qs("#yearList .side-items");
+        yearDiv.innerHTML = "";
+
+        years.forEach((yr) => {
+          const btn = document.createElement("button");
+          btn.className = "side-btn";
+          btn.textContent = yr;
+
+          btn.onclick = () => {
+            document
+              .querySelectorAll("#yearList .side-btn")
+              .forEach((b) => b.classList.remove("active"));
+
+            btn.classList.add("active");
+
+            currentYear = yr;
+            renderSalaryCharts(currentYear, filters.station);
+          };
+
+          yearDiv.appendChild(btn);
+        });
+
+        // 🔥 default
+        const fy = getCurrentFinancialYear();
+
+        if (years.includes(fy)) {
+          currentYear = fy; // 🔥 use current FY if available
+        } else {
+          currentYear = years[0] || ""; // fallback
+        }
+        filters.station = stations[0];
+
+        stationDiv.querySelector(".side-btn")?.classList.add("active");
+        yearDiv.querySelector(".side-btn")?.classList.add("active");
+
+        renderSalaryCharts(currentYear, filters.station);
+      }
+
+      function getSalaryDataForChart(year, station) {
+        const headers = pbData.headers;
+        const rows = pbData.rows;
+
+        const nameIdx = headers.indexOf("Employee Name");
+        const stationIdx = headers.indexOf("Pay Drawn Station");
+        const incomeIdx = headers.indexOf("Net Income");
+        const taxIdx = headers.indexOf("Net IT");
+        const grossIdx = headers.indexOf("Gross Income");
+        const dateIdx = headers.indexOf("Salary Month");
+
+        const empMap = {}; // 🔥 aggregation map
+
+        rows.forEach((r) => {
+          const st = String(r[stationIdx]).toLowerCase();
+          const fy = getFinancialYear(r[dateIdx]);
+
+          if (st === station.toLowerCase() && fy === year) {
+            const name = r[nameIdx] || "Unknown";
+            const income = Number(r[incomeIdx]) || 0;
+            const tax = Number(r[taxIdx]) || 0;
+            const gross = Number(r[grossIdx]) || 0;
+
+            if (!empMap[name]) {
+              empMap[name] = { income: 0, tax: 0, gross:0 };
+            }
+
+            empMap[name].income += income;
+            empMap[name].tax += tax;
+            empMap[name].gross += gross;
+          }
+        });
+
+        const labels = Object.keys(empMap);
+        const incomeArr = labels.map((n) => empMap[n].income);
+        const taxArr = labels.map((n) => empMap[n].tax);
+        const grossArr = labels.map((n) => empMap[n].gross);
+
+        const totalIncome = incomeArr.reduce((a, b) => a + b, 0);
+        const totalTax = taxArr.reduce((a, b) => a + b, 0);
+        const totalGross = grossArr.reduce((a, b) => a + b, 0);
+
+        return { labels, incomeArr, taxArr, grossArr, totalIncome, totalTax , totalGross};
+      }
+
+      function renderSalaryBarChart(year, station) {
+        const data = getSalaryDataForChart(year, station);
+        if (!data) return;
+
+        const { labels, incomeArr, taxArr, grossArr, totalIncome, totalTax , totalGross } = data;
+
+        const ctx = id("sbgBarChart");
+
+        if (window.barChart) window.barChart.destroy();
+
+        const serialLabels = labels.map((_, i) => i + 1);
+
+        // 🔥 width control
+        setChartWidth(labels);
+
+        // 🔥 split income into tax + remaining
+        const remainingArr = incomeArr.map((inc, i) =>
+          Math.max(inc - taxArr[i], 0),
+        );
+
+        window.barChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: serialLabels,
+            datasets: [              
+              {
+                label: "Net Income",
+                data: remainingArr,
+                backgroundColor: "#00ff5e", // blue
+                hoverBackgroundColor: "rgba(251,255,0,0.46)",
+                stack: "salary",
+
+                barThickness: BAR_WIDTH,
+                maxBarThickness: BAR_WIDTH,
+              },
+              {
+                label: "Net IT",
+                data: taxArr,
+                backgroundColor: "#ff6363", // orange
+                stack: "salary",
+                hoverBackgroundColor: "rgba(251,255,0,0.46)",
+                barThickness: BAR_WIDTH,
+                maxBarThickness: BAR_WIDTH,
+              },
+            ],
+          },
+
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            layout: { padding: { bottom: 30 } },
+
+            interaction: {
+              mode: "nearest",
+              intersect: true,
+            },
+
+            animation: {duration: 800, easing: "easeOutCubic"},
+
+            animations: {
+              y: {
+                from: (ctx) => {
+                  const chart = ctx.chart;
+                  const yScale = chart.scales.y;
+
+                  // 🔥 safe fallback
+                  if (yScale.type === "logarithmic") {
+                    return chart.chartArea.bottom; // start from bottom
+                  }
+
+                  return yScale.getPixelForValue(0); // normal charts
+                },
+
+                delay: (ctx) => ctx.dataIndex * 40,
+                duration: 800,
+                easing: "easeOutCubic"
+              }
+            },
+
+            transitions: {
+              active: {
+                animation: {
+                  duration: 0 // ❌ disable animation on hover/update
+                }
+              },
+              resize: {
+                animation: {
+                  duration: 0
+                }
+              },
+              show: {
+                animation: {
+                  duration: 800 // ✅ only initial load
+                }
+              }
+            },
+
+            // 🔥 hover sync
+            onHover: (event, elements) => {
+              if (isTableHover) return;
+
+              if (elements.length > 0) {
+                highlightSalaryRow(elements[0].index);
+              } else {
+                highlightSalaryRow(-1);
+              }
+            },
+
+            plugins: {
+              legend: { position: "top" },
+
+              title: {
+                display: true,
+                text: `${station} - ${year} Salary Overview`,
+                font: { size: 12, weight: "600" },
+              },
+
+              columnLabelPlugin: {
+                enabled: true,
+                numeratorDatasetIndex: 0,
+                denominatorDatasetIndex: 1,
+                mode: "custom",
+                offsetY: 12,
+                rotate:true,
+
+                formatter: ({ value }) => formatCurrency(value)
+              },
+
+              subtitle: {
+                display: true,
+                text: `Gross of Station : ${formatCurrency(totalGross)} | TDS Recovered : ${formatCurrency(totalTax)}`,
+              },
+
+              tooltip: {
+                displayColors: false,
+                callbacks: {
+                  title: (ctx) => labels[ctx[0].dataIndex],
+                  label: (ctx) => {
+                    const i = ctx.dataIndex;
+
+                    return [
+                      `Income: ${formatCurrency(incomeArr[i])}`,
+                      `IT: ${formatCurrency(taxArr[i])}`,
+                    ];
+                  },
+                },
+              },
+            },
+
+            scales: {
+              x: {
+                stacked: true,
+                ticks: { display: false },
+                grid: { display: false },
+              },
+
+              y: {
+                stacked: true,
+                ticks: {
+                  padding: 8,
+                  maxTicksLimit: 6,
+                  callback: (v) => formatCurrency(v),
+                },
+                grid: { display: false },
+              },
+            },
+          },
+
+          plugins: [xAxisPillPlugin],
+          plugins: [columnLabelPlugin],
+        });
+
+        // 🔥 FIXED
+        attachChartMouseLeave(ctx, highlightSalaryRow);
+      }
+
+      function renderSalarySideTable(year, station) {
+        const data = getSalaryDataForChart(year, station);
+        if (!data) return;
+
+        const { labels, incomeArr, taxArr, grossArr, totalIncome, totalTax , totalGross } = data;
+
+        const table = id("sbgSideTable");
+
+        let html = `
+    <colgroup>
+      <col style="width:5%">
+      <col style="width:44%">
+      <col style="width:17%">
+      <col style="width:17%">
+      <col style="width:12%">
+      <col style="width:5%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Employee</th>
+        <th>Gross Income</th>
+        <th>Net Income</th>
+        <th>TDS</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+  `;    
+         labels.forEach((name, i) => {
+            const income = Math.round(incomeArr[i]);
+            const tax = Math.round(taxArr[i]);
+            const gross = Math.round(grossArr[i]);
+
+            const percent = income > 0 ? (tax / income) * 100 : 0;
+
+            let color1, color2;
+
+            if (percent > 30) {
+              // 🔥 Above threshold → fixed alert
+              color1 = "#7f1d1d";
+              color2 = "#dc2626";
+            } else {
+              // 🔥 Normalize 0 → 30 into 0 → 1
+              const ratio = Math.max(0, Math.min(percent / 30, 1));
+
+              // 🔥 Smooth transition: Green (120) → Red (0)
+              const hue = 120 * (1 - ratio);
+
+              // 🔥 Gradient shades
+              color1 = `hsl(${hue}, 85%, 60%)`;
+              color2 = `hsl(${hue}, 85%, 40%)`;
+            }
+
+            const bg = `linear-gradient(135deg, ${color1}, ${color2})`;
+
+            const textColor = percent >= 20 ? "#fff" : "#111";
+
+          html += `
+      <tr>
+        <td class="sno"><span>${i + 1}</span></td>  <!-- 🔥 serial -->
+        <td title="${name}">${name}</td>
+        <td>${formatCurrency(grossArr[i])}</td>
+        <td>${formatCurrency(incomeArr[i])}</td>
+        <td>${formatCurrency(taxArr[i])}</td>
+        <td>
+          <span class="percent-pill"
+            style="background:${bg}; color:${textColor}">
+          ${percent.toFixed(0)}%
+        </span>
+        </td>
+      </tr>
+    `;
+        });
+
+        html += `</tbody>`;
+
+        table.innerHTML = html;
+      }
+
+
+      function highlightSalaryRow(index) {
+        const rows = qsa("#sbgSideTable tbody tr");
+        const container = qs(".table-box");
+
+        rows.forEach((r) => r.classList.remove("highlight"));
+
+        if (!rows[index]) return;
+
+        const row = rows[index];
+        row.classList.add("highlight");
+
+        const header = qs("#sbgSideTable thead");
+        const headerHeight = header ? header.offsetHeight : 0;
+
+        const rowTop = row.offsetTop;
+        const rowBottom = rowTop + row.offsetHeight;
+
+        const viewTop = container.scrollTop;
+        const viewBottom = viewTop + container.clientHeight;
+
+        if (rowTop < viewTop + headerHeight + 10) {
+          container.scrollTo({
+            top: rowTop - headerHeight - 35,
+            behavior: "smooth",
+          });
+        } else if (rowBottom > viewBottom - 10) {
+          container.scrollTo({
+            top: rowBottom - container.clientHeight + 35,
+            behavior: "smooth",
+          });
+        }
+      }
+
+      function renderSalaryCharts(year, station) {
+        renderSalaryBarChart(year, station);
+        renderSalarySideTable(year, station);
+      }
 
       /* ============== SIDEBAR TOGGLE======================== */
       function toggleSidebar() {
@@ -8270,78 +9967,6 @@
         recalculateAllTotals(); // ✅ only once
       }
 
-      function handleStationChange(sourceId) {
-        enableAllButtons();
-
-        const station = id(sourceId).value;
-        if (!station) return;
-
-        // 🔁 Sync both dropdowns
-        id("PayBillPage_Station").value = station;
-        id("EmpPage_Station").value = station;
-        id("BudgetPage_Station").value = station;
-        id("SalSlipPage_Station").value = station;
-        id("ITPage_Station").value = station;
-
-        // 🔄 Update filters
-        filters.station = station;
-        applyFilters();
-
-        // 🌆 Update Zones (both pages)
-        const zone = getCityZone(station) || {};
-        const hraZone = zone.hra;
-        setTimeout(() => {
-          const daPercent = Number(id("PayBillPage_DA%")?.value) || 0;
-
-          let percent = 0;
-
-          if (hraZone === "X") percent = 28;
-          else if (hraZone === "Y") percent = 18;
-          else percent = 8;
-
-          if (daPercent >= 50) percent += 2;
-          else if (daPercent >= 25) percent += 1;
-
-          id("PayBillPage_HRA%").value = percent;
-        }, 100); // ⏱ 50–150ms is ideal
-
-        id("PayBillPage_TAZone").value = val(zone.ta);
-        id("PayBillPage_HRAZone").value = val(zone.hra);
-
-        id("EmpPage_TAZone").value = val(zone.ta);
-        id("EmpPage_HRAZone").value = val(zone.hra);
-
-        // 🔢 Recalculate + Refresh
-        recalculateAllRows();
-        refreshPBView();
-      }
-
-      on("EmpPage_Station", "change", () => {
-        handleStationChange("EmpPage_Station");
-      });
-
-      on("PayBillPage_Station", "change", () => {
-        handleStationChange("PayBillPage_Station");
-      });
-
-      on("BudgetPage_Station", "change", () => {
-        handleStationChange("BudgetPage_Station");
-      });
-
-      on("SalSlipPage_Station", "change", () => {
-        handleStationChange("SalSlipPage_Station");
-      });
-
-      on("ITPage_Station", "change", () => {
-        handleStationChange("ITPage_Station");
-      });
-
-      on("PayBillPage_FY", "change", refreshPBView);
-      on("SalSlipPage_FY", "change", refreshPBView);
-      on("BudgetPage_FY", "change", refreshPBView);
-      on("ITPage_FY", "change", refreshPBView);
-      on("PayBillPage_SalMonth", "change", refreshPBView);
-
       function getNextMonthStr(current) {
         const months = [
           "Jan",
@@ -10564,7 +12189,7 @@
       }
 
       function loadBudgetDropdown() {
-        if (!sbgData || !sbgData.rows) {
+        if (!sbgData?.rows?.length) {
           console.warn("❌ sbgData not loaded");
           return;
         }
@@ -10573,59 +12198,49 @@
         const select = id("BudgetUnderSelect");
         if (!select) return;
 
+        // 🔥 RESET
         select.innerHTML = `<option value="" hidden>Select Budget</option>`;
 
-        // ✅ FIXED COLUMN + UNIQUE VALUES
-        const budgetList = [
-          ...new Set(
-            rows
-              .map((r) => String(r[0] || "").trim()) // 🔥 FIXED
-              .filter(
-                (val) => val && val.toLowerCase() !== "sbg expenditure under",
-              ),
-          ),
+        // =========================
+        // 🔹 DEFINE GROUP BREAKPOINTS
+        // =========================
+        const groupRanges = [
+          { name: "Salaries - GO", start: 1, end: 4 }, // Row 3–4
+          { name: "Salaries - PB", start: 4, end: 9 }, // Row 5–10
+          { name: "Admin Expenditure - IEBR", start: 9, end: 30 }, // Row 11–31
+          { name: "Programme Expenses", start: 30, end: rows.length }, // Row 32+
         ];
 
-        const groupMap = {
-          "Salaries - GO": [],
-          "Salaries - PB": [],
-          "Admin Expenditure - IEBR": [],
-          "Programme Expenses": [],
-        };
-
-        budgetList.forEach((val) => {
-          const v = val.toLowerCase();
-
-          if (v.includes("govt")) {
-            groupMap["Salaries - GO"].push(val);
-          } else if (v.includes("pb")) {
-            groupMap["Salaries - PB"].push(val);
-          } else if (
-            v.includes("oe") ||
-            v.includes("rent") ||
-            v.includes("travel")
-          ) {
-            groupMap["Admin Expenditure - IEBR"].push(val);
-          } else {
-            groupMap["Programme Expenses"].push(val);
-          }
-        });
-
-        Object.keys(groupMap).forEach((group) => {
-          if (!groupMap[group].length) return;
-
+        // =========================
+        // 🔹 BUILD GROUPS
+        // =========================
+        groupRanges.forEach((group) => {
           const optgroup = document.createElement("optgroup");
-          optgroup.label = group;
+          optgroup.label = group.name;
 
-          groupMap[group].forEach((val) => {
+          for (let i = group.start; i < group.end; i++) {
+            const val = String(rows[i]?.[0] || "").trim();
+
+            // ❌ Skip invalid rows
+            if (!val || val.toLowerCase() === "station") continue;
+
             const opt = document.createElement("option");
             opt.value = val;
             opt.textContent = val;
-            optgroup.appendChild(opt);
-          });
 
-          select.appendChild(optgroup);
+            optgroup.appendChild(opt);
+          }
+
+          if (optgroup.children.length) {
+            select.appendChild(optgroup);
+          }
         });
+
+        // 🔥 DEFAULT SELECT
+        const first = select.querySelector("option");
+        if (first) select.value = first.value;
+
+        // 🔁 Next dependent dropdown
         loadBudgetMonthDropdown();
       }
 
@@ -10635,9 +12250,9 @@
           return;
         }
 
-        const select = document.getElementById("BudgetPage_Month");
-        const fySelect = document.getElementById("BudgetPage_FY");
-        const budgetSelect = document.getElementById("BudgetUnderSelect");
+        const select = id("BudgetPage_Month");
+        const fySelect = id("BudgetPage_FY");
+        const budgetSelect = id("BudgetUnderSelect");
 
         if (!select || !fySelect || !budgetSelect) return;
 
@@ -12670,7 +14285,7 @@
       async function exportSBGExcel() {
         const workbook = new ExcelJS.Workbook();
 
-        const wrapper = document.getElementById("BudgetTableWrapper");
+        const wrapper = id("BudgetTableWrapper");
         if (!wrapper) return;
 
         const table = wrapper.querySelector("table");
@@ -17166,9 +18781,9 @@
         });
       });
 
-      //==================================================================//
-      //                        Pension Page Script
-      // ==================================================================//
+      //================================================================================//
+      //                🔥🔥🔥🔥🔥PENSION PAGE SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
 
       const pensionSelect = id("PensionFor");
       const checkbox = id("CommutationOpted");
@@ -18782,7 +20397,7 @@
           // 🔥 RENDER DIRECTLY
           renderPensionTable(empName);
 
-          if ((mode = "all")) {
+          if (mode === "all") {
             id("PensionInfoPanel")
               .querySelectorAll("span")
               .forEach((el) => {
@@ -19232,7 +20847,7 @@
           // 🔥 RENDER
           renderPensionTable(empName);
 
-          if ((mode = "all")) {
+          if (mode === "all") {
             id("PensionInfoPanel")
               .querySelectorAll("span")
               .forEach((el) => {
