@@ -119,8 +119,8 @@ def get_hsd():
 def get_eb():
     return jsonify(sheet_to_json(eb_sheet))
 
-@app.route("/dc", methods=["GET"])
-def get_dc():
+@app.route("/duty", methods=["GET"])
+def get_duty():
     return jsonify(sheet_to_json(duty_sheet))
 
 
