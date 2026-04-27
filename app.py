@@ -41,6 +41,7 @@ it_sheet = spreadsheet.worksheet("ITDB")
 dg_sheet = spreadsheet.worksheet("DGlog")
 hsd_sheet = spreadsheet.worksheet("HSDlog")
 eb_sheet = spreadsheet.worksheet("EBlog")
+duty_sheet = spreadsheet.worksheet("DutyChart")
 
 
 # =========================
@@ -117,6 +118,10 @@ def get_hsd():
 @app.route("/eb", methods=["GET"])
 def get_eb():
     return jsonify(sheet_to_json(eb_sheet))
+
+@app.route("/dc", methods=["GET"])
+def get_dc():
+    return jsonify(sheet_to_json(duty_sheet))
 
 
 
