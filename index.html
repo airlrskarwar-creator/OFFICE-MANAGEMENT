@@ -305,40 +305,135 @@
         padding: 4px;
         border-top: solid 1px rgb(221, 221, 221);        
       }
-      .dashboard-footer div{
-        display: flex;
-        border-right: solid 1px lightgray;
-        padding-right: 35px;
-      }
-      .dashboard-footer span{
-        font-size: 18px;
-      }
-      .dashboard-footer h3{
-        padding-top: 3px;
-        margin: 0;
-        color: lightgray;
-        font-style: italic;
-        font-size: 9px;
+      
+      .db-wrapper {
+        position: relative;
       }
 
-      .material-symbols-outlined {
+      /* 🔥 TRIGGER */
+      .db-trigger {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      /* 🔥 PANEL (HIDDEN) */
+      .dashboard-footer-database {
+        position: absolute;
+        bottom: 25px;
+        left: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+
+        padding: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+        display: flex;
+        flex-direction: column;
+        min-width: 240px;
+
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
+
+        transition: 0.25s ease;
+      }
+
+      /* 🔥 SHOW ON HOVER */
+      .db-wrapper:hover .dashboard-footer-database {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      /* 🔥 ROW */
+      .dashboard-footer-database div {
+        display: flex;
+        align-items: center;
+        border-radius: 4px;
+        min-width: 220px;
+        padding: 2px;
+        gap: 10px;
+      }
+
+      .dashboard-footer-database div:hover {
+        background: #f3f4f6;
+      }
+
+      /* TEXT */
+      .dashboard-footer-database h3 {
+        margin: 0;
+        font-size: 11px;
+      }
+
+
+      .dashboard-footer .material-symbols-outlined {
         display: inline-flex;        /* 🔥 important */
         align-items: center;
         justify-content: center;
-
         width: 18px;                 /* 🔥 fixed box */
         height: 18px;
-
         font-size: 18px;             /* icon size inside */
+        color: rgb(156, 156, 156);
       }
 
-      .material-symbols-outlined.syncing {
+      .dashboard-footer .material-symbols-outlined.syncing {
         animation: spin 1s linear infinite;
       }
+      
 
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
+      }
+
+      /* 🔥 Badge base */
+      .db-badge {
+        color: #fff;
+        font-size: 10px;
+        font-weight: 600;
+
+        padding: 2px 6px;
+        border-radius: 999px;
+        min-width: 32px;
+        text-align: center;
+        box-shadow: 0px 0px 2px 1px silver;
+        transition: 
+          transform 0.2s ease,
+          background 1s cubic-bezier(0.22, 1, 0.36, 1),
+          color 0.4s ease;
+      }
+
+      /* 🔥 Blinking effect */
+      .db-badge.blink {
+        animation: badgeBlink 1.2s ease-in-out infinite;
+      }
+
+      #DatabaseIcon{
+        font-size: 22px;
+      }
+
+      .db-rotate {
+        animation: spin 1s linear infinite;
+        display: inline-block; /* important for transform */
+      }
+
+      @keyframes badgeBlink {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.06);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
 
       /* =============SIDEBAR TOGGLE=========== */
@@ -1983,6 +2078,7 @@
         gap: 6px;
         height: 100%;
         min-height: 0; /* 🔥 critical */
+        width: 100%;
       }
 
       /* Chart */
@@ -2433,6 +2529,15 @@
             <span>Electricity Log</span>
           </button>
 
+          <button
+            class="menu-btn"
+            data-tooltip="Duty Chart Register"
+            data-page="DutyChartPage"
+          >
+            <i class="material-symbols-outlined">work</i>
+            <span>Duty Chart</span>
+          </button>
+
            <!-- Database -->
           <button
             class="menu-btn"
@@ -2508,21 +2613,36 @@
 
             </div>
             <div class="dashboard-footer">
-              <div ><span class="material-symbols-outlined" style="color: red;" id="empDatabase">database_off</span><h3>Employee DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="pbDatabase">database_off</span><h3>PayBill DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="sbgDatabase">database_off</span><h3>Budgets DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="sbgexpDatabase">database_off</span><h3>SBG Expenditure DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="dgDatabase">database_off</span><h3>DG Log DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="hsdDatabase">database_off</span><h3>HSD Log DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="ebDatabase">database_off</span><h3>EB Log DB</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="itDatabase">data_alert</span><h3>IT</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="cpcDatabase">data_alert</span><h3>CPC</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="qtrDatabase">data_alert</span><h3>QTRS</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="cityDatabase">data_alert</span><h3>CITY</h3></div>
-              <div ><span class="material-symbols-outlined" style="color: red;" id="commDatabase">data_alert</span><h3>COMM</h3></div>
+              <div class="db-wrapper">
+
+                <div class="db-trigger">
+                  <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
+                  <span>Database</span>
+                  <!-- 🔥 BUBBLE COUNTER -->
+                  <span class="db-badge" id="dbBadge">0/0</span>
+                </div>
+
+                <!-- 🔥 PANEL -->
+                <div class="dashboard-footer-database">
+                  <div><span class="material-symbols-outlined" id="empDatabase">database_off</span><h3>Employee Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="pbDatabase">database_off</span><h3>PayBill Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="sbgDatabase">database_off</span><h3>Budgets Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span><h3>SBG Expenditure Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="dgDatabase">database_off</span><h3>DG Log Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="hsdDatabase">database_off</span><h3>HSD Log Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="ebDatabase">database_off</span><h3>EB Log Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="dutyDatabase">database_off</span><h3>Duty Chart Database</h3></div>
+                  <div><span class="material-symbols-outlined" id="itDatabase">data_alert</span><h3>Income Tax Reference</h3></div>
+                  <div><span class="material-symbols-outlined" id="cpcDatabase">data_alert</span><h3>7th Pay Matrix Reference</h3></div>
+                  <div><span class="material-symbols-outlined" id="qtrDatabase">data_alert</span><h3>Staff Quarters Reference</h3></div>
+                  <div><span class="material-symbols-outlined" id="cityDatabase">data_alert</span><h3>TA/HRA City Reference</h3></div>
+                  <div><span class="material-symbols-outlined" id="commDatabase">data_alert</span><h3>Commutation Factor Reference</h3></div>
+                </div>
+
+              </div>
             </div>
-          </div>
           
+          </div>
         </div>
 
         <div class="SectionPage" id="EmpPage" style="display: none">
@@ -3729,7 +3849,7 @@
 
         <div class="SectionPage" id="DGlogPage" style="display: none">
           <div class="header">
-            <h2>DG Log Book</h2>
+            <h2>DG Log Register</h2>
           </div>
           <div class="Selection-bar">
             <table>
@@ -3780,13 +3900,19 @@
 
         <div class="SectionPage" id="HSDlogPage" style="display: none">
           <div class="header">
-            <h2>HSD Log Book</h2>
+            <h2>HSD Log Register</h2>
           </div>
         </div>
 
         <div class="SectionPage" id="ElectricityPage" style="display: none">
           <div class="header">
-            <h2>Electricity Log Book</h2>
+            <h2>Electricity Log Register</h2>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="ElectricityPage" style="display: none">
+          <div class="header">
+            <h2>Duty Chart Register</h2>
           </div>
         </div>
 
@@ -3797,29 +3923,30 @@
 
           <div class="button-bar">
             <button onclick="showSheet('EmpDB', this)" class="active">
-              Employee Database
+              Employee Detail
             </button>
             <button onclick="showSheet('BudgetDB', this)">
-              Budget Database
+              Budgets
             </button>
             <button onclick="showSheet('SBGexpenditureDB', this)">
-              Budget Expenditures Database
+              SBG Expenditure
             </button>
-            <button onclick="showSheet('PBDB', this)">Pay Bill Database</button>
+            <button onclick="showSheet('PBDB', this)">Pay Bill</button>
             <button onclick="showSheet('CPC7DB', this)">
-              Pay Matrix 7th CPC
+              Pay Matrix
             </button>
             <button onclick="showSheet('QtrsRateDB', this)">
-              Quarters Rate
+              Qtrs Rate
             </button>
             <button onclick="showSheet('CityZoneDB', this)">City Zones</button>
             <button onclick="showSheet('CommFactDB', this)">
-              Commutation Factors
+              Comm. Factor
             </button>
-            <button onclick="showSheet('ITDB', this)">IT Database</button>
-            <button onclick="showSheet('DGlog', this)">DG Log</button>
-            <button onclick="showSheet('HSDlog', this)">HSD Log</button>
-            <button onclick="showSheet('EBlog', this)">Electricity Log</button>
+            <button onclick="showSheet('ITDB', this)">IT </button>
+            <button onclick="showSheet('DGlog', this)">DG Log </button>
+            <button onclick="showSheet('HSDlog', this)">HSD Log </button>
+            <button onclick="showSheet('EBlog', this)">EB Log </button>
+            <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
           </div>
 
           <div class="DB-Table-Wrapper">
@@ -3836,6 +3963,7 @@
             <table id="DGlog" style="display: none"></table>
             <table id="HSDlog" style="display: none"></table>
             <table id="EBlog" style="display: none"></table>
+            <table id="DutyChart" style="display: none"></table>
           </div>
         </div>
       </div>
@@ -3866,6 +3994,7 @@
       let dgData = {};
       let hsdData = {};
       let ebData = {};
+      let dutyData = {};
       let currentYear = "";
 
       // Prevent infinite reload loop
@@ -4049,22 +4178,87 @@
         return `${month}-${day}, ${year}`;
       }
 
+      //==========================Dashboard Footer Database Script =============================//
 
-      function updateStatus(id, type = "db") {
+      function updateDBBadge() {
+        const icons = document.querySelectorAll(
+          ".dashboard-footer-database .material-symbols-outlined"
+        );
+
+        let total = icons.length;
+        let success = 0;
+        let isSyncing = false;
+
+        icons.forEach(icon => {
+          const txt = icon.textContent;
+
+          if (txt === "database" || txt === "data_check") success++;
+
+          if (icon.classList.contains("db-sync") || txt === "sync") {
+            isSyncing = true;
+          }
+        });
+
+        const percent = total ? success / total : 0;
+        const badge = id("dbBadge");
+        const db = id("DatabaseIcon");
+
+        // 🔢 count
+        badge.textContent = `${success}/${total}`;
+
+        // 🎨 smooth gradient
+        const hue = percent * 120;
+        badge.style.background = `hsl(${hue}, 80%, 45%)`;
+
+        // 🔥 text color
+        badge.style.color = hue > 60 ? "#000" : "#fff";
+
+        // 🔁 SYNC STATE
+        if (isSyncing) {
+          badge.classList.add("blink");
+
+          db.textContent = "sync";
+          db.classList.add("db-sync", "db-rotate"); // 🔥 rotate ON
+
+          return; // stop further checks
+        }
+
+        // 🔁 STOP SYNC
+        badge.classList.remove("blink");
+        db.classList.remove("db-sync", "db-rotate"); // 🔥 rotate OFF
+
+        // 🔥 FINAL STATES
+        if (success === 0) {
+          db.textContent = "database_off";
+          db.style.color = "#db0707";
+        }
+        else if (success < total) {
+          db.textContent = "database_search";
+          db.style.color = "#eb9534";
+        }
+        else {
+          db.textContent = "database";
+          db.style.color = "#00b01d";
+        }
+      }
+
+
+      function updateStatus(id, type = "db", isSuccess = true) {
         const el = document.getElementById(id);
         if (!el) return;
 
-        el.textContent = type === "db" ? "database" : "data_check";
-        el.style.color = "#16a34a"; // green
+        if (isSuccess) {
+          // ✅ SUCCESS → green
+          el.textContent = type === "db" ? "database" : "data_check";
+          el.style.color = "#16a34a";
+        } else {
+          // ❌ FAILURE → red
+          el.textContent = type === "db" ? "database_off" : "data_alert";
+          el.style.color = "#dc2626";
+        }
+        updateDBBadge();
       }
 
-      function setErrorStatus(id, type = "db") {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        el.textContent = type === "db" ? "database_off" : "data_alert";
-        el.style.color = "#dc2626"; // red
-      }
 
       function setSyncStatus(id) {
         const el = document.getElementById(id);
@@ -4073,14 +4267,15 @@
         el.textContent = "sync";
         el.style.color = "#eab308"; // yellow
         el.classList.add("syncing");
+        updateDBBadge();
       }
 
-      function clearSyncStatus(id, type = "db") {
+      function clearSyncStatus(id, type = "db", isSuccess = true) {
         const el = document.getElementById(id);
         if (!el) return;
 
         el.classList.remove("syncing");
-        updateStatus(id, type); // back to green
+        updateStatus(id, type, isSuccess);// back to green
       }
 
       const apiStatusMap = {
@@ -4091,12 +4286,14 @@
         dg: ["dgDatabase", "db"],
         hsd: ["hsdDatabase", "db"],
         eb: ["ebDatabase", "db"],
+        duty: ["dutyDatabase", "db"],
 
         it: ["itDatabase", "data"],
         cpc: ["cpcDatabase", "data"],
         qtrs: ["qtrDatabase", "data"],
         city: ["cityDatabase", "data"],
-        comm: ["commDatabase", "data"]
+        comm: ["commDatabase", "data"],
+        
       };
 
       //============================🔥 GET DATA FROM SHEET🔥===========================//
@@ -4112,7 +4309,7 @@
             console.error("API failed:", api);
 
             const [id, type] = apiStatusMap[api] || [];
-            if (id) setErrorStatus(id, type);
+            if (id) updateStatus(id, type, false);
 
             return;
           }
@@ -4135,7 +4332,9 @@
             console.error("Invalid API format:", api);
 
             const [id, type] = apiStatusMap[api] || [];
-            if (id) setErrorStatus(id, type);
+            if (id && (api !== "emp"  || api !== "sbg"  || api !== "sbgexp")) {
+              updateStatus(id, type, true);
+            }
 
             return;
           }
@@ -4153,10 +4352,13 @@
           if (api === "dg") dgData = result;
           if (api === "hsd") hsdData = result;
           if (api === "eb") ebData = result;
+          if (api === "duty") dutyData = result;
 
           // 🔥 ✅ SUCCESS → UPDATE ICON
           const [id, type] = apiStatusMap[api] || [];
-          if (id) updateStatus(id, type);
+          if (id && (api !== "emp"  || api !== "sbg"  || api !== "sbgexp")) {
+            updateStatus(id, type, true);
+          }
 
           if (!shouldRender) return;
 
@@ -4174,7 +4376,10 @@
           console.error("Error loading table:", api, err);
 
           const [id, type] = apiStatusMap[api] || [];
-          if (id) setErrorStatus(id, type);
+          if (id && (api !== "emp"  || api !== "sbg"  || api !== "sbgexp")) {
+              updateStatus(id, type, false);
+          }
+
         }
       }
 
@@ -4183,6 +4388,10 @@
         await loadTable("emp", "EmpDB", false);
         await loadTable("pb", "PBDB");
         await loadTable("cpc", "CPC7DB");
+        await loadTable("dg", "DGlog");
+        await loadTable("hsd", "HSDlog");
+        await loadTable("eb", "EBlog");
+        await loadTable("duty", "DutyChart");
 
         // 🔴 STEP 2: Calculate
         buildEmpDBWithCalc();
@@ -4202,10 +4411,7 @@
           loadTable("qtrs", "QtrsRateDB"),
           loadTable("city", "CityZoneDB"),
           loadTable("comm", "CommFactDB"),
-          loadTable("it", "ITDB"),
-          loadTable("dg", "DGlog"),
-          loadTable("hsd", "HSDlog"),
-          loadTable("eb", "EBlog"),
+          loadTable("it", "ITDB")                  
         ]);
       }
 
@@ -4231,6 +4437,9 @@
         let sbgExpRes = await fetch(
           "https://office-management-f425.onrender.com/sbgexp",
         );
+        let dutyRes = await fetch(
+          "https://office-management-f425.onrender.com/duty",
+        );
         let itRes = await fetch(
           "https://office-management-f425.onrender.com/it",
         );
@@ -4251,6 +4460,7 @@
         sbgData = await sbgRes.json();
         sbgExpData = await sbgExpRes.json();
         pbData = await pbRes.json();
+        dutyData = await dutyRes.json();
         cpcData = await cpcRes.json();
         qtrsData = await qtrsRes.json();
         cityData = await cityRes.json();
@@ -4487,7 +4697,7 @@
           if (!empData.headers || !pbData.headers) {
             console.warn("❌ Emp/PB data not ready");
 
-            setErrorStatus("empDatabase", "db");
+            updateStatus("empDatabase", "db", false);
             return;
           }
 
@@ -4577,13 +4787,13 @@
           renderTable("EmpDB", finalHeaders, finalRows);
 
           // 🔥 SUCCESS → green
-          clearSyncStatus("empDatabase", "db");
+          clearSyncStatus("empDatabase", "db", true);
 
         } catch (err) {
           console.error("❌ Emp Calculation Failed:", err);
 
           // 🔴 ERROR → red
-          setErrorStatus("empDatabase", "db");
+          clearSyncStatus("empDatabase", "db", false);
         }
       }
 
@@ -13364,11 +13574,11 @@
 
         } catch (err) {
           console.error("❌ SBGExp Update Failed:", err);
+          clearSyncStatus("sbgexpDatabase", "db", false);
           // ❌ No red state as per your requirement
         } finally {
           // 🔥 END → green
-          clearSyncStatus("sbgexpDatabase", "db");
-          updateStatus("sbgexpDatabase", "db");
+          clearSyncStatus("sbgexpDatabase", "db", true);
         }
       }
       
@@ -13397,7 +13607,7 @@
             console.warn("❌ Data not ready");
 
             // 🔴 error
-            setErrorStatus("sbgDatabase", "db");
+            updateStatus("sbgDatabase", "db", false);
             return;
           }
 
@@ -13480,7 +13690,7 @@
           }
 
           // 🔥 SUCCESS → green
-          clearSyncStatus("sbgDatabase", "db");
+          clearSyncStatus("sbgDatabase", "db", true);
 
           console.log("✅ SBG totals updated from SBGExp");
 
@@ -13488,7 +13698,7 @@
           console.error("❌ SBG Calculation Failed:", err);
 
           // 🔴 ERROR → red
-          setErrorStatus("sbgDatabase", "db");
+          clearSyncStatus("sbgDatabase", "db", false);
         }
       }
 
@@ -13871,7 +14081,7 @@
             console.error("❌ Data not ready");
 
             // 🔴 error state
-            setErrorStatus("sbgDatabase", "db");
+            updateStatus("sbgDatabase", "db", false);
             return;
           }
 
@@ -13935,13 +14145,13 @@
           await res.json();
 
           // 🔥 SUCCESS → green
-          clearSyncStatus("sbgDatabase", "db");
+          clearSyncStatus("sbgDatabase", "db", true);
 
         } catch (err) {
           console.error("❌ SBG Sync Failed:", err);
 
           // 🔴 ERROR → red
-          setErrorStatus("sbgDatabase", "db");
+          clearSyncStatus("sbgDatabase", "db", false);
 
         }
       }
