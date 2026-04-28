@@ -160,14 +160,23 @@
       width: 250px;
     }
 
-    .digital-clock,
-    .today-date {
+    .digital-clock {
       font-family: 'Digital-7 Mono', monospace;
       font-size: 16px;
       font-weight: 600;
       color: #111827;
       text-align: right;
     }
+
+    .today-date {
+      font-family: 'Inter', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: #111827;
+      text-align: right;
+    }
+
+
 
     /* =============SCROLLBAR=========== */
     div::-webkit-scrollbar {
@@ -204,6 +213,22 @@
       font-family: "Inter", Arial, Helvetica, sans-serif;
     }
 
+    .login-container {
+      width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+
+    #loginUserDropdown,
+    #loginPasswordInput {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+
     /* =============APP LAYOUT=========== */
     .watermark {
       width: calc(100vw - 70%);
@@ -218,7 +243,7 @@
     }
 
     .app {
-      display: flex;
+      display: none;
       height: 100vh;
       overflow: visible;
     }
@@ -285,6 +310,8 @@
       gap: 5px;
       padding: 4px;
       border-top: solid 1px rgb(221, 221, 221);
+      align-items: center;
+      justify-content: space-between;
     }
 
     .db-wrapper {
@@ -319,7 +346,7 @@
       opacity: 0;
       transform: translateY(10px);
       pointer-events: none;
-
+      z-index: 9999;
       transition: 0.25s ease;
     }
 
@@ -941,7 +968,7 @@
       margin-top: 4px;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 130px);
+      height: calc(100vh - 150px);
       /* adjust header height */
       gap: 10px;
     }
@@ -1444,9 +1471,9 @@
 
     .Error_Note {
       background: linear-gradient(180deg,
-          rgba(114, 204, 197, 1) 0%,
+          rgb(214, 234, 255) 0%,
           rgba(255, 255, 255, 1) 34%,
-          rgba(114, 204, 197, 1) 100%);
+          rgb(214, 234, 255) 100%);
       padding: 4px 10px;
       text-align: left;
       width: 100%;
@@ -1776,7 +1803,7 @@
       font-size: 11px;
       background-color: white;
       overflow: auto;
-      height: 600px;
+      height: 575px;
     }
 
     .SalarySlipTableWrapper table {
@@ -1919,7 +1946,7 @@
       margin: 4px;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 140px);
+      height: calc(100vh - 155px);
       min-height: 0;
       gap: 10px;
       text-align: center;
@@ -1930,7 +1957,7 @@
       margin: 4px;
       display: flex;
       flex-direction: row;
-      height: calc(100vh - 100px);
+      height: calc(100vh - 120px);
       min-height: 0;
       gap: 10px;
       text-align: center;
@@ -2431,6 +2458,15 @@
       width: 60px;
     }
 
+    .disabled-cell {
+      background: #f3f4f6;
+      opacity: 0.6;
+    }
+
+    .req-select:disabled {
+      cursor: not-allowed;
+    }
+
     /* ===============================================
         RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
       =================================================== */
@@ -2559,7 +2595,22 @@
 </head>
 
 <body>
-  <div class="app">
+  <div id="loginPage" class="login-container">
+
+    <h2>Login</h2>
+
+    <select id="loginUserDropdown">
+      <option value="">Select User</option>
+    </select>
+
+    <input type="password" id="loginPasswordInput" placeholder="Enter Password" />
+
+    <button id="loginBtn">Login</button>
+
+    <div id="loginError" style="color:red; margin-top:10px;"></div>
+
+  </div>
+  <div class="app" id="mainPage">
     <div class="left-panel collapsed" id="sidebar">
       <!-- Toggle button -->
       <div class="sidebar-header" onclick="toggleSidebar()">
@@ -2653,11 +2704,6 @@
       <div class="SectionPage" id="DashBoard">
         <div class="header" style="text-align: center;">
           <h2>OFFICE DASHBOARD</h2>
-          <div class="date_timeDiv">
-            <div id="digitalClock" class="digital-clock"></div>
-            <div id="todayDate" class="today-date"></div>
-          </div>
-
         </div>
         <div class="DashBoardContainer">
           <div class="chart-container">
@@ -2697,62 +2743,6 @@
           <div>
 
           </div>
-          <div class="dashboard-footer">
-            <div class="db-wrapper">
-
-              <div class="db-trigger">
-                <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
-                <span>Database</span>
-                <!-- 🔥 BUBBLE COUNTER -->
-                <span class="db-badge" id="dbBadge">0/0</span>
-              </div>
-
-              <!-- 🔥 PANEL -->
-              <div class="dashboard-footer-database">
-                <div><span class="material-symbols-outlined" id="empDatabase">database_off</span>
-                  <h3>Employee Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="pbDatabase">database_off</span>
-                  <h3>PayBill Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
-                  <h3>Budgets Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
-                  <h3>SBG Expenditure Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="dgDatabase">database_off</span>
-                  <h3>DG Log Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
-                  <h3>HSD Log Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="ebDatabase">database_off</span>
-                  <h3>EB Log Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
-                  <h3>Duty Chart Database</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="itDatabase">data_alert</span>
-                  <h3>Income Tax Reference</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
-                  <h3>7th Pay Matrix Reference</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
-                  <h3>Staff Quarters Reference</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
-                  <h3>TA/HRA City Reference</h3>
-                </div>
-                <div><span class="material-symbols-outlined" id="commDatabase">data_alert</span>
-                  <h3>Commutation Factor Reference</h3>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
         </div>
       </div>
 
@@ -3935,6 +3925,7 @@
           <button onclick="showSheet('HSDlog', this)">HSD Log </button>
           <button onclick="showSheet('EBlog', this)">EB Log </button>
           <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
+          <button onclick="showSheet('Login', this)">Login ID</button>
         </div>
 
         <div class="DB-Table-Wrapper">
@@ -3952,6 +3943,80 @@
           <table id="HSDlog" style="display: none"></table>
           <table id="EBlog" style="display: none"></table>
           <table id="DutyChart" style="display: none"></table>
+          <table id="Login" style="display: none"></table>
+        </div>
+      </div>
+
+      <div class="dashboard-footer">
+        <div class="db-wrapper">
+
+          <div class="db-trigger">
+            <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
+            <span>Database</span>
+            <!-- 🔥 BUBBLE COUNTER -->
+            <span class="db-badge" id="dbBadge">0/0</span>
+          </div>
+
+          <!-- 🔥 PANEL -->
+          <div class="dashboard-footer-database">
+            <div><span class="material-symbols-outlined" id="idDatabase">data_alert</span>
+              <h3>User ID & Passwords</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="empDatabase">database_off</span>
+              <h3>Employee Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="pbDatabase">database_off</span>
+              <h3>PayBill Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
+              <h3>Budgets Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
+              <h3>SBG Expenditure Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="dgDatabase">database_off</span>
+              <h3>DG Log Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
+              <h3>HSD Log Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="ebDatabase">database_off</span>
+              <h3>EB Log Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
+              <h3>Duty Chart Database</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="itDatabase">data_alert</span>
+              <h3>Income Tax Reference</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
+              <h3>7th Pay Matrix Reference</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
+              <h3>Staff Quarters Reference</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
+              <h3>TA/HRA City Reference</h3>
+            </div>
+            <div><span class="material-symbols-outlined" id="commDatabase">data_alert</span>
+              <h3>Commutation Factor Reference</h3>
+            </div>
+          </div>
+
+        </div>
+        <div style="display: flex;flex-direction: row;gap: 10px;">
+          <span class="material-symbols-outlined" style="color: blue;">account_circle</span>
+          <span id="welcomeUser"></span>
+        </div>
+        <div style="display: flex;flex-direction: row;gap: 50px;">
+          <div style="display: flex;flex-direction: row;gap: 10px;">
+            <span class="material-symbols-outlined" style="color: blue;">calendar_today</span>
+            <div id="todayDate" class="today-date"></div>
+          </div>
+          <div style="display: flex;flex-direction: row;gap: 10px;">
+            <span class="material-symbols-outlined" style="color: blue;">alarm</span>
+            <div id="digitalClock" class="digital-clock"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -3970,6 +4035,7 @@
     let isAddMode = false;
     let isEditMode = false;
     let isPBProcessing = false;
+    let idData = {};
     let empData = {};
     let pbData = {};
     let cpcData = {};
@@ -4003,9 +4069,208 @@
       );
     }
 
-    /* ============================================================
-  🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
-  =================================================================== */
+    //================================================================================
+    //                                    🔥Login Script🔥
+    // ===============================================================================
+    function getUserMap() {
+
+      const headers = idData.headers;
+      const rows = idData.rows;
+
+      const userIdx = headers.indexOf("User ID");
+      const passIdx = headers.indexOf("Password");
+      const usernameIdx = headers.indexOf("User Name");
+
+      const map = {};
+
+      rows.forEach(r => {
+
+        const user = r[userIdx];
+        const pass = r[passIdx];
+        const name = r[usernameIdx];
+
+        if (!user || !pass || !name) return;
+
+        // 🔥 overwrite → last occurrence wins
+        map[user] = {
+          user,
+          password: String(pass).trim(),
+          name
+        };
+      });
+
+      return map;
+    }
+
+    function populateloginUserDropdown() {
+
+      const dropdown = id("loginUserDropdown");
+      dropdown.innerHTML = `<option value="" hidden>Select User</option>`;
+
+      const users = Object.values(getUserMap());
+
+      users.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.user;
+        opt.textContent = u.user;
+        dropdown.appendChild(opt);
+      });
+
+      // store globally
+      window.userList = users;
+    }
+
+    on("loginBtn", "click", () => {
+
+      const user = id("loginUserDropdown").value;
+      const password = id("loginPasswordInput").value;
+      const errorBox = id("loginError");
+
+      errorBox.textContent = "";
+
+      if (!user || !password) {
+        errorBox.textContent = "Select user & enter password";
+        return;
+      }
+
+      const record = window.userList.find(u => u.user === user);
+
+      if (!record) {
+        errorBox.textContent = "User not found";
+        return;
+      }
+
+      if (password !== record.password) {
+        errorBox.textContent = "Incorrect password";
+        return;
+      }
+
+      // ✅ SUCCESS
+      window.currentUser = user;
+
+      id("loginPage").style.display = "none";
+      id("mainPage").style.display = "flex";
+
+      id("welcomeUser").textContent = `Welcome ${record.name}`;
+      lockRequirementTableForUser(user);
+    });
+
+
+
+    const ACCESS_RULES = {
+      ALL: ["ALL"],
+
+      ADMIN: ["DashBoard", "EmpPage", "PayBillPage", "SalarySlipPage", "ITPage", "PensionPage", "BudgetPage"],
+
+      ENGG: ["DashBoard", "EmpPage", "SalarySlipPage", "DGlogPage", "HSDlogPage", "ElectricityPage", "DutyPage"],
+
+      DEFAULT: ["SalarySlipPage", "EmpPage", "DutyPage"]
+    };
+
+
+
+    function applyUserAccess(role) {
+
+      const buttons = document.querySelectorAll(".menu-btn");
+      const access = ACCESS_RULES[role] || ACCESS_RULES.DEFAULT;
+
+      buttons.forEach(btn => {
+
+        const page = btn.dataset.page;
+
+        if (access.includes("ALL")) {
+          btn.style.display = "flex";
+          return;
+        }
+
+        btn.style.display = access.includes(page) ? "flex" : "none";
+      });
+    }
+
+
+    function lockRequirementTableForUser(user) {
+
+      const reqContainer = id("dutyRequirementTable");
+      const editContainer = id("editableRequirementContainer");
+      const dutyTable = id("dutyChartTable");
+
+      // =========================
+      // 🔥 ROLE BASED VISIBILITY
+      // =========================
+      if (user === "TECHNICAL") {
+
+        if (dutyTable) dutyTable.style.display = "block";
+        if (editContainer) editContainer.style.display = "block";
+        if (reqContainer) reqContainer.style.display = "none";
+
+        console.log("TECHNICAL MODE");
+        return; // 🔥 stop further execution
+      }
+
+      // =========================
+      // 🔥 NORMAL USERS
+      // =========================
+      if (dutyTable) dutyTable.style.display = "none";
+      if (editContainer) editContainer.style.display = "none";
+      if (reqContainer) reqContainer.style.display = "block";
+
+      if (!reqContainer) return;
+
+      const table = reqContainer.querySelector("table");
+      if (!table) return;
+
+      const selects = table.querySelectorAll(".req-select");
+
+      selects.forEach(select => {
+
+        const emp = select.dataset.emp;
+        if (!emp) return;
+
+        const td = select.closest("td");
+        const lieu = td?.nextElementSibling?.querySelector(".lieu-input");
+
+        const isCurrentUser = emp === user;
+
+        // =========================
+        // 🔥 LOCK SELECT
+        // =========================
+        select.disabled = !isCurrentUser;
+
+        // =========================
+        // 🔥 LIEU CONDITION (FINAL FIX)
+        // =========================
+        if (lieu) {
+          if (isCurrentUser && select.value === "C/O") {
+            lieu.disabled = false;
+          } else {
+            lieu.disabled = true;
+            lieu.value = "";
+          }
+        }
+
+        // =========================
+        // 🔥 UI STYLE
+        // =========================
+        td.classList.toggle("disabled-cell", !isCurrentUser);
+      });
+
+      console.log("lockRequirementTableForUser Applied for:", user);
+    }
+
+
+    on("loginUserDropdown", "change", () => {
+      const user = id("loginUserDropdown").value;
+
+      if (!user) return;
+
+      applyUserAccess(user);
+      // 🔥 lock table
+      lockRequirementTableForUser(user);
+    });
+
+    /* ===========================================================================================
+                                🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
+  ================================================================================================== */
 
     window.addEventListener("resize", moveIndicator);
 
@@ -4300,6 +4565,7 @@
     }
 
     const apiStatusMap = {
+      id: ["idDatabase", "data"],
       emp: ["empDatabase", "db"],
       pb: ["pbDatabase", "db"],
       sbg: ["sbgDatabase", "db"],
@@ -4361,6 +4627,7 @@
         }
 
         // 🔥 STORE DATA (same as your code)
+        if (api === "id") idData = result;
         if (api === "emp") empData = result;
         if (api === "pb") pbData = result;
         if (api === "cpc") cpcData = result;
@@ -4406,13 +4673,15 @@
 
     async function loadAllData() {
       // 🔴 STEP 1: Load REQUIRED data first
+      await loadTable("id", "Login");
+      populateloginUserDropdown();
+      await loadTable("duty", "DutyChart");
       await loadTable("emp", "EmpDB", false);
       await loadTable("pb", "PBDB");
       await loadTable("cpc", "CPC7DB");
       await loadTable("dg", "DGlog");
       await loadTable("hsd", "HSDlog");
       await loadTable("eb", "EBlog");
-      await loadTable("duty", "DutyChart");
 
       // 🔴 STEP 2: Calculate
       buildEmpDBWithCalc();
@@ -4437,6 +4706,9 @@
     }
 
     async function loadData() {
+      let idRes = await fetch(
+        "https://office-management-f425.onrender.com/id",
+      );
       let empRes = await fetch(
         "https://office-management-f425.onrender.com/emp",
       );
@@ -4477,6 +4749,7 @@
         "https://office-management-f425.onrender.com/eb",
       );
 
+      idData = await idRes.json();
       empData = await empRes.json();
       sbgData = await sbgRes.json();
       sbgExpData = await sbgExpRes.json();
@@ -22106,7 +22379,7 @@
 
             // 🔹 W/O
             else if (v === "W/O") {
-              weekMap[key].WO.push(emp);
+              weekMap[key].WO.push(bold(emp));
             }
 
             // 🔹 C/O
@@ -22121,7 +22394,19 @@
                 text = `${emp}(${formatLieuDate(lieuDate)})`;
               }
 
-              weekMap[key].CO.push(bold(text));
+              // 🔥 normalize comparison
+              const normalize = (val) =>
+                val
+                  .replace(/\(.*?\)/g, "")
+                  .split(",")
+                  .map(x => x.trim())
+                  .sort()
+                  .join(",");
+
+              const normalizedReq = normalize(reqVal);
+              const isMatch = normalizedReq.includes("C/O");
+
+              weekMap[key].CO.push(isMatch ? `<b><u>${text}</u></b>` : text);
             }
 
             // 🔹 LEAVES
@@ -22215,7 +22500,7 @@
       html += `
         <tr>
           <td colspan="5" style="padding:0">
-            <textarea style="background-color: #d3fc58;height:50px;font-style:italic;align-content: bottom;">
+            <textarea style="background-color: #d3fc58;height:80px;font-style:italic;text-align:left !important;">
               No Change in duty chart allowed without prior permission of undersigned
             </textarea>
           </td>
@@ -22389,6 +22674,12 @@
       });
 
       html += "</tbody></table>";
+
+      setTimeout(() => {
+        if (window.currentUser) {
+          lockRequirementTableForUser(window.currentUser);
+        }
+      }, 0);
 
       container.innerHTML = html;
       window.currentRequirementState = {
@@ -22565,7 +22856,8 @@
               <!-- 🔥 SPAN → REQUIREMENT ONLY -->
               <span class="req-text" data-emp="${emp.name}" data-date="${formatDutyChartDate(d.date)}">
                 ${displayText === "C/O" && val.lieu
-              ? `C/O(${formatDutyChartDate(parseDDMMYYYY(val.lieu))})`
+              //? `C/O(${formatDutyChartDate(parseDDMMYYYY(val.lieu))})`
+              ? `C/O`
               : displayText
             }
               </span>
