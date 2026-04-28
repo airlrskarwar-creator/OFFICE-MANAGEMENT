@@ -29,6 +29,7 @@ client = gspread.authorize(creds)
 # ✅ OPEN ALL SHEETS PROPERLY
 spreadsheet = client.open("AKASHAVANI")
 
+id_sheet = spreadsheet.worksheet("Login")
 emp_sheet = spreadsheet.worksheet("EmpDB")
 sbg_sheet = spreadsheet.worksheet("BudgetDB")
 sbgexp_sheet = spreadsheet.worksheet("SBGexpenditure")
@@ -59,6 +60,9 @@ def sheet_to_json(sheet):
         "rows": rows
     }
 
+@app.route("/id", methods=["GET"])
+def get_id():
+    return jsonify(sheet_to_json(id_sheet))
 
 @app.route("/emp", methods=["GET"])
 def get_emp():
