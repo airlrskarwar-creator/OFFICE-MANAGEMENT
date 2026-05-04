@@ -29,7 +29,6 @@ client = gspread.authorize(creds)
 # ✅ OPEN ALL SHEETS PROPERLY
 spreadsheet = client.open("AKASHAVANI")
 
-id_sheet = spreadsheet.worksheet("Login")
 emp_sheet = spreadsheet.worksheet("EmpDB")
 sbg_sheet = spreadsheet.worksheet("BudgetDB")
 sbgexp_sheet = spreadsheet.worksheet("SBGexpenditure")
@@ -59,10 +58,6 @@ def sheet_to_json(sheet):
         "headers": headers,
         "rows": rows
     }
-
-@app.route("/id", methods=["GET"])
-def get_id():
-    return jsonify(sheet_to_json(id_sheet))
 
 @app.route("/emp", methods=["GET"])
 def get_emp():
@@ -425,7 +420,93 @@ def bulk_update_sbg():
             "status": "error",
             "message": str(e)
         }), 500
-    
+
+# =========================
+# 🔥 SAVE DUTY DATA
+# =========================
+@app.route("/duty/update", methods=["POST"])
+def update_duty():
+
+    try:
+        req_data = request.get_json()
+        rows = req_data.get("data", [])
+        mode = req_data.get("mode", "update")
+
+        if not rows:
+            return jsonify({"status": "error", "message": "No data"}), 400
+
+        # =========================
+        # 🔥 GET HEADERS
+        # =========================
+        existing = duty_sheet.get_all_values()
+
+        if not existing:
+            return jsonify({"status": "error", "message": "Sheet empty"}), 400
+
+        headers = existing[0]
+
+        # =========================
+        # 🔥 CONVERT INPUT → ROW FORMAT
+        # =========================
+        def build_row(obj):
+            return [obj.get(h, "") for h in headers]
+
+        new_rows = [build_row(r) for r in rows]
+
+        # =========================
+        # 🔥 MODE: REPLACE (FULL OVERWRITE)
+        # =========================
+        if mode == "replace":
+
+            duty_sheet.clear()
+            duty_sheet.append_row(headers)
+            duty_sheet.append_rows(new_rows)
+
+        # =========================
+        # 🔥 MODE: UPDATE (MERGE BY DATE)
+        # =========================
+        else:
+
+            # build map of existing rows
+            data_map = {}
+
+            for r in existing[1:]:
+                if not r:
+                    continue
+                date = r[0]
+                data_map[date] = dict(zip(headers, r))
+
+            # merge new data
+            for r in rows:
+                date = r.get("Date")
+                if not date:
+                    continue
+
+                if date not in data_map:
+                    data_map[date] = {"Date": date}
+
+                data_map[date].update(r)
+
+            # rebuild full dataset
+            final_rows = [
+                [data_map[d].get(h, "") for h in headers]
+                for d in sorted(data_map.keys())
+            ]
+
+            # write back
+            duty_sheet.clear()
+            duty_sheet.append_row(headers)
+            duty_sheet.append_rows(final_rows)
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 @app.route("/health")
 def health():
     return "OK", 200
