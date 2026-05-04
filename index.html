@@ -3,35 +3,31 @@
 
 <head>
   <title>OFFICE MANAGEMENT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base target="_top" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
   <!-- font style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.cdnfonts.com/css/digital-7-mono" rel="stylesheet">
-
-  <link rel="icon" href="data:," />
+  <link rel="icon" href="data:,">
   <!-- Icon -->
   <script defer src="https://unpkg.com/lucide@latest"></script>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
   <!-- Formula Display JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body)"></script>
-
   <!-- Chart Display JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
     /* =========================
       RESET
@@ -2423,7 +2419,7 @@
       background-color: #d3fc58;
       width: 60px;
       font-size: 11px;
-      height: 100%;
+      height: 25px;
       border-radius: 0;
       text-align: center;
     }
@@ -2441,14 +2437,20 @@
     .lieu-input {
       width: 110px;
       font-size: 11px;
-      height: 100%;
+      height: 25px;
       border-radius: 0;
       color: black;
     }
 
     .lieu-input:disabled {
-      color: lightgray;
+      color: black;
+      background: white;
+      border: none;
+    }
 
+    .lieu-input[value=""]:disabled {
+      background-color: white;
+      color: white;
     }
 
     .req-text {
@@ -2467,11 +2469,14 @@
 
     .disabled-cell {
       background: #f3f4f6;
-      opacity: 0.6;
+      color: black;
     }
 
     .req-select:disabled {
       cursor: not-allowed;
+      color: black;
+      background: white;
+      border: none;
     }
 
     /* ===============================================
@@ -2652,7 +2657,8 @@
 
       #dutyRequirementTable {
         width: 100%;
-        height: 80%
+        height: 80%;
+        display: none;
       }
 
       .material-symbols-outlined {
@@ -2688,103 +2694,83 @@
 
 <body>
   <div id="loginPage" class="login-container">
-
     <h2>Login</h2>
     <select id="loginStationDropdown">
       <option value="">Select Station</option>
     </select>
-
     <select id="loginUserDropdown" disabled>
       <option value="">Select User</option>
     </select>
-
-    <input type="password" id="loginPasswordInput" placeholder="Enter Password" />
-
+    <input type="password" id="loginPasswordInput" placeholder="Enter Password">
     <button id="loginBtn">Login</button>
-
     <div id="loginError" style="color:red; margin-top:10px;"></div>
-
   </div>
   <div class="app" id="mainPage">
     <div class="left-panel collapsed" id="sidebar">
       <!-- Toggle button -->
       <div class="sidebar-header" onclick="toggleSidebar()">
-        <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" class="sidebar-logo" />
+        <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" class="sidebar-logo">
         <span class="app-title">OFFICE-MANAGEMENT</span>
         <div class="sidebar-toggle">☰</div>
       </div>
-
       <div class="menu-list">
-        <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
+        <button class="menu-btn" data-tooltip="Dashboard" data-page="DashBoard">
           <i class="material-symbols-outlined">dashboard</i>
           <span>Dashboard</span>
         </button>
-
         <!-- Employee -->
         <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
           <i class="material-symbols-outlined">group</i>
           <span>Employee Details</span>
         </button>
-
         <!-- Pay Bill -->
         <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
           <i class="material-symbols-outlined">description</i>
           <span>Pay Bill</span>
         </button>
-
         <!-- Salary Slip -->
         <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
           <i class="material-symbols-outlined">receipt_long</i>
           <span>Salary Slip</span>
         </button>
-
         <!-- Income Tax -->
         <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
           <i class="material-symbols-outlined">calculate</i>
           <span>Income Tax</span>
         </button>
-
         <!-- Pension -->
         <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
           <i class="material-symbols-outlined">elderly</i>
           <span>Pensions</span>
         </button>
-
         <!-- Budget -->
         <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
           <i class="material-symbols-outlined">finance</i>
           <span>Budgets</span>
         </button>
-
         <button class="menu-btn" data-tooltip="DG Log Book" data-page="DGlogPage">
           <i class="material-symbols-outlined">electric_meter</i>
           <span>DG Log</span>
         </button>
-
         <button class="menu-btn" data-tooltip="HSD Log Book" data-page="HSDlogPage">
           <i class="material-symbols-outlined">local_gas_station</i>
           <span>HSD Log</span>
         </button>
-
         <button class="menu-btn" data-tooltip="Electricity Log Book" data-page="ElectricityPage">
           <i class="material-symbols-outlined">bolt</i>
           <span>Electricity Log</span>
         </button>
-
         <button class="menu-btn" data-tooltip="Duty Chart Register" data-page="DutyPage">
           <i class="material-symbols-outlined">work</i>
           <span>Duty Chart</span>
         </button>
-
         <!-- Database -->
         <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
           <i class="material-symbols-outlined">storage</i>
           <span>Database</span>
         </button>
-
         <!-- Footer -->
       </div>
-
       <div class="menu-footer">
         <button class="logout-btn" data-tooltip="Logout">
           <i class="material-symbols-outlined">logout</i>
@@ -2792,11 +2778,9 @@
         </button>
       </div>
     </div>
-
     <div class="right-panel">
-      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" />
-
-      <div class="SectionPage" id="DashBoard">
+      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+      <div class="SectionPage" id="DashBoard" style="display: none">
         <div class="header" style="text-align: center;">
           <h2>OFFICE DASHBOARD</h2>
         </div>
@@ -2808,13 +2792,11 @@
               </button>
               <button id="btnSalary" class="chart-btn">Salary</button>
             </div>
-
             <div class="sbg-dashboard">
               <div class="side-list" id="stationList">
                 <div class="side-header">Select Station</div>
                 <div class="side-items"></div>
               </div>
-
               <div class="chart-layout">
                 <div class="chart-box">
                   <div class="chart-scroll">
@@ -2823,24 +2805,19 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="table-box">
                   <table id="dashBoardTable" class="sbg-table"></table>
                 </div>
               </div>
-
               <div class="side-list" id="yearList">
                 <div class="side-header">Select FY</div>
                 <div class="side-items"></div>
               </div>
             </div>
           </div>
-          <div>
-
-          </div>
+          <div></div>
         </div>
       </div>
-
       <div class="SectionPage" id="EmpPage" style="display: none">
         <div class="header">
           <h2>Employee Profile Details</h2>
@@ -2848,19 +2825,19 @@
         <div class="Selection-bar">
           <div class="select-group">
             <label for="EmpPage_Station">Station :</label>
-            <select id="EmpPage_Station"></select>
+            <select id="EmpPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group">
             <label for="EmpPage_Emp">Employee :</label>
-            <select id="EmpPage_Emp"></select>
+            <select id="EmpPage_Emp" class="employeeDropdown"></select>
           </div>
           <div class="select-group">
             <label>TA Zone :</label>
-            <input disabled id="EmpPage_TAZone" />
+            <input disabled id="EmpPage_TAZone">
           </div>
           <div class="select-group">
             <label>HRA Zone :</label>
-            <input disabled id="EmpPage_HRAZone" />
+            <input disabled id="EmpPage_HRAZone">
           </div>
           <div class="action-group"></div>
         </div>
@@ -2985,7 +2962,6 @@
           </table>
         </div>
       </div>
-
       <div class="SectionPage" id="PayBillPage" style="display: none">
         <div class="header">
           <h2>Pay Bill Generation</h2>
@@ -2993,11 +2969,11 @@
         <div class="Selection-bar">
           <div class="select-group">
             <label for="PayBillPage_Station">Station :</label>
-            <select id="PayBillPage_Station"></select>
+            <select id="PayBillPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group" style="display: none">
             <label for="PayBillPage_Emp">Employee :</label>
-            <select id="PayBillPage_Emp"></select>
+            <select id="PayBillPage_Emp" class="employeeDropdown"></select>
           </div>
           <div class="select-group">
             <label for="PayBillPage_FY">FY :</label>
@@ -3009,31 +2985,34 @@
           </div>
           <div class="select-group">
             <label>DA(%) :</label>
-            <input style="max-width: 40px" disabled id="PayBillPage_DA%" type="text" />
-            <input id="PayBillPage_OldDA%" disabled style="max-width: 40px" type="text" hidden />
+            <input style="max-width: 40px" disabled id="PayBillPage_DA%" type="text">
+            <input id="PayBillPage_OldDA%" disabled style="max-width: 40px" type="text" hidden>
           </div>
           <div class="select-group">
             <label>TA Zone :</label>
-            <input disabled id="PayBillPage_TAZone" />
+            <input disabled id="PayBillPage_TAZone">
           </div>
           <div class="select-group">
             <label>HRA Zone :</label>
-            <input disabled id="PayBillPage_HRAZone" /><input hidden id="PayBillPage_HRA%" />
+            <input disabled id="PayBillPage_HRAZone">
+            <input hidden id="PayBillPage_HRA%">
           </div>
-
           <div class="action-group">
             <button id="PBeditBtn">
-              <i data-lucide="edit"></i><span>Edit</span>
+              <i data-lucide="edit"></i>
+              <span>Edit</span>
             </button>
             <button id="PBaddBtn">
-              <i data-lucide="plus"></i><span>Add</span>
+              <i data-lucide="plus"></i>
+              <span>Add</span>
             </button>
-
             <button id="PBprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="PBexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
             <div id="PBprintMenu">
               <div class="print-option menu-option" data-type="pdf-paybill">
@@ -3042,7 +3021,6 @@
               <div class="print-option menu-option" id="daaPrintOption" data-type="pdf-daa">
                 📊 DAA Bill Report PDF
               </div>
-
               <!-- EXCEL OPTIONS -->
               <div class="excel-option menu-option" data-type="excel-paybill">
                 ⬇️ Pay Bill Excel
@@ -3060,26 +3038,25 @@
             <table id="PB_GOEditTbl"></table>
             <table class="daaArrearsTbl" id="daaGOTableCalculation">
               <colgroup>
-                <col style="width: 180px" />
-                <col style="width: 60px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 40px" />
-                <col style="width: 50px" />
-                <col style="width: 40px" />
-                <col style="width: 50px" />
+                <col style="width: 180px">
+                <col style="width: 60px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 40px">
+                <col style="width: 50px">
+                <col style="width: 40px">
+                <col style="width: 50px">
               </colgroup>
               <thead>
                 <tr>
                   <th colspan="13" style="border: none">
                     <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" />
-
+                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
                       <div class="header-text">
                         <h1>PRASAR BHARATI</h1>
                         <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
@@ -3106,10 +3083,14 @@
                   <th rowspan="2">BASIC PAY</th>
                   <th rowspan="2">TA</th>
                   <th colspan="2">
-                    DRAWN SALARY <br /><span class="OldDASpan"></span>
+                    DRAWN SALARY
+                    <br>
+                    <span class="OldDASpan"></span>
                   </th>
                   <th colspan="2">
-                    DUE SALARY <br /><span class="NewDASpan"></span>
+                    DUE SALARY
+                    <br>
+                    <span class="NewDASpan"></span>
                   </th>
                   <th colspan="2">DIFFERENCE</th>
                   <th colspan="2">TOTAL</th>
@@ -3126,7 +3107,6 @@
                   <th>DAA on TA</th>
                 </tr>
               </thead>
-
               <tbody></tbody>
               <!-- 🔥 REQUIRED -->
             </table>
@@ -3137,33 +3117,32 @@
             <table id="PB_NPSEditTbl"></table>
             <table class="daaArrearsTbl" id="daaNPSTableCalculation">
               <colgroup>
-                <col style="width: 180px" />
-                <col style="width: 60px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 60px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
-                <col style="width: 40px" />
-                <col style="width: 30px" />
-                <col style="width: 30px" />
-                <col style="width: 50px" />
-                <col style="width: 40px" />
-                <col style="width: 50px" />
-                <col style="width: 50px" />
+                <col style="width: 180px">
+                <col style="width: 60px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 60px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 50px">
+                <col style="width: 40px">
+                <col style="width: 30px">
+                <col style="width: 30px">
+                <col style="width: 50px">
+                <col style="width: 40px">
+                <col style="width: 50px">
+                <col style="width: 50px">
               </colgroup>
               <thead>
                 <tr>
                   <th colspan="20" style="border: none">
                     <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" />
-
+                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
                       <div class="header-text">
                         <h1>PRASAR BHARATI</h1>
                         <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
@@ -3188,10 +3167,14 @@
                   <th rowspan="2">BASIC PAY</th>
                   <th rowspan="2">TA</th>
                   <th colspan="4">
-                    DRAWN SALARY <br /><span class="OldDASpan"></span>
+                    DRAWN SALARY
+                    <br>
+                    <span class="OldDASpan"></span>
                   </th>
                   <th colspan="4">
-                    DUE SALARY <br /><span class="NewDASpan"></span>
+                    DUE SALARY
+                    <br>
+                    <span class="NewDASpan"></span>
                   </th>
                   <th colspan="4">DIFFERENCE</th>
                   <th colspan="2">TOTAL</th>
@@ -3215,7 +3198,6 @@
                   <th>DAA on TA</th>
                 </tr>
               </thead>
-
               <tbody></tbody>
               <!-- 🔥 REQUIRED -->
             </table>
@@ -3226,7 +3208,6 @@
           <span id="GPF_Error" class="PB-error"></span>
         </div>
       </div>
-
       <div class="SectionPage" id="SalarySlipPage" style="display: none">
         <div class="header">
           <h2>Salary Slip</h2>
@@ -3234,11 +3215,11 @@
         <div class="Selection-bar">
           <div class="select-group">
             <label for="SalSlipPage_Station">Station :</label>
-            <select id="SalSlipPage_Station"></select>
+            <select id="SalSlipPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group">
             <label for="SalSlipPage_Emp">Employee :</label>
-            <select id="SalSlipPage_Emp"></select>
+            <select id="SalSlipPage_Emp" class="employeeDropdown"></select>
           </div>
           <div class="select-group">
             <label for="SalSlipPage_FY">FY :</label>
@@ -3248,15 +3229,15 @@
             <label for="SalSlipPage_SalMonth">Month :</label>
             <select id="SalSlipPage_SalMonth"></select>
           </div>
-
           <div class="SSaction-group">
             <button id="SSprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="SSexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
-
             <div id="SSprintMenu">
               <div class="print-option menu-option" id="ssPrintOption" data-type="pdf-singleSS">
                 🧾 Employee Salary Slip PDF
@@ -3264,7 +3245,6 @@
               <div class="print-option menu-option" data-type="pdf-allSS">
                 🧾 All Employee Salary Slip PDF
               </div>
-
               <!-- EXCEL OPTIONS -->
               <div class="excel-option menu-option" id="ssExcelOption" data-type="excel-singleSS">
                 ⬇️ Employee Salary Slip Excel
@@ -3288,7 +3268,7 @@
                         padding: 8px 2px;
                       ">
                     <img id="SalarySlipLogo"
-                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" />
+                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
                     <div style="
                           display: flex;
                           flex-direction: column;
@@ -3321,13 +3301,13 @@
                         border: none;
                       ">
                     <colgroup>
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
                     </colgroup>
                     <tr>
                       <td style="font-weight: bold">NAME:</td>
@@ -3349,7 +3329,9 @@
                       <td style="font-weight: bold">POSTING OFFICE :</td>
                       <td colspan="2" id="SSstation"></td>
                       <td style="font-weight: bold">
-                        DIRECTORATE/VERTICAL<br />:
+                        DIRECTORATE/VERTICAL
+                        <br>
+                        :
                       </td>
                       <td colspan="3">DG:AIR</td>
                     </tr>
@@ -3364,7 +3346,11 @@
                       <td id="SSaadhaar"></td>
                       <td style="font-weight: bold">PAN:</td>
                       <td id="SSpan"></td>
-                      <td style="font-weight: bold">GPF/CPF <br />NUMBER:</td>
+                      <td style="font-weight: bold">
+                        GPF/CPF
+                        <br>
+                        NUMBER:
+                      </td>
                       <td colspan="2" id="SSgpf"></td>
                     </tr>
                     <tr>
@@ -3398,13 +3384,13 @@
                 <td style="padding: 0px">
                   <table id="SalarySlipBreakup">
                     <colgroup>
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
                     </colgroup>
                     <thead>
                       <tr>
@@ -3413,7 +3399,11 @@
                         <td>DEDUCTIONS</td>
                         <td>AMOUNT</td>
                         <td>LOAN TYPE</td>
-                        <td>INSTALLMENT<br />NO</td>
+                        <td>
+                          INSTALLMENT
+                          <br>
+                          NO
+                        </td>
                         <td>RECOVERY</td>
                       </tr>
                     </thead>
@@ -3443,13 +3433,13 @@
                 <td style="padding: 0px">
                   <table id="SalarySlipFYDetails">
                     <colgroup>
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 15%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
-                      <col style="width: 13%" />
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 15%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
+                      <col style="width: 13%">
                     </colgroup>
                     <thead>
                       <tr>
@@ -3499,20 +3489,18 @@
           </table>
         </div>
       </div>
-
       <div class="SectionPage" id="ITPage" style="display: none">
         <div class="header">
           <h2>Income Tax Calculation</h2>
         </div>
         <div class="Selection-bar">
-
           <div class="select-group">
             <label for="ITPage_Station">Station :</label>
-            <select id="ITPage_Station"></select>
+            <select id="ITPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group">
             <label for="ITPage_Emp">Employee :</label>
-            <select id="ITPage_Emp"></select>
+            <select id="ITPage_Emp" class="employeeDropdown"></select>
           </div>
           <div class="select-group">
             <label for="ITPage_FY">FY :</label>
@@ -3520,26 +3508,23 @@
           </div>
           <div class="select-group">
             <label for="ITCalcFor">IT Calulation For :</label>
-
             <div class="salary-toggle">
-              <input type="radio" name="salaryMode" id="calcSalary" value="Calculated Salary" checked />
+              <input type="radio" name="salaryMode" id="calcSalary" value="Calculated Salary" checked>
               <label for="calcSalary" class="btn red">Calculated Salary</label>
-
-              <input type="radio" name="salaryMode" id="paidSalary" value="Paid Salary" />
+              <input type="radio" name="salaryMode" id="paidSalary" value="Paid Salary">
               <label for="paidSalary" class="btn green">Paid Salary</label>
-
               <div class="slider"></div>
             </div>
           </div>
-
           <div class="ITaction-group">
             <button id="ITprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="ITexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
-
             <div id="ITprintMenu">
               <div class="print-option menu-option" id="itPrintOption" data-type="pdf-singleIT">
                 🧾 Employee IT Calculation PDF
@@ -3547,7 +3532,6 @@
               <div class="print-option menu-option" data-type="pdf-allIT">
                 🧾 All Employee IT Calculation PDF
               </div>
-
               <!-- EXCEL OPTIONS -->
               <div class="excel-option menu-option" id="itExcelOption" data-type="excel-singleIT">
                 ⬇️ Employee IT Calculation Excel
@@ -3558,7 +3542,7 @@
             </div>
           </div>
         </div>
-        <input type="hidden" id="paidMonthCountInput" />
+        <input type="hidden" id="paidMonthCountInput">
         <div id="ITInfoPanel" style="
               display: flex;
               flex-direction: row;
@@ -3589,7 +3573,6 @@
         </div>
         <div class="ITtableWrapper"></div>
       </div>
-
       <div class="SectionPage" id="PensionPage" style="display: none">
         <div class="header">
           <h2>Pension Benifits & Calculations</h2>
@@ -3598,21 +3581,21 @@
           <div class="Selection-bar">
             <div class="select-group">
               <label for="PensionPage_Station">Station :</label>
-              <select id="PensionPage_Station"></select>
+              <select id="PensionPage_Station" class="stationDropdown"></select>
             </div>
             <div class="select-group">
               <label for="PensionPage_Emp">Employee :</label>
-              <select id="PensionPage_Emp" style="min-width: 210px"></select>
+              <select id="PensionPage_Emp" class="employeeDropdown" style="min-width: 210px"></select>
             </div>
-
             <div class="Pensionaction-group">
               <button id="PensionprintBtn">
-                <i data-lucide="printer"></i><span>Print</span>
+                <i data-lucide="printer"></i>
+                <span>Print</span>
               </button>
               <button id="PensionexcelBtn">
-                <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Excel</span>
               </button>
-
               <div id="PensionprintMenu">
                 <div class="print-option menu-option" id="pensionPrintOption" data-type="pdf-singlePension">
                   🧾 Employee Pension Benifits PDF
@@ -3620,7 +3603,6 @@
                 <div class="print-option menu-option" data-type="pdf-allPension">
                   🧾 All Employee Pension Benifits PDF
                 </div>
-
                 <!-- EXCEL OPTIONS -->
                 <div class="excel-option menu-option" id="pensionExcelOption" data-type="excel-singlePension">
                   ⬇️ Employee Pension Benifits Excel
@@ -3659,16 +3641,15 @@
               <span id="PanelResidualPension">0</span>
             </div>
           </div>
-
           <table style="height: 40px">
             <colgroup>
-              <col style="width: 100px" />
-              <col style="width: 500px" />
-              <col style="width: 250px" />
-              <col style="width: 100px" />
-              <col style="width: 90px" />
-              <col style="width: 100px" />
-              <col style="width: 90px" />
+              <col style="width: 100px">
+              <col style="width: 500px">
+              <col style="width: 250px">
+              <col style="width: 100px">
+              <col style="width: 90px">
+              <col style="width: 100px">
+              <col style="width: 90px">
             </colgroup>
             <tr>
               <td style="padding-left: 10px; font-weight: bold">
@@ -3687,34 +3668,36 @@
                     </option>
                   </select>
                   <label style="margin-left: 10px; font-weight: bold">Last Working Date :</label>
-                  <input disabled type="date" id="VRS_Death_Date" style="width: 110px" />
+                  <input disabled type="date" id="VRS_Death_Date" style="width: 110px">
                 </div>
               </td>
               <td style="text-align: right; padding-left: 10px">
                 <div style="display: flex; align-items: center; gap: 6px">
-                  <input type="checkbox" id="CommutationOpted" checked style="height: 18px; width: 18px; margin: 0" />
-
-                  <label for="CommutationOpted" style="margin: 0; margin-left: 2px; font-weight: bold">Commutation
-                    Option :</label>
-
+                  <input type="checkbox" id="CommutationOpted" checked style="height: 18px; width: 18px; margin: 0">
+                  <label for="CommutationOpted" style="margin: 0; margin-left: 2px; font-weight: bold">
+                    Commutation
+                    Option :
+                  </label>
                   <select id="CommutationOption" style="width: 60px; min-width: 60px"></select>
                 </div>
               </td>
               <td style="padding-left: 10px; font-weight: bold">
                 EL Available :
               </td>
-              <td><input type="number" id="PensionEL" value="300" /></td>
+              <td>
+                <input type="number" id="PensionEL" value="300">
+              </td>
               <td style="padding-left: 10px; font-weight: bold">
                 HPL Available :
               </td>
-              <td><input type="number" id="PensionHPL" value="200" /></td>
+              <td>
+                <input type="number" id="PensionHPL" value="200">
+              </td>
             </tr>
           </table>
         </div>
-
         <div class="PensionTableWrapper" style="height: calc(100vh - 180px)"></div>
       </div>
-
       <div class="SectionPage" id="BudgetPage" style="display: none">
         <div class="header">
           <h2>Budgets</h2>
@@ -3722,7 +3705,7 @@
         <div class="Selection-bar">
           <div class="select-group">
             <label for="BudgetPage_Station">Station :</label>
-            <select id="BudgetPage_Station"></select>
+            <select id="BudgetPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group">
             <label for="BudgetPage_FY">FY :</label>
@@ -3736,20 +3719,22 @@
             <label>Budget under</label>
             <select id="BudgetUnderSelect" style="width: 400px"></select>
           </div>
-
           <div class="SBGaction-group">
             <button id="SBGeditBtn">
-              <i data-lucide="edit"></i><span>Edit</span>
+              <i data-lucide="edit"></i>
+              <span>Edit</span>
             </button>
             <button id="SBGaddBtn">
-              <i data-lucide="plus"></i><span>Add</span>
+              <i data-lucide="plus"></i>
+              <span>Add</span>
             </button>
-
             <button id="SBGprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="SBGexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
           </div>
         </div>
@@ -3764,23 +3749,23 @@
           <tr>
             <td>Sanctioned SBG</td>
             <td>
-              <input disabled id="SBGsanctioned" style="font-size: 12px; font-weight: bold; width: 150px" />
+              <input disabled id="SBGsanctioned" style="font-size: 12px; font-weight: bold; width: 150px">
             </td>
             <td>SBG Utilised</td>
             <td>
-              <input disabled id="SBGutilised" style="font-size: 12px; font-weight: bold; width: 150px" />
+              <input disabled id="SBGutilised" style="font-size: 12px; font-weight: bold; width: 150px">
             </td>
             <td>Available SBG</td>
             <td>
-              <input disabled id="SBGavailable" style="font-size: 12px; font-weight: bold; width: 150px" />
+              <input disabled id="SBGavailable" style="font-size: 12px; font-weight: bold; width: 150px">
             </td>
             <td>Calculated SBG</td>
             <td>
-              <input disabled id="SBGcalculated" style="font-size: 12px; font-weight: bold; width: 150px" />
+              <input disabled id="SBGcalculated" style="font-size: 12px; font-weight: bold; width: 150px">
             </td>
             <td>Revised SBG</td>
             <td>
-              <input disabled id="SBGrevised" style="font-size: 12px; font-weight: bold; width: 150px" />
+              <input disabled id="SBGrevised" style="font-size: 12px; font-weight: bold; width: 150px">
             </td>
           </tr>
         </table>
@@ -3789,7 +3774,6 @@
           <div class="BudgetTableWrapper" id="BudgetTableWrapper" style="max-height: calc(100vh - 140px)"></div>
         </div>
       </div>
-
       <div class="SectionPage" id="DGlogPage" style="display: none">
         <div class="header">
           <h2>DG Log Register</h2>
@@ -3797,7 +3781,7 @@
         <div class="Selection-bar">
           <div class="select-group">
             <label for="DGPage_Station">Station :</label>
-            <select id="DGPage_Station"></select>
+            <select id="DGPage_Station" class="stationDropdown"></select>
           </div>
           <div class="select-group">
             <label for="DGPage_FY">FY :</label>
@@ -3807,73 +3791,67 @@
             <label for="DGPage_Month">Month :</label>
             <select id="DGPage_Month"></select>
           </div>
-
           <div class="DGaction-group">
             <button id="DGeditBtn">
-              <i data-lucide="edit"></i><span>Edit</span>
+              <i data-lucide="edit"></i>
+              <span>Edit</span>
             </button>
             <button id="DGaddBtn">
-              <i data-lucide="plus"></i><span>Add</span>
+              <i data-lucide="plus"></i>
+              <span>Add</span>
             </button>
-
             <button id="DGprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="DGexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
           </div>
         </div>
         <div class="DGlogTableWrapper" id="DGlogTableWrapper" style="max-height: calc(100vh - 140px)"></div>
       </div>
-
       <div class="SectionPage" id="HSDlogPage" style="display: none">
         <div class="header">
           <h2>HSD Log Register</h2>
         </div>
       </div>
-
       <div class="SectionPage" id="ElectricityPage" style="display: none">
         <div class="header">
           <h2>Electricity Log Register</h2>
         </div>
       </div>
-
       <div class="SectionPage" id="DutyPage" style="display: none">
         <div class="header">
           <h2>Duty Chart Register</h2>
         </div>
         <div class="Selection-bar">
           <div class="select-group">
-            <label for="DutyChartPage_Station">Station :</label>
-            <select id="DutyChartPage_Station"></select>
-          </div>
-          <div class="select-group">
             <label for="DutyChartFYSelect">FY :</label>
             <select id="DutyChartFYSelect"></select>
           </div>
           <div class="select-group">
             <label for="DutyChartMonthSelect">Month :</label>
-            <select id="DutyChartMonthSelect"></select></select>
+            <select id="DutyChartMonthSelect"></select>
+            </select>
           </div>
           <div class="select-group">
             <label for="DutyChartWeekSelect">Week Ending :</label>
             <select id="DutyChartWeekSelect"></select>
           </div>
-
           <div class="Dutyaction-group">
-            <button id="DutyeditBtn">
-              <i data-lucide="edit"></i><span>Edit</span>
+            <button id="DutysaveBtn">
+              <i data-lucide="save"></i>
+              <span>Save</span>
             </button>
-            <button id="DutyaddBtn">
-              <i data-lucide="plus"></i><span>Add</span>
-            </button>
-
             <button id="DutyprintBtn">
-              <i data-lucide="printer"></i><span>Print</span>
+              <i data-lucide="printer"></i>
+              <span>Print</span>
             </button>
             <button id="DutyexcelBtn">
-              <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              <i data-lucide="file-spreadsheet"></i>
+              <span>Excel</span>
             </button>
           </div>
         </div>
@@ -3883,12 +3861,10 @@
           <div id="dutyChartTable"></div>
         </div>
       </div>
-
-      <div class="SectionPage" id="DatabasePage" style="display: none">
+      <div class="SectionPage" id="DatabasePage" style="display: none;">
         <div class="header">
           <h2>Database</h2>
         </div>
-
         <div class="button-bar">
           <button onclick="showSheet('EmpDB', this)" class="active">
             Employee Detail
@@ -3910,14 +3886,13 @@
           <button onclick="showSheet('CommFactDB', this)">
             Comm. Factor
           </button>
-          <button onclick="showSheet('ITDB', this)">IT </button>
-          <button onclick="showSheet('DGlog', this)">DG Log </button>
-          <button onclick="showSheet('HSDlog', this)">HSD Log </button>
-          <button onclick="showSheet('EBlog', this)">EB Log </button>
+          <button onclick="showSheet('ITDB', this)">IT</button>
+          <button onclick="showSheet('DGlog', this)">DG Log</button>
+          <button onclick="showSheet('HSDlog', this)">HSD Log</button>
+          <button onclick="showSheet('EBlog', this)">EB Log</button>
           <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
           <button onclick="showSheet('Login', this)">Login ID</button>
         </div>
-
         <div class="DB-Table-Wrapper">
           <table id="EmpDB"></table>
           <table id="EmpDBCalc"></table>
@@ -3936,63 +3911,69 @@
           <table id="Login" style="display: none"></table>
         </div>
       </div>
-
       <div class="dashboard-footer">
         <div class="db-wrapper">
-
           <div class="db-trigger">
             <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
             <span>Database</span>
             <!-- 🔥 BUBBLE COUNTER -->
             <span class="db-badge" id="dbBadge">0/0</span>
           </div>
-
           <!-- 🔥 PANEL -->
           <div class="dashboard-footer-database">
-            <div><span class="material-symbols-outlined" id="idDatabase">data_alert</span>
-              <h3>User ID & Passwords</h3>
-            </div>
-            <div><span class="material-symbols-outlined" id="empDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="empDatabase">database_off</span>
               <h3>Employee Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="pbDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="pbDatabase">database_off</span>
               <h3>PayBill Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
               <h3>Budgets Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
               <h3>SBG Expenditure Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="dgDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="dgDatabase">database_off</span>
               <h3>DG Log Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
               <h3>HSD Log Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="ebDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="ebDatabase">database_off</span>
               <h3>EB Log Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
+            <div>
+              <span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
               <h3>Duty Chart Database</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="itDatabase">data_alert</span>
+            <div>
+              <span class="material-symbols-outlined" id="itDatabase">data_alert</span>
               <h3>Income Tax Reference</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
+            <div>
+              <span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
               <h3>7th Pay Matrix Reference</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
+            <div>
+              <span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
               <h3>Staff Quarters Reference</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
+            <div>
+              <span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
               <h3>TA/HRA City Reference</h3>
             </div>
-            <div><span class="material-symbols-outlined" id="commDatabase">data_alert</span>
+            <div>
+              <span class="material-symbols-outlined" id="commDatabase">data_alert</span>
               <h3>Commutation Factor Reference</h3>
             </div>
           </div>
-
         </div>
         <div style="display: flex;flex-direction: row;gap: 10px;">
           <span class="material-symbols-outlined" style="color: blue;">account_circle</span>
@@ -4011,7 +3992,6 @@
       </div>
     </div>
   </div>
-
   <script>
     /* =========================
   DOM SHORTCUTS
@@ -4070,23 +4050,28 @@
 
       const stationIdx = headers.indexOf("Station");
       const userIdx = headers.indexOf("Employee Name");
+      const initialIdx = headers.indexOf("Initials");
       const passIdx = headers.indexOf("Password");
-
+      const deptIdx = headers.indexOf("Section");
       const map = {};
 
       rows.forEach(r => {
 
         const station = r[stationIdx];
         const user = r[userIdx];
+        const initial = r[initialIdx];
         const pass = r[passIdx];
+        const dept = r[deptIdx];
 
-        if (!station || !user || !pass) return;
+        if (!station || !user || !pass || !dept || !initial) return;
 
         map[user] = {
           station,
           user,
+          initial: (initial || "").trim().toUpperCase(),
           name: user,
-          password: String(pass).trim()
+          password: String(pass).trim(),
+          department: dept
         };
       });
 
@@ -4100,6 +4085,43 @@
           .map(u => u.station)
           .filter(Boolean)
       )];
+    }
+
+    function applyStation_UserControl(loginStation, user, userRole) {
+
+      const role = userRole?.trim().toUpperCase();
+
+      const isRestrictedUser = !["MASTER", "ADMIN", "ENGG"].includes(role);
+
+      document.querySelectorAll(".stationDropdown").forEach(stationEl => {
+        stationEl.value = loginStation;
+        stationEl.dispatchEvent(new Event("change"));
+        stationEl.disabled = isRestrictedUser;
+      });
+
+      document.querySelectorAll(".employeeDropdown").forEach(empEl => {
+
+        if ([...empEl.options].some(opt => opt.value === user)) {
+          empEl.value = user;
+          empEl.dispatchEvent(new Event("change"));
+        }
+
+        const observer = new MutationObserver(() => {
+          const role = userRole?.trim().toUpperCase();
+
+          document.querySelectorAll(".employeeDropdown").forEach(empEl => {
+            if (empEl.disabled !== isRestrictedUser) {
+              empEl.disabled = isRestrictedUser;
+            }
+          });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // 🔍 DEBUG
+        console.log("Employee Disabled:", isRestrictedUser);
+      });
+
     }
 
 
@@ -4184,13 +4206,7 @@
       // 🔥 set employee
       const empInput = id("SalSlipPage_Emp");
       if (empInput) empInput.value = record.name;
-
-      // 🔥 access + locking
-      applyUserAccess(user);
-
-      setTimeout(() => {
-        lockRequirementTableForUser(user);
-      }, 0);
+      
     });
 
 
@@ -4255,6 +4271,14 @@
       // ✅ SUCCESS
       window.currentUser = user;
       window.currentStation = station;
+      window.currentInitial = record.initial;
+
+
+      applyStation_UserControl(
+        window.currentStation,
+        window.currentUser,   // 👈 actual employee
+        window.currentUser    // 👈 role OR user (same in your case)
+      );
 
       id("loginPage").style.display = "none";
       id("mainPage").style.display = "flex";
@@ -4271,9 +4295,6 @@
 
 
     const ACCESS_RULES = {
-
-      APR: ["ALL"],
-
       ADMIN: [
         "DashBoard",
         "EmpPage",
@@ -4285,7 +4306,6 @@
       ],
 
       ENGG: [
-        "DashBoard",
         "EmpPage",
         "SalarySlipPage",
         "DGlogPage",
@@ -4297,65 +4317,106 @@
       MASTER: ["ALL"], // 🔥 full access
 
       DEFAULT: [
-        //"SalarySlipPage",
-        //"EmpPage",
+        "SalarySlipPage",
+        "EmpPage",
         "DutyPage"
       ]
     };
 
     const ROLE_USERS = [
-      { user: "ADMIN", password: "admin123" },
-      { user: "ENGG", password: "engg123" },
-      { user: "MASTER", password: "master123" }
+      { user: "MASTER", password: "master@11051993" },
+      { user: "ENGG", password: "engg@225344" },
+      { user: "ADMIN", password: "admin@221902" }
     ];
 
 
 
-    function applyUserAccess(role) {
+    function applyUserAccess(user) {
 
       const buttons = document.querySelectorAll(".menu-btn");
+
+      const role = user?.trim().toUpperCase();
       const access = ACCESS_RULES[role] || ACCESS_RULES.DEFAULT;
 
+      const userMap = getUserMap();
+      const record = userMap[user];
+
+      const dept = (record?.department || "").trim().toUpperCase();
+
+      const isRestrictedUser = !["MASTER", "ADMIN", "ENGG"].includes(role);
+
+      // =========================
+      // 🔥 HANDLE BUTTON VISIBILITY
+      // =========================
       buttons.forEach(btn => {
 
-        const page = btn.dataset.page;
+        const page = btn.getAttribute("data-page");
 
-        if (access.includes("ALL")) {
-          btn.style.display = "flex";
-          return;
+        let isVisible =
+          access.includes("ALL") || access.includes(page);
+
+        // 🔥 DUTY PAGE CONDITION
+        if (page === "DutyPage") {
+
+          if (role === "MASTER" || role === "ENGG") {
+            isVisible = true;
+          }
+          else if (role === "ADMIN") {
+            isVisible = false; // ❌ hide for admin
+          }
+          else {
+            isVisible = dept.includes("ENGINEERING");
+          }
         }
 
-        btn.style.display = access.includes(page) ? "flex" : "none";
+        // 🔥 DASHBOARD BUTTON HIDE FOR NORMAL USERS
+        if (isRestrictedUser && page === "DashBoard") {
+          isVisible = false;
+        }
+
+        btn.style.display = isVisible ? "flex" : "none";
       });
+
+      // =========================
+      // 🔥 PAGE VISIBILITY (ONLY ONCE)
+      // =========================
+      const dashboard = id("DashBoard");
+      const empPage = id("EmpPage");
+
+      if (!["MASTER", "ADMIN"].includes(role)) {
+
+        if (dashboard) dashboard.style.display = "none";
+        if (empPage) empPage.style.display = "block";
+
+        // 🔥 force active button to Salary Slip
+        const buttonsArr = [...buttons];
+
+        buttonsArr.forEach(b => removeClass(b, "active"));
+
+        const empBtn = buttonsArr.find(
+          b => b.dataset.page === "EmpPage"
+        );
+
+        if (empBtn) addClass(empBtn, "active");
+
+      } else {
+
+        if (dashboard) dashboard.style.display = "block";
+      }
+
+      //console.log("User:", user, "| Dept:", dept, "| Role:", role);
     }
 
 
-    function lockRequirementTableForUser(user) {
-
+    function lockRequirementTableForUser(user, isLocked = false) {
       const reqContainer = id("dutyRequirementTable");
-      const editContainer = id("editableRequirementContainer");
-      const dutyTable = id("dutyChartTable");
+
+      const role = user?.trim().toUpperCase();
+      const currentInitial = (window.currentInitial || user).trim().toUpperCase();
 
       // =========================
-      // 🔥 ROLE BASED VISIBILITY
+      // 🔥 NORMAL USERS (LOCK OTHER COLUMNS)
       // =========================
-      if (user === "ENGG") {
-
-        if (dutyTable) dutyTable.style.display = "block";
-        if (editContainer) editContainer.style.display = "block";
-        if (reqContainer) reqContainer.style.display = "none";
-      }
-
-      // =========================
-      // 🔥 NORMAL USERS
-      // =========================
-      if (dutyTable) dutyTable.style.display = "none";
-      if (editContainer) editContainer.style.display = "none";
-      if (reqContainer) {
-        reqContainer.style.display = "block";
-        reqContainer.style.width = "100%";
-      }
-
       if (!reqContainer) return;
 
       const table = reqContainer.querySelector("table");
@@ -4365,24 +4426,27 @@
 
       selects.forEach(select => {
 
-        const emp = select.dataset.emp;
-        if (!emp) return;
+        const emp = (select.dataset.emp || "").trim().toUpperCase();
+        const isCurrentUser = emp === currentInitial;
 
         const td = select.closest("td");
+
+        // 🔥 In requirement table → lieu is in next cell
         const lieu = td?.nextElementSibling?.querySelector(".lieu-input");
 
-        const isCurrentUser = emp === user;
+        // 🔒 Enable only current user's column
+        // 🔥 FINAL PRIORITY: LOCK FIRST
+        if (isLocked) {
+          select.disabled = true;
+        } else {
+          select.disabled = !isCurrentUser;
+        }
 
-        // =========================
-        // 🔥 LOCK SELECT
-        // =========================
-        select.disabled = !isCurrentUser;
-
-        // =========================
-        // 🔥 LIEU CONDITION (FINAL FIX)
-        // =========================
+        // 🔥 LIEU ENABLE ONLY FOR C/O
         if (lieu) {
-          if (isCurrentUser && select.value === "C/O") {
+          if (isLocked) {
+            lieu.disabled = true;
+          } else if (isCurrentUser && select.value === "C/O") {
             lieu.disabled = false;
           } else {
             lieu.disabled = true;
@@ -4390,15 +4454,9 @@
           }
         }
 
-        // =========================
-        // 🔥 UI STYLE                            
-        // =========================
         td.classList.toggle("disabled-cell", !isCurrentUser);
       });
-
-      console.log("lockRequirementTableForUser Applied for:", user);
     }
-
 
 
     /* ===========================================================================================
@@ -4414,14 +4472,10 @@
 
       // 🚀 Load data once
       await loadAllData();
-
       initAfterData();
-
       initButtons();
       initBindings();
-
       initDefaultView();
-
       initPostSetup();
     });
 
@@ -4485,33 +4539,6 @@
         {
           defaultText: "Edit",
           activeText: "Update",
-          defaultIcon: "edit",
-          activeIcon: "upload",
-          className: "upload-mode",
-        },
-        "edit"
-      );
-
-      // =========================
-      // 🔥 DUTY BUTTONS (NEW)
-      // =========================
-      setupDutyToggleButton(
-        "DutyaddBtn",
-        {
-          defaultText: "Add",
-          activeText: "Upload",
-          defaultIcon: "plus",
-          activeIcon: "upload",
-          className: "upload-mode",
-        },
-        "add"
-      );
-
-      setupDutyToggleButton(
-        "DutyeditBtn",
-        {
-          defaultText: "Edit",
-          activeText: "Upload",
           defaultIcon: "edit",
           activeIcon: "upload",
           className: "upload-mode",
@@ -4698,7 +4725,6 @@
     }
 
     const apiStatusMap = {
-      id: ["idDatabase", "data"],
       emp: ["empDatabase", "db"],
       pb: ["pbDatabase", "db"],
       sbg: ["sbgDatabase", "db"],
@@ -4760,7 +4786,6 @@
         }
 
         // 🔥 STORE DATA (same as your code)
-        if (api === "id") idData = result;
         if (api === "emp") empData = result;
         if (api === "pb") pbData = result;
         if (api === "cpc") cpcData = result;
@@ -4806,7 +4831,6 @@
 
     async function loadAllData() {
       // 🔴 STEP 1: Load REQUIRED data first
-      await loadTable("id", "Login");
       await loadTable("emp", "EmpDB", false);
       populateloginStationDropdown();
       await loadTable("duty", "DutyChart");
@@ -4839,9 +4863,6 @@
     }
 
     async function loadData() {
-      let idRes = await fetch(
-        "https://office-management-f425.onrender.com/id",
-      );
       let empRes = await fetch(
         "https://office-management-f425.onrender.com/emp",
       );
@@ -4882,7 +4903,6 @@
         "https://office-management-f425.onrender.com/eb",
       );
 
-      idData = await idRes.json();
       empData = await empRes.json();
       sbgData = await sbgRes.json();
       sbgExpData = await sbgExpRes.json();
@@ -7178,6 +7198,7 @@
       const pages = qsa(".SectionPage");
 
       buttons.forEach((btn) => {
+        // inside initMenu() -> on(btn, "click", ...)
         on(btn, "click", () => {
           const pageId = btn.dataset.page;
 
@@ -7191,7 +7212,25 @@
           buttons.forEach((b) => removeClass(b, "active"));
           addClass(btn, "active");
 
-          // 🔥 ADD THIS BLOCK HERE
+          // 🔥 HANDLE DUTY PAGE VISIBILITY HERE
+          if (pageId === "DutyPage") {
+            const role = (window.currentUser || "").trim().toUpperCase();
+
+            const reqContainer = id("dutyRequirementTable");
+            const editContainer = id("editableRequirementContainer");
+            const dutyTable = id("dutyChartTable");
+
+            const isEditRole = ["ENGG", "MASTER"].includes(role);
+
+            if (reqContainer) {
+              reqContainer.style.display = isEditRole ? "none" : "block";
+              reqContainer.style.width = isEditRole ? "50%" : "100%";
+            }
+            if (editContainer) editContainer.style.display = isEditRole ? "block" : "none";
+            if (dutyTable) dutyTable.style.display = isEditRole ? "block" : "none";
+          }
+
+          // existing DatabasePage block...
           if (pageId === "DatabasePage") {
             setTimeout(() => {
               initDatabaseDefault();
@@ -22633,7 +22672,7 @@
       html += `
         <tr>
           <td colspan="5" style="padding:0">
-            <textarea style="background-color: #d3fc58;height:80px;font-style:italic;text-align:left !important;">
+            <textarea style="background-color: #d3fc58;height:80px;font-style:italic;text-align:left !important;width:100%;">
               No Change in duty chart allowed without prior permission of undersigned
             </textarea>
           </td>
@@ -22659,6 +22698,16 @@
       const [dd, mm, yyyy] = parts;
 
       return `${dd}/${mm}/${yyyy}`; // MM/DD/YYYY
+    }
+
+
+    function isPastWeek(weekStart) {
+      const currentWeekEnd = getCurrentWeekEnd();
+
+      const currentWeekStart = new Date(currentWeekEnd);
+      currentWeekStart.setDate(currentWeekEnd.getDate() - 6);
+
+      return weekStart < currentWeekStart;
     }
 
 
@@ -22740,77 +22789,95 @@
       // =========================
       // 🔥 RENDER TABLE
       // =========================
+      const isLocked = isPastWeek(weekStart);
+      console.log("Requirement Table Locked:", isLocked);
       let html = `
-  <table border="1">
+      <table border="1">
 
-    <colgroup>
-      <col style="width:100px">
-      ${employees.map(() => `
-        <col style="width:100px">
-        <col style="width:150px">
-      `).join("")}
-    </colgroup>
+        <colgroup>
+          <col style="width:140px">
+          ${Object.values(weekMap).map(() => `
+            <col style="width:120px">
+            <col style="width:150px">
+          `).join("")}
+        </colgroup>
 
-    <thead>
-      <tr>
-        <th colspan="${1 + (employees.length * 2)}" style="text-align:center;">
-          EMPLOYEES REQUIREMENT REGISTER
-        </th>
-      </tr>
-      <tr>
-        <th>Date</th>
-        ${employees.map(emp => `
-          <th>${emp.name}</th>
-          <th>${emp.name} in lieu of</th>
-        `).join("")}
-      </tr>
-    </thead>
+        <thead>
+          <tr>
+            <th colspan="${1 + (Object.keys(weekMap).length * 2)}" style="text-align:center;">
+              EMPLOYEES REQUIREMENT REGISTER
+            </th>
+          </tr>
 
-    <tbody>
-  `;
+          <tr>
+            <th>Employee</th>
+
+            ${Object.values(weekMap).map(d => `
+              <th colspan="2">
+                ${formatDutyChartDate(d.date)}
+              </th>
+            `).join("")}
+          </tr>
+
+          <tr>
+            <th></th>
+
+            ${Object.values(weekMap).map(() => `
+              <th>Req</th>
+              <th>Lieu</th>
+            `).join("")}
+          </tr>
+        </thead>
+
+        <tbody>
+      `;
 
       let i = 0;
 
-      Object.values(weekMap).forEach(d => {
-        html += `
-      <tr>
-        <td>${days[i]} (${formatDutyChartDate(d.date)})</td>
+      employees.forEach(emp => {
 
-        ${employees.map(emp => `
-          <td style="padding:0">
-            <select class="req-select" required
-                    data-emp="${emp.name}" 
-                    data-date="${formatDutyChartDate(d.date)}">
+        html += `<tr>
+          <td><b>${emp.name}</b></td>`;
 
-              ${DUTY_OPTIONS.map(opt => `
-                <option value="${opt}" ${opt === d.values[emp.name].req ? "selected" : ""}>
-                  ${opt}
-                </option>
-              `).join("")}
+        Object.values(weekMap).forEach(d => {
 
-            </select>
-          </td>
+          const val = d.values[emp.name];
 
-          <td style="padding:0">
-            <input type="date"
-                  class="lieu-input"
-                  data-emp="${emp.name}"
-                  data-date="${formatDutyChartDate(d.date)}"
-                  value="${convertToInputDate(d.values[emp.name].lieu)}"
-                  ${d.values[emp.name].req === "C/O" ? "" : "disabled"}>
-          </td>
-        `).join("")}
-      </tr>
-    `;
+          html += `
+            <td style="padding:0">
+              <select class="req-select"
+                data-emp="${emp.name}"
+                data-date="${formatDutyChartDate(d.date)}"
+                ${isLocked ? "disabled" : ""}>
 
-        i++;
+                ${DUTY_OPTIONS.map(opt => `
+                  <option value="${opt}" ${opt === val.req ? "selected" : ""}>
+                    ${opt}
+                  </option>
+                `).join("")}
+
+              </select>
+            </td>
+
+            <td style="padding:0">
+              <input type="date"
+                class="lieu-input"
+                data-emp="${emp.name}"
+                data-date="${formatDutyChartDate(d.date)}"
+                value="${convertToInputDate(val.lieu)}"
+                ${isLocked || val.req !== "C/O" ? "disabled" : ""}>
+            </td>
+          `;
+        });
+
+        html += `</tr>`;
       });
 
       html += "</tbody></table>";
 
       setTimeout(() => {
         if (window.currentUser) {
-          lockRequirementTableForUser(window.currentUser);
+          lockRequirementTableForUser(window.currentUser, isLocked);
         }
       }, 0);
 
@@ -22826,16 +22893,16 @@
     function renderEditableRequirementTable(data, weekStart, statusRow) {
 
       const container = id("editableRequirementContainer");
-      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
       const headers = data.length
         ? Object.keys(data[0])
         : Object.keys(statusRow || {});
 
+      // =========================
       // 🔥 FILTER EMPLOYEES
-
+      // =========================
       const employees = headers
-        .filter(h => h.endsWith("Requirement")) // stricter match
+        .filter(h => h.endsWith("Requirement"))
         .map(h => {
           const name = h.replace(" Requirement", "").trim();
 
@@ -22848,9 +22915,11 @@
             lieuKey: `${name} in lieu of`
           };
         })
-        .filter(Boolean); // remove nulls
+        .filter(Boolean);
 
+      // =========================
       // 🔥 BUILD WEEK MAP
+      // =========================
       const weekMap = {};
 
       for (let i = 0; i < 7; i++) {
@@ -22868,11 +22937,18 @@
         };
 
         employees.forEach(emp => {
-          weekMap[key].values[emp.name] = { req: "", lieu: "" };
+          weekMap[key].values[emp.name] = {
+            req: "",
+            lieu: "",
+            selectVals: [],
+            auto: false
+          };
         });
       }
 
+      // =========================
       // 🔥 FILL DATA
+      // =========================
       data.forEach(row => {
 
         const dObj = parseDDMMYYYY(row.Date);
@@ -22888,135 +22964,133 @@
           const dutyVal = row[dutyKey] || "";
           const reqVal = row[emp.reqKey] || "";
 
-          // =========================
-          // 🔥 SPAN → FROM REQUIREMENT ONLY
-          // =========================
           weekMap[key].values[emp.name].req = reqVal || "";
 
-          // =========================
-          // 🔥 SELECT → FROM DUTY
-          // =========================
           let selectedVals = [];
-
           let shouldAutoUpdate = false;
 
-          // 🔥 DUTY
           if (dutyVal && dutyVal.trim() !== "") {
-
             const cleanDuty = dutyVal.replace(/\(.*?\)/g, "");
             selectedVals = cleanDuty.split(",").map(v => v.trim()).sort();
-
           }
-
-          // 🔥 FALLBACK → REQUIREMENT
           else if (reqVal && reqVal.trim() !== "") {
-
             selectedVals = reqVal.split(",").map(v => v.trim()).sort();
-
-            shouldAutoUpdate = true; // 🔥 IMPORTANT
-          }
-
-          // 🔥 EMPTY
-          else {
-            selectedVals = [];
+            shouldAutoUpdate = true;
           }
 
           weekMap[key].values[emp.name].selectVals = selectedVals;
           weekMap[key].values[emp.name].auto = shouldAutoUpdate;
 
-          if (dutyVal) {
-            const cleanDuty = dutyVal.replace(/\(.*?\)/g, ""); // remove dates
-            const arr = cleanDuty.split(",").map(v => v.trim());
-
-            if (arr.includes("C/O")) selectedVal = "C/O";
-            else if (arr.includes("MOR")) selectedVal = "MOR";
-            else if (arr.includes("GEN")) selectedVal = "GEN";
-            else if (arr.includes("EVE")) selectedVal = "EVE";
-            else selectedVal = arr[0] || "";
-          }
-
           weekMap[key].values[emp.name].lieu = row[emp.lieuKey] || "";
         });
-
       });
 
       // =========================
-      // 🔥 RENDER EDITABLE TABLE
+      // 🔥 RENDER TABLE
       // =========================
+      const isLocked = isPastWeek(weekStart);
+      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
       let html = `
-      <table border="1">
-        <colgroup>
-      <col style="width:100px">
-        ${employees.map(() => `
-          <col style="width:100px">
-        `).join("")}
-      </colgroup>
-        <thead>
-          <tr>
-            <th colspan="${1 + (employees.length * 2)}" style="text-align:center;">
-              Duty Chart Preparation Table
-            </th>
-          </tr>
-          <tr>
-            <th>Date</th>
-            ${employees.map(emp => `
-              <th>${emp.name}</th>
+        <table border="1">
+          <colgroup>
+            <col style="width:120px">
+            ${Object.values(weekMap).map(() => `
+              <col style="width:120px">
             `).join("")}
-          </tr>
-        </thead>
-        <tbody>
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th colspan="${1 + Object.keys(weekMap).length}">
+                Duty Chart Preparation Table
+              </th>
+            </tr>
+
+            <tr>
+              <th>Employee</th>
+              ${Object.values(weekMap).map((d, i) => `
+                <th>
+                  ${days[i]}<br>
+                  ${formatDutyChartDate(d.date)}
+                </th>
+              `).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
       `;
 
-      let i = 0;
+      // =========================
+      // 🔥 ROWS = EMPLOYEES
+      // =========================
+      employees.forEach(emp => {
 
-      Object.values(weekMap).forEach(d => {
         html += `<tr>
-          <td>${days[i]} (${formatDutyChartDate(d.date)})</td>`;
+          <td><b>${emp.name}</b></td>`;
 
-        employees.forEach(emp => {
+        Object.values(weekMap).forEach(d => {
+
           const val = d.values[emp.name];
 
-          const displayText = val.req || "";
           const selectedCombined = (val.selectVals || [])
             .map(v => v.trim())
             .sort()
             .join(",");
 
           html += `
-            <td>
+              <td>
 
-              <!-- 🔥 SPAN → REQUIREMENT ONLY -->
-              <span class="req-text" data-emp="${emp.name}" data-date="${formatDutyChartDate(d.date)}">
-                ${displayText === "C/O" && val.lieu
-              //? `C/O(${formatDutyChartDate(parseDDMMYYYY(val.lieu))})`
-              ? `C/O`
-              : displayText
+              <!-- 🔥 REQUIREMENT TEXT -->
+              <span class="req-text"
+                data-emp="${emp.name}"
+                data-date="${formatDutyChartDate(d.date)}">
+
+                ${val.req === "C/O" && val.lieu
+              ? `C/O(${formatDutyChartDate(parseDDMMYYYY(val.lieu))})`
+              : (val.req || "")
             }
+
               </span>
 
-              <!-- 🔥 SELECT → DUTY -->
-              <select class="req-select" required>
+              <!-- 🔥 SELECT (DUTY) -->
+              <select class="req-select"
+                data-emp="${emp.name}"
+                data-date="${formatDutyChartDate(d.date)}">
+
                 ${DUTY_OPTIONS.map(o => {
-              const normalizedOption = o.split(",").map(v => v.trim()).sort().join(",");
+              const norm = o.split(",").map(v => v.trim()).sort().join(",");
               return `
-                    <option value="${o}" ${normalizedOption === selectedCombined ? "selected" : ""}>
+                    <option value="${o}" ${norm === selectedCombined ? "selected" : ""}>
                       ${o}
                     </option>
                   `;
             }).join("")}
+
               </select>
+
+              <!-- 🔥 LIEU INPUT (ADDED BACK) -->
+             <input type="date"
+                class="lieu-input"
+                data-emp="${emp.name}"
+                data-date="${formatDutyChartDate(d.date)}"
+                value="${convertToInputDate(val.lieu)}"
+                ${val.req !== "C/O" ? "disabled" : ""}>
+
             </td>
           `;
         });
 
         html += "</tr>";
-        i++;
       });
 
       html += "</tbody></table>";
 
       container.innerHTML = html;
+
+      // =========================
+      // 🔥 AUTO UPDATE DUTY CHART
+      // =========================
       setTimeout(() => {
 
         Object.entries(weekMap).forEach(([key, day]) => {
@@ -23025,21 +23099,18 @@
 
           Object.entries(day.values).forEach(([emp, val]) => {
 
-            if (!val.auto) return; // 🔥 only fallback cases
+            if (!val.auto) return;
 
             const values = val.selectVals || [];
-
             if (!values.length) return;
 
             updateDutyChart(emp, dateStr, values);
-
           });
-
         });
 
       }, 0);
-      window.currentEmployees = employees;
 
+      window.currentEmployees = employees;
     }
 
     // =========================
@@ -23091,62 +23162,73 @@
 
       if (
         !select.classList.contains("req-select") ||
-        !select.closest("#dutyRequirementTable")
+        !select.closest("#editableRequirementContainer")
       ) return;
 
-      const row = select.closest("tr");
-      const val = select.value;
+      // =========================
+      // 🔥 GET DATA
+      // =========================
+      const emp = (select.dataset.emp || "").trim().toUpperCase();
+      const dateStr = select.dataset.date;
 
-      // 🔥 find correct lieu input for SAME employee cell
+      if (!emp || !dateStr) return;
+
+      const currentInitial = (window.currentInitial || "").toUpperCase();
+
+      // =========================
+      // 🔥 LIEU ENABLE/DISABLE
+      // =========================
       const td = select.closest("td");
-      const lieuTd = td.nextElementSibling;
-      const lieuInput = lieuTd?.querySelector(".lieu-input");
+      const lieuInput = td?.querySelector(".lieu-input");
 
-      if (!lieuInput) return;
+      if (lieuInput) {
 
-      if (val === "C/O") {
-        lieuInput.disabled = false;
-      } else {
-        lieuInput.disabled = true;
-        lieuInput.value = "";
+        // 🔒 restrict to current user only
+        if (emp === currentInitial && select.value === "C/O") {
+          lieuInput.disabled = false;
+        } else {
+          lieuInput.disabled = true;
+          lieuInput.value = "";
+        }
       }
+
+      // =========================
+      // 🔥 UPDATE DUTY CHART
+      // =========================
+      const values = select.value
+        ? select.value.split(",").map(v => v.trim())
+        : [];
+
+      updateDutyChart(emp, dateStr, values);
+
     });
-
-
 
 
     document.addEventListener("change", function (e) {
 
       const select = e.target;
 
+      // 🔥 ONLY REQUIREMENT TABLE (NOT EDIT TABLE)
       if (
         !select.classList.contains("req-select") ||
-        !select.closest("#editableRequirementContainer")
+        !select.closest("#dutyRequirementTable")
       ) return;
 
-      const row = select.closest("tr");
       const td = select.closest("td");
 
-      const empIndex = [...row.children].indexOf(td) - 1;
-      const emp = window.currentEmployees?.[empIndex]?.name;
-      if (!emp) return;
+      // 🔥 LIEU INPUT IS IN NEXT CELL (NON-TRANSPOSE TABLE)
+      const lieuInput = td?.nextElementSibling?.querySelector(".lieu-input");
 
-      // 🔥 GET DATE FROM SAME CELL
-      const dateText = row.querySelector("td")?.innerText;
-      if (!dateText) return;
+      if (!lieuInput) return;
 
-      const match = dateText.match(/\d{2}\/\d{2}\/\d{4}/);
-      if (!match) return;
+      if (select.value === "C/O") {
+        lieuInput.disabled = false;
+      } else {
+        lieuInput.disabled = true;
+        lieuInput.value = "";
+      }
 
-      const dateStr = match[0];
-
-      const values = select.value
-        ? select.value.split(",").map(v => v.trim())
-        : [];
-
-      updateDutyChart(emp, dateStr, values);
     });
-
 
 
     function getEmployeeOrderMap() {
@@ -23165,13 +23247,10 @@
 
       const rows = table.querySelectorAll("tbody tr");
 
-      // 🔥 employee order (header order)
       const orderMap = getEmployeeOrderMap();
 
-      // 🔥 remove HTML before sorting
       const clean = (x) => x.replace(/<[^>]+>/g, "");
 
-      // 🔥 sorter
       const sortList = (list) => {
         return list.sort((a, b) => {
           const nameA = clean(a).split("(")[0];
@@ -23199,7 +23278,7 @@
         };
 
         // =========================
-        // 🔥 GET REQUIREMENT VALUE
+        // 🔥 GET REQUIREMENT VALUE (FIXED)
         // =========================
         const reqCell = document.querySelector(
           `.req-text[data-emp="${emp}"][data-date="${dateStr}"]`
@@ -23207,8 +23286,12 @@
 
         let reqVal = reqCell ? reqCell.textContent.trim() : "";
 
-        // normalize requirement
-        reqVal = reqVal.replace(/\(.*?\)/g, "").split(",").map(v => v.trim()).sort().join(",");
+        reqVal = reqVal
+          .replace(/\(.*?\)/g, "")
+          .split(",")
+          .map(v => v.trim())
+          .sort()
+          .join(",");
 
         const selectedVal = (values || []).slice().sort().join(",");
 
@@ -23218,6 +23301,7 @@
         // 🔥 REMOVE OLD VALUES
         // =========================
         Object.values(map).forEach(idx => {
+
           const cell = cells[idx];
           if (!cell) return;
 
@@ -23240,12 +23324,16 @@
 
           // 🔹 LEAVES
           if (["EL", "CL", "RH", "ML", "H/D", "SCL"].includes(v)) {
+
             cell = cells[6];
-            newVal = isMatch ? `<b>${emp}(${v})</b>` : `${emp}(${v})`;
+            newVal = isMatch
+              ? `<b>${emp}(${v})</b>`
+              : `${emp}(${v})`;
           }
 
           // 🔹 C/O
           else if (v === "C/O") {
+
             cell = cells[5];
 
             const lieuInput = document.querySelector(
@@ -23259,11 +23347,14 @@
               lieuText = `${emp}(${formatDutyChartDate(d)})`;
             }
 
-            newVal = isMatch ? `<b><u>${lieuText}</u></b>` : lieuText;
+            newVal = isMatch
+              ? `<b>${lieuText}</b>`
+              : lieuText;
           }
 
           // 🔹 NORMAL DUTY
           else {
+
             const idx = map[v];
             if (!idx) return;
 
@@ -23285,68 +23376,257 @@
       });
     }
 
+    
+async function saveRequirementData(modeType = "add") {
 
+  let reqData = [];
+  let dutyData = [];
 
+  // =========================
+  // 🔥 GET ACTIVE TABLE
+  // =========================
+  const container =
+    id("editableRequirementContainer")?.style.display === "block"
+      ? id("editableRequirementContainer")
+      : id("dutyRequirementTable");
 
-    function setupDutyToggleButton(btnId, config, modeType) {
+  const table = container?.querySelector("table");
+  if (!table) return false;
 
-      const btn = id(btnId);
-      if (!btn) return;
+  const rows = table.querySelectorAll("tbody tr");
 
-      let isActive = false;
+  // =========================
+  // 🔥 COLLECT REQUIREMENT DATA
+  // =========================
+  rows.forEach(row => {
 
-      btn.onclick = () => {
+    const empCell = row.querySelector("td");
+    if (!empCell) return;
 
-        const reqTable = id("dutyRequirementTable");
-        const editTable = id("editableRequirementContainer");
+    const emp = empCell.innerText.trim();
 
-        const state = window.currentRequirementState;
-        if (!state) return;
+    const selects = row.querySelectorAll(".req-select");
 
-        if (!isActive) {
-          // =========================
-          // 🔥 ENTER MODE
-          // =========================
-          isActive = true;
+    selects.forEach(select => {
 
-          reqTable.style.display = "none";
-          editTable.style.display = "block";
+      const dateStr = select.dataset.date;
+      const value = select.value;
 
-          btn.classList.add(config.className);
-          btn.querySelector("span").textContent = config.activeText;
-          updateIcon(btn, config.activeIcon);
+      if (!dateStr || !value) return;
 
-          if (modeType === "add") {
+      const td = select.closest("td");
 
-          }
+      const lieuInput =
+        td?.querySelector(".lieu-input") ||
+        td?.nextElementSibling?.querySelector(".lieu-input");
 
-          if (modeType === "edit") {
+      const lieu = lieuInput?.value || "";
 
-          }
+      reqData.push({
+        Date: dateStr,
+        Employee: emp,
+        Requirement: value,
+        Lieu: lieu
+      });
 
-        } else {
-          // =========================
-          // 🔥 EXIT MODE (SAVE)
-          // =========================
+    });
 
-          // 🔥 push all edits → duty chart
+  });
 
-          isActive = false;
+  // =========================
+  // ❌ VALIDATION
+  // =========================
+  if (!reqData.length) {
+    alert("❌ No valid data");
+    return false;
+  }
 
-          reqTable.style.display = "block";
-          editTable.style.display = "none";
+  const invalid = reqData.some(r =>
+    r.Requirement === "C/O" && !r.Lieu
+  );
 
-          btn.classList.remove(config.className);
-          btn.querySelector("span").textContent = config.defaultText;
-          updateIcon(btn, config.defaultIcon);
+  if (invalid) {
+    alert("❌ Please select Lieu date for C/O entries");
+    return false;
+  }
+
+  // =========================
+  // 🔥 TRANSFORM REQUIREMENT
+  // =========================
+  const reqSheetData = transformRequirementToSheet(reqData);
+
+  // =========================
+  // 🔥 COLLECT DUTY CHART DATA
+  // =========================
+  const dutyTable = id("dutyChartTable");
+  const dutyRows = dutyTable?.querySelectorAll("tbody tr");
+
+  dutyRows?.forEach(row => {
+
+    const firstCell = row.querySelector("td");
+    if (!firstCell) return;
+
+    const match = firstCell.innerText.match(/\d{2}\/\d{2}\/\d{4}/);
+    if (!match) return;
+
+    const dateStr = match[0];
+
+    const cells = row.querySelectorAll("td");
+
+    const map = {
+      MOR: 1,
+      GEN: 2,
+      EVE: 3,
+      "W/O": 4,
+      "C/O": 5,
+      LEAVE: 6
+    };
+
+    const rowObj = { Date: dateStr };
+
+    Object.entries(map).forEach(([type, idx]) => {
+
+      const cell = cells[idx];
+      if (!cell) return;
+
+      const text = cell.innerText.trim();
+      if (!text) return;
+
+      text.split(",").forEach(val => {
+
+        val = val.trim().replace(/<[^>]+>/g, "");
+
+        let emp = val;
+        let extra = "";
+
+        if (val.includes("(")) {
+          emp = val.split("(")[0].trim();
+          extra = val.match(/\((.*?)\)/)?.[1] || "";
         }
-      };
+
+        const dutyCol = `${emp} Duty`;
+        const reqCol = `${emp} Requirement`;
+        const lieuCol = `${emp} in lieu of`;
+
+        if (type === "C/O") {
+          rowObj[dutyCol] = "C/O";
+          rowObj[lieuCol] = extra;
+        }
+
+        else if (type === "LEAVE") {
+          rowObj[reqCol] = extra;
+        }
+
+        else if (type === "W/O") {
+          rowObj[dutyCol] = "W/O";
+        }
+
+        else {
+          rowObj[dutyCol] = type; // MOR / GEN / EVE
+        }
+
+      });
+
+    });
+
+    dutyData.push(rowObj);
+
+  });
+
+  // =========================
+  // 🔥 MERGE BOTH
+  // =========================
+  const finalData = mergeRequirementAndDuty(reqSheetData, dutyData);
+
+  // =========================
+  // 🔥 API CALL
+  // =========================
+  try {
+
+    const res = await fetch(
+      "https://office-management-f425.onrender.com/duty/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          data: finalData,
+          mode: modeType === "add" ? "update" : "replace"
+        })
+      }
+    );
+
+    const result = await res.json();
+
+    if (result?.status === "success") {
+
+      alert("✅ Duty + Requirement Saved Successfully");
+
+      await loadTable("duty", "DutyDB");
+
+      return true;
+
+    } else {
+      console.error(result);
+      alert("❌ Save failed");
+      return false;
     }
 
+  } catch (err) {
+    console.error(err);
+    alert("❌ Network error");
+    return false;
+  }
+}
 
 
+function transformRequirementToSheet(data) {
+
+  const map = {};
+
+  data.forEach(r => {
+
+    const key = r.Date;
+
+    if (!map[key]) map[key] = { Date: key };
+
+    map[key][`${r.Employee} Requirement`] = r.Requirement;
+
+    if (r.Requirement === "C/O") {
+      map[key][`${r.Employee} in lieu of`] = r.Lieu;
+    }
+
+  });
+
+  return Object.values(map);
+}
 
 
+function mergeRequirementAndDuty(req, duty) {
+
+  const map = {};
+
+  [...req, ...duty].forEach(r => {
+
+    const key = r.Date;
+
+    if (!map[key]) map[key] = { Date: key };
+
+    Object.assign(map[key], r);
+
+  });
+
+  return Object.values(map);
+}
+
+
+on("DutysaveBtn", "click", async () => {
+  await saveRequirementData("add");
+});
+
+
+    
   </script>
 </body>
 
