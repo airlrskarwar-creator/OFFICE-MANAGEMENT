@@ -36,7 +36,8 @@
     /* =========================
       RESET
       ========================= */
-    * {
+    *,
+    html {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -948,16 +949,22 @@
       justify-content: space-between;
     }
 
-    .Selection-bar table {
-      width: 100%;
-      display: block;
-      flex: 1;
+    .select-group {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      gap: 4px;
     }
 
-    .Selection-bar td:nth-child(odd) {
-      padding-right: 3px;
-      text-align: right;
-      font-weight: 600;
+    .select-group label {
+      min-width: max-content;
+      padding-top: 6px;
+    }
+
+    .select-group select {
+      width: max-content;
+      min-width: 100px;
+      margin-right: 4px;
     }
 
     /* ===============================================
@@ -2477,9 +2484,20 @@
       }
     }
 
-    @media (max-width: 900px) {
+    @media only screen and (max-width: 600px) {
+
+      html,
+      * {
+        font-size: 10px;
+      }
+
       body::before {
-        opacity: 0.06;
+        opacity: 0.03;
+        /* Softer watermark on small screens */
+      }
+
+      table {
+        padding: 1px;
       }
 
       .button-bar {
@@ -2498,6 +2516,19 @@
 
       .Selection-bar {
         flex-direction: column;
+        max-height: 35px;
+        overflow-y: auto;
+        min-height: 0;
+      }
+
+      .Error_Note {
+        display: none;
+      }
+
+      .SectionPage {
+        max-height: 100%;
+        min-height: 0;
+        overflow-y: auto;
       }
 
       .action-group,
@@ -2505,6 +2536,19 @@
       .SSaction-group,
       .DGaction-group {
         width: 100%;
+      }
+
+      .sidebar-header {
+        padding: 2px;
+      }
+
+      .side-list {
+        max-height: 60px;
+        overflow-y: auto;
+      }
+
+      .side-header {
+        position: relative;
       }
 
       .button-bar button {
@@ -2530,27 +2574,37 @@
 
       /* Sidebar collapse */
       .left-panel {
-        width: 60px !important;
-        min-width: 60px !important;
+        width: 30px !important;
+        min-width: 30px !important;
+        padding: 2px;
       }
 
       /* Hide text */
-      .left-panel .menu-btn span,
-      .left-panel .logout-btn span {
+      .left-panel .menu-btn span {
         display: none;
       }
 
       /* Center icons */
-      .left-panel .menu-btn,
-      .left-panel .logout-btn {
+      .left-panel .menu-btn {
         justify-content: center;
         padding: 4px 0;
       }
 
       /* Active button adjust */
       .left-panel .menu-btn.active {
-        transform: translateX(10px);
         border-radius: 999px 0 0 999px;
+        margin-left: 0px;
+        width: 20px;
+      }
+
+      .menu-footer {
+        padding: 2px;
+      }
+
+      .logout-btn {
+        width: 20px;
+        height: 20px;
+        padding: 2px;
       }
 
       #EmpPage td:first-child {
@@ -2563,6 +2617,7 @@
 
       .SalarySlipTableWrapper {
         width: 95%;
+        height: 80%;
       }
 
       .sbg-dashboard {
@@ -2590,6 +2645,43 @@
         min-width: 120px;
         margin-right: 6px;
       }
+
+      .dashboard-footer {
+        display: none;
+      }
+
+      #dutyRequirementTable {
+        width: 100%;
+        height: 80%
+      }
+
+      .material-symbols-outlined {
+        font-size: 14px;
+      }
+
+      table th,
+      table td {
+        padding: 1px !important;
+        width: 1%;
+        white-space: nowrap;
+      }
+
+      .PensionInfoPanel {
+        overflow-x: auto;
+        width: 100%;
+      }
+
+      .PB-Table-Wrapper {
+        height: 100%;
+      }
+
+
+      .PB-Table-WrapperGO,
+      .PB-Table-WrapperNPS,
+      .BudgetTableWrapper,
+      .BudgetTablefromPBWrapper {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -2598,8 +2690,11 @@
   <div id="loginPage" class="login-container">
 
     <h2>Login</h2>
+    <select id="loginStationDropdown">
+      <option value="">Select Station</option>
+    </select>
 
-    <select id="loginUserDropdown">
+    <select id="loginUserDropdown" disabled>
       <option value="">Select User</option>
     </select>
 
@@ -2751,41 +2846,22 @@
           <h2>Employee Profile Details</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 250px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 60px" />
-              <col style="width: 100px" />
-              <col style="width: 50px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 80px" />
-              <col style="width: 90px" />
-              <col style="width: 30px" />
-            </colgroup>
-            <tr>
-              <td><label for="EmpPage_Station">Station :</label></td>
-              <td><select id="EmpPage_Station"></select></td>
-              <td><label for="EmpPage_Emp">Employee :</label></td>
-              <td><select id="EmpPage_Emp"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="EmpPage_TAZone" /></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="EmpPage_HRAZone" /></td>
-              <td></td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="EmpPage_Station">Station :</label>
+            <select id="EmpPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="EmpPage_Emp">Employee :</label>
+            <select id="EmpPage_Emp"></select>
+          </div>
+          <div class="select-group">
+            <label>TA Zone :</label>
+            <input disabled id="EmpPage_TAZone" />
+          </div>
+          <div class="select-group">
+            <label>HRA Zone :</label>
+            <input disabled id="EmpPage_HRAZone" />
+          </div>
           <div class="action-group"></div>
         </div>
         <div class="Emp-Table-Wrapper">
@@ -2915,52 +2991,35 @@
           <h2>Pay Bill Generation</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 250px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 60px" />
-              <col style="width: 100px" />
-              <col style="width: 50px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 80px" />
-              <col style="width: 90px" />
-              <col style="width: 30px" />
-            </colgroup>
-            <tr>
-              <td><label for="PayBillPage_Station">Station :</label></td>
-              <td><select id="PayBillPage_Station"></select></td>
-              <td></td>
-              <td></td>
-              <td style="display: none">
-                <label for="PayBillPage_Emp">Employee :</label>
-              </td>
-              <td style="display: none">
-                <select id="PayBillPage_Emp"></select>
-              </td>
-              <td><label for="PayBillPage_FY">FY :</label></td>
-              <td><select id="PayBillPage_FY"></select></td>
-              <td><label for="PayBillPage_SalMonth">Month :</label></td>
-              <td><select id="PayBillPage_SalMonth"></select></td>
-              <td><label>DA(%) :</label></td>
-              <td>
-                <input style="max-width: 40px" disabled id="PayBillPage_DA%" type="text" />
-                <input id="PayBillPage_OldDA%" disabled style="max-width: 40px" type="text" hidden />
-              </td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="PayBillPage_TAZone" /></td>
-              <td><label>HRA Zone :</label></td>
-              <td>
-                <input disabled id="PayBillPage_HRAZone" /><input hidden id="PayBillPage_HRA%" />
-              </td>
-              <td></td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="PayBillPage_Station">Station :</label>
+            <select id="PayBillPage_Station"></select>
+          </div>
+          <div class="select-group" style="display: none">
+            <label for="PayBillPage_Emp">Employee :</label>
+            <select id="PayBillPage_Emp"></select>
+          </div>
+          <div class="select-group">
+            <label for="PayBillPage_FY">FY :</label>
+            <select id="PayBillPage_FY"></select>
+          </div>
+          <div class="select-group">
+            <label for="PayBillPage_SalMonth">Month :</label>
+            <select id="PayBillPage_SalMonth"></select>
+          </div>
+          <div class="select-group">
+            <label>DA(%) :</label>
+            <input style="max-width: 40px" disabled id="PayBillPage_DA%" type="text" />
+            <input id="PayBillPage_OldDA%" disabled style="max-width: 40px" type="text" hidden />
+          </div>
+          <div class="select-group">
+            <label>TA Zone :</label>
+            <input disabled id="PayBillPage_TAZone" />
+          </div>
+          <div class="select-group">
+            <label>HRA Zone :</label>
+            <input disabled id="PayBillPage_HRAZone" /><input hidden id="PayBillPage_HRA%" />
+          </div>
 
           <div class="action-group">
             <button id="PBeditBtn">
@@ -3173,41 +3232,22 @@
           <h2>Salary Slip</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 250px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 60px" />
-              <col style="width: 100px" />
-              <col style="width: 50px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 80px" />
-              <col style="width: 90px" />
-              <col style="width: 30px" />
-            </colgroup>
-            <tr>
-              <td><label for="SalSlipPage_Station">Station :</label></td>
-              <td><select id="SalSlipPage_Station"></select></td>
-              <td><label for="SalSlipPage_Emp">Employee :</label></td>
-              <td><select id="SalSlipPage_Emp"></select></td>
-              <td><label for="SalSlipPage_FY">FY :</label></td>
-              <td><select id="SalSlipPage_FY"></select></td>
-              <td><label for="SalSlipPage_SalMonth">Month :</label></td>
-              <td><select id="SalSlipPage_SalMonth"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="SalSlipPage_Station">Station :</label>
+            <select id="SalSlipPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="SalSlipPage_Emp">Employee :</label>
+            <select id="SalSlipPage_Emp"></select>
+          </div>
+          <div class="select-group">
+            <label for="SalSlipPage_FY">FY :</label>
+            <select id="SalSlipPage_FY"></select>
+          </div>
+          <div class="select-group">
+            <label for="SalSlipPage_SalMonth">Month :</label>
+            <select id="SalSlipPage_SalMonth"></select>
+          </div>
 
           <div class="SSaction-group">
             <button id="SSprintBtn">
@@ -3465,47 +3505,32 @@
           <h2>Income Tax Calculation</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 250px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 60px" />
-              <col style="width: 100px" />
-              <col style="width: 50px" />
-              <col style="width: 40px" />
-              <col style="width: 90px" />
-              <col style="width: 80px" />
-              <col style="width: 90px" />
-              <col style="width: 30px" />
-            </colgroup>
-            <tr>
-              <td><label for="ITPage_Station">Station :</label></td>
-              <td><select id="ITPage_Station"></select></td>
-              <td><label for="ITPage_Emp">Employee :</label></td>
-              <td><select id="ITPage_Emp"></select></td>
-              <td><label for="ITPage_FY">FY :</label></td>
-              <td><select id="ITPage_FY"></select></td>
-              <td colspan="2">
-                <label for="ITCalcFor">IT Calulation For :</label>
-              </td>
-              <td colspan="4">
-                <div class="salary-toggle">
-                  <input type="radio" name="salaryMode" id="calcSalary" value="Calculated Salary" checked />
-                  <label for="calcSalary" class="btn red">Calculated Salary</label>
 
-                  <input type="radio" name="salaryMode" id="paidSalary" value="Paid Salary" />
-                  <label for="paidSalary" class="btn green">Paid Salary</label>
+          <div class="select-group">
+            <label for="ITPage_Station">Station :</label>
+            <select id="ITPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="ITPage_Emp">Employee :</label>
+            <select id="ITPage_Emp"></select>
+          </div>
+          <div class="select-group">
+            <label for="ITPage_FY">FY :</label>
+            <select id="ITPage_FY"></select>
+          </div>
+          <div class="select-group">
+            <label for="ITCalcFor">IT Calulation For :</label>
 
-                  <div class="slider"></div>
-                </div>
-              </td>
-              <td></td>
-            </tr>
-          </table>
+            <div class="salary-toggle">
+              <input type="radio" name="salaryMode" id="calcSalary" value="Calculated Salary" checked />
+              <label for="calcSalary" class="btn red">Calculated Salary</label>
+
+              <input type="radio" name="salaryMode" id="paidSalary" value="Paid Salary" />
+              <label for="paidSalary" class="btn green">Paid Salary</label>
+
+              <div class="slider"></div>
+            </div>
+          </div>
 
           <div class="ITaction-group">
             <button id="ITprintBtn">
@@ -3571,25 +3596,14 @@
         </div>
         <div style="display: flex; flex-direction: column">
           <div class="Selection-bar">
-            <table>
-              <colgroup>
-                <col style="width: 60px" />
-                <col style="width: 170px" />
-                <col style="width: 80px" />
-                <col style="width: 250px" />
-                <col style="width: 120px" />
-                <col style="width: 450px" />
-                <col style="width: 200px" />
-              </colgroup>
-              <tr>
-                <td><label for="PensionPage_Station">Station :</label></td>
-                <td><select id="PensionPage_Station"></select></td>
-                <td><label for="PensionPage_Emp">Employee :</label></td>
-                <td>
-                  <select id="PensionPage_Emp" style="min-width: 210px"></select>
-                </td>
-              </tr>
-            </table>
+            <div class="select-group">
+              <label for="PensionPage_Station">Station :</label>
+              <select id="PensionPage_Station"></select>
+            </div>
+            <div class="select-group">
+              <label for="PensionPage_Emp">Employee :</label>
+              <select id="PensionPage_Emp" style="min-width: 210px"></select>
+            </div>
 
             <div class="Pensionaction-group">
               <button id="PensionprintBtn">
@@ -3706,30 +3720,22 @@
           <h2>Budgets</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 120px" />
-              <col style="width: 400px" />
-            </colgroup>
-            <tr>
-              <td><label for="BudgetPage_Station">Station :</label></td>
-              <td><select id="BudgetPage_Station"></select></td>
-              <td><label for="BudgetPage_FY">FY :</label></td>
-              <td><select id="BudgetPage_FY"></select></td>
-              <td><label for="BudgetPage_Month">Month :</label></td>
-              <td><select id="BudgetPage_Month"></select></td>
-              <td><label>Budget under</label></td>
-              <td>
-                <select id="BudgetUnderSelect" style="width: 400px"></select>
-              </td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="BudgetPage_Station">Station :</label>
+            <select id="BudgetPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="BudgetPage_FY">FY :</label>
+            <select id="BudgetPage_FY"></select>
+          </div>
+          <div class="select-group">
+            <label for="BudgetPage_Month">Month :</label>
+            <select id="BudgetPage_Month"></select>
+          </div>
+          <div class="select-group">
+            <label>Budget under</label>
+            <select id="BudgetUnderSelect" style="width: 400px"></select>
+          </div>
 
           <div class="SBGaction-group">
             <button id="SBGeditBtn">
@@ -3789,28 +3795,18 @@
           <h2>DG Log Register</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 120px" />
-              <col style="width: 400px" />
-            </colgroup>
-            <tr>
-              <td><label for="DGPage_Station">Station :</label></td>
-              <td><select id="DGPage_Station"></select></td>
-              <td><label for="DGPage_FY">FY :</label></td>
-              <td><select id="DGPage_FY"></select></td>
-              <td><label for="DGPage_Month">Month :</label></td>
-              <td><select id="DGPage_Month"></select></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="DGPage_Station">Station :</label>
+            <select id="DGPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="DGPage_FY">FY :</label>
+            <select id="DGPage_FY"></select>
+          </div>
+          <div class="select-group">
+            <label for="DGPage_Month">Month :</label>
+            <select id="DGPage_Month"></select>
+          </div>
 
           <div class="DGaction-group">
             <button id="DGeditBtn">
@@ -3848,28 +3844,22 @@
           <h2>Duty Chart Register</h2>
         </div>
         <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width: 60px" />
-              <col style="width: 170px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 80px" />
-              <col style="width: 120px" />
-              <col style="width: 120px" />
-              <col style="width: 400px" />
-            </colgroup>
-            <tr>
-              <td><label for="DutyChartPage_Station">Station :</label></td>
-              <td><select id="DutyChartPage_Station"></select></td>
-              <td><label for="DutyChartFYSelect">FY :</label></td>
-              <td><select id="DutyChartFYSelect"></select></td>
-              <td><label for="DutyChartMonthSelect">Month :</label></td>
-              <td><select id="DutyChartMonthSelect"></select></select></td>
-              <td><label for="DutyChartWeekSelect">Week Ending :</label></td>
-              <td><select id="DutyChartWeekSelect"></select></td>
-            </tr>
-          </table>
+          <div class="select-group">
+            <label for="DutyChartPage_Station">Station :</label>
+            <select id="DutyChartPage_Station"></select>
+          </div>
+          <div class="select-group">
+            <label for="DutyChartFYSelect">FY :</label>
+            <select id="DutyChartFYSelect"></select>
+          </div>
+          <div class="select-group">
+            <label for="DutyChartMonthSelect">Month :</label>
+            <select id="DutyChartMonthSelect"></select></select>
+          </div>
+          <div class="select-group">
+            <label for="DutyChartWeekSelect">Week Ending :</label>
+            <select id="DutyChartWeekSelect"></select>
+          </div>
 
           <div class="Dutyaction-group">
             <button id="DutyeditBtn">
@@ -4072,100 +4062,252 @@
     //================================================================================
     //                                    🔥Login Script🔥
     // ===============================================================================
+
     function getUserMap() {
 
-      const headers = idData.headers;
-      const rows = idData.rows;
+      const headers = empData.headers;
+      const rows = empData.rows;
 
-      const userIdx = headers.indexOf("User ID");
+      const stationIdx = headers.indexOf("Station");
+      const userIdx = headers.indexOf("Employee Name");
       const passIdx = headers.indexOf("Password");
-      const usernameIdx = headers.indexOf("User Name");
 
       const map = {};
 
       rows.forEach(r => {
 
+        const station = r[stationIdx];
         const user = r[userIdx];
         const pass = r[passIdx];
-        const name = r[usernameIdx];
 
-        if (!user || !pass || !name) return;
+        if (!station || !user || !pass) return;
 
-        // 🔥 overwrite → last occurrence wins
         map[user] = {
+          station,
           user,
-          password: String(pass).trim(),
-          name
+          name: user,
+          password: String(pass).trim()
         };
       });
 
       return map;
     }
 
-    function populateloginUserDropdown() {
 
-      const dropdown = id("loginUserDropdown");
-      dropdown.innerHTML = `<option value="" hidden>Select User</option>`;
+    function getStations() {
+      return [...new Set(
+        Object.values(getUserMap())
+          .map(u => u.station)
+          .filter(Boolean)
+      )];
+    }
 
-      const users = Object.values(getUserMap());
 
-      users.forEach(u => {
+    function populateloginStationDropdown() {
+
+      const dropdown = id("loginStationDropdown");
+
+      dropdown.innerHTML = `<option value="" hidden>Select Station</option>`;
+
+      const stations = getStations();
+
+      stations.forEach(st => {
         const opt = document.createElement("option");
-        opt.value = u.user;
-        opt.textContent = u.user;
+        opt.value = st;
+        opt.textContent = st;
         dropdown.appendChild(opt);
       });
 
-      // store globally
+      // 🔥 disable user dropdown initially
+      id("loginUserDropdown").disabled = true;
+    }
+
+
+
+    function populateloginUserDropdown(station) {
+
+      const dropdown = id("loginUserDropdown");
+
+      dropdown.innerHTML = `<option value="" hidden>Select User</option>`;
+
+      const users = Object.values(getUserMap())
+        .filter(u => u.station === station);
+
+      // 🔥 ROLE USERS
+      ROLE_USERS.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r.user;
+        opt.textContent = `🔑 ${r.user}`;
+        dropdown.appendChild(opt);
+      });
+
+
+      // 🔥 NORMAL USERS
+      users.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.user;
+        opt.textContent = `👤 ${u.user}`;
+        dropdown.appendChild(opt);
+      });
+
+
+
       window.userList = users;
     }
 
-    on("loginBtn", "click", () => {
+
+
+
+    on("loginStationDropdown", "change", () => {
+
+      const station = id("loginStationDropdown").value;
+      if (!station) return;
+
+      const userDropdown = id("loginUserDropdown");
+
+      userDropdown.disabled = false;
+
+      populateloginUserDropdown(station);
+
+    });
+
+
+
+    on("loginUserDropdown", "change", () => {
 
       const user = id("loginUserDropdown").value;
-      const password = id("loginPasswordInput").value;
-      const errorBox = id("loginError");
+      if (!user) return;
 
-      errorBox.textContent = "";
+      const record = window.userList.find(u => u.user === user);
+      if (!record) return;
+
+      // 🔥 set employee
+      const empInput = id("SalSlipPage_Emp");
+      if (empInput) empInput.value = record.name;
+
+      // 🔥 access + locking
+      applyUserAccess(user);
+
+      setTimeout(() => {
+        lockRequirementTableForUser(user);
+      }, 0);
+    });
+
+
+
+
+    on("loginBtn", "click", () => {
+
+      const station = id("loginStationDropdown").value;
+      const user = id("loginUserDropdown").value;
+      const password = id("loginPasswordInput").value;
 
       if (!user || !password) {
-        errorBox.textContent = "Select user & enter password";
+        alert("Select user & enter password");
+        return;
+      }
+
+      // =========================
+      // 🔥 ROLE LOGIN
+      // =========================
+      const roleUser = ROLE_USERS.find(r => r.user === user);
+
+      if (roleUser) {
+
+        if (password !== roleUser.password) {
+          alert("Incorrect password");
+          return;
+        }
+
+        // ✅ SUCCESS
+        window.currentUser = user;
+
+        id("loginPage").style.display = "none";
+        id("mainPage").style.display = "flex";
+
+        id("welcomeUser").textContent = `Welcome ${user}`;
+
+        applyUserAccess(user);
+
+        return;
+      }
+
+      // =========================
+      // 🔥 NORMAL USER LOGIN
+      // =========================
+      if (!station) {
+        alert("Select station");
         return;
       }
 
       const record = window.userList.find(u => u.user === user);
 
       if (!record) {
-        errorBox.textContent = "User not found";
+        alert("User not found");
         return;
       }
 
       if (password !== record.password) {
-        errorBox.textContent = "Incorrect password";
+        alert("Incorrect password");
         return;
       }
 
       // ✅ SUCCESS
       window.currentUser = user;
+      window.currentStation = station;
 
       id("loginPage").style.display = "none";
       id("mainPage").style.display = "flex";
 
       id("welcomeUser").textContent = `Welcome ${record.name}`;
-      lockRequirementTableForUser(user);
+
+      applyUserAccess(user);
+
+      setTimeout(() => {
+        lockRequirementTableForUser(user);
+      }, 0);
     });
 
 
 
     const ACCESS_RULES = {
-      ALL: ["ALL"],
 
-      ADMIN: ["DashBoard", "EmpPage", "PayBillPage", "SalarySlipPage", "ITPage", "PensionPage", "BudgetPage"],
+      APR: ["ALL"],
 
-      ENGG: ["DashBoard", "EmpPage", "SalarySlipPage", "DGlogPage", "HSDlogPage", "ElectricityPage", "DutyPage"],
+      ADMIN: [
+        "DashBoard",
+        "EmpPage",
+        "PayBillPage",
+        "SalarySlipPage",
+        "ITPage",
+        "PensionPage",
+        "BudgetPage"
+      ],
 
-      DEFAULT: ["SalarySlipPage", "EmpPage", "DutyPage"]
+      ENGG: [
+        "DashBoard",
+        "EmpPage",
+        "SalarySlipPage",
+        "DGlogPage",
+        "HSDlogPage",
+        "ElectricityPage",
+        "DutyPage"
+      ],
+
+      MASTER: ["ALL"], // 🔥 full access
+
+      DEFAULT: [
+        //"SalarySlipPage",
+        //"EmpPage",
+        "DutyPage"
+      ]
     };
+
+    const ROLE_USERS = [
+      { user: "ADMIN", password: "admin123" },
+      { user: "ENGG", password: "engg123" },
+      { user: "MASTER", password: "master123" }
+    ];
 
 
 
@@ -4197,14 +4339,11 @@
       // =========================
       // 🔥 ROLE BASED VISIBILITY
       // =========================
-      if (user === "TECHNICAL") {
+      if (user === "ENGG") {
 
         if (dutyTable) dutyTable.style.display = "block";
         if (editContainer) editContainer.style.display = "block";
         if (reqContainer) reqContainer.style.display = "none";
-
-        console.log("TECHNICAL MODE");
-        return; // 🔥 stop further execution
       }
 
       // =========================
@@ -4212,7 +4351,10 @@
       // =========================
       if (dutyTable) dutyTable.style.display = "none";
       if (editContainer) editContainer.style.display = "none";
-      if (reqContainer) reqContainer.style.display = "block";
+      if (reqContainer) {
+        reqContainer.style.display = "block";
+        reqContainer.style.width = "100%";
+      }
 
       if (!reqContainer) return;
 
@@ -4249,7 +4391,7 @@
         }
 
         // =========================
-        // 🔥 UI STYLE
+        // 🔥 UI STYLE                            
         // =========================
         td.classList.toggle("disabled-cell", !isCurrentUser);
       });
@@ -4258,15 +4400,6 @@
     }
 
 
-    on("loginUserDropdown", "change", () => {
-      const user = id("loginUserDropdown").value;
-
-      if (!user) return;
-
-      applyUserAccess(user);
-      // 🔥 lock table
-      lockRequirementTableForUser(user);
-    });
 
     /* ===========================================================================================
                                 🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
@@ -4674,9 +4807,9 @@
     async function loadAllData() {
       // 🔴 STEP 1: Load REQUIRED data first
       await loadTable("id", "Login");
-      populateloginUserDropdown();
-      await loadTable("duty", "DutyChart");
       await loadTable("emp", "EmpDB", false);
+      populateloginStationDropdown();
+      await loadTable("duty", "DutyChart");
       await loadTable("pb", "PBDB");
       await loadTable("cpc", "CPC7DB");
       await loadTable("dg", "DGlog");
