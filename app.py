@@ -436,7 +436,7 @@ def update_duty():
             return jsonify({"status": "error", "message": "No data"}), 400
 
         # =========================
-        # 🔥 GET HEADERS
+        # 🔥 READ EXISTING SHEET
         # =========================
         existing = duty_sheet.get_all_values()
 
@@ -446,38 +446,60 @@ def update_duty():
         headers = existing[0]
 
         # =========================
-        # 🔥 CONVERT INPUT → ROW FORMAT
+        # 🔥 HELPER
         # =========================
         def build_row(obj):
             return [obj.get(h, "") for h in headers]
 
-        new_rows = [build_row(r) for r in rows]
-
         # =========================
-        # 🔥 MODE: REPLACE (FULL OVERWRITE)
+        # 🔥 REPLACE MODE
         # =========================
         if mode == "replace":
 
+            new_rows = [build_row(r) for r in rows]
+
+            # remove empty rows
+            new_rows = [
+                r for r in new_rows
+                if any(str(x).strip() for x in r)
+            ]
+
             duty_sheet.clear()
             duty_sheet.append_row(headers)
+
+            # preserve STATUS row
+            status_row = existing[1] if len(existing) > 1 else []
+            if status_row:
+                duty_sheet.append_row(status_row)
+
             duty_sheet.append_rows(new_rows)
 
         # =========================
-        # 🔥 MODE: UPDATE (MERGE BY DATE)
+        # 🔥 UPDATE MODE (MERGE)
         # =========================
         else:
 
-            # build map of existing rows
             data_map = {}
 
-            for r in existing[1:]:
-                if not r:
+            # 🔥 skip header + STATUS row
+            for r in existing[2:]:
+
+                # skip blank rows
+                if not r or not r[0].strip():
                     continue
-                date = r[0]
+
+                # skip duplicate headers
+                if r[0].strip().upper() == "DATE":
+                    continue
+
+                date = r[0].strip()
                 data_map[date] = dict(zip(headers, r))
 
-            # merge new data
+            # =========================
+            # 🔥 MERGE NEW DATA
+            # =========================
             for r in rows:
+
                 date = r.get("Date")
                 if not date:
                     continue
@@ -487,15 +509,39 @@ def update_duty():
 
                 data_map[date].update(r)
 
-            # rebuild full dataset
+            # =========================
+            # 🔥 SORT BY DATE
+            # =========================
+            def parse_date(d):
+                try:
+                    return datetime.strptime(d, "%d/%m/%Y")
+                except:
+                    return datetime.max
+
+            sorted_dates = sorted(data_map.keys(), key=parse_date)
+
             final_rows = [
                 [data_map[d].get(h, "") for h in headers]
-                for d in sorted(data_map.keys())
+                for d in sorted_dates
             ]
 
-            # write back
+            # remove empty rows
+            final_rows = [
+                r for r in final_rows
+                if any(str(x).strip() for x in r)
+            ]
+
+            # =========================
+            # 🔥 WRITE BACK CLEAN
+            # =========================
             duty_sheet.clear()
             duty_sheet.append_row(headers)
+
+            # preserve STATUS row
+            status_row = existing[1] if len(existing) > 1 else []
+            if status_row:
+                duty_sheet.append_row(status_row)
+
             duty_sheet.append_rows(final_rows)
 
         return jsonify({"status": "success"})
