@@ -480,15 +480,12 @@ def update_duty():
                     if "Requirement" in h or "lieu" in h:
                         row_data[idx] = val if val is not None else ""
 
-                    elif "Time Stamp" in h:
-
+                    elif h.endswith("Time Stamp"):
                         emp_name = h.replace(" Time Stamp", "").upper()
-
-                        # 🔥 ONLY UPDATE CURRENT USER TIMESTAMP
-                        if emp_name == current_user and obj.get(f"{current_user} Requirement") is not None:
+                        if emp_name == current_user:
                             row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
                         else:
-                            row_data[idx] = None  # 🔥 DO NOT TOUCH
+                            row_data[idx] = None
 
                 # =========================
                 # 🔥 ENGG / MASTER (Duty Mode)
