@@ -438,74 +438,81 @@ def update_duty():
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
 
-        # =========================
-        # 🔥 GET EXISTING DATA
-        # =========================
         all_values = duty_sheet.get_all_values()
-
-        if len(all_values) < 2:
-            return jsonify({"status": "error", "message": "Sheet structure invalid"}), 400
 
         headers = all_values[0]
 
         # =========================
-        # 🔥 BUILD DATE → ROW INDEX MAP
+        # 🔥 MAP DATE → ROW INDEX
         # =========================
         date_row_map = {}
 
-        for i, r in enumerate(all_values[2:], start=3):  # skip header + STATUS
-
-            if not r or not r[0].strip():
-                continue
-
-            date = r[0].strip()
-            date_row_map[date] = i  # actual sheet row index
+        for i, r in enumerate(all_values[2:], start=3):
+            if r and r[0].strip():
+                date_row_map[r[0].strip()] = i
 
         # =========================
-        # 🔥 PROCESS EACH ROW
+        # 🔥 PREPARE BATCH UPDATES
         # =========================
+        updates = []
+        new_rows = []
+
         for obj in rows:
 
             date = obj.get("Date")
             if not date:
                 continue
 
-            # =========================
-            # 🔥 BUILD FULL ROW TEMPLATE
-            # =========================
+            # build row template
             row_data = [""] * len(headers)
 
             for idx, h in enumerate(headers):
+
                 if h == "Date":
                     row_data[idx] = date
+                    continue
 
+                val = obj.get(h)
+
+                if role in ["ENGG", "MASTER"]:
+                    if h.endswith("Duty"):
+                        row_data[idx] = val or ""
                 else:
-                    val = obj.get(h)
-
-                    # 🔥 ROLE FILTER
-                    if role in ["ENGG", "MASTER"]:
-                        if h.endswith("Duty"):
-                            row_data[idx] = val if val is not None else ""
-                    else:
-                        if "Requirement" in h or "lieu" in h:
-                            row_data[idx] = val if val is not None else ""
+                    if "Requirement" in h or "lieu" in h:
+                        row_data[idx] = val or ""
 
             # =========================
-            # 🔥 UPDATE OR INSERT
+            # 🔥 EXISTING ROW → BATCH UPDATE
             # =========================
             if date in date_row_map:
 
                 row_index = date_row_map[date]
 
-                # 🔥 UPDATE ONLY NON-EMPTY CELLS
                 for col_idx, value in enumerate(row_data, start=1):
 
                     if value != "":
-                        duty_sheet.update_cell(row_index, col_idx, value)
+                        updates.append({
+                            "range": f"{gspread.utils.rowcol_to_a1(row_index, col_idx)}",
+                            "values": [[value]]
+                        })
 
+            # =========================
+            # 🔥 NEW ROW → APPEND LATER
+            # =========================
             else:
-                # 🔥 NEW ROW APPEND
-                duty_sheet.append_row(row_data)
+                new_rows.append(row_data)
+
+        # =========================
+        # 🔥 EXECUTE BATCH UPDATE
+        # =========================
+        if updates:
+            duty_sheet.batch_update(updates)
+
+        # =========================
+        # 🔥 APPEND NEW ROWS (ONCE)
+        # =========================
+        if new_rows:
+            duty_sheet.append_rows(new_rows)
 
         return jsonify({"status": "success"})
 
