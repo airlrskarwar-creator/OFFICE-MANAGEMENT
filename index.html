@@ -210,20 +210,283 @@
       font-family: "Inter", Arial, Helvetica, sans-serif;
     }
 
-    .login-container {
-      width: 300px;
-      margin: 100px auto;
-      padding: 20px;
-      text-align: center;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+    /* =============LOGIN PAGE LAYOUT=========== */
+    #loginPage{
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#f4f7fc;
+      font-family:'Segoe UI',sans-serif;
+      overflow:hidden;
+      position:relative;
     }
 
-    #loginUserDropdown,
-    #loginPasswordInput {
+    /* Animated soft floating shapes */
+    #loginPage::before,
+    #loginPage::after{
+      content:"";
+      position:absolute;
+      width:400px;
+      height:400px;
+      border-radius:50%;
+      background:rgba(37,99,235,0.1);
+      animation:float 8s ease-in-out infinite alternate;
+    }
+
+    #loginPage::before{
+      top:-100px;
+      left:-100px;
+    }
+
+    #loginPage::after{
+      bottom:-120px;
+      right:-120px;
+      animation-delay:2s;
+    }
+
+    @keyframes float{
+      from{transform:translateY(0);}
+      to{transform:translateY(30px);}
+    }
+
+    /* =============================
+      MAIN CONTAINER
+    ============================= */
+
+    .login-container{
+      width:850px;
+      height:480px;
+      background:white;
+      border-radius:16px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.2);
+      display:flex;
+      overflow:hidden;
+      animation:slideUp 0.8s ease forwards;
+      opacity:0;
+      transform:translateY(40px);
+      scale:0.8;
+    }
+
+    @keyframes slideUp{
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    /* =============================
+      LEFT PANEL
+    ============================= */
+
+    .login-left{
+      flex:1;
+      color:black;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:40px;
+    }
+
+    .branding img{
+      width:200px;
+      margin-bottom:20px;
+    }
+
+    .branding h1{
+      margin-bottom:10px;
+      font-size:20px;
+    }
+
+    .branding p{
+      font-size:12px;
+      opacity:0.9;
+    }
+    .highlight-card{
+      animation: highlightFlash 1.2s ease;
+    }
+
+    @keyframes highlightFlash{
+      0%   { box-shadow:0 0 0 0 rgba(37,99,235,0.6); }
+      50%  { box-shadow:0 0 20px 6px rgba(37,99,235,0.5); }
+      100% { box-shadow:0 0 0 0 rgba(37,99,235,0); }
+    }
+
+    /* =============================
+      RIGHT PANEL
+    ============================= */
+
+    .login-right{
+      flex:1;
+      padding:60px 50px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background:linear-gradient(135deg,#5aafff,#2ef8ff);
+      color:rgb(0, 9, 61);
+    }
+
+    .login-right h2{
+      margin-bottom:30px;
+      color:rgb(0, 9, 61);
+      font-size:20px;
+    }
+
+    /* =============================
+      INPUT CONTAINER
+    ============================= */
+
+    .input-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      height: 50px !important;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.35);
+      border:2px solid transparent;
+      transition:all 0.3s ease;
+      margin-bottom:20px;
+    }
+
+    /* Remove input border completely */
+    .input-box select, .input-box input{
+      flex:1;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:15px !important;
+      color:rgb(5, 0, 68);
+      font-weight:500;
+      box-shadow:none;
+      min-height:30px;
+    }
+
+    .input-box input{
+      width:100%;
+    }
+
+    .input-box select option{
+      color: black;
+      background: white;
+    }
+
+    .input-box select:focus{
+      padding-left: 32px;
+      margin-left: -32px;
+    }
+
+    /* Placeholder */
+    .input-box input::placeholder{
+      color:rgba(0, 9, 61, 0.603);
+    }
+
+    /* Icon style */
+    .input-box i{
+      font-size:30px;
+      color:rgb(0, 9, 61);
+      transition:0.3s ease;
+    }
+
+    .input-box:focus-within{
+      border:2px solid #ffffff;
+      background:rgba(255,255,255,0.25);
+      box-shadow:0 0 2px 1px rgba(255,255,255,0.15);
+    }
+
+    /* Icon highlight on focus */
+    .input-box:focus-within i{
+      color:#0400ff;
+      transform:scale(1.1);
+    }
+
+    /* 🔥 ERROR */
+    #loginError {
+      font-size: 14px;
+      color: #990000;
+      font-weight: bold;
+      text-align: center;
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      right: 0;
+    }
+        
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
       width: 100%;
-      padding: 8px;
-      margin: 8px 0;
+      padding: 10px 36px 10px 12px;
+      border-radius: 6px;
+    }
+
+    #togglePassword {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 🔥 icon style */
+    #togglePassword i {
+      font-size: 25px;
+      color: rgb(0, 0, 61);
+    }
+
+    #loginBtn{
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding:12px;
+      border:none;
+      border-radius:8px;
+      background:#02005c;
+      color:white;
+      cursor:pointer;
+      transition:all 0.3s ease;      
+    }
+
+    #loginBtn:hover{
+      background:rgb(0, 140, 255);
+      transform:scale(1.05);
+      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.4);
+    }
+
+    #loginBtn:active{
+      transform:scale(1.0);
+      box-shadow: 0 2px 8px rgba(0, 107, 194, 0.3);
+      background:#02005c;
+    }
+
+    #loginBtn i{
+      font-size:18px;
+      margin-right:8px;
+    }
+
+    #loginBtn p{
+      font-size:15px;
+      font-weight:500;
+    }
+    
+    .caps-warning {
+      display: none;
+      font-size: 14px;
+      color: #990000;
+      font-weight: bold;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      right: 0;
+    }
+    .caps-warning.show {
+      display: block;
     }
 
     /* =============APP LAYOUT=========== */
@@ -1806,7 +2069,7 @@
       font-size: 11px;
       background-color: white;
       overflow: auto;
-      height: 575px;
+      height: 85vh;
     }
 
     .SalarySlipTableWrapper table {
@@ -2207,9 +2470,12 @@
       height: 100%;
       overflow-x: auto;
       overflow-y: hidden;
+      min-width: 0;
     }
 
     #chartInner {
+      display: inline-block;
+      min-width: 100%;
       height: 100%;
     }
 
@@ -2440,6 +2706,7 @@
       height: 25px;
       border-radius: 0;
       color: black;
+      margin-top: 2px;
     }
 
     .lieu-input:disabled {
@@ -2465,6 +2732,23 @@
     #editableRequirementContainer table td {
       padding: 5px;
       width: 60px;
+      background-color: white;
+    }
+
+    #dutyRequirementTable table td {
+      padding: 5px;
+      width: 60px;
+      background-color: white;
+      font-size: 12px;
+    }
+
+    #dutyRequirementTable select:disabled {
+      font-size: 12px;
+      color: black;
+    }
+
+    #dutyRequirementTable input {
+      font-size: 12px;
     }
 
     .disabled-cell {
@@ -2622,7 +2906,6 @@
 
       .SalarySlipTableWrapper {
         width: 95%;
-        height: 80%;
       }
 
       .sbg-dashboard {
@@ -2693,17 +2976,58 @@
 </head>
 
 <body>
-  <div id="loginPage" class="login-container">
-    <h2>Login</h2>
-    <select id="loginStationDropdown">
-      <option value="">Select Station</option>
-    </select>
-    <select id="loginUserDropdown" disabled>
-      <option value="">Select User</option>
-    </select>
-    <input type="password" id="loginPasswordInput" placeholder="Enter Password">
-    <button id="loginBtn">Login</button>
-    <div id="loginError" style="color:red; margin-top:10px;"></div>
+  <div id="loginPage" >
+
+    <div class="login-container">
+
+      <!-- LEFT PANEL -->
+      <div class="login-left">
+        <div class="branding">
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" class="login-logo">
+          <h1>Office Management System</h1>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="login-right">
+
+        <h2>Sign In</h2>
+
+        <div class="input-box">
+          <i class="material-icons">broadcast_on_personal</i>
+          <select id="loginStationDropdown">
+            <option value="">Select Station</option>
+          </select>
+        </div>
+
+        <div class="input-box">
+          <i class="material-icons">admin_panel_settings</i>
+          <select id="loginUserDropdown" disabled>
+            <option value="">Select User</option>
+          </select>
+        </div>
+
+        <div class="input-box">
+          <i class="material-icons">lock</i>
+          <div class="password-wrap">
+            <input type="password" id="loginPasswordInput" placeholder="Enter Password">
+            <span id="togglePassword">
+              <i class="material-icons">visibility_off</i>
+            </span>
+          </div>
+        </div>
+
+
+        <button id="loginBtn">
+          <i class="material-icons">login</i>
+          <p>Login</p>
+        </button>
+        <div id="loginError"></div>
+        <div id="capsWarning" class="caps-warning">Caps Lock is ON</div>
+      </div>
+
+    </div>
+
   </div>
   <div class="app" id="mainPage">
     <div class="left-panel collapsed" id="sidebar">
@@ -4206,91 +4530,111 @@
       // 🔥 set employee
       const empInput = id("SalSlipPage_Emp");
       if (empInput) empInput.value = record.name;
-      
+
     });
 
+    const pwdEl = id("loginPasswordInput");
+    const toggle = id("togglePassword");
+    const stationEl = id("loginStationDropdown");
+    const userEl = id("loginUserDropdown");
+    const loginBtn = id("loginBtn");
+    const capsWarning = id("capsWarning");
+    const errormsg = id("loginError");
 
+    // ========================= COMMON EVENTS ========================= //
+    [toggle, pwdEl, stationEl, userEl].forEach(el => {
+      el.addEventListener("click", handleEvents);
+      el.addEventListener("keydown", handleEvents);
+      el.addEventListener("blur", handleEvents);
+    });
 
+    function handleEvents(e) {
 
-    on("loginBtn", "click", () => {
+      // 🔥 PASSWORD TOGGLE (FIXED)
+      const toggleBtn = e.target.closest("#togglePassword");
 
-      const station = id("loginStationDropdown").value;
-      const user = id("loginUserDropdown").value;
-      const password = id("loginPasswordInput").value;
+      if (toggleBtn) {
+        const isHidden = pwdEl.type === "password";
 
-      if (!user || !password) {
-        alert("Select user & enter password");
-        return;
+        pwdEl.type = isHidden ? "text" : "password";
+
+        toggleBtn.querySelector("i").textContent =
+          isHidden ? "visibility" : "visibility_off";
       }
 
-      // =========================
+      // 🔥 ENTER LOGIN
+      if (e.type === "keydown" && e.key === "Enter") {
+        if (!stationEl.value) return stationEl.focus();
+        if (!userEl.value) return userEl.focus();
+
+        loginBtn.click();
+      }
+
+      // 🔥 CAPS LOCK
+      if (e.target === pwdEl) {
+        if (e.type === "keydown") {
+          capsWarning.classList.toggle(
+            "show",
+            e.getModifierState && e.getModifierState("CapsLock")
+          );
+        }
+        if (e.type === "blur") {
+          capsWarning.classList.remove("show");
+        }
+      }
+    }
+
+    // ========================= LOGIN ========================= //
+    on("loginBtn", "click", () => {
+
+      const station = stationEl.value;
+      const user = userEl.value;
+      const password = pwdEl.value;
+
+      if (!user) return errormsg.textContent = "Select user";
+      if (!password) return errormsg.textContent = "Enter password";
+
       // 🔥 ROLE LOGIN
-      // =========================
       const roleUser = ROLE_USERS.find(r => r.user === user);
 
       if (roleUser) {
+        if (password !== roleUser.password)
+          return errormsg.textContent = "Incorrect password";
 
-        if (password !== roleUser.password) {
-          alert("Incorrect password");
-          return;
-        }
-
-        // ✅ SUCCESS
-        window.currentUser = user;
-
-        id("loginPage").style.display = "none";
-        id("mainPage").style.display = "flex";
-
-        id("welcomeUser").textContent = `Welcome ${user}`;
-
-        applyUserAccess(user);
-
+        loginSuccess(user, user);
         return;
       }
 
-      // =========================
-      // 🔥 NORMAL USER LOGIN
-      // =========================
-      if (!station) {
-        alert("Select station");
-        return;
-      }
+      // 🔥 NORMAL USER
+      if (!station) return errormsg.textContent = "Select station";
 
       const record = window.userList.find(u => u.user === user);
 
-      if (!record) {
-        alert("User not found");
-        return;
-      }
+      if (!record) return errormsg.textContent = "User not found";
+      if (password !== record.password)
+        return errormsg.textContent = "Incorrect password";
 
-      if (password !== record.password) {
-        alert("Incorrect password");
-        return;
-      }
-
-      // ✅ SUCCESS
-      window.currentUser = user;
       window.currentStation = station;
       window.currentInitial = record.initial;
 
+      applyStation_UserControl(station, user, user);
 
-      applyStation_UserControl(
-        window.currentStation,
-        window.currentUser,   // 👈 actual employee
-        window.currentUser    // 👈 role OR user (same in your case)
-      );
+      loginSuccess(user, record.name);
+
+      setTimeout(() => lockRequirementTableForUser(user), 0);
+    });
+
+    // ========================= SUCCESS HANDLER ========================= //
+    function loginSuccess(user, displayName) {
+      window.currentUser = user;
 
       id("loginPage").style.display = "none";
       id("mainPage").style.display = "flex";
 
-      id("welcomeUser").textContent = `Welcome ${record.name}`;
+      id("welcomeUser").textContent = `Welcome ${displayName}`;
 
       applyUserAccess(user);
-
-      setTimeout(() => {
-        lockRequirementTableForUser(user);
-      }, 0);
-    });
+    }
 
 
 
@@ -4432,15 +4776,19 @@
         const td = select.closest("td");
 
         // 🔥 In requirement table → lieu is in next cell
-        const lieu = td?.nextElementSibling?.querySelector(".lieu-input");
+        const lieu = td?.querySelector(".lieu-input")
 
-        // 🔒 Enable only current user's column
-        // 🔥 FINAL PRIORITY: LOCK FIRST
+          // 🔥 1. PAST WEEK → FULL LOCK
         if (isLocked) {
           select.disabled = true;
-        } else {
-          select.disabled = !isCurrentUser;
+          if (lieu) lieu.disabled = true;
+
+          td.classList.add("disabled-cell");
+          return; // 🔥 STOP HERE (VERY IMPORTANT)
         }
+
+        // 🔥 2. USER CONTROL
+        select.disabled = !isCurrentUser;
 
         // 🔥 LIEU ENABLE ONLY FOR C/O
         if (lieu) {
@@ -4450,7 +4798,7 @@
             lieu.disabled = false;
           } else {
             lieu.disabled = true;
-            lieu.value = "";
+            //lieu.value = "";
           }
         }
 
@@ -4459,6 +4807,7 @@
     }
 
 
+    
     /* ===========================================================================================
                                 🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
   ================================================================================================== */
@@ -5986,7 +6335,11 @@
           mode = "percent", // "percent" | "value" | "custom"
 
           color = "#111827",
-          font = "10px sans-serif",
+          font = {
+            size: 12,
+            family: "Segoe UI, Arial, sans-serif",
+            weight: "bold"
+          },
 
           minDisplay = 0,
 
@@ -6005,7 +6358,7 @@
         const meta = chart.getDatasetMeta(numeratorDatasetIndex);
 
         ctx.save();
-        ctx.font = font;
+        ctx.font = `${font.weight || "normal"} ${font.size || 10}px ${font.family || "sans-serif"}`;
         ctx.fillStyle = color;
         ctx.textAlign = rotate ? "left" : "center";
 
@@ -6148,22 +6501,19 @@
       }, 300); // match CSS duration
     }
 
-    const BAR_WIDTH = 16; // width of bar
+    const BAR_WIDTH = 18; // width of bar
     const GAP = 7; // space between columns
     const STEP = BAR_WIDTH + GAP;
 
     //==============Auto Width to Max-Width of Chart Div =============//
+
+
     function setChartWidth(labels) {
       const inner = id("chartInner");
-      const scrollBox = qs(".chart-scroll");
+      if (!inner) return;
 
       const requiredWidth = labels.length * STEP;
-      const containerWidth = scrollBox.clientWidth;
-
-      inner.style.width =
-        requiredWidth > containerWidth
-          ? requiredWidth + "px" // enable scroll
-          : "100%"; // fit container
+      inner.style.width = requiredWidth + "px";
     }
 
 
@@ -6208,7 +6558,7 @@
 
     //=============== Highlight Table row on Chart Bar Hover ===========//
     function highlightTableRow(index) {
-      const rows = qsa("#sbgSideTable tbody tr");
+      const rows = qsa("#dashBoardTable tbody tr");
       const container = qs(".table-box");
 
       rows.forEach((r) => r.classList.remove("highlight"));
@@ -6218,7 +6568,7 @@
       const row = rows[index];
       row.classList.add("highlight");
 
-      const header = qs("#sbgSideTable thead");
+      const header = qs("#dashBoardTable thead");
       const headerHeight = header ? header.offsetHeight : 0;
 
       const rowTop = row.offsetTop;
@@ -6243,6 +6593,7 @@
         });
       }
     }
+
 
     //================= Table Row Hover effect on Chart ===============//
     let isTableHover = false;
@@ -6295,7 +6646,7 @@
       if (currentMode === "budget") {
         highlightTableRow(-1);
       } else {
-        highlightSalaryRow(-1);
+        highlightTableRow(-1);
       }
 
       chart.update("none");
@@ -6480,8 +6831,14 @@
 
       const serialLabels = labels.map((_, i) => i + 1);
 
-      // 🔥 width control (correct)
-      setChartWidth(labels);
+      // 🔥 width control
+      requestAnimationFrame(() => {
+        setChartWidth(labels);
+
+        if (window.barChart) {
+          window.barChart.resize(); // 🔥 force proper sizing
+        }
+      });
 
       window.barChart = new Chart(ctx, {
         type: "bar",
@@ -6567,8 +6924,13 @@
             if (isTableHover) return;
 
             if (elements.length > 0) {
-              const el = elements[0];
-              highlightTableRow(el.index);
+              const index = elements[0].index;
+
+              highlightTableRow(index);
+
+              // 🔥 ADD THIS (missing)
+              scrollChartToIndex(index);
+
             } else {
               highlightTableRow(-1);
             }
@@ -6623,28 +6985,32 @@
               grid: { display: false },
 
               // 🔥 ensures consistent spacing
-              categoryPercentage: 1.0,
-              barPercentage: 1.0,
+              //categoryPercentage: 1.0,
+              //barPercentage: 1.0,
             },
 
             y: {
               type: "logarithmic",
+
+              grid: {
+                display: false   // ✅ hides horizontal grid lines
+              },
+
               ticks: {
-                padding: 8, // 🔥 space from axis
+                padding: 8,
                 maxTicksLimit: 6,
                 callback: (v) => {
                   if (v >= 1e7) return "₹" + v / 1e7 + " Cr";
                   if (v >= 1e5) return "₹" + v / 1e5 + " L";
                   if (v >= 1e3) return "₹" + v / 1e3 + " K";
                   return "₹" + v;
-                },
-              },
-            },
+                }
+              }
+            }
           },
         },
 
-        plugins: [xAxisPillPlugin],
-        plugins: [columnLabelPlugin],
+        plugins: [xAxisPillPlugin, columnLabelPlugin],
       });
       attachChartMouseLeave(ctx, highlightTableRow);
     }
@@ -6881,7 +7247,13 @@
       const serialLabels = labels.map((_, i) => i + 1);
 
       // 🔥 width control
-      setChartWidth(labels);
+      requestAnimationFrame(() => {
+        setChartWidth(labels);
+
+        if (window.barChart) {
+          window.barChart.resize(); // 🔥 force proper sizing
+        }
+      });
 
       // 🔥 split income into tax + remaining
       const remainingArr = incomeArr.map((inc, i) =>
@@ -6971,9 +7343,15 @@
             if (isTableHover) return;
 
             if (elements.length > 0) {
-              highlightSalaryRow(elements[0].index);
+              const index = elements[0].index;
+
+              highlightTableRow(index);
+
+              // 🔥 ADD THIS (missing)
+              scrollChartToIndex(index);
+
             } else {
-              highlightSalaryRow(-1);
+              highlightTableRow(-1);
             }
           },
 
@@ -7037,12 +7415,11 @@
           },
         },
 
-        plugins: [xAxisPillPlugin],
-        plugins: [columnLabelPlugin],
+        plugins: [xAxisPillPlugin, columnLabelPlugin],
       });
 
       // 🔥 FIXED
-      attachChartMouseLeave(ctx, highlightSalaryRow);
+      attachChartMouseLeave(ctx, highlightTableRow);
     }
 
     function renderSalaryDashBoardTable(year, station) {
@@ -7128,39 +7505,6 @@
 
     }
 
-
-    function highlightSalaryRow(index) {
-      const rows = qsa("#sbgSideTable tbody tr");
-      const container = qs(".table-box");
-
-      rows.forEach((r) => r.classList.remove("highlight"));
-
-      if (!rows[index]) return;
-
-      const row = rows[index];
-      row.classList.add("highlight");
-
-      const header = qs("#sbgSideTable thead");
-      const headerHeight = header ? header.offsetHeight : 0;
-
-      const rowTop = row.offsetTop;
-      const rowBottom = rowTop + row.offsetHeight;
-
-      const viewTop = container.scrollTop;
-      const viewBottom = viewTop + container.clientHeight;
-
-      if (rowTop < viewTop + headerHeight + 10) {
-        container.scrollTo({
-          top: rowTop - headerHeight - 35,
-          behavior: "smooth",
-        });
-      } else if (rowBottom > viewBottom - 10) {
-        container.scrollTo({
-          top: rowBottom - container.clientHeight + 35,
-          behavior: "smooth",
-        });
-      }
-    }
 
     function renderSalaryCharts(year, station) {
       renderSalaryBarChart(year, station);
@@ -13563,8 +13907,8 @@
       const empIdx = headers.indexOf("Employee Name");
       const monthIdx = headers.indexOf("Salary Month");
       const netIdx = headers.indexOf("Gross Income");
-      const npsIdx = headers.indexOf("NPS");
-      const daaIdx = headers.indexOf("DAA on NPS");
+      const npsIdx = headers.indexOf("NPSE");
+      const daaIdx = headers.indexOf("DAA on NPSE");
       const stationIdx = headers.indexOf("Pay Drawn Station");
 
       const medIdx = headers.findIndex((h) =>
@@ -22082,7 +22426,7 @@
     //=====================================================================================================
     //                                  Duty Chart Log
     //====================================================================================================
-    const DUTY_OPTIONS = ["", "EL", "CL", "RH", "W/O", "C/O", "ML", "H/D", "SCL", "MOR", "GEN", "EVE", "MOR,GEN", "MOR,EVE", "GEN,EVE"];
+    const DUTY_OPTIONS = ["", "MOR", "GEN", "EVE", "MOR,GEN", "MOR,EVE", "GEN,EVE", "W/O", "C/O", "EL", "CL", "RH", "ML", "H/D", "SCL"];
 
     // =========================
     // 🔥 GET CURRENT WEEK END (SATURDAY)
@@ -22346,11 +22690,12 @@
     }
 
     // ✅ FORMAT DISPLAY
-    function formatDutyChartDate(date) {
-      const d = String(date.getDate()).padStart(2, "0");
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const y = date.getFullYear();
-      return `${d}/${m}/${y}`;
+    function formatDutyChartDate(d) {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+
+      return `${day}-${month}-${year}`;
     }
 
     // =========================
@@ -22404,13 +22749,6 @@
       renderEditableRequirementTable(weekData, weekStart, statusRow);
     }
 
-    // =========================
-    // 🔥 NO DATA
-    // =========================
-    function showNoData() {
-      id("dutyChartTable").innerHTML = "<div>No Data</div>";
-      id("dutyRequirementTable").innerHTML = "";
-    }
 
     // =========================
     // 🔥 DUTY TABLE
@@ -22578,7 +22916,8 @@
               const normalizedReq = normalize(reqVal);
               const isMatch = normalizedReq.includes("C/O");
 
-              weekMap[key].CO.push(isMatch ? `<b><u>${text}</u></b>` : text);
+              //weekMap[key].CO.push(isMatch ? `<b><u>${text}</u></b>` : text);
+              weekMap[key].CO.push(isMatch ? `${text}` : text);
             }
 
             // 🔹 LEAVES
@@ -22586,7 +22925,7 @@
 
               const text = `${emp}(${v})`;
 
-              weekMap[key].LV.push(bold(text));
+              weekMap[key].LV.push(text);
             }
 
           });
@@ -22697,48 +23036,60 @@
 
       const [dd, mm, yyyy] = parts;
 
-      return `${dd}/${mm}/${yyyy}`; // MM/DD/YYYY
+      return `${dd}-${mm}-${yyyy}`; // MM/DD/YYYY
     }
 
 
     function isPastWeek(weekStart) {
+
       const currentWeekEnd = getCurrentWeekEnd();
 
       const currentWeekStart = new Date(currentWeekEnd);
       currentWeekStart.setDate(currentWeekEnd.getDate() - 6);
 
-      return weekStart < currentWeekStart;
+      // 🔥 convert to timestamp (safe compare)
+      const ws = new Date(weekStart).setHours(0, 0, 0, 0);
+      const cs = new Date(currentWeekStart).setHours(0, 0, 0, 0);
+
+      return ws < cs;
+    }
+
+    
+    function getCurrentTimestamp() {
+      const now = new Date();
+
+      const pad = (n) => String(n).padStart(2, "0");
+
+      return `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
 
 
     function renderRequirementTableSeparate(data, weekStart, statusRow) {
+
       const container = id("dutyRequirementTable");
 
-      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
       const headers = data.length
         ? Object.keys(data[0])
         : Object.keys(statusRow || {});
 
       // =========================
-      // 🔥 FILTER EMPLOYEES (IN SERVICE ONLY)
+      // 🔥 FILTER EMPLOYEES
       // =========================
-      const employees = [];
-
-      headers.forEach(h => {
-        if (h.includes("Requirement")) {
+      const employees = headers
+        .filter(h => h.includes("Requirement"))
+        .map(h => {
           const name = h.replace(" Requirement", "").trim();
 
           const status = (statusRow && statusRow[h] || "").toUpperCase();
+          if (status !== "IN SERVICE") return null;
 
-          if (status !== "IN SERVICE") return;
-
-          employees.push({
+          return {
             name,
             reqKey: h,
             lieuKey: `${name} in lieu of`
-          });
-        }
-      });
+          };
+        })
+        .filter(Boolean);
 
       // =========================
       // 🔥 BUILD WEEK MAP
@@ -22771,6 +23122,7 @@
       // 🔥 FILL DATA
       // =========================
       data.forEach(row => {
+
         const dObj = parseDDMMYYYY(row.Date);
         if (!dObj) return;
 
@@ -22778,6 +23130,7 @@
         if (!weekMap[key]) return;
 
         employees.forEach(emp => {
+
           const reqVal = row[emp.reqKey];
           const lieuVal = row[emp.lieuKey];
 
@@ -22787,52 +23140,40 @@
       });
 
       // =========================
-      // 🔥 RENDER TABLE
+      // 🔥 RENDER TABLE (NEW)
       // =========================
       const isLocked = isPastWeek(weekStart);
-      console.log("Requirement Table Locked:", isLocked);
+      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
       let html = `
-      <table border="1">
+        <table border="1">
 
-        <colgroup>
-          <col style="width:140px">
-          ${Object.values(weekMap).map(() => `
-            <col style="width:120px">
-            <col style="width:150px">
-          `).join("")}
-        </colgroup>
-
-        <thead>
-          <tr>
-            <th colspan="${1 + (Object.keys(weekMap).length * 2)}" style="text-align:center;">
-              EMPLOYEES REQUIREMENT REGISTER
-            </th>
-          </tr>
-
-          <tr>
-            <th>Employee</th>
-
-            ${Object.values(weekMap).map(d => `
-              <th colspan="2">
-                ${formatDutyChartDate(d.date)}
-              </th>
-            `).join("")}
-          </tr>
-
-          <tr>
-            <th></th>
-
+          <colgroup>
+            <col style="width:140px">
             ${Object.values(weekMap).map(() => `
-              <th>Req</th>
-              <th>Lieu</th>
+              <col style="width:150px">
             `).join("")}
-          </tr>
-        </thead>
+          </colgroup>
 
-        <tbody>
+          <thead>
+            <tr>
+              <th colspan="${1 + Object.keys(weekMap).length}">
+                EMPLOYEES REQUIREMENT REGISTER
+              </th>
+            </tr>
+
+            <tr>
+              <th>Employee</th>
+              ${Object.values(weekMap).map((d, i) => `
+                <th>
+                  ${days[i]}<br>
+                  ${formatDutyChartDate(d.date)}
+                </th>
+              `).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
       `;
-
-      let i = 0;
 
       employees.forEach(emp => {
 
@@ -22844,7 +23185,9 @@
           const val = d.values[emp.name];
 
           html += `
-            <td style="padding:0">
+            <td>
+
+              <!-- SELECT -->
               <select class="req-select"
                 data-emp="${emp.name}"
                 data-date="${formatDutyChartDate(d.date)}"
@@ -22857,37 +23200,41 @@
                 `).join("")}
 
               </select>
-            </td>
 
-            <td style="padding:0">
+              <!-- LIEU -->
               <input type="date"
                 class="lieu-input"
                 data-emp="${emp.name}"
                 data-date="${formatDutyChartDate(d.date)}"
                 value="${convertToInputDate(val.lieu)}"
                 ${isLocked || val.req !== "C/O" ? "disabled" : ""}>
+
             </td>
           `;
         });
 
-        html += `</tr>`;
+        html += "</tr>";
       });
 
       html += "</tbody></table>";
 
+      container.innerHTML = html;
+
       setTimeout(() => {
         if (window.currentUser) {
+          const isLocked = isPastWeek(weekStart);
           lockRequirementTableForUser(window.currentUser, isLocked);
         }
       }, 0);
 
       container.innerHTML = html;
-      window.currentRequirementState = {
-        weekStart,
-        data,
-        statusRow
-      };
+          window.currentRequirementState = {
+            weekStart,
+            data,
+            statusRow
+          };
     }
+
 
 
     function renderEditableRequirementTable(data, weekStart, statusRow) {
@@ -23123,10 +23470,14 @@
       renderDutyTables(dutyData, week);
     }
 
+
+
     id("DutyChartFYSelect")?.addEventListener("change", (e) => {
       populateMonthDropdown(e.target.value);
       renderFromDropdowns();
     });
+
+
 
     id("DutyChartMonthSelect")?.addEventListener("change", () => {
       const year = id("DutyChartFYSelect").value;
@@ -23135,6 +23486,8 @@
       populateWeekDropdown(year, month);
       renderFromDropdowns();
     });
+
+
 
     // 🔥 ONLY WEEK triggers render
     id("DutyChartWeekSelect")?.addEventListener("change", () => {
@@ -23158,74 +23511,79 @@
 
     document.addEventListener("change", function (e) {
 
-      const select = e.target;
+      const el = e.target;
 
-      if (
-        !select.classList.contains("req-select") ||
-        !select.closest("#editableRequirementContainer")
-      ) return;
+      const isSelect = el.classList.contains("req-select");
+      const isLieu = el.classList.contains("lieu-input");
+
+      if (!isSelect && !isLieu) return;
+
+      const isEditTable = el.closest("#editableRequirementContainer");
+      const isReqTable = el.closest("#dutyRequirementTable");
+
+      if (!isEditTable && !isReqTable) return;
 
       // =========================
-      // 🔥 GET DATA
+      // 🔥 COMMON DATA
       // =========================
-      const emp = (select.dataset.emp || "").trim().toUpperCase();
-      const dateStr = select.dataset.date;
+      const emp = (el.dataset.emp || "").trim().toUpperCase();
+      const dateStr = el.dataset.date;
 
       if (!emp || !dateStr) return;
 
-      const currentInitial = (window.currentInitial || "").toUpperCase();
+      let select, lieuInput, td;
 
       // =========================
-      // 🔥 LIEU ENABLE/DISABLE
+      // 🔥 SELECT CHANGE
       // =========================
-      const td = select.closest("td");
-      const lieuInput = td?.querySelector(".lieu-input");
+      if (isSelect) {
 
-      if (lieuInput) {
+        select = el;
+        td = select.closest("td");
 
-        // 🔒 restrict to current user only
-        if (emp === currentInitial && select.value === "C/O") {
-          lieuInput.disabled = false;
-        } else {
-          lieuInput.disabled = true;
-          lieuInput.value = "";
+        // 🔥 SAME STRUCTURE (both tables now)
+        lieuInput = td?.querySelector(".lieu-input");
+
+        // 🔥 ENABLE / DISABLE LIEU
+        if (lieuInput) {
+          if (select.value === "C/O") {
+            lieuInput.disabled = false;
+          } else {
+            lieuInput.disabled = true;
+            //lieuInput.value = "";
+          }
+        }
+
+        // 🔥 UPDATE DUTY (ONLY edit table drives duty chart)
+        if (isEditTable) {
+          const values = select.value
+            ? select.value.split(",").map(v => v.trim())
+            : [];
+
+          updateDutyChart(emp, dateStr, values);
         }
       }
 
       // =========================
-      // 🔥 UPDATE DUTY CHART
+      // 🔥 LIEU CHANGE (FIXED)
       // =========================
-      const values = select.value
-        ? select.value.split(",").map(v => v.trim())
-        : [];
+      if (isLieu) {
 
-      updateDutyChart(emp, dateStr, values);
+        lieuInput = el;
+        td = lieuInput.closest("td");
 
-    });
+        select = td?.querySelector(".req-select");
+        if (!select) return;
 
+        // 🔥 ONLY EDIT TABLE UPDATES DUTY
+        if (isEditTable) {
 
-    document.addEventListener("change", function (e) {
+          const values = select.value
+            ? select.value.split(",").map(v => v.trim())
+            : [];
 
-      const select = e.target;
-
-      // 🔥 ONLY REQUIREMENT TABLE (NOT EDIT TABLE)
-      if (
-        !select.classList.contains("req-select") ||
-        !select.closest("#dutyRequirementTable")
-      ) return;
-
-      const td = select.closest("td");
-
-      // 🔥 LIEU INPUT IS IN NEXT CELL (NON-TRANSPOSE TABLE)
-      const lieuInput = td?.nextElementSibling?.querySelector(".lieu-input");
-
-      if (!lieuInput) return;
-
-      if (select.value === "C/O") {
-        lieuInput.disabled = false;
-      } else {
-        lieuInput.disabled = true;
-        lieuInput.value = "";
+          updateDutyChart(emp, dateStr, values);
+        }
       }
 
     });
@@ -23280,20 +23638,24 @@
         // =========================
         // 🔥 GET REQUIREMENT VALUE (FIXED)
         // =========================
+        // 🔥 ALWAYS USE CURRENT SELECT VALUES (NOT req-text)
+        const selectedVal = (values || []).slice().sort().join(",");
+
+        // 🔥 OPTIONAL: still compare with requirement if needed
+        let reqVal = "";
+
         const reqCell = document.querySelector(
           `.req-text[data-emp="${emp}"][data-date="${dateStr}"]`
         );
 
-        let reqVal = reqCell ? reqCell.textContent.trim() : "";
-
-        reqVal = reqVal
-          .replace(/\(.*?\)/g, "")
-          .split(",")
-          .map(v => v.trim())
-          .sort()
-          .join(",");
-
-        const selectedVal = (values || []).slice().sort().join(",");
+        if (reqCell) {
+          reqVal = reqCell.textContent
+            .replace(/\(.*?\)/g, "")
+            .split(",")
+            .map(v => v.trim())
+            .sort()
+            .join(",");
+        }
 
         const isMatch = reqVal === selectedVal;
 
@@ -23327,7 +23689,7 @@
 
             cell = cells[6];
             newVal = isMatch
-              ? `<b>${emp}(${v})</b>`
+              ? `${emp}(${v})`
               : `${emp}(${v})`;
           }
 
@@ -23336,10 +23698,13 @@
 
             cell = cells[5];
 
-            const lieuInput = document.querySelector(
-              `.lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
-            );
-
+            let lieuInput =
+              document.querySelector(
+                `#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
+              ) ||
+              document.querySelector(
+                `#dutyRequirementTable .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
+              );
             let lieuText = emp;
 
             if (lieuInput && lieuInput.value) {
@@ -23348,7 +23713,7 @@
             }
 
             newVal = isMatch
-              ? `<b>${lieuText}</b>`
+              ? `${lieuText}`
               : lieuText;
           }
 
@@ -23376,257 +23741,224 @@
       });
     }
 
-    
-async function saveRequirementData(modeType = "add") {
 
-  let reqData = [];
-  let dutyData = [];
+    async function saveDutyData() {
 
-  // =========================
-  // 🔥 GET ACTIVE TABLE
-  // =========================
-  const container =
-    id("editableRequirementContainer")?.style.display === "block"
-      ? id("editableRequirementContainer")
-      : id("dutyRequirementTable");
+      const role = (window.currentUser || "").trim().toUpperCase();
 
-  const table = container?.querySelector("table");
-  if (!table) return false;
+      let payload = [];
 
-  const rows = table.querySelectorAll("tbody tr");
+      // =========================
+      // 🔥 BUILD DUTY DATA (RIGHT TABLE)
+      // =========================
+      function getDutyFromEditTable() {
 
-  // =========================
-  // 🔥 COLLECT REQUIREMENT DATA
-  // =========================
-  rows.forEach(row => {
+        const table = id("editableRequirementContainer")?.querySelector("table");
+        if (!table) return [];
 
-    const empCell = row.querySelector("td");
-    if (!empCell) return;
+        const dataMap = {};
 
-    const emp = empCell.innerText.trim();
+        const selects = table.querySelectorAll(".req-select");
 
-    const selects = row.querySelectorAll(".req-select");
+        selects.forEach(sel => {
 
-    selects.forEach(select => {
+          const emp = sel.dataset.emp;
+          const date = sel.dataset.date;
 
-      const dateStr = select.dataset.date;
-      const value = select.value;
+          if (!emp || !date) return;
 
-      if (!dateStr || !value) return;
+          if (!dataMap[date]) dataMap[date] = { Date: date };
 
-      const td = select.closest("td");
+          const td = sel.closest("td");
+          const lieu = td?.querySelector(".lieu-input");
 
-      const lieuInput =
-        td?.querySelector(".lieu-input") ||
-        td?.nextElementSibling?.querySelector(".lieu-input");
+          let val = "";
 
-      const lieu = lieuInput?.value || "";
+          // =========================
+          // 🔥 CORRECT DUTY VALUE
+          // =========================
+          if (sel.value === "C/O") {
 
-      reqData.push({
-        Date: dateStr,
-        Employee: emp,
-        Requirement: value,
-        Lieu: lieu
-      });
+            if (lieu && lieu.value) {
+              const d = parseYMD(lieu.value);
+              val = `C/O(${formatDutyChartDate(d)})`;
+            } else {
+              val = "C/O";
+            }
 
-    });
+          } else {
+            val = sel.value || "";
+          }
 
-  });
+          // 🔥 MATCH SHEET COLUMN NAME
+          dataMap[date][`${emp} Duty`] = val;
 
-  // =========================
-  // ❌ VALIDATION
-  // =========================
-  if (!reqData.length) {
-    alert("❌ No valid data");
-    return false;
-  }
+        });
 
-  const invalid = reqData.some(r =>
-    r.Requirement === "C/O" && !r.Lieu
-  );
-
-  if (invalid) {
-    alert("❌ Please select Lieu date for C/O entries");
-    return false;
-  }
-
-  // =========================
-  // 🔥 TRANSFORM REQUIREMENT
-  // =========================
-  const reqSheetData = transformRequirementToSheet(reqData);
-
-  // =========================
-  // 🔥 COLLECT DUTY CHART DATA
-  // =========================
-  const dutyTable = id("dutyChartTable");
-  const dutyRows = dutyTable?.querySelectorAll("tbody tr");
-
-  dutyRows?.forEach(row => {
-
-    const firstCell = row.querySelector("td");
-    if (!firstCell) return;
-
-    const match = firstCell.innerText.match(/\d{2}\/\d{2}\/\d{4}/);
-    if (!match) return;
-
-    const dateStr = match[0];
-
-    const cells = row.querySelectorAll("td");
-
-    const map = {
-      MOR: 1,
-      GEN: 2,
-      EVE: 3,
-      "W/O": 4,
-      "C/O": 5,
-      LEAVE: 6
-    };
-
-    const rowObj = { Date: dateStr };
-
-    Object.entries(map).forEach(([type, idx]) => {
-
-      const cell = cells[idx];
-      if (!cell) return;
-
-      const text = cell.innerText.trim();
-      if (!text) return;
-
-      text.split(",").forEach(val => {
-
-        val = val.trim().replace(/<[^>]+>/g, "");
-
-        let emp = val;
-        let extra = "";
-
-        if (val.includes("(")) {
-          emp = val.split("(")[0].trim();
-          extra = val.match(/\((.*?)\)/)?.[1] || "";
-        }
-
-        const dutyCol = `${emp} Duty`;
-        const reqCol = `${emp} Requirement`;
-        const lieuCol = `${emp} in lieu of`;
-
-        if (type === "C/O") {
-          rowObj[dutyCol] = "C/O";
-          rowObj[lieuCol] = extra;
-        }
-
-        else if (type === "LEAVE") {
-          rowObj[reqCol] = extra;
-        }
-
-        else if (type === "W/O") {
-          rowObj[dutyCol] = "W/O";
-        }
-
-        else {
-          rowObj[dutyCol] = type; // MOR / GEN / EVE
-        }
-
-      });
-
-    });
-
-    dutyData.push(rowObj);
-
-  });
-
-  // =========================
-  // 🔥 MERGE BOTH
-  // =========================
-  const finalData = mergeRequirementAndDuty(reqSheetData, dutyData);
-
-  // =========================
-  // 🔥 API CALL
-  // =========================
-  try {
-
-    const res = await fetch(
-      "https://office-management-f425.onrender.com/duty/update",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          data: finalData,
-          mode: modeType === "add" ? "update" : "replace"
-        })
+        return Object.values(dataMap);
       }
-    );
 
-    const result = await res.json();
+      // =========================
+      // 🔥 BUILD REQUIREMENT DATA (LEFT TABLE)
+      // =========================
+      function getRequirementData() {
 
-    if (result?.status === "success") {
+        const table = id("dutyRequirementTable")?.querySelector("table");
+        if (!table) return [];
 
-      alert("✅ Duty + Requirement Saved Successfully");
+        const dataMap = {};
 
-      await loadTable("duty", "DutyDB");
+        const selects = table.querySelectorAll(".req-select");
 
-      return true;
+        selects.forEach(sel => {
 
-    } else {
-      console.error(result);
-      alert("❌ Save failed");
-      return false;
+          const emp = sel.dataset.emp;
+          const date = sel.dataset.date;
+
+          if (!emp || !date) return;
+
+          if (!dataMap[date]) dataMap[date] = { Date: date };
+
+          const td = sel.closest("td");
+          const lieuInput = td?.querySelector(".lieu-input");
+
+          let reqVal = (sel.value || "").trim();
+
+          // 🔥 NORMALIZE EMPTY
+          const isEmpty =
+            !reqVal ||
+            reqVal === "Select" ||
+            reqVal === "" ||
+            reqVal === "NONE";
+
+          let lieuVal = "";
+
+          if (!isEmpty && reqVal === "C/O" && lieuInput && lieuInput.value) {
+            const d = parseYMD(lieuInput.value);
+            lieuVal = formatDutyChartDate(d);
+          }
+
+          // =========================
+          // 🔥 ALWAYS SET (IMPORTANT)
+          // =========================
+          dataMap[date][`${emp} Requirement`] = isEmpty ? "" : reqVal;
+          dataMap[date][`${emp} in lieu of`] = isEmpty ? "" : lieuVal;
+          //dataMap[date][`${emp} Time Stamp`] = getCurrentTimestamp();
+
+        });
+
+        return Object.values(dataMap);
+      }
+
+      // =========================
+      // 🔥 ROLE BASED DATA
+      // =========================
+      if (role === "ENGG" || role === "MASTER") {
+
+        // 🔥 BUILD DUTY FROM EDIT TABLE
+        payload = getDutyFromEditTable();
+
+      } else {
+
+        // 🔥 NORMAL USER → REQUIREMENT
+        payload = getRequirementData();
+      }
+
+      if (!payload.length) {
+        alert("❌ No data to save");
+        return;
+      }
+
+      // =========================
+      // 🔥 SAVE API CALL
+      // =========================
+      try {
+
+        const res = await fetch(
+          "https://office-management-f425.onrender.com/duty/update",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              data: payload,
+              role: role
+            })
+          }
+        );
+
+        const text = await res.text();
+
+        // 🔥 FIX: prevent JSON crash
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch {
+          console.error("Server returned HTML:", text);
+          alert("❌ Server error (not JSON)");
+          return;
+        }
+
+        if (result.status === "success") {
+          alert("✅ Saved successfully");
+        } else {
+          alert("❌ Save failed");
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("❌ Network error");
+      }
     }
 
-  } catch (err) {
-    console.error(err);
-    alert("❌ Network error");
-    return false;
-  }
-}
 
+    function transformRequirementToSheet(data) {
 
-function transformRequirementToSheet(data) {
+      const map = {};
 
-  const map = {};
+      data.forEach(r => {
 
-  data.forEach(r => {
+        const key = r.Date;
 
-    const key = r.Date;
+        if (!map[key]) map[key] = { Date: key };
 
-    if (!map[key]) map[key] = { Date: key };
+        map[key][`${r.Employee} Requirement`] = r.Requirement;
 
-    map[key][`${r.Employee} Requirement`] = r.Requirement;
+        if (r.Requirement === "C/O") {
+          map[key][`${r.Employee} in lieu of`] = r.Lieu;
+        }
 
-    if (r.Requirement === "C/O") {
-      map[key][`${r.Employee} in lieu of`] = r.Lieu;
+      });
+
+      return Object.values(map);
     }
 
-  });
 
-  return Object.values(map);
-}
+    function mergeRequirementAndDuty(req, duty) {
 
+      const map = {};
 
-function mergeRequirementAndDuty(req, duty) {
+      [...req, ...duty].forEach(r => {
 
-  const map = {};
+        const key = r.Date;
 
-  [...req, ...duty].forEach(r => {
+        if (!map[key]) map[key] = { Date: key };
 
-    const key = r.Date;
+        Object.assign(map[key], r);
 
-    if (!map[key]) map[key] = { Date: key };
+      });
 
-    Object.assign(map[key], r);
-
-  });
-
-  return Object.values(map);
-}
+      return Object.values(map);
+    }
 
 
-on("DutysaveBtn", "click", async () => {
-  await saveRequirementData("add");
-});
+    on("DutysaveBtn", "click", async () => {
+      await saveDutyData();
+      await loadTable("duty", "DutyChart");
+      const week = id("DutyChartWeekSelect")?.value;
+      if (!week) return;
 
-
-    
+      renderDutyTables(dutyData, week);
+    });
   </script>
 </body>
 
