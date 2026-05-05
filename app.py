@@ -478,7 +478,7 @@ def update_duty():
                     if h.endswith("Duty"):
                         row_data[idx] = val or ""
                 else:
-                    if "Requirement" in h or "lieu" in h:
+                    if "Requirement" in h or "lieu" in h or "Time Stamp" in h:
                         row_data[idx] = val or ""
 
             # =========================
