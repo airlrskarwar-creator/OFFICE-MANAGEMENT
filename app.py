@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 from flask_cors import CORS
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import os
 import json
 import threading
@@ -431,144 +431,117 @@ def update_duty():
     try:
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        mode = req_data.get("mode", "update")
+        role = (req_data.get("role") or "").upper()
 
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
 
-        # =========================
-        # 🔥 READ EXISTING SHEET
-        # =========================
         existing = duty_sheet.get_all_values()
 
-        if not existing:
-            return jsonify({"status": "error", "message": "Sheet empty"}), 400
+        # =========================
+        # 🔥 FIND HEADER ROW
+        # =========================
+        header_idx = None
+        for i, r in enumerate(existing):
+            if r and str(r[0]).strip().upper() == "DATE":
+                header_idx = i
+                break
 
-        headers = existing[0]
+        if header_idx is None:
+            return jsonify({"status": "error", "message": "Header not found"}), 400
+
+        headers = existing[header_idx]
 
         # =========================
-        # 🔥 HELPER
+        # 🔥 FIND STATUS ROW
         # =========================
-        def build_row(obj):
-            return [obj.get(h, "") for h in headers]
-
-        # =========================
-        # 🔥 REPLACE MODE
-        # =========================
-        if mode == "replace":
-
-            new_rows = [build_row(r) for r in rows]
-
-            # remove empty rows
-            new_rows = [
-                r for r in new_rows
-                if any(str(x).strip() for x in r)
-            ]
-
-            duty_sheet.clear()
-            duty_sheet.append_row(headers)
-
-            # preserve STATUS row
-            status_row = existing[1] if len(existing) > 1 else []
-            if status_row:
-                duty_sheet.append_row(status_row)
-
-            duty_sheet.append_rows(new_rows)
+        status_row = next(
+            (r for r in existing if str(r[0]).strip().upper() == "STATUS"),
+            None
+        )
 
         # =========================
-        # 🔥 UPDATE MODE (MERGE)
+        # 🔥 CLEAN EXISTING DATA
         # =========================
-        else:
+        data_map = {}
 
-            data_map = {}
+        for r in existing[header_idx + 2:]:
 
-            for r in existing:
+            if not r or not any(str(x).strip() for x in r):
+                continue
 
-                # ❌ skip empty rows
-                if not r or not any(str(x).strip() for x in r):
+            first = str(r[0]).strip().upper()
+
+            if first in ["DATE", "STATUS"] or first.startswith("COLUMN"):
+                continue
+
+            date = r[0].strip()
+
+            try:
+                datetime.strptime(date.replace("/", "-"), "%d-%m-%Y")
+            except:
+                continue
+
+            data_map[date] = dict(zip(headers, r))
+
+        # =========================
+        # 🔥 MERGE BASED ON ROLE
+        # =========================
+        for r in rows:
+
+            date = r.get("Date")
+            if not date:
+                continue
+
+            if date not in data_map:
+                data_map[date] = {"Date": date}
+
+            for key, val in r.items():
+
+                if key == "Date":
                     continue
 
-                first = str(r[0]).strip().upper()
+                # 🔥 ENGG → ONLY DUTY COLUMNS
+                if role in ["ENGG", "MASTER"]:
+                    if "Duty" in key:
+                        data_map[date][key] = val
 
-                # ❌ skip header rows
-                if first in ["DATE", "COLUMN 1", "STATUS"]:
-                    continue
+                # 🔥 USER → ONLY REQUIREMENT
+                else:
+                    if "Requirement" in key or "lieu" in key:
+                        data_map[date][key] = val
 
-                # ❌ skip malformed rows
-                if len(r) < 2:
-                    continue
+        # =========================
+        # 🔥 SORT
+        # =========================
+        def parse_date(d):
+            try:
+                return datetime.strptime(d.replace("/", "-"), "%d-%m-%Y")
+            except:
+                return datetime.max
 
-                date = str(r[0]).strip()
+        sorted_dates = sorted(data_map.keys(), key=parse_date)
 
-                # ❌ invalid date protection
-                try:
-                    datetime.strptime(date.replace("/", "-"), "%d-%m-%Y")
-                except:
-                    continue
+        final_rows = [
+            [data_map[d].get(h, "") for h in headers]
+            for d in sorted_dates
+        ]
 
-                data_map[date] = dict(zip(headers, r))
+        # =========================
+        # 🔥 WRITE CLEAN
+        # =========================
+        duty_sheet.clear()
+        duty_sheet.append_row(headers)
 
-            # =========================
-            # 🔥 MERGE NEW DATA
-            # =========================
-            for r in rows:
+        if status_row:
+            duty_sheet.append_row(status_row)
 
-                date = r.get("Date")
-                if not date:
-                    continue
+        duty_sheet.append_rows(final_rows)
 
-                if date not in data_map:
-                    data_map[date] = {"Date": date}
-
-                data_map[date].update(r)
-
-            # =========================
-            # 🔥 SORT CLEAN
-            # =========================
-            def parse_date(d):
-                try:
-                    return datetime.strptime(d.replace("/", "-"), "%d-%m-%Y")
-                except:
-                    return datetime.max
-
-            sorted_dates = sorted(data_map.keys(), key=parse_date)
-
-            final_rows = [
-                [data_map[d].get(h, "") for h in headers]
-                for d in sorted_dates
-            ]
-
-            # =========================
-            # 🔥 FINAL CLEAN (IMPORTANT)
-            # =========================
-            final_rows = [
-                r for r in final_rows
-                if r[0] and r[0].strip() != ""  # only valid dates
-            ]
-
-            # =========================
-            # 🔥 WRITE BACK CLEAN
-            # =========================
-            duty_sheet.clear()
-
-            duty_sheet.append_row(headers)
-
-            # preserve STATUS row ONLY ONCE
-            status_row = next(
-                (r for r in existing if str(r[0]).upper() == "STATUS"),
-                None
-            )
-
-            if status_row:
-                duty_sheet.append_row(status_row)
-
-            duty_sheet.append_rows(final_rows)
+        return jsonify({"status": "success"})
 
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/health")
