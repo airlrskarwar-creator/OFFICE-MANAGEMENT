@@ -433,36 +433,38 @@ def update_duty():
 
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        role = (req_data.get("role") or "").strip().upper()
-        current_user = (req_data.get("user") or "").strip().upper()
+        role = (req_data.get("role") or "").upper()
 
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
 
         all_values = duty_sheet.get_all_values()
+
         headers = all_values[0]
 
         # =========================
         # 🔥 MAP DATE → ROW INDEX
         # =========================
         date_row_map = {}
+
         for i, r in enumerate(all_values[2:], start=3):
             if r and r[0].strip():
                 date_row_map[r[0].strip()] = i
 
+        # =========================
+        # 🔥 PREPARE BATCH UPDATES
+        # =========================
         updates = []
         new_rows = []
 
-        # =========================
-        # 🔥 PROCESS EACH ROW
-        # =========================
         for obj in rows:
 
             date = obj.get("Date")
             if not date:
                 continue
 
-            row_data = [None] * len(headers)
+            # build row template
+            row_data = [""] * len(headers)
 
             for idx, h in enumerate(headers):
 
@@ -472,41 +474,15 @@ def update_duty():
 
                 val = obj.get(h)
 
-                # =========================
-                # 🔥 REQUIREMENT + LIEU (ALL USERS)
-                # =========================
-                if "Requirement" in h or "lieu" in h:
-                    row_data[idx] = val if val is not None else ""
-
-                # =========================
-                # 🔥 DUTY (ONLY ENGG / MASTER)
-                # =========================
-                elif h.endswith("Duty"):
-                    if role in ["ENGG", "MASTER"]:
-                        row_data[idx] = val if val is not None else ""
-                    else:
-                        row_data[idx] = None  # do not touch
-
-                # =========================
-                # 🔥 TIMESTAMP (ONLY NORMAL USERS)
-                # =========================
-                elif h.endswith("Time Stamp"):
-
-                    emp_name = h.replace(" Time Stamp", "").strip().upper()
-
-                    # ❌ NO TIMESTAMP FOR ENGG / MASTER
-                    if role in ["ENGG", "MASTER"]:
-                        row_data[idx] = None
-
-                    # ✅ ONLY CURRENT USER
-                    elif emp_name == current_user:
-                        row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-
-                    else:
-                        row_data[idx] = None  # do not touch
+                if role in ["ENGG", "MASTER"]:
+                    if h.endswith("Duty"):
+                        row_data[idx] = val or ""
+                else:
+                    if "Requirement" in h or "lieu" in h:
+                        row_data[idx] = val or ""
 
             # =========================
-            # 🔥 UPDATE EXISTING ROW
+            # 🔥 EXISTING ROW → BATCH UPDATE
             # =========================
             if date in date_row_map:
 
@@ -514,30 +490,25 @@ def update_duty():
 
                 for col_idx, value in enumerate(row_data, start=1):
 
-                    if value is None:
-                        continue  # 🔥 DO NOT OVERWRITE
-
                     updates.append({
-                        "range": gspread.utils.rowcol_to_a1(row_index, col_idx),
-                        "values": [[value]]
+                        "range": f"{gspread.utils.rowcol_to_a1(row_index, col_idx)}",
+                        "values": [[value if value is not None else ""]]
                     })
 
             # =========================
-            # 🔥 NEW ROW
+            # 🔥 NEW ROW → APPEND LATER
             # =========================
             else:
-                new_rows.append([
-                    v if v is not None else "" for v in row_data
-                ])
+                new_rows.append(row_data)
 
         # =========================
-        # 🔥 BATCH UPDATE
+        # 🔥 EXECUTE BATCH UPDATE
         # =========================
         if updates:
             duty_sheet.batch_update(updates)
 
         # =========================
-        # 🔥 APPEND NEW ROWS
+        # 🔥 APPEND NEW ROWS (ONCE)
         # =========================
         if new_rows:
             duty_sheet.append_rows(new_rows)
