@@ -481,9 +481,22 @@ def update_duty():
                         row_data[idx] = val if val is not None else ""
 
                     elif h.endswith("Time Stamp"):
-                        emp_name = h.replace(" Time Stamp", "").upper()
-                        if emp_name == current_user:
-                            row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+                        emp_name = h.replace(" Time Stamp", "").strip().upper()
+                        user_clean = current_user.strip().upper()
+
+                        if emp_name == user_clean:
+
+                            # 🔥 CHECK IF THIS USER HAS ANY DATA IN THIS ROW
+                            user_changed = any(
+                                key.startswith(user_clean) and obj.get(key) is not None
+                                for key in obj.keys()
+                            )
+
+                            if user_changed:
+                                row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                            else:
+                                row_data[idx] = None
                         else:
                             row_data[idx] = None
 
