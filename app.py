@@ -482,18 +482,30 @@ def update_duty():
 
             data_map = {}
 
-            # 🔥 skip header + STATUS row
-            for r in existing[2:]:
+            for r in existing:
 
-                # skip blank rows
-                if not r or not r[0].strip():
+                # ❌ skip empty rows
+                if not r or not any(str(x).strip() for x in r):
                     continue
 
-                # skip duplicate headers
-                if r[0].strip().upper() == "DATE":
+                first = str(r[0]).strip().upper()
+
+                # ❌ skip header rows
+                if first in ["DATE", "COLUMN 1", "STATUS"]:
                     continue
 
-                date = r[0].strip()
+                # ❌ skip malformed rows
+                if len(r) < 2:
+                    continue
+
+                date = str(r[0]).strip()
+
+                # ❌ invalid date protection
+                try:
+                    datetime.strptime(date.replace("/", "-"), "%d-%m-%Y")
+                except:
+                    continue
+
                 data_map[date] = dict(zip(headers, r))
 
             # =========================
@@ -511,12 +523,11 @@ def update_duty():
                 data_map[date].update(r)
 
             # =========================
-            # 🔥 SORT BY DATE
+            # 🔥 SORT CLEAN
             # =========================
             def parse_date(d):
                 try:
-                    d = d.strip().replace("/", "-")
-                    return datetime.strptime(d, "%d-%m-%Y")
+                    return datetime.strptime(d.replace("/", "-"), "%d-%m-%Y")
                 except:
                     return datetime.max
 
@@ -527,26 +538,31 @@ def update_duty():
                 for d in sorted_dates
             ]
 
-            # remove empty rows
+            # =========================
+            # 🔥 FINAL CLEAN (IMPORTANT)
+            # =========================
             final_rows = [
                 r for r in final_rows
-                if any(str(x).strip() for x in r)
+                if r[0] and r[0].strip() != ""  # only valid dates
             ]
 
             # =========================
             # 🔥 WRITE BACK CLEAN
             # =========================
             duty_sheet.clear()
+
             duty_sheet.append_row(headers)
 
-            # preserve STATUS row
-            status_row = existing[1] if len(existing) > 1 else []
+            # preserve STATUS row ONLY ONCE
+            status_row = next(
+                (r for r in existing if str(r[0]).upper() == "STATUS"),
+                None
+            )
+
             if status_row:
                 duty_sheet.append_row(status_row)
 
             duty_sheet.append_rows(final_rows)
-
-        return jsonify({"status": "success"})
 
     except Exception as e:
         return jsonify({
