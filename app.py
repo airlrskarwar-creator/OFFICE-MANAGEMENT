@@ -503,7 +503,7 @@ def update_duty():
 
                 # 🔥 ENGG → ONLY DUTY COLUMNS
                 if role in ["ENGG", "MASTER"]:
-                    if "Duty" in key:
+                    if key.endswith("Duty"):
                         data_map[date][key] = val
 
                 # 🔥 USER → ONLY REQUIREMENT
