@@ -433,8 +433,8 @@ def update_duty():
 
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        role = (req_data.get("role") or "").upper()
-        current_user = (req_data.get("user") or "").upper()
+        role = (req_data.get("role") or "").strip().upper()
+        current_user = (req_data.get("user") or "").strip().upper()
 
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
@@ -462,7 +462,7 @@ def update_duty():
             if not date:
                 continue
 
-            row_data = [None] * len(headers)  # 🔥 IMPORTANT
+            row_data = [None] * len(headers)
 
             for idx, h in enumerate(headers):
 
@@ -473,43 +473,37 @@ def update_duty():
                 val = obj.get(h)
 
                 # =========================
-                # 🔥 NORMAL USERS (Requirement Mode)
+                # 🔥 REQUIREMENT + LIEU (ALL USERS)
                 # =========================
-                if role not in ["ENGG", "MASTER"]:
+                if "Requirement" in h or "lieu" in h:
+                    row_data[idx] = val if val is not None else ""
 
-                    if "Requirement" in h or "lieu" in h:
+                # =========================
+                # 🔥 DUTY (ONLY ENGG / MASTER)
+                # =========================
+                elif h.endswith("Duty"):
+                    if role in ["ENGG", "MASTER"]:
                         row_data[idx] = val if val is not None else ""
-
-                    elif h.endswith("Time Stamp"):
-
-                        emp_name = h.replace(" Time Stamp", "").strip().upper()
-                        user_clean = current_user.strip().upper()
-
-                        if emp_name == user_clean:
-
-                            # 🔥 CHECK IF THIS USER HAS ANY DATA IN THIS ROW
-                            user_changed = any(
-                                key.startswith(user_clean) and obj.get(key) is not None
-                                for key in obj.keys()
-                            )
-
-                            if user_changed:
-                                row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                            else:
-                                row_data[idx] = None
-                        else:
-                            row_data[idx] = None
+                    else:
+                        row_data[idx] = None  # do not touch
 
                 # =========================
-                # 🔥 ENGG / MASTER (Duty Mode)
+                # 🔥 TIMESTAMP (ONLY NORMAL USERS)
                 # =========================
-                else:
+                elif h.endswith("Time Stamp"):
 
-                    if h.endswith("Duty"):
-                        row_data[idx] = val if val is not None else ""
+                    emp_name = h.replace(" Time Stamp", "").strip().upper()
 
-                    elif "Time Stamp" in h:
-                        row_data[idx] = None  # ❌ DO NOT UPDATE
+                    # ❌ NO TIMESTAMP FOR ENGG / MASTER
+                    if role in ["ENGG", "MASTER"]:
+                        row_data[idx] = None
+
+                    # ✅ ONLY CURRENT USER
+                    elif emp_name == current_user:
+                        row_data[idx] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+                    else:
+                        row_data[idx] = None  # do not touch
 
             # =========================
             # 🔥 UPDATE EXISTING ROW
@@ -521,7 +515,7 @@ def update_duty():
                 for col_idx, value in enumerate(row_data, start=1):
 
                     if value is None:
-                        continue  # 🔥 SKIP (IMPORTANT)
+                        continue  # 🔥 DO NOT OVERWRITE
 
                     updates.append({
                         "range": gspread.utils.rowcol_to_a1(row_index, col_idx),
@@ -532,7 +526,9 @@ def update_duty():
             # 🔥 NEW ROW
             # =========================
             else:
-                new_rows.append([v if v is not None else "" for v in row_data])
+                new_rows.append([
+                    v if v is not None else "" for v in row_data
+                ])
 
         # =========================
         # 🔥 BATCH UPDATE
