@@ -514,7 +514,8 @@ def update_duty():
             # =========================
             def parse_date(d):
                 try:
-                    return datetime.strptime(d.strip(), "%d-%m-%Y")
+                    d = d.strip().replace("/", "-")
+                    return datetime.strptime(d, "%d-%m-%Y")
                 except:
                     return datetime.max
 
