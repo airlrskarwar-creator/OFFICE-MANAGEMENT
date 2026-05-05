@@ -480,7 +480,7 @@ def update_duty():
                     if "Requirement" in h or "lieu" in h:
                         row_data[idx] = val if val is not None else ""
 
-                    elif h.endswith("Time Stamp"):
+                    elif "Time Stamp" in h:
 
                         emp_name = h.replace(" Time Stamp", "").upper()
 
