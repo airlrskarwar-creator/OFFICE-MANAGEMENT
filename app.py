@@ -490,11 +490,10 @@ def update_duty():
 
                 for col_idx, value in enumerate(row_data, start=1):
 
-                    if value != "":
-                        updates.append({
-                            "range": f"{gspread.utils.rowcol_to_a1(row_index, col_idx)}",
-                            "values": [[value]]
-                        })
+                    updates.append({
+                        "range": f"{gspread.utils.rowcol_to_a1(row_index, col_idx)}",
+                        "values": [[value if value is not None else ""]]
+                    })
 
             # =========================
             # 🔥 NEW ROW → APPEND LATER
