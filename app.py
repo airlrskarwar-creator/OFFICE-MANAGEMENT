@@ -429,21 +429,22 @@ def bulk_update_sbg():
 def update_duty():
 
     try:
-        from datetime import datetime
-
         req_data = request.get_json()
+
         rows = req_data.get("data", [])
         role = (req_data.get("role") or "").upper()
 
         if not rows:
-            return jsonify({"status": "error", "message": "No data"}), 400
+            return jsonify({
+                "status": "error",
+                "message": "No data"
+            }), 400
 
         all_values = duty_sheet.get_all_values()
-
         headers = all_values[0]
 
         # =========================
-        # 🔥 MAP DATE → ROW INDEX
+        # 🔥 DATE → ROW MAP
         # =========================
         date_row_map = {}
 
@@ -451,20 +452,21 @@ def update_duty():
             if r and r[0].strip():
                 date_row_map[r[0].strip()] = i
 
-        # =========================
-        # 🔥 PREPARE BATCH UPDATES
-        # =========================
         updates = []
         new_rows = []
 
+        # =========================
+        # 🔥 PROCESS ROWS
+        # =========================
         for obj in rows:
 
             date = obj.get("Date")
+
             if not date:
                 continue
 
-            # build row template
-            row_data = [""] * len(headers)
+            # 🔥 IMPORTANT
+            row_data = [None] * len(headers)
 
             for idx, h in enumerate(headers):
 
@@ -474,15 +476,26 @@ def update_duty():
 
                 val = obj.get(h)
 
+                # =========================
+                # 🔥 ENGG / MASTER
+                # =========================
                 if role in ["ENGG", "MASTER"]:
+
+                    # ✅ ONLY DUTY COLUMNS
                     if h.endswith("Duty"):
-                        row_data[idx] = val or ""
+                        row_data[idx] = val if val is not None else ""
+
+                # =========================
+                # 🔥 NORMAL USERS
+                # =========================
                 else:
+
+                    # ✅ ONLY REQUIREMENT + LIEU
                     if "Requirement" in h or "lieu" in h:
-                        row_data[idx] = val or ""
+                        row_data[idx] = val if val is not None else ""
 
             # =========================
-            # 🔥 EXISTING ROW → BATCH UPDATE
+            # 🔥 UPDATE EXISTING ROW
             # =========================
             if date in date_row_map:
 
@@ -490,32 +503,46 @@ def update_duty():
 
                 for col_idx, value in enumerate(row_data, start=1):
 
+                    # 🔥 SKIP untouched columns
+                    if value is None:
+                        continue
+
                     updates.append({
-                        "range": f"{gspread.utils.rowcol_to_a1(row_index, col_idx)}",
-                        "values": [[value if value is not None else ""]]
+                        "range": gspread.utils.rowcol_to_a1(
+                            row_index,
+                            col_idx
+                        ),
+                        "values": [[value]]
                     })
 
             # =========================
-            # 🔥 NEW ROW → APPEND LATER
+            # 🔥 NEW ROW
             # =========================
             else:
-                new_rows.append(row_data)
+
+                new_rows.append([
+                    v if v is not None else ""
+                    for v in row_data
+                ])
 
         # =========================
-        # 🔥 EXECUTE BATCH UPDATE
+        # 🔥 BATCH UPDATE
         # =========================
         if updates:
             duty_sheet.batch_update(updates)
 
         # =========================
-        # 🔥 APPEND NEW ROWS (ONCE)
+        # 🔥 APPEND NEW ROWS
         # =========================
         if new_rows:
             duty_sheet.append_rows(new_rows)
 
-        return jsonify({"status": "success"})
+        return jsonify({
+            "status": "success"
+        })
 
     except Exception as e:
+
         return jsonify({
             "status": "error",
             "message": str(e)
