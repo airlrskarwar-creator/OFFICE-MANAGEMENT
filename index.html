@@ -255,8 +255,8 @@
     ============================= */
 
     .login-container{
-      width:850px;
-      height:480px;
+      width:900px;
+      height:550px;
       background:white;
       border-radius:16px;
       box-shadow:0 20px 50px rgba(0,0,0,0.2);
@@ -290,7 +290,7 @@
     }
 
     .branding img{
-      width:200px;
+      width:300px;
       margin-bottom:20px;
     }
 
@@ -319,11 +319,11 @@
 
     .login-right{
       flex:1;
-      padding:60px 50px;
+      padding:50px 30px;
       display:flex;
       flex-direction:column;
       justify-content:center;
-      background:linear-gradient(135deg,#5aafff,#2ef8ff);
+      background:linear-gradient(135deg,#ffaf8f,#ffffff,rgb(128, 255, 128));
       color:rgb(0, 9, 61);
     }
 
@@ -331,6 +331,7 @@
       margin-bottom:30px;
       color:rgb(0, 9, 61);
       font-size:20px;
+      text-align: center;
     }
 
     /* =============================
@@ -341,8 +342,8 @@
       display:flex;
       align-items:center;
       gap:12px;
-      height: 50px !important;
-      padding:10px 12px;
+      height: 65px !important;
+      padding:2px 12px;
       border-radius:12px;
       background:rgba(34, 34, 34, 0.582);
       border:2px solid transparent;
@@ -351,19 +352,39 @@
     }
 
     /* Remove input border completely */
-    .input-box select, .input-box input{
+    .input-box select{
       flex:1;
       border:none;
       outline:none;
       background:transparent;
-      font-size:15px !important;
-      color:rgb(206, 240, 255);
+      font-size:16px !important;
+      color:rgb(255, 255, 255);
       font-weight:500;
       box-shadow:none;
-      min-height:30px;
+      min-height:60px;
       width: 100%;
       margin-left: -40px;
       padding-left: 50px;
+      padding-top: 20px;
+    }
+    .input-box input{
+      flex:1;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:16px !important;
+      color:rgb(255, 255, 255);
+      font-weight:500;
+      box-shadow:none;
+      min-height:60px;
+      width: 100%;
+      margin-left: -40px;
+      padding-left: 50px;
+      padding-top: 10px;
+    }
+
+    .input-box select:disabled, .input-box:has(select:disabled) i{
+      color: gray;
     }
 
     .input-box select,.input-box select::picker(select) {
@@ -371,7 +392,6 @@
     }
 
     .input-box select::picker(select) {
-      margin-top: 7px;
       border: 1px solid #e0e0e0;
       border-radius: 12px;
       background: white;
@@ -379,7 +399,9 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       
       /* Creates the gap from the input box */
-      margin-top: 10px;
+      margin-top: 5px;
+      margin-left: -20px;
+      width: max-content;  
       
       /* Optional: Smooth entry (Check browser support) */
       transition: opacity 0.2s ease, transform 0.2s ease;
@@ -390,6 +412,7 @@
       padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .input-box select option:checked {
@@ -400,7 +423,8 @@
 
     .input-box select option:hover {
       background-color: #9ff9ff;
-      color: black;
+      color: blue;
+      font-weight: bold;
     }
 
     .input-box:hover, .input-box:has(select:focus), .input-box:has(select:open) {
@@ -410,7 +434,7 @@
 
     .input-box:has(select:disabled){
       background: transparent;
-      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 62, 112, 0.3);
     }
     .input-box:has(select:disabled):hover {
       scale: 1.0;
@@ -423,8 +447,8 @@
 
     /* Icon style */
     .input-box i{
-      font-size:30px;
-      color:rgb(206, 240, 255);
+      font-size:40px;
+      color:rgb(255, 255, 255);
       transition:0.3s ease;
     }
 
@@ -447,7 +471,7 @@
 
     /* 🔥 ERROR */
     #loginError {
-      font-size: 14px;
+      font-size: 15px;
       color: #ff0000;
       font-weight: bold;
       text-align: center;
@@ -463,7 +487,7 @@
 
     #togglePassword {
       position: absolute;
-      right: -45px;
+      right: -40px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
@@ -474,7 +498,7 @@
 
     /* 🔥 icon style */
     #togglePassword i {
-      font-size: 25px;
+      font-size: 28px;
       color:rgb(206, 240, 255);
     }
 
@@ -483,13 +507,13 @@
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      padding:12px;
+      padding:20px;
       border:none;
       border-radius:8px;
       background:#02005c;
       color:white;
       cursor:pointer;
-      transition:all 0.3s ease;      
+      transition:all 0.3s ease;  
     }
 
     #loginBtn:hover{
@@ -505,18 +529,18 @@
     }
 
     #loginBtn i{
-      font-size:18px;
+      font-size:25px;
       margin-right:8px;
     }
 
     #loginBtn p{
-      font-size:15px;
+      font-size:16px;
       font-weight:500;
     }
     
     .caps-warning {
       display: none;
-      font-size: 14px;
+      font-size: 15px;
       color: #ff0000;
       font-weight: bold;
       position: absolute;
@@ -3024,6 +3048,11 @@
         display: flex;
         flex-direction: column;
       }
+
+       .input-box select::picker(select) {
+        margin-left: 0px;
+        width: max-content;
+       }
     }
   </style>
 </head>
@@ -3036,7 +3065,7 @@
       <!-- LEFT PANEL -->
       <div class="login-left">
         <div class="branding">
-          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" class="login-logo">
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" class="login-logo">
           <h1>Office Management System</h1>
         </div>
       </div>
@@ -3086,7 +3115,7 @@
     <div class="left-panel collapsed" id="sidebar">
       <!-- Toggle button -->
       <div class="sidebar-header" onclick="toggleSidebar()">
-        <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" class="sidebar-logo">
+        <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" class="sidebar-logo">
         <span class="app-title">OFFICE-MANAGEMENT</span>
         <div class="sidebar-toggle">☰</div>
       </div>
@@ -3156,7 +3185,7 @@
       </div>
     </div>
     <div class="right-panel">
-      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
       <div class="SectionPage" id="DashBoard" style="display: none">
         <div class="header" style="text-align: center;">
           <h2>OFFICE DASHBOARD</h2>
@@ -3433,7 +3462,7 @@
                 <tr>
                   <th colspan="13" style="border: none">
                     <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
                       <div class="header-text">
                         <h1>PRASAR BHARATI</h1>
                         <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
@@ -3519,7 +3548,7 @@
                 <tr>
                   <th colspan="20" style="border: none">
                     <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
                       <div class="header-text">
                         <h1>PRASAR BHARATI</h1>
                         <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
@@ -3645,7 +3674,7 @@
                         padding: 8px 2px;
                       ">
                     <img id="SalarySlipLogo"
-                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
                     <div style="
                           display: flex;
                           flex-direction: column;
@@ -4758,6 +4787,8 @@
 
           if (role === "MASTER" || role === "ENGG") {
             isVisible = true;
+            id("DutyexcelBtn").disabled = false;
+            id("DutyprintBtn").disabled = false;
           }
           else if (role === "ADMIN") {
             isVisible = false; // ❌ hide for admin
@@ -4770,6 +4801,8 @@
         // 🔥 DASHBOARD BUTTON HIDE FOR NORMAL USERS
         if (isRestrictedUser && page === "DashBoard") {
           isVisible = false;
+          id("DutyexcelBtn").disabled = true;
+          id("DutyprintBtn").disabled = true;
         }
 
         btn.style.display = isVisible ? "flex" : "none";
@@ -12622,7 +12655,7 @@
       return `
         <div class="header">
 
-          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100">
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
           <div class="header-text">
             <h1>PRASAR BHARATI</h1>
@@ -13319,7 +13352,7 @@
 
         /* ===== LOGO ===== */
         const response = await fetch(
-          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100",
+          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
         );
         const blob = await response.blob();
         const buffer = await blob.arrayBuffer();
@@ -15922,7 +15955,7 @@
       // 🔥 LOGO
       // =========================
       const base64 = await urlToBase64(
-        "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100",
+        "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
       );
 
       const imageId = workbook.addImage({
@@ -19609,7 +19642,7 @@
               "ALL INDIA RADIO",
               `${station}`,
             ],
-            logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100",
+            logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
           };
         }
         const header = getHeaderData();
@@ -19825,7 +19858,7 @@
             <!-- LOGO -->
             <td style="width:70px; text-align:left;">
               <img 
-                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100"
+                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
                 style="width:60px;height:60px;"
               />
             </td>
@@ -22377,7 +22410,7 @@
         // 🔥 LOGO (FIXED POSITION)
         // =========================
         const base64 = await urlToBase64(
-          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100",
+          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
         );
 
         const imageId = workbook.addImage({
@@ -22949,13 +22982,13 @@
             // 🔹 C/O
             else if (v.startsWith("C/O")) {
 
-              const lieuKey = `${emp} in lieu of`;
-              const lieuDate = row[lieuKey];
-
               let text = emp;
 
-              if (lieuDate) {
-                text = `${emp}(${formatLieuDate(lieuDate)})`;
+              // 🔥 EXTRACT DATE FROM DUTY VALUE
+              const match = String(v).match(/\((.*?)\)/);
+
+              if (match && match[1]) {
+                text = `${emp}(${match[1]})`;
               }
 
               // 🔥 normalize comparison
@@ -22970,8 +23003,7 @@
               const normalizedReq = normalize(reqVal);
               const isMatch = normalizedReq.includes("C/O");
 
-              //weekMap[key].CO.push(isMatch ? `<b><u>${text}</u></b>` : text);
-              weekMap[key].CO.push(isMatch ? `${text}` : text);
+              weekMap[key].CO.push(text);
             }
 
             // 🔹 LEAVES
@@ -23013,7 +23045,7 @@
     <thead>
       <tr>
         <th colspan="7">
-          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l=s100" style="height:50px;vertical-align: middle;position:absolute;left:2px;top:2px">
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" style="height:50px;vertical-align: middle;position:absolute;left:2px;top:2px">
           <h3>प्रसार भारती / PRASAR BHARATI</h3>
           <h3>भारत के लोक सेवा प्रसारक / INDIA'S PUBLIC SERVICE BROADCASTER</h3>
           <h3>आकाशवाणी कारवार / AKASHAVANI KARWAR</h3>
@@ -23366,24 +23398,72 @@
           const dutyVal = row[dutyKey] || "";
           const reqVal = row[emp.reqKey] || "";
 
+          // 🔥 SPAN SHOULD SHOW REQUIREMENT
           weekMap[key].values[emp.name].req = reqVal || "";
 
           let selectedVals = [];
-          let shouldAutoUpdate = false;
+          let lieuDate = "";
 
+          // 🔥 REQUIREMENT TABLE LIEU
+          const reqLieu = row[emp.lieuKey] || "";
+
+          // =========================
+          // 🔥 EXTRACT FROM DUTY
+          // =========================
           if (dutyVal && dutyVal.trim() !== "") {
-            const cleanDuty = dutyVal.replace(/\(.*?\)/g, "");
-            selectedVals = cleanDuty.split(",").map(v => v.trim()).sort();
+
+            // 🔥 REMOVE DATE PART
+            const cleanDuty = dutyVal
+              .replace(/\(.*?\)/g, "")
+              .trim();
+
+            selectedVals = cleanDuty
+              .split(",")
+              .map(v => v.trim())
+              .filter(Boolean)
+              .sort();
+
+            // =========================
+            // 🔥 IF C/O
+            // =========================
+            if (cleanDuty.includes("C/O")) {
+
+              // 🔥 FIRST TAKE FROM DUTY
+              const match = dutyVal.match(/\((.*?)\)/);
+
+              if (match && match[1]) {
+
+                lieuDate = match[1];
+
+              }
+              // 🔥 ELSE TAKE FROM REQUIREMENT TABLE
+              else if (reqLieu) {
+
+                lieuDate = reqLieu;
+              }
+
+            }
+            // 🔥 NOT C/O → CLEAR
+            else {
+
+              lieuDate = "";
+            }
+
           }
-          else if (reqVal && reqVal.trim() !== "") {
-            selectedVals = reqVal.split(",").map(v => v.trim()).sort();
-            shouldAutoUpdate = true;
+          // 🔥 NO DUTY DATA → KEEP EXISTING REQUIREMENT LIEU
+          else if (reqLieu) {
+
+            lieuDate = reqLieu;
           }
 
+          // 🔥 SELECT VALUES
           weekMap[key].values[emp.name].selectVals = selectedVals;
-          weekMap[key].values[emp.name].auto = shouldAutoUpdate;
 
-          weekMap[key].values[emp.name].lieu = row[emp.lieuKey] || "";
+          // 🔥 LIEU FROM DUTY COLUMN
+          weekMap[key].values[emp.name].lieu = lieuDate;
+
+          // 🔥 NO AUTO
+          weekMap[key].values[emp.name].auto = false;
         });
       });
 
@@ -23396,9 +23476,9 @@
       let html = `
         <table border="1">
           <colgroup>
-            <col style="width:120px">
+            <col style="width:80px">
             ${Object.values(weekMap).map(() => `
-              <col style="width:120px">
+              <col style="width:80px">
             `).join("")}
           </colgroup>
 
@@ -23472,12 +23552,12 @@
               </select>
 
               <!-- 🔥 LIEU INPUT (ADDED BACK) -->
-             <input type="date"
+              <input type="date"
                 class="lieu-input"
                 data-emp="${emp.name}"
                 data-date="${formatDutyChartDate(d.date)}"
                 value="${convertToInputDate(val.lieu)}"
-                ${val.req !== "C/O" ? "disabled" : ""}>
+                ${!selectedCombined.includes("C/O") ? "disabled" : ""}>
 
             </td>
           `;
@@ -23601,11 +23681,36 @@
 
         // 🔥 ENABLE / DISABLE LIEU
         if (lieuInput) {
+
+          // =========================
+          // 🔥 C/O
+          // =========================
           if (select.value === "C/O") {
+
             lieuInput.disabled = false;
-          } else {
+            lieuInput.style.color = "black";
+            // 🔥 IF EMPTY → GET FROM REQUIREMENT TABLE
+            if (!lieuInput.value && isEditTable) {
+
+              const reqLieuInput = document.querySelector(
+                `#dutyRequirementTable .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
+              );
+
+              if (reqLieuInput && reqLieuInput.value) {
+                lieuInput.value = reqLieuInput.value;
+              }
+            }
+
+          }
+          // =========================
+          // 🔥 NOT C/O
+          // =========================
+          else {
+
+            // 🔥 CLEAR DATE
+            lieuInput.value = "";
+            lieuInput.style.color = "white";
             lieuInput.disabled = true;
-            //lieuInput.value = "";
           }
         }
 
@@ -23756,10 +23861,7 @@
             let lieuInput =
               document.querySelector(
                 `#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
-              ) ||
-              document.querySelector(
-                `#dutyRequirementTable .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`
-              );
+              )
             let lieuText = emp;
 
             if (lieuInput && lieuInput.value) {
@@ -24007,12 +24109,14 @@
 
 
     on("DutysaveBtn", "click", async () => {
-      await saveDutyData();
-      await loadTable("duty", "DutyChart");
-      const week = id("DutyChartWeekSelect")?.value;
-      if (!week) return;
 
-      renderDutyTables(dutyData, week);
+      await saveDutyData();
+
+      await loadTable("duty", "DutyChart");
+
+      // 🔥 USE EXISTING DROPDOWN FLOW
+      renderFromDropdowns();
+
     });
 
 
@@ -24100,18 +24204,78 @@
         { width: 25 }  // Leaves
       ];
 
+      const FULL_BORDER = {
+        top: { style: "thin", color: { argb: "FF000000" } },
+        left: { style: "thin", color: { argb: "FF000000" } },
+        bottom: { style: "thin", color: { argb: "FF000000" } },
+        right: { style: "thin", color: { argb: "FF000000" } }
+      };
+
       // 2. MAIN HEADER (PRASAR BHARATI)
       sheet.mergeCells(1, 1, 1, 7);
       const mainHeader = sheet.getCell(1, 1);
+
       mainHeader.value = {
         richText: [
-          { text: "प्रसार भारती / PRASAR BHARATI\n", font: { bold: true, size: 12 } },
-          { text: "भारत के लोक सेवा प्रसारक / INDIA'S PUBLIC SERVICE BROADCASTER\n", font: { bold: true, size: 12 } },
-          { text: "आकाशवाणी कारवार / AKASHAVANI KARWAR", font: { bold: true, size: 12 } }
+
+          // 🔥 LINE 1
+          {
+            text: "प्रसार भारती  ",
+            font: {
+              bold: true,
+              size: 15
+            }
+          },
+          {
+            text: "/ PRASAR BHARATI\n",
+            font: {
+              bold: true,
+              size: 12
+            }
+          },
+
+          // 🔥 LINE 2
+          {
+            text: "भारत के लोक सेवा प्रसारक  ",
+            font: {
+              bold: true,
+              size: 15
+            }
+          },
+          {
+            text: "/ INDIA'S PUBLIC SERVICE BROADCASTER\n",
+            font: {
+              bold: true,
+              size: 12
+            }
+          },
+
+          // 🔥 LINE 3
+          {
+            text: "आकाशवाणी कारवार  ",
+            font: {
+              bold: true,
+              size: 15
+            }
+          },
+          {
+            text: "/ AKASHAVANI KARWAR",
+            font: {
+              bold: true,
+              size: 12
+            }
+          }
         ]
       };
-      mainHeader.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-      sheet.getRow(1).height = 65;
+
+      mainHeader.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true
+      };
+      mainHeader.border = FULL_BORDER;
+      // 🔥 AUTO HEIGHT
+      sheet.getRow(1).height = 70;
 
       // 3. LOGO INTEGRATION
       try {
@@ -24125,15 +24289,39 @@
 
       // 4. SUB-HEADER (BILINGUAL WEEK ENDING)
       const weekEndText = id("dutyChartTable").querySelector("thead tr:nth-child(2) th:last-child").innerText;
+      
       sheet.mergeCells(2, 1, 2, 6);
+
       const subHeaderCell = sheet.getCell(2, 1);
+
       subHeaderCell.value = {
         richText: [
-          { text: "समाप्त होनेवाले सप्ताह के लिए अभियांत्रिक कर्मचारियो के लिए ड्यूटी चार्ट\n", font: { bold: true, size: 10 } },
-          { text: "DUTY CHART FOR ENGINEERING STAFF FOR WEEK ENDING", font: { bold: true, size: 10 } }
+
+          {
+            text: "समाप्त होनेवाले सप्ताह के लिए अभियांत्रिक कर्मचारियो के लिए ड्यूटी चार्ट\n",
+            font: {
+              bold: true,
+              size: 12
+            }
+          },
+
+          {
+            text: "DUTY CHART FOR ENGINEERING STAFF FOR WEEK ENDING",
+            font: {
+              bold: true,
+              size: 10
+            }
+          }
         ]
       };
-      subHeaderCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+
+      subHeaderCell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true
+      };
+      subHeaderCell.border = FULL_BORDER;
+      // 🔥 AUTO HEIGHT
       sheet.getRow(2).height = 40;
 
       // Date Cell
@@ -24141,30 +24329,103 @@
       dateCell.value = weekEndText;
       dateCell.font = { bold: true, size: 11 };
       dateCell.alignment = { horizontal: "center", vertical: "middle" };
-      dateCell.border = { bottom: { style: 'thin' }, right: { style: 'thin' } };
+      dateCell.border = FULL_BORDER;
 
       // 5. COLUMN HEADERS WITH TIMESLOTS (Row 3)
       const headers = [
-        "दिन / दिनांक\nDAY / DATE", 
-        "सुबह / MORNING\n(05:00 - 12:20)", 
-        "सामान्य / GENERAL\n(10:00 - 17:20)", 
-        "शाम / EVENING\n(16:00 - 23:20)", 
-        "सप्ताहिक अवकाश\nW/OFF", 
-        "प्रतिपूरक अवकाश\nC/OFF", 
-        "छुट्टी\nLEAVES"
+        {
+          hindi: "दिन / दिनांक",
+          english: "DAY / DATE"
+        },
+        {
+          hindi: "सुबह ",
+          english: "MORNING\n(05:00 - 12:20)"
+        },
+        {
+          hindi: "सामान्य",
+          english: "GENERAL\n(10:00 - 17:20)"
+        },
+        {
+          hindi: "शाम",
+          english: "EVENING\n(16:00 - 23:20)"
+        },
+        {
+          hindi: "सप्ताहिक अवकाश",
+          english: "W-OFF"
+        },
+        {
+          hindi: "प्रतिपूरक अवकाश",
+          english: "C-OFF"
+        },
+        {
+          hindi: "छुट्टी",
+          english: "LEAVES"
+        }
       ];
-      
-      const headerRow = sheet.getRow(3);
-      headerRow.height = 50;
 
+      // =========================
+      // 🔥 HEADER ROW
+      // =========================
+      const headerRow = sheet.getRow(3);
+
+      headerRow.height = 54;
+
+      // =========================
+      // 🔥 CREATE HEADERS
+      // =========================
       headers.forEach((h, i) => {
+
         const cell = headerRow.getCell(i + 1);
-        cell.value = h;
-        cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 9 };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF444444" } };
-        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+
+        cell.value = {
+          richText: [
+
+            // 🔥 HINDI (FIRST LINE)
+            {
+              text: h.hindi + "\n",
+              font: {
+                bold: true,
+                size: 12,
+                color: { argb: "FFFFFFFF" }
+              }
+            },
+
+            // 🔥 ENGLISH (SECOND LINE)
+            {
+              text: h.english,
+              font: {
+                bold: true,
+                size: 10,
+                color: { argb: "FFFFFFFF" }
+              }
+            }
+          ]
+        };
+
+        // =========================
+        // 🔥 HEADER COLOR
+        // =========================
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF444444" }
+        };
+
+        // =========================
+        // 🔥 ALIGNMENT
+        // =========================
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true
+        };
+
+        // =========================
+        // 🔥 BORDER
+        // =========================
+        cell.border = FULL_BORDER;
       });
+
 
       // 6. DATA ROWS
       const tableRows = document.querySelectorAll("#dutyChartTable tbody tr");
@@ -24181,14 +24442,14 @@
           noteCell.value = tr.querySelector("textarea")?.value.trim() || "";
           noteCell.font = { italic: true, size: 10 };
           noteCell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
-          noteCell.border = { left: {style:'thin'}, bottom: {style:'thin'} };
+          noteCell.border = FULL_BORDER;
 
           sheet.mergeCells(currentRow, 6, currentRow, 7);
           const signCell = sheet.getCell(currentRow, 6);
           signCell.value = "ASSISTANT ENGINEER";
           signCell.font = { bold: true, size: 11 };
           signCell.alignment = { horizontal: "center", vertical: "bottom" };
-          signCell.border = { right: {style:'thin'}, bottom: {style:'thin'} };
+          signCell.border = FULL_BORDER;
           sheet.getRow(currentRow).height = 70;
         } else {
           // DATA CELLS
@@ -24197,16 +24458,103 @@
             const cell = excelRow.getCell(i + 1);
             cell.value = td.innerText.trim();
             cell.alignment = { wrapText: true, vertical: "middle", horizontal: "center" };
-            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            cell.border = FULL_BORDER;
             
             // Highlight logic (Bold/Underline)
             if (td.querySelector("b")) {
               cell.font = { bold: true, underline: true, color: { argb: "FF000000" } };
             }
           });
-          excelRow.height = 45;
+
+          // 🔥 AUTO ROW HEIGHT
+          const maxLines = Math.max(
+            ...Array.from(cells).map(td =>
+              (td.innerText || "").split("\n").length
+            )
+          );
+
+          excelRow.height = Math.max(25, maxLines * 18);
         }
         currentRow++;
+      });
+
+      // =========================
+      // 🔥 PAGE SETUP
+      // =========================
+      sheet.pageSetup = {
+
+        // 🔥 A4
+        paperSize: 9,
+
+        // 🔥 LANDSCAPE
+        orientation: "portrait",
+
+        // 🔥 FIT TO PAGE
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+
+        // 🔥 PRINT AREA
+        printArea: `A1:G${currentRow - 1}`,
+
+        // 🔥 MARGINS
+        margins: {
+          left: 0.25,
+          right: 0.25,
+          top: 0.4,
+          bottom: 0.4,
+          header: 0.2,
+          footer: 0.2
+        },
+
+        // 🔥 CENTER ON PAGE
+        horizontalCentered: true,
+        verticalCentered: false
+      };
+
+      // =========================
+      // 🔥 REPEAT HEADER ROWS
+      // =========================
+      sheet.pageSetup.printTitlesRow = '1:3';
+
+      // =========================
+      // 🔥 AUTO COLUMN WIDTH
+      // =========================
+      sheet.columns.forEach(col => {
+
+        let maxLength = 10;
+
+        col.eachCell({ includeEmpty: true }, cell => {
+
+          let val = "";
+
+          // 🔥 RICH TEXT SUPPORT
+          if (cell.value?.richText) {
+
+            val = cell.value.richText
+              .map(r => r.text)
+              .join("");
+
+          } else {
+
+            val = cell.value
+              ? cell.value.toString()
+              : "";
+          }
+
+          // 🔥 HINDI NEEDS EXTRA WIDTH
+          const extra =
+            /[\u0900-\u097F]/.test(val)
+              ? 1.8
+              : 1;
+
+          maxLength = Math.max(
+            maxLength,
+            Math.ceil(val.length * extra)
+          );
+        });
+
+        col.width = Math.min(maxLength + 3, 16);
       });
 
       // 7. EXPORT
