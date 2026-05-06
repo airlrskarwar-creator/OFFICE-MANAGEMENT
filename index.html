@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.cdnfonts.com/css/digital-7-mono" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+
   <link rel="icon" href="data:,">
   <!-- Icon -->
   <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -211,67 +213,73 @@
     }
 
     /* =============LOGIN PAGE LAYOUT=========== */
-    #loginPage{
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#f4f7fc;
-      font-family:'Segoe UI',sans-serif;
-      overflow:hidden;
-      position:relative;
+    #loginPage {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f7fc;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      position: relative;
     }
 
     /* Animated soft floating shapes */
     #loginPage::before,
-    #loginPage::after{
-      content:"";
-      position:absolute;
-      width:400px;
-      height:400px;
-      border-radius:50%;
-      background:rgba(37,99,235,0.1);
-      animation:float 8s ease-in-out infinite alternate;
+    #loginPage::after {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.1);
+      animation: float 8s ease-in-out infinite alternate;
     }
 
-    #loginPage::before{
-      top:-100px;
-      left:-100px;
+    #loginPage::before {
+      top: -100px;
+      left: -100px;
     }
 
-    #loginPage::after{
-      bottom:-120px;
-      right:-120px;
-      animation-delay:2s;
+    #loginPage::after {
+      bottom: -120px;
+      right: -120px;
+      animation-delay: 2s;
     }
 
-    @keyframes float{
-      from{transform:translateY(0);}
-      to{transform:translateY(30px);}
+    @keyframes float {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(30px);
+      }
     }
 
     /* =============================
       MAIN CONTAINER
     ============================= */
 
-    .login-container{
-      width:900px;
-      height:550px;
-      background:white;
-      border-radius:16px;
-      box-shadow:0 20px 50px rgba(0,0,0,0.2);
-      display:flex;
-      overflow:hidden;
-      animation:slideUp 0.8s ease forwards;
-      opacity:0;
-      transform:translateY(40px);
-      scale:0.8;
+    .login-container {
+      width: 900px;
+      height: 550px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      display: flex;
+      overflow: hidden;
+      animation: slideUp 0.8s ease forwards;
+      opacity: 0;
+      transform: translateY(40px);
+      scale: 0.8;
+      z-index: 2;
     }
 
-    @keyframes slideUp{
-      to{
-        opacity:1;
-        transform:translateY(0);
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
@@ -279,115 +287,147 @@
       LEFT PANEL
     ============================= */
 
-    .login-left{
-      flex:1;
-      color:black;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:40px;
+    .login-left {
+      flex: 1;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
     }
 
-    .branding img{
-      width:300px;
-      margin-bottom:20px;
+    .branding img {
+      width: 300px;
+      margin-bottom: 20px;
     }
 
-    .branding h1{
-      margin-bottom:10px;
-      font-size:20px;
+    .branding h1 {
+      margin-bottom: 10px;
+      font-size: 20px;
     }
 
-    .branding p{
-      font-size:12px;
-      opacity:0.9;
+    .branding p {
+      font-size: 12px;
+      opacity: 0.9;
     }
-    .highlight-card{
+
+    .highlight-card {
       animation: highlightFlash 1.2s ease;
     }
 
-    @keyframes highlightFlash{
-      0%   { box-shadow:0 0 0 0 rgba(37,99,235,0.6); }
-      50%  { box-shadow:0 0 20px 6px rgba(37,99,235,0.5); }
-      100% { box-shadow:0 0 0 0 rgba(37,99,235,0); }
+    @keyframes highlightFlash {
+      0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6);
+      }
+
+      50% {
+        box-shadow: 0 0 20px 6px rgba(37, 99, 235, 0.5);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+      }
     }
 
     /* =============================
       RIGHT PANEL
     ============================= */
 
-    .login-right{
-      flex:1;
-      padding:50px 30px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      background:linear-gradient(135deg,#ffaf8f,#ffffff,rgb(128, 255, 128));
-      color:rgb(0, 9, 61);
+    .login-right {
+      flex: 1;
+      padding: 50px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffaf8f, #ffffff, rgb(128, 255, 128));
+      color: rgb(0, 9, 61);
     }
 
-    .login-right h2{
-      margin-bottom:30px;
-      color:rgb(0, 9, 61);
-      font-size:20px;
+    .login-right h2 {
+      margin-bottom: 30px;
+      color: rgb(0, 9, 61);
+      font-size: 20px;
       text-align: center;
     }
 
+    .login-credit{
+      text-align: center;
+      font-size: 14px;
+      color: #7a7a7a8a;
+      font-style: italic;
+      letter-spacing: 0.3px;
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      font-weight: bold;
+      z-index: 1;
+      text-align: right;
+      padding-right: 10px;
+      font-family: cursive;
+    }
+    .login-credit h3{
+      font-family: 'Allura', cursive;
+      font-size: 30px;
+      color: #00437a8a;
+    }
     /* =============================
       INPUT CONTAINER
     ============================= */
 
-    .input-box{
-      display:flex;
-      align-items:center;
-      gap:12px;
+    .input-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       height: 65px !important;
-      padding:2px 12px;
-      border-radius:12px;
-      background:rgba(34, 34, 34, 0.582);
-      border:2px solid transparent;
-      transition:all 0.3s ease;
-      margin-bottom:20px;
+      padding: 2px 12px;
+      border-radius: 12px;
+      background: rgba(34, 34, 34, 0.582);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
     }
 
     /* Remove input border completely */
-    .input-box select{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      font-size:16px !important;
-      color:rgb(255, 255, 255);
-      font-weight:500;
-      box-shadow:none;
-      min-height:60px;
+    .input-box select {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 16px !important;
+      color: rgb(255, 255, 255);
+      font-weight: 500;
+      box-shadow: none;
+      min-height: 60px;
       width: 100%;
       margin-left: -40px;
       padding-left: 50px;
       padding-top: 20px;
     }
-    .input-box input{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      font-size:16px !important;
-      color:rgb(255, 255, 255);
-      font-weight:500;
-      box-shadow:none;
-      min-height:60px;
+
+    .input-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 16px !important;
+      color: rgb(255, 255, 255);
+      font-weight: 500;
+      box-shadow: none;
+      min-height: 60px;
       width: 100%;
       margin-left: -40px;
       padding-left: 50px;
       padding-top: 10px;
     }
 
-    .input-box select:disabled, .input-box:has(select:disabled) i{
+    .input-box select:disabled,
+    .input-box:has(select:disabled) i {
       color: gray;
     }
 
-    .input-box select,.input-box select::picker(select) {
+    .input-box select,
+    .input-box select::picker(select) {
       appearance: base-select;
     }
 
@@ -396,13 +436,13 @@
       border-radius: 12px;
       background: white;
       max-height: 250px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
       /* Creates the gap from the input box */
       margin-top: 5px;
       margin-left: -20px;
-      width: max-content;  
-      
+      width: max-content;
+
       /* Optional: Smooth entry (Check browser support) */
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
@@ -412,11 +452,12 @@
       padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .input-box select option:checked {
-      background-color: #006086; /* Your theme blue */
+      background-color: #006086;
+      /* Your theme blue */
       color: white;
       font-weight: bold;
     }
@@ -427,46 +468,52 @@
       font-weight: bold;
     }
 
-    .input-box:hover, .input-box:has(select:focus), .input-box:has(select:open) {
+    .input-box:hover,
+    .input-box:has(select:focus),
+    .input-box:has(select:open) {
       scale: 1.02;
       box-shadow: 0 4px 15px rgba(0, 107, 194, 0.3);
     }
 
-    .input-box:has(select:disabled){
+    .input-box:has(select:disabled) {
       background: transparent;
       box-shadow: 0 4px 15px rgba(0, 62, 112, 0.3);
     }
+
     .input-box:has(select:disabled):hover {
       scale: 1.0;
     }
 
     /* Placeholder */
-    .input-box input::placeholder{
-      color:rgb(206, 240, 255);
+    .input-box input::placeholder {
+      color: rgb(206, 240, 255);
     }
 
     /* Icon style */
-    .input-box i{
-      font-size:40px;
-      color:rgb(255, 255, 255);
-      transition:0.3s ease;
+    .input-box i {
+      font-size: 40px;
+      color: rgb(255, 255, 255);
+      transition: 0.3s ease;
     }
 
-    .input-box:focus-within{
-      background:rgba(170, 242, 255, 0.836);
-      border-bottom:4px solid blue;
+    .input-box:focus-within {
+      background: rgba(170, 242, 255, 0.836);
+      border-bottom: 4px solid blue;
       border-radius: 12px 12px 0 0;
-      transform:scale(1.02);
+      transform: scale(1.02);
     }
 
     /* Icon highlight on focus */
-    .input-box:focus-within i{
-      color:#0400ff;
-      transform:scale(1.02);
+    .input-box:focus-within i {
+      color: #0400ff;
+      transform: scale(1.02);
     }
 
-    .input-box:focus-within select, .input-box:focus-within input, .input-box:focus-within #togglePassword i , .input-box:focus-within input::placeholder{
-      color:#0400ff;
+    .input-box:focus-within select,
+    .input-box:focus-within input,
+    .input-box:focus-within #togglePassword i,
+    .input-box:focus-within input::placeholder {
+      color: #0400ff;
     }
 
     /* 🔥 ERROR */
@@ -480,7 +527,7 @@
       left: 50%;
       right: 0;
     }
-        
+
     .password-wrap {
       position: relative;
     }
@@ -499,45 +546,45 @@
     /* 🔥 icon style */
     #togglePassword i {
       font-size: 28px;
-      color:rgb(206, 240, 255);
+      color: rgb(206, 240, 255);
     }
 
-    #loginBtn{
+    #loginBtn {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      padding:20px;
-      border:none;
-      border-radius:8px;
-      background:#02005c;
-      color:white;
-      cursor:pointer;
-      transition:all 0.3s ease;  
+      padding: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #02005c;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    #loginBtn:hover{
-      background:rgb(0, 140, 255);
-      transform:scale(1.05);
+    #loginBtn:hover {
+      background: rgb(0, 140, 255);
+      transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(0, 107, 194, 0.4);
     }
 
-    #loginBtn:active{
-      transform:scale(1.0);
+    #loginBtn:active {
+      transform: scale(1.0);
       box-shadow: 0 2px 8px rgba(0, 107, 194, 0.3);
-      background:#02005c;
+      background: #02005c;
     }
 
-    #loginBtn i{
-      font-size:25px;
-      margin-right:8px;
+    #loginBtn i {
+      font-size: 25px;
+      margin-right: 8px;
     }
 
-    #loginBtn p{
-      font-size:16px;
-      font-weight:500;
+    #loginBtn p {
+      font-size: 16px;
+      font-weight: 500;
     }
-    
+
     .caps-warning {
       display: none;
       font-size: 15px;
@@ -548,6 +595,7 @@
       left: 50%;
       right: 0;
     }
+
     .caps-warning.show {
       display: flex;
     }
@@ -2770,7 +2818,7 @@
       border-radius: 0;
       color: black;
       margin-top: 2px;
-      text-align:center;
+      text-align: center;
     }
 
     .lieu-input:disabled {
@@ -2835,7 +2883,7 @@
       .SalarySlipTableWrapper {
         width: 70%;
       }
-      
+
     }
 
     @media only screen and (max-width: 600px) {
@@ -2877,7 +2925,7 @@
         max-height: 150px;
         overflow-y: auto;
         min-height: 0;
-      }     
+      }
 
       .Error_Note {
         display: none;
@@ -2942,9 +2990,10 @@
         display: none;
       }
 
-      .login-left{
+      .login-left {
         display: none;
       }
+
       /* Center icons */
       .left-panel .menu-btn {
         justify-content: center;
@@ -3044,21 +3093,21 @@
         flex-direction: column;
       }
 
-      .Emp-Table-Wrapper{
+      .Emp-Table-Wrapper {
         display: flex;
         flex-direction: column;
       }
 
-       .input-box select::picker(select) {
+      .input-box select::picker(select) {
         margin-left: 0px;
         width: max-content;
-       }
+      }
     }
   </style>
 </head>
 
 <body>
-  <div id="loginPage" >
+  <div id="loginPage">
 
     <div class="login-container">
 
@@ -3105,11 +3154,12 @@
           <p>Login</p>
         </button>
         <div id="loginError"></div>
-        <div id="capsWarning" class="caps-warning"><i class="material-icons">keyboard_capslock</i>Caps Lock is ON</div>
-      </div>
-
+        <div id="capsWarning" class="caps-warning"><i class="material-icons">keyboard_capslock</i>Caps Lock is ON</div>        
+      </div>      
     </div>
-
+    <div class="login-credit">
+      Created by :<br><h3>Abhijin P R,</h3>Technician, <br> Akashavani Karwar
+    </div>
   </div>
   <div class="app" id="mainPage">
     <div class="left-panel collapsed" id="sidebar">
@@ -4630,37 +4680,51 @@
       ["click", "keydown", "keyup", "blur", "focus"].forEach(evt => {
         el.addEventListener(evt, handleEvents);
       });
-      
+
       el.addEventListener("change", () => { errormsg.textContent = ""; });
       el.addEventListener("input", () => { errormsg.textContent = ""; });
     });
 
 
     function handleEvents(e) {
+
       // 🔥 PASSWORD TOGGLE
       const toggleBtn = e.target.closest("#togglePassword");
+
       if (toggleBtn && e.type === "click") {
         const isHidden = pwdEl.type === "password";
+
         pwdEl.type = isHidden ? "text" : "password";
-        toggleBtn.querySelector("i").textContent = isHidden ? "visibility" : "visibility_off";
+
+        toggleBtn.querySelector("i").textContent =
+          isHidden ? "visibility" : "visibility_off";
       }
 
       // 🔥 ENTER LOGIN
       if (e.type === "keydown" && e.key === "Enter") {
+
         if (!stationEl.value) return stationEl.focus();
+
         if (!userEl.value) return userEl.focus();
+
         loginBtn.click();
       }
 
-      // 🔥 CAPS LOCK (Logic for pwdEl)
+      // 🔥 CAPS LOCK
       if (e.target === pwdEl) {
-        const checkTypes = ["keydown", "keyup", "focus", "mousemove", "click"];
-        
-        if (checkTypes.includes(e.type)) {
+
+        const checkTypes = ["keydown", "keyup", "focus", "click"];
+
+        if (
+          checkTypes.includes(e.type) &&
+          typeof e.getModifierState === "function"
+        ) {
+
           const isCapsOn = e.getModifierState("CapsLock");
+
           capsWarning.classList.toggle("show", isCapsOn);
-        } 
-        
+        }
+
         if (e.type === "blur") {
           capsWarning.classList.remove("show");
         }
@@ -4865,7 +4929,7 @@
         // 🔥 In requirement table → lieu is in next cell
         const lieu = td?.querySelector(".lieu-input")
 
-          // 🔥 1. PAST WEEK → FULL LOCK
+        // 🔥 1. PAST WEEK → FULL LOCK
         if (isLocked) {
           select.disabled = true;
           if (lieu) lieu.disabled = true;
@@ -4894,7 +4958,7 @@
     }
 
 
-    
+
     /* ===========================================================================================
                                 🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
   ================================================================================================== */
@@ -22710,9 +22774,35 @@
       // =========================
       // 🔥 SELECT CURRENT WEEK
       // =========================
-      const todayWeekEnd = getCurrentWeekEnd();
+      //  const todayWeekEnd = getCurrentWeekEnd();
 
-      const weekValue = `${todayWeekEnd.getFullYear()}-${String(todayWeekEnd.getMonth() + 1).padStart(2, "0")}-${String(todayWeekEnd.getDate()).padStart(2, "0")}`;
+      //  const weekValue = `${todayWeekEnd.getFullYear()}-${String(todayWeekEnd.getMonth() + 1).padStart(2, "0")}-${String(todayWeekEnd.getDate()).padStart(2, "0")}`;
+
+      //  let found = false;
+
+      //  Array.from(weekSelect.options).forEach(opt => {
+      //    if (opt.value === weekValue) {
+      //      opt.selected = true;
+      //      found = true;
+      //    }
+      //  });
+
+      // fallback → last week
+      //  if (!found && weekSelect.options.length > 0) {
+      //    weekSelect.options[weekSelect.options.length - 1].selected = true;
+      //  }
+      //}
+
+      // =========================
+      // 🔥 SELECT NEXT WEEK END
+      // =========================
+      const currentWeekEnd = getCurrentWeekEnd();
+
+      // 🔥 next Saturday
+      const nextWeekEnd = new Date(currentWeekEnd);
+      nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
+
+      const weekValue = `${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getMonth() + 1).padStart(2, "0")}-${String(nextWeekEnd.getDate()).padStart(2, "0")}`;
 
       let found = false;
 
@@ -22723,7 +22813,20 @@
         }
       });
 
-      // fallback → last week
+      // fallback → current week
+      if (!found) {
+
+        const currentValue = `${currentWeekEnd.getFullYear()}-${String(currentWeekEnd.getMonth() + 1).padStart(2, "0")}-${String(currentWeekEnd.getDate()).padStart(2, "0")}`;
+
+        Array.from(weekSelect.options).forEach(opt => {
+          if (opt.value === currentValue) {
+            opt.selected = true;
+            found = true;
+          }
+        });
+      }
+
+      // final fallback → last available
       if (!found && weekSelect.options.length > 0) {
         weekSelect.options[weekSelect.options.length - 1].selected = true;
       }
@@ -23131,17 +23234,21 @@
 
       const currentWeekEnd = getCurrentWeekEnd();
 
+      // Current week start
       const currentWeekStart = new Date(currentWeekEnd);
       currentWeekStart.setDate(currentWeekEnd.getDate() - 6);
 
-      // 🔥 convert to timestamp (safe compare)
-      const ws = new Date(weekStart).setHours(0, 0, 0, 0);
-      const cs = new Date(currentWeekStart).setHours(0, 0, 0, 0);
+      // Normalize dates
+      const ws = new Date(weekStart);
+      ws.setHours(0, 0, 0, 0);
 
-      return ws < cs;
+      const cs = new Date(currentWeekStart);
+      cs.setHours(0, 0, 0, 0);
+
+      // Include current week also
+      return ws.getTime() <= cs.getTime();
     }
 
-    
     function getCurrentTimestamp() {
       const now = new Date();
 
@@ -23315,11 +23422,11 @@
       }, 0);
 
       container.innerHTML = html;
-          window.currentRequirementState = {
-            weekStart,
-            data,
-            statusRow
-          };
+      window.currentRequirementState = {
+        weekStart,
+        data,
+        statusRow
+      };
     }
 
 
@@ -24289,7 +24396,7 @@
 
       // 4. SUB-HEADER (BILINGUAL WEEK ENDING)
       const weekEndText = id("dutyChartTable").querySelector("thead tr:nth-child(2) th:last-child").innerText;
-      
+
       sheet.mergeCells(2, 1, 2, 6);
 
       const subHeaderCell = sheet.getCell(2, 1);
@@ -24459,7 +24566,7 @@
             cell.value = td.innerText.trim();
             cell.alignment = { wrapText: true, vertical: "middle", horizontal: "center" };
             cell.border = FULL_BORDER;
-            
+
             // Highlight logic (Bold/Underline)
             if (td.querySelector("b")) {
               cell.font = { bold: true, underline: true, color: { argb: "FF000000" } };
