@@ -2069,7 +2069,7 @@
       font-size: 11px;
       background-color: white;
       overflow: auto;
-      height: 85vh;
+      height: 83vh;
     }
 
     .SalarySlipTableWrapper table {
@@ -2701,12 +2701,13 @@
     }
 
     .lieu-input {
-      width: 110px;
+      width: 100%;
       font-size: 11px;
       height: 25px;
       border-radius: 0;
       color: black;
       margin-top: 2px;
+      text-align:center;
     }
 
     .lieu-input:disabled {
@@ -2805,10 +2806,10 @@
 
       .Selection-bar {
         flex-direction: column;
-        max-height: 35px;
+        max-height: 150px;
         overflow-y: auto;
         min-height: 0;
-      }
+      }     
 
       .Error_Note {
         display: none;
@@ -23151,9 +23152,9 @@
         <table border="1">
 
           <colgroup>
-            <col style="width:140px">
+            <col style="width:12.5%">
             ${Object.values(weekMap).map(() => `
-              <col style="width:150px">
+              <col style="width:12.5%">
             `).join("")}
           </colgroup>
 
@@ -23189,29 +23190,29 @@
 
           html += `
             <td>
+              <div style="display:flex;flex-direction:column;gap:2px;width:100%;border:none;text-align:center;">
+                <!-- SELECT -->
+                <select class="req-select"
+                  data-emp="${emp.name}"
+                  data-date="${formatDutyChartDate(d.date)}"
+                  ${isLocked ? "disabled" : ""}>
 
-              <!-- SELECT -->
-              <select class="req-select"
-                data-emp="${emp.name}"
-                data-date="${formatDutyChartDate(d.date)}"
-                ${isLocked ? "disabled" : ""}>
+                  ${DUTY_OPTIONS.map(opt => `
+                    <option value="${opt}" ${opt === val.req ? "selected" : ""}>
+                      ${opt}
+                    </option>
+                  `).join("")}
 
-                ${DUTY_OPTIONS.map(opt => `
-                  <option value="${opt}" ${opt === val.req ? "selected" : ""}>
-                    ${opt}
-                  </option>
-                `).join("")}
+                </select>
 
-              </select>
-
-              <!-- LIEU -->
-              <input type="date"
-                class="lieu-input"
-                data-emp="${emp.name}"
-                data-date="${formatDutyChartDate(d.date)}"
-                value="${convertToInputDate(val.lieu)}"
-                ${isLocked || val.req !== "C/O" ? "disabled" : ""}>
-
+                <!-- LIEU -->
+                <input type="date"
+                  class="lieu-input"
+                  data-emp="${emp.name}"
+                  data-date="${formatDutyChartDate(d.date)}"
+                  value="${convertToInputDate(val.lieu)}"
+                  ${isLocked || val.req !== "C/O" ? "disabled" : ""}>
+              </div>     
             </td>
           `;
         });
