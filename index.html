@@ -344,7 +344,7 @@
       height: 50px !important;
       padding:10px 12px;
       border-radius:12px;
-      background:rgba(255,255,255,0.35);
+      background:rgba(34, 34, 34, 0.582);
       border:2px solid transparent;
       transition:all 0.3s ease;
       margin-bottom:20px;
@@ -357,54 +357,91 @@
       outline:none;
       background:transparent;
       font-size:15px !important;
-      color:rgb(5, 0, 68);
+      color:rgb(206, 240, 255);
       font-weight:500;
       box-shadow:none;
       min-height:30px;
+      width: 100%;
+      margin-left: -40px;
+      padding-left: 50px;
     }
 
-    .input-box input{
-      width:100%;
+    .input-box select,.input-box select::picker(select) {
+      appearance: base-select;
     }
 
-    .input-box select option{
-      color: black;
+    .input-box select::picker(select) {
+      margin-top: 7px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
       background: white;
+      max-height: 250px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      
+      /* Creates the gap from the input box */
+      margin-top: 10px;
+      
+      /* Optional: Smooth entry (Check browser support) */
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
-    .input-box select:focus{
-      padding-left: 32px;
-      margin-left: -32px;
+    .input-box select option {
+      color: black;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .input-box select option:hover {
+      background-color: #9ff9ff;
+    }
+
+    .input-box:hover, .input-box:has(select:focus), .input-box:has(select:open) {
+      scale: 1.02;
+      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.3);
+    }
+
+    .input-box:has(select:disabled){
+      background: transparent;
+      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.3);
+    }
+    .input-box:has(select:disabled):hover {
+      scale: 1.0;
     }
 
     /* Placeholder */
     .input-box input::placeholder{
-      color:rgba(0, 9, 61, 0.603);
+      color:rgb(206, 240, 255);
     }
 
     /* Icon style */
     .input-box i{
       font-size:30px;
-      color:rgb(0, 9, 61);
+      color:rgb(206, 240, 255);
       transition:0.3s ease;
     }
 
     .input-box:focus-within{
-      border:2px solid #ffffff;
-      background:rgba(255,255,255,0.25);
-      box-shadow:0 0 2px 1px rgba(255,255,255,0.15);
+      background:rgba(170, 242, 255, 0.836);
+      border-bottom:4px solid blue;
+      border-radius: 12px 12px 0 0;
+      transform:scale(1.02);
     }
 
     /* Icon highlight on focus */
     .input-box:focus-within i{
       color:#0400ff;
-      transform:scale(1.1);
+      transform:scale(1.02);
+    }
+
+    .input-box:focus-within select, .input-box:focus-within input, .input-box:focus-within #togglePassword i , .input-box:focus-within input::placeholder{
+      color:#0400ff;
     }
 
     /* 🔥 ERROR */
     #loginError {
       font-size: 14px;
-      color: #990000;
+      color: #ff0000;
       font-weight: bold;
       text-align: center;
       position: absolute;
@@ -417,26 +454,21 @@
       position: relative;
     }
 
-    .password-wrap input {
-      width: 100%;
-      padding: 10px 36px 10px 12px;
-      border-radius: 6px;
-    }
-
     #togglePassword {
       position: absolute;
-      right: 8px;
+      right: -45px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
       display: flex;
       align-items: center;
+      width: 30px;
     }
 
     /* 🔥 icon style */
     #togglePassword i {
       font-size: 25px;
-      color: rgb(0, 0, 61);
+      color:rgb(206, 240, 255);
     }
 
     #loginBtn{
@@ -478,7 +510,7 @@
     .caps-warning {
       display: none;
       font-size: 14px;
-      color: #990000;
+      color: #ff0000;
       font-weight: bold;
       position: absolute;
       bottom: 20px;
@@ -486,7 +518,7 @@
       right: 0;
     }
     .caps-warning.show {
-      display: block;
+      display: flex;
     }
 
     /* =============APP LAYOUT=========== */
@@ -2954,7 +2986,7 @@
 
       table th,
       table td {
-        padding: 1px !important;
+        padding: 3px !important;
         width: 1%;
         white-space: nowrap;
       }
@@ -2973,6 +3005,11 @@
       .PB-Table-WrapperNPS,
       .BudgetTableWrapper,
       .BudgetTablefromPBWrapper {
+        flex-direction: column;
+      }
+
+      .Emp-Table-Wrapper{
+        display: flex;
         flex-direction: column;
       }
     }
@@ -3027,7 +3064,7 @@
           <p>Login</p>
         </button>
         <div id="loginError"></div>
-        <div id="capsWarning" class="caps-warning">Caps Lock is ON</div>
+        <div id="capsWarning" class="caps-warning"><i class="material-icons">keyboard_capslock</i>Caps Lock is ON</div>
       </div>
 
     </div>
@@ -4545,48 +4582,50 @@
     const capsWarning = id("capsWarning");
     const errormsg = id("loginError");
 
-    // ========================= COMMON EVENTS ========================= //
+
+    // 2. UPDATED EVENT LOOP
+    // Added "mousemove" and "keyup" to the event list
     [toggle, pwdEl, stationEl, userEl].forEach(el => {
-      el.addEventListener("click", handleEvents);
-      el.addEventListener("keydown", handleEvents);
-      el.addEventListener("blur", handleEvents);
+      ["click", "keydown", "keyup", "blur", "focus"].forEach(evt => {
+        el.addEventListener(evt, handleEvents);
+      });
+      
+      el.addEventListener("change", () => { errormsg.textContent = ""; });
+      el.addEventListener("input", () => { errormsg.textContent = ""; });
     });
 
+
     function handleEvents(e) {
-
-      // 🔥 PASSWORD TOGGLE (FIXED)
+      // 🔥 PASSWORD TOGGLE
       const toggleBtn = e.target.closest("#togglePassword");
-
-      if (toggleBtn) {
+      if (toggleBtn && e.type === "click") {
         const isHidden = pwdEl.type === "password";
-
         pwdEl.type = isHidden ? "text" : "password";
-
-        toggleBtn.querySelector("i").textContent =
-          isHidden ? "visibility" : "visibility_off";
+        toggleBtn.querySelector("i").textContent = isHidden ? "visibility" : "visibility_off";
       }
 
       // 🔥 ENTER LOGIN
       if (e.type === "keydown" && e.key === "Enter") {
         if (!stationEl.value) return stationEl.focus();
         if (!userEl.value) return userEl.focus();
-
         loginBtn.click();
       }
 
-      // 🔥 CAPS LOCK
+      // 🔥 CAPS LOCK (Logic for pwdEl)
       if (e.target === pwdEl) {
-        if (e.type === "keydown") {
-          capsWarning.classList.toggle(
-            "show",
-            e.getModifierState && e.getModifierState("CapsLock")
-          );
-        }
+        const checkTypes = ["keydown", "keyup", "focus", "mousemove", "click"];
+        
+        if (checkTypes.includes(e.type)) {
+          const isCapsOn = e.getModifierState("CapsLock");
+          capsWarning.classList.toggle("show", isCapsOn);
+        } 
+        
         if (e.type === "blur") {
           capsWarning.classList.remove("show");
         }
       }
     }
+
 
     // ========================= LOGIN ========================= //
     on("loginBtn", "click", () => {
@@ -4594,29 +4633,28 @@
       const station = stationEl.value;
       const user = userEl.value;
       const password = pwdEl.value;
-
-      if (!user) return errormsg.textContent = "Select user";
-      if (!password) return errormsg.textContent = "Enter password";
+      if (!station) return errormsg.textContent = "❌ Select station";
+      if (!user) return errormsg.textContent = "❌ Select user";
+      if (!password) return errormsg.textContent = "❌ Enter password";
 
       // 🔥 ROLE LOGIN
       const roleUser = ROLE_USERS.find(r => r.user === user);
 
       if (roleUser) {
         if (password !== roleUser.password)
-          return errormsg.textContent = "Incorrect password";
+          return errormsg.textContent = "❌ Incorrect password";
 
         loginSuccess(user, user);
         return;
       }
 
       // 🔥 NORMAL USER
-      if (!station) return errormsg.textContent = "Select station";
 
       const record = window.userList.find(u => u.user === user);
 
-      if (!record) return errormsg.textContent = "User not found";
+      if (!record) return errormsg.textContent = "❌ User not found";
       if (password !== record.password)
-        return errormsg.textContent = "Incorrect password";
+        return errormsg.textContent = "❌ Incorrect password";
 
       window.currentStation = station;
       window.currentInitial = record.initial;
