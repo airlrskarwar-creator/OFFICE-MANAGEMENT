@@ -127,51 +127,82 @@ def get_duty():
 
 @app.route("/pb/update", methods=["POST"])
 def update_pb():
+
     try:
+        from datetime import datetime
+
         req_data = request.get_json()
+
         edit_rows = req_data.get("data", [])
 
         if not edit_rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+            return jsonify({
+                "status": "error",
+                "message": "No data received"
+            }), 400
 
-        # 📥 Existing data
+        # =========================
+        # 📥 READ SHEET
+        # =========================
         data = pb_sheet.get_all_values()
+
         headers = data[0]
         rows = data[1:]
-        print("📌 HEADERS:", headers)
-        # 🔍 Column indexes
+
+        # =========================
+        # 🔍 COLUMN INDEXES
+        # =========================
         month_idx = headers.index("Salary Month")
-        station_idx = headers.index("Pay Drawn Station")
         emp_idx = headers.index("Employee Name")
-        hris_idx = headers.index("HRIS") if "HRIS" in headers else -1
 
-        # Optional
-        category_idx = headers.index("Category") if "Category" in headers else -1
+        hris_idx = headers.index("HRIS") \
+            if "HRIS" in headers else -1
 
+        category_idx = headers.index("Category") \
+            if "Category" in headers else -1
+
+        # 🔥 OPTIONAL LAST UPDATED
+        last_updated_idx = headers.index("Last Updated") \
+            if "Last Updated" in headers else -1
+
+        # =========================
+        # 🔧 CLEAN
+        # =========================
         def clean(val):
-            return str(val).strip().lower()
+            return str(val or "").strip().lower()
 
-        # ⚡ Create lookup map
+        # =========================
+        # 🔑 CREATE ROW MAP
+        # =========================
         row_map = {}
+
         for i, r in enumerate(rows):
-            key = f"{clean(r[month_idx])}|{clean(r[station_idx])}|{clean(r[emp_idx])}"
+
+            key = f"{clean(r[month_idx])}"
 
             if hris_idx >= 0:
                 key += f"|{clean(r[hris_idx])}"
-            
+
             if category_idx >= 0:
                 key += f"|{clean(r[category_idx])}"
 
-            row_map[key] = i + 2
+            row_map[key] = i + 2   # actual sheet row
 
-        updates = []
+        # =========================
+        # 🔥 PROCESS UPDATES
+        # =========================
         update_cells = []
         new_rows = []
+        conflicts = []
 
-        # 🔄 Process incoming
+        editable_columns = set(headers)
+
         for row_obj in edit_rows:
-            print("📦 Incoming Row:", row_obj)
-            key = f"{clean(row_obj.get('Salary Month'))}|{clean(row_obj.get('Pay Drawn Station'))}|{clean(row_obj.get('Employee Name'))}"
+
+            # =========================
+            # 🔑 BUILD KEY
+            # =========================
+            key = f"{clean(row_obj.get('Salary Month'))}"
 
             if hris_idx >= 0:
                 key += f"|{clean(row_obj.get('HRIS'))}"
@@ -179,61 +210,154 @@ def update_pb():
             if category_idx >= 0:
                 key += f"|{clean(row_obj.get('Category'))}"
 
-            existing_row = []
-
+            # =========================
+            # 🔄 EXISTING ROW
+            # =========================
             if key in row_map:
-                existing_row = rows[row_map[key] - 2]
-            else:
-                existing_row = [""] * len(headers)
 
-            new_row = existing_row.copy()
-
-            for i, h in enumerate(headers):
-
-                # only update fields sent from frontend
-                if h in row_obj:
-
-                    val = row_obj.get(h, "")
-
-                    # preserve designation if blank
-                    if h.strip().lower() == "designation on salary month":
-                        if not val:
-                            val = existing_row[i]
-
-                    new_row[i] = val
-            print("📊 Generated Row:", new_row)
-
-            if key in row_map:
                 row_num = row_map[key]
 
-                # batch update preparation
-                for col_idx, val in enumerate(new_row):
+                existing_row = rows[row_num - 2]
+
+                # =========================
+                # 🔥 CONFLICT CHECK
+                # =========================
+                if last_updated_idx >= 0:
+
+                    sheet_timestamp = ""
+
+                    if len(existing_row) > last_updated_idx:
+                        sheet_timestamp = existing_row[last_updated_idx]
+
+                    client_timestamp = row_obj.get("_lastUpdated", "")
+
+                    # 🔥 conflict
+                    if (
+                        client_timestamp
+                        and sheet_timestamp
+                        and client_timestamp != sheet_timestamp
+                    ):
+
+                        conflicts.append(
+                            row_obj.get("Employee Name", "Unknown")
+                        )
+
+                        continue
+
+                # =========================
+                # 🔥 MERGE SAFE UPDATE
+                # =========================
+                merged_row = existing_row.copy()
+
+                # ensure row length safe
+                while len(merged_row) < len(headers):
+                    merged_row.append("")
+
+                for col_idx, header in enumerate(headers):
+
+                    # 🔥 ONLY update fields present
+                    if header in row_obj:
+
+                        val = row_obj.get(header, "")
+
+                        # =========================
+                        # 🔥 PRESERVE DESIGNATION
+                        # =========================
+                        if (
+                            header.strip().lower()
+                            == "designation on salary month"
+                        ):
+
+                            if not val:
+                                val = merged_row[col_idx]
+
+                        merged_row[col_idx] = val
+
+                # =========================
+                # 🔥 UPDATE TIMESTAMP
+                # =========================
+                if last_updated_idx >= 0:
+
+                    merged_row[last_updated_idx] = (
+                        datetime.now().isoformat()
+                    )
+
+                # =========================
+                # 🔥 PREPARE CELL UPDATES
+                # =========================
+                for col_idx, val in enumerate(merged_row, start=1):
+
                     update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx+1),
+                        "range": gspread.utils.rowcol_to_a1(
+                            row_num,
+                            col_idx
+                        ),
                         "values": [[val]]
                     })
-                updates.append(row_num)
 
+            # =========================
+            # ➕ NEW ROW
+            # =========================
             else:
-                new_rows.append(new_row)
-                
 
-        # ⚡ BULK UPDATE (FAST)
+                new_row = []
+
+                for col_idx, header in enumerate(headers):
+
+                    if header == "Last Updated":
+
+                        new_row.append(
+                            datetime.now().isoformat()
+                        )
+
+                    else:
+
+                        new_row.append(
+                            row_obj.get(header, "")
+                        )
+
+                new_rows.append(new_row)
+
+        # =========================
+        # 🔥 APPLY UPDATES
+        # =========================
         if update_cells:
             pb_sheet.batch_update(update_cells)
 
-        # ➕ Append
+        # =========================
+        # ➕ APPEND NEW ROWS
+        # =========================
         if new_rows:
             pb_sheet.append_rows(new_rows)
 
+        # =========================
+        # ⚠️ CONFLICT RESPONSE
+        # =========================
+        if conflicts:
+
+            return jsonify({
+                "status": "conflict",
+                "message": "Some rows modified by another user",
+                "employees": conflicts
+            })
+
+        # =========================
+        # ✅ SUCCESS
+        # =========================
         return jsonify({
             "status": "success",
-            "updated": len(updates),
+            "updated": len(update_cells),
             "added": len(new_rows)
         })
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+
+        print("❌ PB UPDATE ERROR:", str(e))
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
     
 @app.route("/sbgexp/update", methods=["POST"])
