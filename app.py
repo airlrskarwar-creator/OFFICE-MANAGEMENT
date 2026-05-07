@@ -294,11 +294,23 @@ def update_pb():
                 # =========================
                 row_changed = False
 
-                for i in range(len(headers)):
+                ignore_compare = {
+                    "Last Updated",
+                    "_lastUpdated"
+                }
 
-                    old_val = str(
-                        existing_row[i]
-                    ).strip()
+                for i, header in enumerate(headers):
+
+                    # 🔥 Ignore timestamp fields
+                    if header in ignore_compare:
+                        continue
+
+                    old_val = ""
+
+                    if i < len(existing_row):
+                        old_val = str(
+                            existing_row[i]
+                        ).strip()
 
                     new_val = str(
                         merged_row[i]
@@ -347,6 +359,12 @@ def update_pb():
                     merged_row,
                     start=1
                 ):
+
+                    header = headers[col_idx - 1]
+
+                    # 🔥 Ignore timestamp compare
+                    if header in ["Last Updated", "_lastUpdated"]:
+                        continue
 
                     old_val = str(
                         existing_row[col_idx - 1]
