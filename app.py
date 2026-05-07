@@ -179,19 +179,28 @@ def update_pb():
             if category_idx >= 0:
                 key += f"|{clean(row_obj.get('Category'))}"
 
-            new_row = []
+            existing_row = []
+
+            if key in row_map:
+                existing_row = rows[row_map[key] - 2]
+            else:
+                existing_row = [""] * len(headers)
+
+            new_row = existing_row.copy()
 
             for i, h in enumerate(headers):
 
-                val = row_obj.get(h, "")
+                # only update fields sent from frontend
+                if h in row_obj:
 
-                # 🔥 ONLY protect designation column
-                if h.strip().lower() == "designation on salary month":
-                    if not val and key in row_map:
-                        existing_row = rows[row_map[key] - 2]
-                        val = existing_row[i]
+                    val = row_obj.get(h, "")
 
-                new_row.append(val)
+                    # preserve designation if blank
+                    if h.strip().lower() == "designation on salary month":
+                        if not val:
+                            val = existing_row[i]
+
+                    new_row[i] = val
             print("📊 Generated Row:", new_row)
 
             if key in row_map:
