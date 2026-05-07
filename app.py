@@ -155,15 +155,20 @@ def update_pb():
         month_idx = headers.index("Salary Month")
         emp_idx = headers.index("Employee Name")
 
-        hris_idx = headers.index("HRIS") \
+        hris_idx = (
+            headers.index("HRIS")
             if "HRIS" in headers else -1
+        )
 
-        category_idx = headers.index("Category") \
+        category_idx = (
+            headers.index("Category")
             if "Category" in headers else -1
+        )
 
-        # 🔥 OPTIONAL LAST UPDATED
-        last_updated_idx = headers.index("Last Updated") \
+        last_updated_idx = (
+            headers.index("Last Updated")
             if "Last Updated" in headers else -1
+        )
 
         # =========================
         # 🔧 CLEAN
@@ -172,7 +177,7 @@ def update_pb():
             return str(val or "").strip().lower()
 
         # =========================
-        # 🔑 CREATE ROW MAP
+        # 🔑 ROW MAP
         # =========================
         row_map = {}
 
@@ -186,17 +191,22 @@ def update_pb():
             if category_idx >= 0:
                 key += f"|{clean(r[category_idx])}"
 
-            row_map[key] = i + 2   # actual sheet row
+            row_map[key] = i + 2
 
         # =========================
-        # 🔥 PROCESS UPDATES
+        # 🔥 TRACKERS
         # =========================
         update_cells = []
         new_rows = []
+
+        updated_employees = []
+        added_employees = []
+
         conflicts = []
 
-        editable_columns = set(headers)
-
+        # =========================
+        # 🔄 PROCESS ROWS
+        # =========================
         for row_obj in edit_rows:
 
             # =========================
@@ -220,18 +230,29 @@ def update_pb():
                 existing_row = rows[row_num - 2]
 
                 # =========================
+                # 🔥 ENSURE SAFE LENGTH
+                # =========================
+                while len(existing_row) < len(headers):
+                    existing_row.append("")
+
+                merged_row = existing_row.copy()
+
+                # =========================
                 # 🔥 CONFLICT CHECK
                 # =========================
                 if last_updated_idx >= 0:
 
-                    sheet_timestamp = ""
+                    sheet_timestamp = (
+                        existing_row[last_updated_idx]
+                        if last_updated_idx < len(existing_row)
+                        else ""
+                    )
 
-                    if len(existing_row) > last_updated_idx:
-                        sheet_timestamp = existing_row[last_updated_idx]
+                    client_timestamp = row_obj.get(
+                        "_lastUpdated",
+                        ""
+                    )
 
-                    client_timestamp = row_obj.get("_lastUpdated", "")
-
-                    # 🔥 conflict
                     if (
                         client_timestamp
                         and sheet_timestamp
@@ -239,39 +260,58 @@ def update_pb():
                     ):
 
                         conflicts.append(
-                            row_obj.get("Employee Name", "Unknown")
+                            row_obj.get(
+                                "Employee Name",
+                                "Unknown"
+                            )
                         )
 
                         continue
 
                 # =========================
-                # 🔥 MERGE SAFE UPDATE
+                # 🔥 MERGE ONLY SENT FIELDS
                 # =========================
-                merged_row = existing_row.copy()
-
-                # ensure row length safe
-                while len(merged_row) < len(headers):
-                    merged_row.append("")
-
                 for col_idx, header in enumerate(headers):
 
-                    # 🔥 ONLY update fields present
                     if header in row_obj:
 
                         val = row_obj.get(header, "")
 
-                        # =========================
-                        # 🔥 PRESERVE DESIGNATION
-                        # =========================
+                        # 🔥 Preserve designation
                         if (
                             header.strip().lower()
-                            == "designation on salary month"
+                            ==
+                            "designation on salary month"
                         ):
 
                             if not val:
                                 val = merged_row[col_idx]
 
                         merged_row[col_idx] = val
+
+                # =========================
+                # 🔥 CHECK ROW CHANGED
+                # =========================
+                row_changed = False
+
+                for i in range(len(headers)):
+
+                    old_val = str(
+                        existing_row[i]
+                    ).strip()
+
+                    new_val = str(
+                        merged_row[i]
+                    ).strip()
+
+                    if old_val != new_val:
+
+                        row_changed = True
+                        break
+
+                # ❌ Skip if no changes
+                if not row_changed:
+                    continue
 
                 # =========================
                 # 🔥 UPDATE TIMESTAMP
@@ -283,14 +323,47 @@ def update_pb():
                     )
 
                 # =========================
-                # 🔥 PREPARE CELL UPDATES
+                # 🔥 TRACK UPDATED EMPLOYEE
                 # =========================
-                for col_idx, val in enumerate(merged_row, start=1):
+                updated_employees.append({
+                    "employee": row_obj.get(
+                        "Employee Name",
+                        ""
+                    ),
+                    "month": row_obj.get(
+                        "Salary Month",
+                        ""
+                    ),
+                    "category": row_obj.get(
+                        "Category",
+                        ""
+                    )
+                })
+
+                # =========================
+                # 🔥 UPDATE ONLY CHANGED CELLS
+                # =========================
+                for col_idx, val in enumerate(
+                    merged_row,
+                    start=1
+                ):
+
+                    old_val = str(
+                        existing_row[col_idx - 1]
+                    ).strip()
+
+                    new_val = str(val).strip()
+
+                    # ❌ Skip unchanged cell
+                    if old_val == new_val:
+                        continue
 
                     update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(
-                            row_num,
-                            col_idx
+                        "range": (
+                            gspread.utils.rowcol_to_a1(
+                                row_num,
+                                col_idx
+                            )
                         ),
                         "values": [[val]]
                     })
@@ -302,7 +375,7 @@ def update_pb():
 
                 new_row = []
 
-                for col_idx, header in enumerate(headers):
+                for header in headers:
 
                     if header == "Last Updated":
 
@@ -318,16 +391,57 @@ def update_pb():
 
                 new_rows.append(new_row)
 
+                # =========================
+                # 🔥 TRACK ADDED EMPLOYEE
+                # =========================
+                added_employees.append({
+                    "employee": row_obj.get(
+                        "Employee Name",
+                        ""
+                    ),
+                    "month": row_obj.get(
+                        "Salary Month",
+                        ""
+                    ),
+                    "category": row_obj.get(
+                        "Category",
+                        ""
+                    )
+                })
+
+        # =========================
+        # 🔥 REMOVE DUPLICATES
+        # =========================
+        updated_employees = list({
+            (
+                x["employee"],
+                x["month"],
+                x["category"]
+            ): x
+            for x in updated_employees
+        }.values())
+
+        added_employees = list({
+            (
+                x["employee"],
+                x["month"],
+                x["category"]
+            ): x
+            for x in added_employees
+        }.values())
+
         # =========================
         # 🔥 APPLY UPDATES
         # =========================
         if update_cells:
+
             pb_sheet.batch_update(update_cells)
 
         # =========================
         # ➕ APPEND NEW ROWS
         # =========================
         if new_rows:
+
             pb_sheet.append_rows(new_rows)
 
         # =========================
@@ -337,7 +451,10 @@ def update_pb():
 
             return jsonify({
                 "status": "conflict",
-                "message": "Some rows modified by another user",
+                "message": (
+                    "Some rows modified "
+                    "by another user"
+                ),
                 "employees": conflicts
             })
 
@@ -346,13 +463,20 @@ def update_pb():
         # =========================
         return jsonify({
             "status": "success",
-            "updated": len(update_cells),
-            "added": len(new_rows)
+
+            "updatedEmployees":
+                updated_employees,
+
+            "addedEmployees":
+                added_employees
         })
 
     except Exception as e:
 
-        print("❌ PB UPDATE ERROR:", str(e))
+        print(
+            "❌ PB UPDATE ERROR:",
+            str(e)
+        )
 
         return jsonify({
             "status": "error",
