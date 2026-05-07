@@ -212,393 +212,988 @@
       font-family: "Inter", Arial, Helvetica, sans-serif;
     }
 
-    /* =============LOGIN PAGE LAYOUT=========== */
+    /* =========================================================
+   LOGIN PAGE
+========================================================= */
+
     #loginPage {
-      height: 100vh;
+
+      min-height: 100vh;
+
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f4f7fc;
-      font-family: 'Segoe UI', sans-serif;
+
       overflow: hidden;
       position: relative;
+
+      padding: 24px;
+
+      background:
+        linear-gradient(135deg,
+          #edf4ff 0%,
+          #f7fbff 50%,
+          #eefdf5 100%);
     }
 
-    /* Animated soft floating shapes */
-    #loginPage::before,
-    #loginPage::after {
-      content: "";
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: rgba(37, 99, 235, 0.1);
-      animation: float 8s ease-in-out infinite alternate;
-    }
+    /* =========================================================
+   ANIMATED FLAG WAVES
+========================================================= */
 
     #loginPage::before {
-      top: -100px;
-      left: -100px;
+
+      content: "";
+
+      position: absolute;
+
+      inset: -40%;
+
+      z-index: 0;
+
+      pointer-events: none;
+
+      will-change: transform;
+
+      background:
+        linear-gradient(120deg,
+
+          rgba(255, 140, 0, .78) 0%,
+          rgba(255, 170, 40, .62) 22%,
+
+          rgba(255, 255, 255, .18) 42%,
+
+          rgba(37, 99, 235, .22) 52%,
+
+          rgba(0, 170, 70, .60) 76%,
+          rgba(19, 136, 8, .78) 100%);
+
+      filter: blur(34px);
+
+      animation:
+        waveFlow 16s ease-in-out infinite alternate;
     }
+
+    /* =========================================================
+   ASHOKA CHAKRA
+========================================================= */
 
     #loginPage::after {
-      bottom: -120px;
-      right: -120px;
-      animation-delay: 2s;
+
+      content: "";
+
+      position: absolute;
+
+      width: 90%;
+      height: 90%;
+
+      left: 5%;
+      top: 5%;
+
+      background-image:
+        url("https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg");
+
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+
+      opacity: .10;
+
+      filter: blur(1px);
+
+      z-index: 0;
+
+      animation:
+        rotate 120s linear infinite;
     }
 
-    @keyframes float {
-      from {
-        transform: translateY(0);
-      }
+    /* =========================================================
+   WAVE ANIMATION
+========================================================= */
 
-      to {
-        transform: translateY(30px);
-      }
-    }
+    @keyframes waveFlow {
 
-    /* =============================
-      MAIN CONTAINER
-    ============================= */
-
-    .login-container {
-      width: 900px;
-      height: 550px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-      display: flex;
-      overflow: hidden;
-      animation: slideUp 0.8s ease forwards;
-      opacity: 0;
-      transform: translateY(40px);
-      scale: 0.8;
-      z-index: 2;
-    }
-
-    @keyframes slideUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* =============================
-      LEFT PANEL
-    ============================= */
-
-    .login-left {
-      flex: 1;
-      color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px;
-    }
-
-    .branding img {
-      width: 300px;
-      margin-bottom: 20px;
-    }
-
-    .branding h1 {
-      margin-bottom: 10px;
-      font-size: 20px;
-    }
-
-    .branding p {
-      font-size: 12px;
-      opacity: 0.9;
-    }
-
-    .highlight-card {
-      animation: highlightFlash 1.2s ease;
-    }
-
-    @keyframes highlightFlash {
       0% {
-        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6);
+
+        transform:
+          translateX(-4%) translateY(0%) rotate(0deg) scale(1);
       }
 
       50% {
-        box-shadow: 0 0 20px 6px rgba(37, 99, 235, 0.5);
+
+        transform:
+          translateX(4%) translateY(-3%) rotate(4deg) scale(1.04);
       }
 
       100% {
-        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+
+        transform:
+          translateX(-3%) translateY(3%) rotate(-4deg) scale(1);
       }
     }
 
-    /* =============================
-      RIGHT PANEL
-    ============================= */
+    /* =========================================================
+   CHAKRA ROTATION
+========================================================= */
+
+    @keyframes rotate {
+
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+   MAIN LOGIN CARD
+========================================================= */
+
+    .login-container {
+
+      width: min(980px, 90vw);
+      height: min(500px, 90vh);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+      border-radius: 30px;
+      box-shadow:
+        0 35px 70px rgba(15, 23, 42, .16),
+        0 12px 30px rgba(15, 23, 42, .08);
+      position: relative;
+      z-index: 2;
+      animation: loginFade .7s ease;
+    }
+
+    @keyframes loginFade {
+
+      from {
+        opacity: 0;
+        transform:
+          translateY(35px) scale(.96);
+      }
+
+      to {
+        opacity: 1;
+        transform:
+          translateY(0) scale(1);
+      }
+    }
+
+    /* =========================================================
+   LEFT PANEL
+========================================================= */
+
+    .login-left {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 10px 15px;
+      background: transparent;
+      backdrop-filter: blur(1px);
+    }
+
+
+    /* =========================================================
+   BRANDING
+========================================================= */
+
+    .branding {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    /* =========================================================
+   AKASHVANI LOGO
+========================================================= */
+
+    .login-logo {
+      width: 300px;
+      max-width: 100%;
+      margin-bottom: 24px;
+      filter:
+        drop-shadow(0 18px 30px rgba(0, 0, 0, .12));
+    }
+
+    /* =========================================================
+   TITLE
+========================================================= */
+
+    .branding h1 {
+
+      font-size: 22px;
+      line-height: 1.08;
+      font-weight: 800;
+      color: #0f2471;
+      letter-spacing: -1.5px;
+      margin-bottom: 18px;
+    }
+
+    /* =========================================================
+   TRICOLOR DIVIDER
+========================================================= */
+
+    .branding .flag-line {
+      width: 140px;
+      height: 5px;
+      margin: 0 auto 20px;
+      border-radius: 50px;
+      background:
+        linear-gradient(90deg,
+          #ff9933 0%,
+          #ff9933 33%,
+          #1d4ed8 33%,
+          #1d4ed8 66%,
+          #138808 66%,
+          #138808 100%);
+    }
+
+    /* =========================================================
+   TAGLINE
+========================================================= */
+
+    .branding p {
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 16px;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .branding p span {
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .branding p span::before {
+
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .branding p span:nth-child(1)::before {
+      background: #ff9933;
+    }
+
+    .branding p span:nth-child(2)::before {
+      background: #1d4ed8;
+    }
+
+    .branding p span:nth-child(3)::before {
+      background: #138808;
+    }
+
+    /* =========================================================
+   RIGHT PANEL
+========================================================= */
 
     .login-right {
-      flex: 1;
-      padding: 50px 30px;
+
+      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      background: linear-gradient(135deg, #ffaf8f, #ffffff, rgb(128, 255, 128));
-      color: rgb(0, 9, 61);
+      padding: 120px 42px 42px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg,
+          #021130d9 0%,
+          #04173fd2 100%);
     }
+
+    /* =========================================================
+   BACKGROUND DOT EFFECT
+========================================================= */
+
+    .login-right::before {
+
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(rgba(255, 255, 255, .06) 1px,
+          transparent 1px);
+      background-size: 10px 10px;
+      opacity: .35;
+      mask-image:
+        radial-gradient(circle at center,
+          black 20%,
+          transparent 75%);
+    }
+
+    /* =========================================================
+   LION EMBLEM
+========================================================= */
+
+    .login-right::after {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 100px;
+      background-image:
+        url("https://upload.wikimedia.org/wikipedia/commons/b/bd/Emblem_of_India_%28gold%29.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original");
+
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      z-index: 3;
+
+      filter:
+        drop-shadow(0 8px 14px rgba(0, 0, 0, .35));
+    }
+
+    /* =========================================================
+   SIGN IN
+========================================================= */
 
     .login-right h2 {
-      margin-bottom: 30px;
-      color: rgb(0, 9, 61);
-      font-size: 20px;
       text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 3;
     }
 
-    .login-credit{
-      text-align: center;
-      font-size: 14px;
-      color: #7a7a7a8a;
-      font-style: italic;
-      letter-spacing: 0.3px;
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
-      font-weight: bold;
-      z-index: 1;
-      text-align: right;
-      padding-right: 10px;
-      font-family: cursive;
+    /* =========================================================
+   SIGN IN UNDERLINE
+========================================================= */
+
+    .login-right h2::after {
+      content: "";
+      display: block;
+      width: 130px;
+      height: 4px;
+      margin: 10px auto 0;
+      border-radius: 50px;
+      background:
+        linear-gradient(90deg,
+          #ff9933 0%,
+          #ff9933 33%,
+          #ffffff 33%,
+          #ffffff 66%,
+          #138808 66%,
+          #138808 100%);
     }
-    .login-credit h3{
-      font-family: 'Allura', cursive;
-      font-size: 30px;
-      color: #00437a8a;
-    }
-    /* =============================
-      INPUT CONTAINER
-    ============================= */
+
+    /* =========================================================
+   INPUT BOX
+========================================================= */
 
     .input-box {
+      position: relative;
       display: flex;
       align-items: center;
-      gap: 12px;
-      height: 65px !important;
-      padding: 2px 12px;
-      border-radius: 12px;
-      background: rgba(34, 34, 34, 0.582);
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-      margin-bottom: 20px;
+      min-height: 50px;
+      margin-bottom: 10px;
+      border-radius: 16px;
+      background:
+        rgba(255, 255, 255, .05);
+
+      border:
+        1px solid rgba(255, 255, 255, .1);
+      backdrop-filter: blur(10px);
+      transition: all .28s ease;
+      z-index: 10;
     }
 
-    /* Remove input border completely */
+    .input-box:hover {
+      border-color: #3b82f6;
+      box-shadow:
+        0 0 0 4px rgba(59, 130, 246, .12);
+      background:
+        rgba(255, 255, 255, .08);
+    }
+
+    .input-box:focus-within {
+      border-bottom: solid 4px #3b82f6;
+      background: #3b83f65f;
+
+    }
+
+    /* =========================================================
+   ICONS
+========================================================= */
+
+    .input-box>i:first-child {
+      width: 24px;
+      min-width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 25px;
+      font-size: 30px;
+      color:
+        rgba(255, 255, 255, .72);
+      z-index: 3;
+    }
+
+    /* =========================================================
+   INPUTS & SELECTS
+========================================================= */
+
+    .input-box input,
     .input-box select {
+
       flex: 1;
+      position: absolute;
+      width: 100%;
+      height: 100%;
       border: none;
       outline: none;
+      border-radius: 16px !important;
       background: transparent;
-      font-size: 16px !important;
-      color: rgb(255, 255, 255);
+      padding: 0 20px 0 50px;
+      margin: 0;
+      color: #fff;
+      font-size: 13px;
       font-weight: 500;
-      box-shadow: none;
-      min-height: 60px;
-      width: 100%;
-      margin-left: -40px;
-      padding-left: 50px;
-      padding-top: 20px;
+      line-height: 50px;
+      box-shadow: none !important;
+      z-index: 11;
+    }
+
+    .input-box input::placeholder {
+      color:
+        rgba(255, 255, 255, .45);
     }
 
     .input-box input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 16px !important;
-      color: rgb(255, 255, 255);
-      font-weight: 500;
-      box-shadow: none;
-      min-height: 60px;
-      width: 100%;
-      margin-left: -40px;
-      padding-left: 50px;
-      padding-top: 10px;
+      margin-left: 0px;
     }
 
-    .input-box select:disabled,
-    .input-box:has(select:disabled) i {
-      color: gray;
+    /* =========================================================
+   REMOVE FOCUS OUTLINE
+========================================================= */
+
+    .input-box input:focus,
+    .input-box select:focus,
+    .input-box input:focus-visible,
+    .input-box select:focus-visible {
+
+      outline: none !important;
+      box-shadow: none !important;
     }
+
+    /* =========================================================
+   REMOVE DEFAULT ARROW
+========================================================= */
+
+    .input-box select::-ms-expand {
+      display: none;
+    }
+
+    /* =========================================================
+   MODERN PICKER
+========================================================= */
 
     .input-box select,
     .input-box select::picker(select) {
       appearance: base-select;
     }
 
+    /* =========================================================
+   PICKER DROPDOWN
+========================================================= */
+
     .input-box select::picker(select) {
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      background: white;
-      max-height: 250px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-
-      /* Creates the gap from the input box */
-      margin-top: 5px;
-      margin-left: -20px;
-      width: max-content;
-
-      /* Optional: Smooth entry (Check browser support) */
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      margin: 10px 0px;
+      min-height: 25px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: none;
+      border-radius: 14px;
+      background:
+        rgba(5, 22, 55, 0.562);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 25px 45px rgba(0, 0, 0, .45),
+        0 10px 25px rgba(0, 0, 0, .25);
+      max-height: 300px;
+      color: white;
+      z-index: 9999;
+      border:
+        1px solid rgba(255, 255, 255, .08);
+      scrollbar-width: thin;
+      scrollbar-color:
+        rgba(255, 255, 255, .25) transparent;
+      transition: all .2s ease;
     }
+
+    /* =========================================================
+   OPTIONS
+========================================================= */
 
     .input-box select option {
-      color: black;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 10px;
+      background: transparent;
+      color:
+        rgba(255, 255, 255, .88);
+
       font-size: 13px;
+      font-weight: 500;
+      line-height: 2.0;
+      transition:
+        background .2s ease,
+        color .2s ease,
+        transform .15s ease;
     }
 
-    .input-box select option:checked {
-      background-color: #006086;
-      /* Your theme blue */
-      color: white;
-      font-weight: bold;
+    .input-box select::picker-icon {
+      font-family: 15px;
+      align-content: center;
+      transition: 150ms ease;
     }
+
+    .input-box select:open::picker-icon {
+      transform: rotate(180deg);
+    }
+
+    /* =========================================================
+   HIDE PLACEHOLDER
+========================================================= */
+
+    .input-box select option[value=""] {
+      display: none;
+    }
+
+    /* =========================================================
+   OPTION HOVER
+========================================================= */
 
     .input-box select option:hover {
-      background-color: #9ff9ff;
-      color: blue;
-      font-weight: bold;
-    }
-
-    .input-box:hover,
-    .input-box:has(select:focus),
-    .input-box:has(select:open) {
+      background: #3b83f62e;
+      color: #00eaff;
       scale: 1.02;
-      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.3);
+      box-shadow: 0 0 0 2px rgba(59, 131, 246, .25);
     }
 
-    .input-box:has(select:disabled) {
-      background: transparent;
-      box-shadow: 0 4px 15px rgba(0, 62, 112, 0.3);
+    /* =========================================================
+   SELECTED OPTION
+========================================================= */
+
+    .input-box select option:checked {
+      background:
+        linear-gradient(135deg,
+          #2563eb,
+          #1d4ed8);
+      color: #fff;
+      font-weight: 700;
     }
 
-    .input-box:has(select:disabled):hover {
-      scale: 1.0;
-    }
-
-    /* Placeholder */
-    .input-box input::placeholder {
-      color: rgb(206, 240, 255);
-    }
-
-    /* Icon style */
-    .input-box i {
-      font-size: 40px;
-      color: rgb(255, 255, 255);
-      transition: 0.3s ease;
-    }
-
-    .input-box:focus-within {
-      background: rgba(170, 242, 255, 0.836);
-      border-bottom: 4px solid blue;
-      border-radius: 12px 12px 0 0;
-      transform: scale(1.02);
-    }
-
-    /* Icon highlight on focus */
-    .input-box:focus-within i {
-      color: #0400ff;
-      transform: scale(1.02);
-    }
-
-    .input-box:focus-within select,
-    .input-box:focus-within input,
-    .input-box:focus-within #togglePassword i,
-    .input-box:focus-within input::placeholder {
-      color: #0400ff;
-    }
-
-    /* 🔥 ERROR */
-    #loginError {
-      font-size: 15px;
-      color: #ff0000;
-      font-weight: bold;
-      text-align: center;
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      right: 0;
-    }
+    /* =========================================================
+   PASSWORD WRAP
+========================================================= */
 
     .password-wrap {
-      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      position: absolute;
+      height: 52px;
+      width: 100%;
     }
+
+    /* =========================================================
+   TOGGLE PASSWORD
+========================================================= */
 
     #togglePassword {
       position: absolute;
-      right: -40px;
+      right: 15px;
       top: 50%;
       transform: translateY(-50%);
-      cursor: pointer;
       display: flex;
-      align-items: center;
-      width: 30px;
-    }
-
-    /* 🔥 icon style */
-    #togglePassword i {
-      font-size: 28px;
-      color: rgb(206, 240, 255);
-    }
-
-    #loginBtn {
-      display: flex;
-      flex-direction: row;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      border: none;
-      border-radius: 8px;
-      background: #02005c;
-      color: white;
       cursor: pointer;
-      transition: all 0.3s ease;
+      z-index: 999;
+    }
+
+    #togglePassword i {
+      font-size: 20px;
+      color:
+        rgba(255, 255, 255, .6);
+    }
+
+    /* =========================================================
+   LOGIN BUTTON
+========================================================= */
+
+    #loginBtn {
+
+      height: 50px;
+      border: none;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      background:
+        linear-gradient(135deg,
+          #2563eb,
+          #1d4ed8);
+
+      box-shadow:
+        0 18px 35px rgba(37, 99, 235, .28);
+
+      transition: all .3s ease;
+      z-index: 2;
+    }
+
+    #loginBtn p {
+      font-size: 14px;
     }
 
     #loginBtn:hover {
-      background: rgb(0, 140, 255);
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(0, 107, 194, 0.4);
+
+      scale: 1.02;
+      box-shadow:
+        0 24px 45px rgba(37, 99, 235, .35);
     }
 
     #loginBtn:active {
-      transform: scale(1.0);
-      box-shadow: 0 2px 8px rgba(0, 107, 194, 0.3);
-      background: #02005c;
+      transform: scale(.98);
     }
 
     #loginBtn i {
       font-size: 25px;
-      margin-right: 8px;
     }
 
-    #loginBtn p {
-      font-size: 16px;
-      font-weight: 500;
+    /* =========================================================
+   ERROR
+========================================================= */
+
+    #loginError {
+      position: absolute;
+      bottom: 35px;
+      left: 0;
+      text-align: center;
+      color: #f87171;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+      line-height: 2;
     }
+
+    /* =========================================================
+   CAPS WARNING
+========================================================= */
 
     .caps-warning {
       display: none;
-      font-size: 15px;
-      color: #ff0000;
-      font-weight: bold;
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      right: 0;
+      bottom: 10px;
+      left: 0;
+      color: #fbbf24;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+      line-height: 2;
     }
 
     .caps-warning.show {
+
       display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
+
+    /* =========================================================
+    CREDIT
+    ========================================================= */
+
+    .login-credit {
+      position: absolute;
+      display: flex;
+      right: 18px;
+      bottom: 5px;
+      z-index: 1;
+      text-align: right;
+      color:
+        rgba(94, 94, 94, 0.5);
+      line-height: 1.5;
+    }
+
+    .login-credit p{
+      height: 30px;
+      padding-top: 10px;
+      font-size: 12px;
+    }
+
+    .login-credit h3 {
+      margin: 0;
+      font-size: 24px;
+      color: #00004983;
+      font-family: "Allura", cursive;
+      font-weight: 400;
+    }
+
+    /* =========================================================
+          LOADING PAGE
+    ========================================================= */
+
+    #globalLoader{
+
+      position:fixed;
+
+      inset:0;
+
+      z-index:999999;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      background:
+        rgba(4,12,28,.78);
+
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+
+      transition:
+        opacity .35s ease,
+        visibility .35s ease;
+    }
+
+    /* =========================================================
+      HIDDEN
+    ========================================================= */
+
+    #globalLoader.hidden{
+
+      opacity:0;
+
+      visibility:hidden;
+
+      pointer-events:none;
+    }
+
+    /* =========================================================
+      CARD
+    ========================================================= */
+
+    .loader-card{
+
+      width:min(420px,90vw);
+
+      padding:34px 30px;
+
+      border-radius:28px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(10,20,45,.96),
+          rgba(18,38,78,.92)
+        );
+
+      border:
+        1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 30px 60px rgba(0,0,0,.45),
+        0 10px 30px rgba(0,0,0,.22);
+
+      text-align:center;
+
+      overflow:hidden;
+
+      position:relative;
+    }
+
+    /* =========================================================
+      GLOW
+    ========================================================= */
+
+    .loader-card::before{
+
+      content:"";
+
+      position:absolute;
+
+      inset:-40%;
+
+      background:
+        linear-gradient(
+          120deg,
+          rgba(255,153,51,.18),
+          rgba(255,255,255,.04),
+          rgba(19,136,8,.16)
+        );
+
+      filter:blur(45px);
+
+      animation:
+        loaderGlow 8s linear infinite;
+
+      pointer-events:none;
+    }
+
+    /* =========================================================
+      TITLE
+    ========================================================= */
+
+    .loader-title{
+
+      position:relative;
+
+      color:#fff;
+
+      font-size:26px;
+      font-weight:800;
+
+      letter-spacing:.5px;
+
+      margin-bottom:18px;
+    }
+
+    /* =========================================================
+      API NAME
+    ========================================================= */
+
+    .loader-api{
+
+      position:relative;
+
+      color:
+        rgba(255,255,255,.75);
+
+      font-size:14px;
+      font-weight:600;
+
+      margin-bottom:22px;
+
+      min-height:18px;
+
+      letter-spacing:.3px;
+    }
+
+    /* =========================================================
+      BAR WRAP
+    ========================================================= */
+
+    .loader-bar-wrap{
+
+      position:relative;
+
+      width:100%;
+      height:14px;
+
+      overflow:hidden;
+
+      border-radius:999px;
+
+      background:
+        rgba(255,255,255,.08);
+
+      border:
+        1px solid rgba(255,255,255,.06);
+    }
+
+    /* =========================================================
+      BAR
+    ========================================================= */
+
+    .loader-bar{
+
+      width:0%;
+      height:100%;
+
+      border-radius:999px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #ff9933,
+          #ffffff,
+          #138808
+        );
+
+      background-size:200% 100%;
+
+      transition:
+        width .35s ease;
+
+      animation:
+        moveGradient 2s linear infinite;
+    }
+
+    /* =========================================================
+      PERCENT
+    ========================================================= */
+
+    .loader-percent{
+
+      position:relative;
+
+      margin-top:18px;
+
+      color:#fff;
+
+      font-size:24px;
+      font-weight:800;
+
+      letter-spacing:1px;
+    }
+
+    /* =========================================================
+      ANIMATIONS
+    ========================================================= */
+
+    @keyframes moveGradient{
+
+      from{
+        background-position:0% 0%;
+      }
+
+      to{
+        background-position:200% 0%;
+      }
+    }
+
+    @keyframes loaderGlow{
+
+      from{
+        transform:rotate(0deg);
+      }
+
+      to{
+        transform:rotate(360deg);
+      }
+    }
+
+
 
     /* =============APP LAYOUT=========== */
     .watermark {
@@ -1365,6 +1960,7 @@
       flex-direction: row;
       gap: 0;
       margin: 0 3px;
+      padding: 0;
     }
 
     .BudgetTablefromPBWrapper {
@@ -1522,11 +2118,29 @@
     }
 
     /* 🔹 MAIN TABLES TAKE REMAINING SPACE */
+    /*#PB_GOViewTbl,
+      #PB_GOEditTbl,
+      #PB_NPSViewTbl,
+      #PB_NPSEditTbl {
+        flex: 1;
+      }   */
+
     #PB_GOViewTbl,
     #PB_GOEditTbl,
     #PB_NPSViewTbl,
     #PB_NPSEditTbl {
-      flex: 1;
+
+      /* 🔥 content decides width */
+      width: max-content;
+
+      /* 🔥 still fill wrapper minimum */
+      min-width: 100%;
+
+      /* 🔥 prevent unnecessary stretch */
+      flex: 0 0 auto;
+
+      table-layout: auto;
+      border-spacing: 0 !important;
     }
 
     /* ================= CELLS ================= */
@@ -1541,6 +2155,30 @@
       padding: 5px 8px;
       border-bottom: 1px solid #e5e7eb;
       border-right: dotted 1px #d7dae0;
+    }
+
+    /* =========================
+      🔥 AUTO CONTENT WIDTH
+    ========================= */
+
+    #PB_GOViewTbl th,
+    #PB_GOViewTbl td,
+    #PB_NPSViewTbl th,
+    #PB_NPSViewTbl td,
+    #PB_GOEditTbl th,
+    #PB_GOEditTbl td,
+    #PB_NPSEditTbl th,
+    #PB_NPSEditTbl td {
+      width: max-content;
+      white-space: nowrap;
+    }
+
+    #PB_GOViewTbl td:not(:first-child),
+    #PB_NPSViewTbl td:not(:first-child),
+    #PB_GOEditTbl td:not(:first-child),
+    #PB_NPSEditTbl td:not(:first-child) {
+
+      width: 1%;
     }
 
     /* ================= HOVER ================= */
@@ -1667,12 +2305,24 @@
     /* ================= TOTAL ROW ================= */
     .total-row td {
       position: sticky;
-      bottom: 0;
+      bottom: -1px;
+      /* 🔥 fixes tiny scroll gap */
+
       background: #fef3c7;
       font-weight: 600;
-      z-index: 7;
-      box-shadow: 0 -2px 0 #f59e0b;
+
+      z-index: 20;
+
       padding: 6px 4px !important;
+
+      /* 🔥 solid separator */
+      border-top: 2px solid #f59e0b;
+
+      /* 🔥 cover scrolling behind */
+      background-clip: padding-box;
+
+      /* 🔥 remove rendering gap */
+      box-shadow: 0 2px 0 #fef3c7;
     }
 
     #PB_GOViewTbl tr:last-child td:first-child,
@@ -1681,7 +2331,7 @@
     #PB_NPSEditTbl tr:last-child td:first-child,
     #PB_GOITCalc tr:last-child td:first-child,
     #PB_NPSITCalc tr:last-child td:first-child {
-      box-shadow: 0 -2px 0 #f59e0b;
+      border-top: 2px solid #f59e0b;
       background: #fef3c7;
     }
 
@@ -2879,14 +3529,7 @@
         RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
       =================================================== */
 
-    @media (max-width: 1200px) {
-      .SalarySlipTableWrapper {
-        width: 70%;
-      }
-
-    }
-
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 1200px) {
 
       html,
       * {
@@ -2896,10 +3539,6 @@
       body::before {
         opacity: 0.03;
         /* Softer watermark on small screens */
-      }
-
-      #togglePassword {
-        right: 0px;
       }
 
       table {
@@ -3102,6 +3741,38 @@
         margin-left: 0px;
         width: max-content;
       }
+
+      .login-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .login-left {
+        padding: 50px 28px;
+      }
+
+      .login-right {
+        padding: 110px 28px 100px;
+      }
+
+      .branding h1 {
+        font-size: 20px;
+      }
+
+      .login-right h2 {
+        font-size: 20px;
+        margin-top: 10px;
+      }
+
+      .login-logo {
+        width: 100px;
+      }
+      
+      .login-credit {
+        right: 0px;
+        justify-content: center;
+        top: 0;
+      }
     }
   </style>
 </head>
@@ -3111,54 +3782,168 @@
 
     <div class="login-container">
 
-      <!-- LEFT PANEL -->
+      <!-- ======================================
+          LEFT PANEL
+      ======================================= -->
       <div class="login-left">
+
         <div class="branding">
-          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" class="login-logo">
-          <h1>Office Management System</h1>
+
+          <!-- AKASHVANI LOGO -->
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" class="login-logo"
+            alt="Akashvani Logo">
+
+          <!-- TITLE -->
+          <h1>
+            Office Management System
+          </h1>
+
+          <!-- TRICOLOR LINE -->
+          <div class="flag-line"></div>
+
+          <!-- TAGLINE -->
+          <p>
+            <span>Administration</span>
+            <span>Engineering</span>
+            <span>Programming</span>
+          </p>
+
         </div>
       </div>
 
-      <!-- RIGHT PANEL -->
+      <!-- ======================================
+          RIGHT PANEL
+      ======================================= -->
       <div class="login-right">
 
+        <!-- SIGN IN -->
         <h2>Sign In</h2>
 
-        <div class="input-box">
-          <i class="material-icons">broadcast_on_personal</i>
+        <!-- STATION -->
+        <div class="input-box select-box">
+
+          <i class="material-icons">
+            broadcast_on_personal
+          </i>
+
           <select id="loginStationDropdown">
-            <option value="">Select Station</option>
+
+            <option value="">
+              Select Station
+            </option>
+
           </select>
         </div>
 
-        <div class="input-box">
-          <i class="material-icons">admin_panel_settings</i>
+        <!-- USER -->
+        <div class="input-box select-box">
+
+          <i class="material-icons">
+            admin_panel_settings
+          </i>
+
           <select id="loginUserDropdown" disabled>
-            <option value="">Select User</option>
+
+            <option value="">
+              Select User
+            </option>
+
           </select>
         </div>
 
+        <!-- PASSWORD -->
         <div class="input-box">
-          <i class="material-icons">lock</i>
+
+          <i class="material-icons">
+            lock
+          </i>
+
           <div class="password-wrap">
+
             <input type="password" id="loginPasswordInput" placeholder="Enter Password">
+
             <span id="togglePassword">
-              <i class="material-icons">visibility_off</i>
+
+              <i class="material-icons">
+                visibility_off
+              </i>
+
             </span>
           </div>
         </div>
 
-
+        <!-- LOGIN BUTTON -->
         <button id="loginBtn">
-          <i class="material-icons">login</i>
+
+          <i class="material-icons">
+            login
+          </i>
+
           <p>Login</p>
+
         </button>
+
+        <!-- ERROR -->
         <div id="loginError"></div>
-        <div id="capsWarning" class="caps-warning"><i class="material-icons">keyboard_capslock</i>Caps Lock is ON</div>        
-      </div>      
+
+        <!-- CAPS WARNING -->
+        <div id="capsWarning" class="caps-warning">
+
+          <i class="material-icons">
+            keyboard_capslock
+          </i>
+
+          Caps Lock is ON
+
+        </div>
+
+      </div>
     </div>
+
+    <!-- ======================================
+        CREDIT
+    ======================================= -->
     <div class="login-credit">
-      Created by :<br><h3>Abhijin P R,</h3>Technician, <br> Akashavani Karwar
+      <p>Created by : </p><h3>Abhijin P R</h3>&emsp;<p>, Technician, Akashvani Karwar</p>
+    </div>
+
+  </div>
+
+    <!-- =========================================================
+      GLOBAL LOADER
+  ========================================================= -->
+
+  <div id="globalLoader">
+
+    <div class="loader-card">
+
+      <div class="loader-title">
+        Loading Application
+      </div>
+
+      <div
+        id="loaderApiName"
+        class="loader-api"
+      >
+        Initializing...
+      </div>
+
+      <div class="loader-bar-wrap">
+
+        <div
+          id="loaderBar"
+          class="loader-bar"
+        ></div>
+
+      </div>
+
+      <div
+        id="loaderPercent"
+        class="loader-percent"
+      >
+        0%
+      </div>
+
     </div>
   </div>
   <div class="app" id="mainPage">
@@ -3228,7 +4013,7 @@
         <!-- Footer -->
       </div>
       <div class="menu-footer">
-        <button class="logout-btn" data-tooltip="Logout">
+        <button class="logout-btn" data-tooltip="Logout" id="logoutBtn">
           <i class="material-symbols-outlined">logout</i>
           <span>Logout</span>
         </button>
@@ -4772,16 +5557,42 @@
     });
 
     // ========================= SUCCESS HANDLER ========================= //
-    function loginSuccess(user, displayName) {
-      window.currentUser = user;
+    /* =========================================
+        LOGIN SUCCESS
+      ========================================= */
 
-      id("loginPage").style.display = "none";
-      id("mainPage").style.display = "flex";
+      async function loginSuccess(
+        user,
+        displayName
+      ) {
 
-      id("welcomeUser").textContent = `Welcome ${displayName}`;
+        window.currentUser = user;
 
-      applyUserAccess(user);
-    }
+        id("loginPage").style.display =
+          "none";
+
+        id("mainPage").style.display =
+          "flex";
+
+        id("welcomeUser").textContent =
+          `Welcome ${displayName}`;
+
+        /* =====================================
+          LOAD REMAINING DATA
+        ===================================== */
+
+          await loadAllData();
+
+          initAfterData();
+
+          initBindings();
+
+          initDefaultView();
+
+          initPostSetup();
+
+        applyUserAccess(user);
+      }
 
 
 
@@ -4965,19 +5776,39 @@
 
     window.addEventListener("resize", moveIndicator);
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      Chart.register(xAxisPillPlugin);
-      Chart.register(columnLabelPlugin);
-      initUI();
+    /* =========================================
+      DOM READY
+    ========================================= */
 
-      // 🚀 Load data once
-      await loadAllData();
-      initAfterData();
-      initButtons();
-      initBindings();
-      initDefaultView();
-      initPostSetup();
-    });
+    document.addEventListener(
+      "DOMContentLoaded",
+      async () => {
+        hideLoader();
+        Chart.register(xAxisPillPlugin);
+        Chart.register(columnLabelPlugin);
+
+        initUI();
+
+        /* =====================================
+          LOAD ONLY EMP DB
+        ===================================== */
+
+        await loadTable(
+          "emp",
+          "EmpDB",
+          false
+        );
+
+        /* =====================================
+          LOGIN DROPDOWNS
+        ===================================== */
+
+        populateloginStationDropdown();
+
+        initButtons();
+      }
+    );
+
 
     function initUI() {
       startDigitalClock();
@@ -5329,37 +6160,180 @@
       }
     }
 
+    function showLoader(){
+
+      id("globalLoader")
+        ?.classList.remove("hidden");
+    }
+
+    function hideLoader(){
+
+      id("globalLoader")
+        ?.classList.add("hidden");
+    }
+
+    function updateLoader(
+      percent,
+      apiName = ""
+    ){
+
+      const bar =
+        id("loaderBar");
+
+      const text =
+        id("loaderPercent");
+
+      const api =
+        id("loaderApiName");
+
+      if (bar) {
+        bar.style.width =
+          `${percent}%`;
+      }
+
+      if (text) {
+        text.textContent =
+          `${Math.round(percent)}%`;
+      }
+
+      if (api) {
+        api.textContent =
+          apiName;
+      }
+    }
+
+
+
+    /* =========================================================
+      LOAD ALL DATA WITH LOADER
+    ========================================================= */
+
     async function loadAllData() {
-      // 🔴 STEP 1: Load REQUIRED data first
-      await loadTable("emp", "EmpDB", false);
-      populateloginStationDropdown();
-      await loadTable("duty", "DutyChart");
+
+      showLoader();
+
+      const totalSteps = 13;
+
+      let currentStep = 0;
+
+      function step(apiName) {
+
+        currentStep++;
+
+        updateLoader(
+          (currentStep / totalSteps) * 100,
+          apiName
+        );
+      }
+
+      /* =====================================================
+        DUTY CHART
+      ===================================================== */
+
+      step("Loading Duty Chart...");
+      await loadTable("duty","DutyChart");
+
+      /* =====================================================
+        PAY BILL
+      ===================================================== */
+
+      step("Loading Pay Bill Data...");
       await loadTable("pb", "PBDB");
-      await loadTable("cpc", "CPC7DB");
+
+      /* =====================================================
+        CPC
+      ===================================================== */
+
+      step("Loading CPC Data...");
+      await loadTable("cpc","CPC7DB");
+
+      /* =====================================================
+        DG LOG
+      ===================================================== */
+
+      step("Loading DG Log...");
       await loadTable("dg", "DGlog");
-      await loadTable("hsd", "HSDlog");
+
+      /* =====================================================
+        HSD LOG
+      ===================================================== */
+
+      step("Loading HSD Log...");
+      await loadTable("hsd","HSDlog");
+
+      /* =====================================================
+        EB LOG
+      ===================================================== */
+
+      step("Loading Electricity Log...");
       await loadTable("eb", "EBlog");
 
-      // 🔴 STEP 2: Calculate
+      /* =====================================================
+        BUILD EMP DB
+      ===================================================== */
+
+      step("Calculating Employee Data...");
       buildEmpDBWithCalc();
 
-      // 🔴 STEP 3: Sync
+      /* =====================================================
+        SYNC PB TO SBG
+      ===================================================== */
+
+      step("Syncing Budget Data...");
       await syncPBtoSBG();
 
-      // 🔴 STEP 4: Load sbg after update
-      await loadTable("sbg", "BudgetDB");
-      await loadTable("sbgexp", "SBGexpenditureDB");
+      /* =====================================================
+        BUDGET DB
+      ===================================================== */
+
+      step("Loading Budget Database...");
+      await loadTable("sbg","BudgetDB" );
+
+      /* =====================================================
+        SBG EXP DB
+      ===================================================== */
+
+      step("Loading Expenditure Data...");
+      await loadTable("sbgexp","SBGexpenditureDB");
+
+      /* =====================================================
+        RENDER BUDGET
+      ===================================================== */
+
+      step("Rendering Budget Tables...");
 
       renderBudgetfromPBData();
       renderFilterMainBudgetExpTable();
 
-      // 🟢 STEP 5: Remaining (parallel)
+      /* =====================================================
+        REMAINING PARALLEL
+      ===================================================== */
+
+      step("Loading Reference Data...");
+
       await Promise.all([
-        loadTable("qtrs", "QtrsRateDB"),
-        loadTable("city", "CityZoneDB"),
-        loadTable("comm", "CommFactDB"),
-        loadTable("it", "ITDB")
+
+        loadTable("qtrs","QtrsRateDB"),
+
+        loadTable("city","CityZoneDB"),
+
+        loadTable("comm","CommFactDB"),
+
+        loadTable("it","ITDB")
       ]);
+
+      /* =====================================================
+        COMPLETE
+      ===================================================== */
+
+      updateLoader(
+        100,
+        "Application Ready"
+      );
+
+      setTimeout(() => {
+        hideLoader();
+      }, 500);
     }
 
     async function loadData() {
@@ -8315,7 +9289,7 @@
             "DAA on NPSC",
             "Total DAA",
             "DAA on NPSE ded",
-            "DAA on NPS",
+            "DAA on NPS"
           ];
 
           resetCols.forEach((col) => {
@@ -9064,7 +10038,6 @@
       "NPSC",
       "DAA",
       "DAA on TA",
-      "DAA on NPSE ded",
       "Gross Income",
       "Total Deduction",
       "Cess @4%",
@@ -9123,12 +10096,9 @@
 
         if (!cell) return;
 
-        /* 🔹 SET VALUE = 0 FOR HIDDEN */
+        /* 🔹 HIDE COLUMN ONLY */
         if (hiddenCols.includes(normalize(header))) {
-          if (input) {
-            input.dataset.raw = 0; // 🔥 ADD
-            input.value = 0;
-          }
+          cell.style.display = "none";
         }
 
         /* 🔹 READ ONLY */
@@ -9179,7 +10149,7 @@
       table.innerHTML = "";
 
       if (!rows.length) {
-        table.innerHTML = "<tr><td>No Data</td></tr>";
+        table.innerHTML = "<tr><td>==============🚫No Data found🚫==============</td></tr>";
         return;
       }
 
@@ -9354,10 +10324,13 @@
             colName === "Arrears Details" ||
             colName === "Recovery Details"
           ) {
-            const textarea = createEl("textarea");
 
-            // 🔥 DO NOT COPY PREVIOUS DATA
-            textarea.value = "";
+            const textarea =
+              createEl("textarea");
+
+            // 🔥 ADD -> blank
+            // 🔥 EDIT -> preserve value
+            textarea.value = isEditMode ? (val || "") : "";
 
             td.appendChild(textarea);
           } else {
@@ -9466,6 +10439,7 @@
       applyTableColumnRules(table, selectedHeaders, tableId);
       recalculateAllTotals();
     }
+
 
     function getBasicPay(payLevel, index) {
       if (!cpcData || !cpcData.headers || !cpcData.rows) return 0;
@@ -9632,59 +10606,133 @@
         }
 
         // =========================
-        // 🔥 BLOCK
+        // 🔥 CURRENT BLOCK
         // =========================
-        const blockStartMonth = selectedNum <= 6 ? 1 : 7;
-        const prevBlockStartMonth = blockStartMonth === 1 ? 7 : 1;
+        const currentBlockStart =
+          selectedNum <= 6
+            ? 1   // Jan-Jun
+            : 7;  // Jul-Dec
 
-        let blockStartIndex = -1;
-        let prevBlockStartIndex = -1;
-
-        history.forEach((r, i) => {
-          const [m, y] = r.month.split("-");
-          const mNum = monthMap[m];
-
-          if (parseInt(y) === parseInt(year) && mNum === blockStartMonth) {
-            blockStartIndex = i;
-          }
-
-          // previous block (same FY assumption)
-          if (mNum === prevBlockStartMonth) {
-            prevBlockStartIndex = i;
-          }
-        });
+        const previousBlockStart =
+          currentBlockStart === 1
+            ? 7
+            : 1;
 
         // =========================
-        // 🔥 CHECK CHANGE IN CURRENT BLOCK
+        // 🔥 FIND CURRENT BLOCK START INDEX
         // =========================
-        let hasChangeInBlock = false;
+        let currentBlockIndex = -1;
 
-        for (let i = selectedIndex - 1; i > 0; i--) {
-          const [m] = history[i].month.split("-");
-          const mNum = monthMap[m];
+        for (let i = 0; i < history.length; i++) {
 
-          if (mNum < blockStartMonth) break;
+          const [m, y] =
+            history[i].month.split("-");
 
-          if (Number(history[i].da) !== Number(history[i - 1].da)) {
-            hasChangeInBlock = true;
+          const mNum =
+            monthMap[m];
+
+          if (
+            parseInt(y) === parseInt(year)
+            &&
+            mNum === currentBlockStart
+          ) {
+
+            currentBlockIndex = i;
             break;
           }
         }
 
         // =========================
-        // 🔥 FINAL START INDEX (UPDATED RULE)
+        // 🔥 FIND PREVIOUS BLOCK START INDEX
         // =========================
-        let startIndex;
+        let previousBlockIndex = -1;
 
-        if (hasChangeInBlock) {
-          // 🔥 ALWAYS FROM BLOCK START
-          startIndex = blockStartIndex;
-        } else {
-          // 🔥 NO CHANGE → INCLUDE PREVIOUS BLOCK
-          startIndex = prevBlockStartIndex;
+        for (let i = 0; i < history.length; i++) {
+
+          const [m, y] =
+            history[i].month.split("-");
+
+          const mNum =
+            monthMap[m];
+
+          // 🔥 previous Jul block for Jan revisions
+          if (
+            currentBlockStart === 1
+            &&
+            parseInt(y) === parseInt(year) - 1
+            &&
+            mNum === 7
+          ) {
+
+            previousBlockIndex = i;
+            break;
+          }
+
+          // 🔥 previous Jan block for Jul revisions
+          if (
+            currentBlockStart === 7
+            &&
+            parseInt(y) === parseInt(year)
+            &&
+            mNum === 1
+          ) {
+
+            previousBlockIndex = i;
+            break;
+          }
         }
 
-        if (startIndex < 0) startIndex = 0;
+        // =========================
+        // 🔥 CHECK REVISION IN PREVIOUS BLOCK
+        // =========================
+        let previousBlockHadRevision = false;
+
+        if (previousBlockIndex >= 0) {
+
+          const currentBlockLimit =
+            currentBlockIndex >= 0
+              ? currentBlockIndex
+              : history.length;
+
+          for (
+            let i = previousBlockIndex + 1;
+            i < currentBlockLimit;
+            i++
+          ) {
+
+            const currentDA =
+              Number(history[i].da);
+
+            const prevDA =
+              Number(history[i - 1].da);
+
+            if (currentDA !== prevDA) {
+
+              previousBlockHadRevision = true;
+              break;
+            }
+          }
+        }
+
+        // =========================
+        // 🔥 FINAL START INDEX
+        // =========================
+        let startIndex = currentBlockIndex;
+
+        // 🔥 no revision in previous block
+        if (
+          !previousBlockHadRevision
+          &&
+          previousBlockIndex >= 0
+        ) {
+
+          startIndex = previousBlockIndex;
+        }
+
+        // 🔥 safety
+        if (startIndex < 0) {
+          startIndex = 0;
+        }
         // =========================
         // 🔥 CALCULATION
         // =========================
@@ -9708,12 +10756,12 @@
           const basic = num(r.basic);
           const ta = num(r.ta);
 
-          const oldAmt = basic * (oldDApercent / 100);
-          const newAmt = basic * (newDApercent / 100);
+          const oldAmt = Math.round(basic * (oldDApercent / 100));
+          const newAmt = Math.round(basic * (newDApercent / 100));
           const diff = newAmt - oldAmt;
 
-          const oldTA = ta * (oldDApercent / 100);
-          const newTA = ta * (newDApercent / 100);
+          const oldTA = Math.round(ta * (oldDApercent / 100));
+          const newTA = Math.round(ta * (newDApercent / 100));
           const diffTA = newTA - oldTA;
 
           if (diff > 0) {
@@ -9723,20 +10771,20 @@
             const daaRounded = Math.round(diff);
             const daaTArounded = Math.round(diffTA);
 
-            let oldnpse = 0,
-              newnpse = 0,
-              oldnpsc = 0,
-              newnpsc = 0,
+            let oldNPSE = 0,
+              newNPSE = 0,
+              oldNPSC = 0,
+              newNPSC = 0,
               diffNPSE = 0,
               diffNPSC = 0;
 
             if (isNPS) {
-              oldnpse = Math.round((oldAmt + basic) * 0.14);
-              newnpse = Math.round((newAmt + basic) * 0.14);
-              oldnpsc = Math.round((oldAmt + basic) * 0.1);
-              newnpsc = Math.round((newAmt + basic) * 0.1);
-              diffNPSE = newnpse - oldnpse;
-              diffNPSC = newnpsc - oldnpsc;
+              oldNPSE = Math.round((oldAmt + basic) * 0.14);
+              newNPSE = Math.round((newAmt + basic) * 0.14);
+              oldNPSC = Math.round((oldAmt + basic) * 0.1);
+              newNPSC = Math.round((newAmt + basic) * 0.1);
+              diffNPSE = newNPSE - oldNPSE;
+              diffNPSC = newNPSC - oldNPSC;
             }
 
             calcDetails.push({
@@ -9750,10 +10798,10 @@
               newDA: Math.round(newAmt),
               oldTA,
               newTA,
-              oldnpsc,
-              newnpsc,
-              oldnpse,
-              newnpse,
+              oldNPSC,
+              newNPSC,
+              oldNPSE,
+              newNPSE,
               diffDA: daaRounded,
               diffTA: daaTArounded,
               diffDAANPSE: diffNPSE,
@@ -9775,10 +10823,11 @@
         tr._daaDetails = calcDetails;
 
         // 🔥 ZERO FIX (IMPORTANT)
-        if (!totalDAA && !totalDAA_TA) {
+        if (!totalDAA && !totalDAA_TA && !tr.dataset.manualEdited) {
           resetDependentFields(tr, table);
           return;
         }
+
         // =========================
         // 🔹 ARREAR DETAILS (TEXTAREA SAFE)
         // =========================
@@ -9836,20 +10885,16 @@
           setValue(daanpscInput, Math.round(daa * 0.1));
           setValue(daanpsInput, Math.round(daa * 0.14 + daa * 0.1));
 
-          const daaNPSE = num(daanpseInput?.value);
-          const daaNPSC = num(daanpscInput?.value);
+          const finalNPSE = Math.round(daa * 0.14);
 
-          setValue(getCellInput(tr, "DAA on NPSE ded"), Math.round(daaNPSE));
+          const finalNPSC = Math.round(daa * 0.1);
 
-          setValue(
-            getCellInput(tr, "DAA on NPS"),
-            Math.round(daaNPSE + daaNPSC),
-          );
+          // 🔥 SET VALUES
+          setValue(getCellInput(tr, "DAA on NPSE ded"), finalNPSE);
 
-          setValue(
-            getCellInput(tr, "Total DAA"),
-            Math.round(daa + daaTA + daaNPSE),
-          );
+          setValue(getCellInput(tr, "DAA on NPS"), finalNPSE + finalNPSC);
+
+          setValue(getCellInput(tr, "Total DAA"), Math.round(daa + daaTA + finalNPSE));
         }
         //recalculateAllRows();
       });
@@ -9871,11 +10916,12 @@
       if (daanpsc) setValue(daanpsc, 0);
       if (daanps) setValue(daanps, 0);
       if (daanpse2) setValue(daanpse2, 0);
-      //recalculateAllRows();
     }
 
     function setupManualDAAHandlers() {
+
       qsa("#PB_NPSEditTbl tbody tr").forEach((tr) => {
+
         if (!tr._cells) return;
         if (tr.classList.contains("total-row")) return;
 
@@ -9884,45 +10930,77 @@
         const daanpseInput = tr._cells["DAA on NPSE"];
         const daanpscInput = tr._cells["DAA on NPSC"];
         const daanpseInput2 = tr._cells["DAA on NPSE ded"];
-        const daanpsInput = tr._cells["DAA on NPS"];
 
         if (!daaInput) return;
 
         if (daaInput.dataset.bound === "true") return;
 
-        [
-          daaInput,
-          daaTAInput,
-          daanpseInput,
-          daanpscInput,
-          daanpseInput2,
-          daanpsInput,
-        ].forEach((el) => {
-          if (el) el.dataset.bound = "true";
+        [daaInput, daaTAInput, daanpseInput, daanpscInput, daanpseInput2].forEach((el) => {
+
+          if (el) {
+            el.dataset.bound = "true";
+          }
         });
 
-        function recalc() {
-          const daa = num(daaInput?.value || daaInput?.innerText || 0);
-          const daaTA = num(daaTAInput?.value || daaTAInput?.innerText || 0);
+        function recalc(syncNPSEDed = false) {
 
+          tr.dataset.manualEdited = "true";
+
+          const daa = num(daaInput?.value || 0);
+          const daaTA = num(daaTAInput?.value || 0);
           const daaNPSE = num(daanpseInput?.value || 0);
           const daaNPSC = num(daanpscInput?.value || 0);
+          const daaNPSE2 = num(daanpseInput2?.value || 0);
 
-          setValue(getCellInput(tr, "DAA on NPSE ded"), daaNPSE);
+          // 🔥 ONLY when NPSE edited
+          if (syncNPSEDed) {
+            setValue(getCellInput(tr, "DAA on NPSE ded"), daaNPSE);
+          }
 
-          setValue(getCellInput(tr, "DAA on NPS"), daaNPSE + daaNPSC);
+          // 🔥 total NPS
+          const totalNPS = Math.round(daaNPSE2 + daaNPSC);
 
-          setValue(
-            getCellInput(tr, "Total DAA"),
-            Math.round(daa + daaTA + daaNPSE),
+          // 🔥 if both zero → total zero
+          setValue(getCellInput(tr, "DAA on NPS"), totalNPS > 0 ? totalNPS : 0);
+
+          // 🔥 total DAA
+          setValue(getCellInput(tr, "Total DAA"), Math.round(daa + daaTA + daaNPSE)
           );
-          recalculateAllRows();
+
+          // 🔥 refresh IT
+          calculateITFields(tr);
+
+          // 🔥 refresh Gross/Deduction/Net
+          calculateGross_Ded_Net(
+            tr,
+            tr.closest("table")?.id
+          );
+
+          // 🔥 refresh totals
+          recalculateAllTotals();
         }
 
-        daaInput.addEventListener("input", recalc);
-        daaTAInput?.addEventListener("input", recalc);
-        daanpseInput?.addEventListener("input", recalc);
-        daanpscInput?.addEventListener("input", recalc);
+        /* =========================
+          🔥 EVENTS
+        ========================= */
+
+        // 🔥 NPSE edit → sync deduction
+        daanpseInput?.addEventListener(
+          "input",
+          () => recalc(true)
+        );
+
+        // 🔥 NPSC edit
+        daanpscInput?.addEventListener(
+          "input",
+          () => recalc(false)
+        );
+
+        // 🔥 NPSE DED edit
+        daanpseInput2?.addEventListener(
+          "input",
+          () => recalc(false)
+        );
       });
     }
 
@@ -11395,8 +12473,10 @@
       const deduction =
         getNum(tr, "Net IT") +
         getNum(tr, "GPF") +
-        getNum(tr, "NPS") +
-        getNum(tr, "Total DAA on NPS") +
+        getNum(tr, "NPSC") +
+        getNum(tr, "NPSE ded") +
+        getNum(tr, "DAA on NPSE ded") +
+        getNum(tr, "DAA on NPSC") +
         getNum(tr, "CGEIS") +
         getNum(tr, "LIC") +
         getNum(tr, "L Fee") +
@@ -11729,8 +12809,9 @@
       console.log("EDIT MODE ACTIVE");
     });
 
+
     async function savePBData(mode = "ADD") {
-      //console.trace("SAVE CALLED");
+
       const salaryMonth = id("PayBillPage_SalMonth").value;
       const station = id("PayBillPage_Station").value;
       const daPercent = id("PayBillPage_DA%").value;
@@ -11741,8 +12822,8 @@
       }
 
       /* =========================
-      🔹 EMP LOOKUP (HRIS)
-    ========================= */
+        🔹 EMP LOOKUP (HRIS)
+      ========================= */
       const empHeaders = window.empCalcHeaders;
       const empRows = window.empCalcRows;
 
@@ -11752,105 +12833,136 @@
       const designationIdx = empHeaders.indexOf("Designation");
 
       function getHRIS(empName, station) {
+
         for (let r of empRows) {
+
           if (
-            String(r[empNameIdx]).trim() === String(empName).trim() &&
-            String(r[stationIdx]).trim() === String(station).trim()
+            String(r[empNameIdx]).trim()
+            === String(empName).trim()
+            &&
+            String(r[stationIdx]).trim()
+            === String(station).trim()
           ) {
             return r[hrisIdx] || "";
           }
         }
+
         return "";
       }
 
       function getEmpDesignation(empName, station, hris) {
+
         const clean = (v) =>
           String(v || "")
             .replace(/\s+/g, "")
             .toLowerCase();
 
-        const cleanName = clean(empName);
-        const cleanStation = clean(station);
         const cleanHRIS = clean(hris);
 
         for (let r of empRows) {
-          const rowName = clean(r[empNameIdx]);
-          const rowStation = clean(r[stationIdx]);
+
           const rowHRIS = clean(r[hrisIdx]);
 
-          // 🔥 PRIORITY: HRIS MATCH
+          // 🔥 PRIORITY HRIS MATCH
           if (cleanHRIS && rowHRIS === cleanHRIS) {
             return r[designationIdx] || "";
           }
-
-          // 🔥 FALLBACK: Name + Station
-          //if (rowName === cleanName && rowStation === cleanStation) {
-          //  return r[designationIdx] || "";
-          //}
         }
 
         return "";
       }
 
       /* =========================
-      🔹 CLEAN NUMBER
-    ========================= */
+        🔹 CLEAN NUMBER
+      ========================= */
       function cleanNumber(val) {
+
         return String(val || "")
           .replace(/[₹,]/g, "")
           .trim();
       }
 
       /* =========================
-      🔹 CELL VALUE READER
-    ========================= */
+        🔹 CELL VALUE READER
+      ========================= */
       function getCellValue(cell, colName) {
+
         if (!cell) return "";
 
-        // 🔹 TEXTAREA (Arrears / Recovery)
-        if (colName === "Arrears Details" || colName === "Recovery Details") {
+        // 🔹 TEXTAREA
+        if (
+          colName === "Arrears Details"
+          ||
+          colName === "Recovery Details"
+        ) {
+
           const textarea = cell.querySelector("textarea");
-          return textarea ? textarea.value.trim() : "";
+
+          return textarea
+            ? textarea.value.trim()
+            : "";
         }
 
         // 🔹 CHECKBOX
-        const checkbox = cell.querySelector("input[type='checkbox']");
+        const checkbox =
+          cell.querySelector("input[type='checkbox']");
+
         if (checkbox) return checkbox.checked;
 
         // 🔹 INPUT
-        const input = cell.querySelector("input:not([type='checkbox'])");
+        const input =
+          cell.querySelector(
+            "input:not([type='checkbox'])"
+          );
+
         if (input) return cleanNumber(input.value);
 
         // 🔹 SELECT
         const select = cell.querySelector("select");
+
         if (select) return select.value || "";
 
         return cleanNumber(cell.textContent || "");
       }
 
       /* =========================
-      🔹 TABLE DATA EXTRACTOR
-    ========================= */
+        🔹 TABLE DATA EXTRACTOR
+      ========================= */
       function getTableData(tableId, type) {
+
         const table = id(tableId);
+
         if (!table) return [];
 
-        const headers = Array.from(table.querySelectorAll("thead th")).map(
-          (th) => th.innerText.trim(),
+        const headers = Array.from(
+          table.querySelectorAll("thead th")
+        ).map(
+          th => th.innerText.trim()
         );
 
-        const rows = table.querySelectorAll("tbody tr");
+        const rows =
+          table.querySelectorAll("tbody tr");
 
         let data = [];
 
         rows.forEach((tr) => {
-          // ❌ Skip TOTAL row
-          if (tr.innerText.toLowerCase().includes("total")) return;
 
-          const cells = tr.querySelectorAll("td");
+          // ❌ Skip total row
+          if (
+            tr.innerText
+              .toLowerCase()
+              .includes("total")
+          ) {
+            return;
+          }
+
+          const cells =
+            tr.querySelectorAll("td");
+
           let rowObj = {};
 
           headers.forEach((h, i) => {
+
             const cell = cells[i];
 
             if (!cell) {
@@ -11859,9 +12971,18 @@
             }
 
             try {
-              rowObj[h] = getCellValue(cell, h);
+
+              rowObj[h] =
+                getCellValue(cell, h);
+
             } catch (err) {
-              console.warn("Cell error:", h, err);
+
+              console.warn(
+                "Cell error:",
+                h,
+                err
+              );
+
               rowObj[h] = "";
             }
           });
@@ -11872,28 +12993,40 @@
           rowObj["DA%"] = daPercent;
 
           // 🔥 HRIS
-          const empName = rowObj["Employee Name"];
-          const empStation = rowObj["Pay Drawn Station"];
-          rowObj["HRIS"] = rowObj["HRIS"] || getHRIS(empName, empStation);
-          //console.log("LOOKUP:", empName, empStation, getDesignation(empName, empStation));
+          const empName =
+            rowObj["Employee Name"];
 
-          //console.log("SAVE MODE:", mode);
+          const empStation =
+            rowObj["Pay Drawn Station"];
 
-          // 🔥 DESIGNATION (ADD MODE ONLY)
+          rowObj["HRIS"] =
+            rowObj["HRIS"]
+            ||
+            getHRIS(empName, empStation);
+
+          // 🔥 DESIGNATION
           if (mode === "ADD") {
+
             const empHRIS = rowObj["HRIS"];
+
             rowObj["Designation on Salary Month"] =
-              getEmpDesignation(empName, empStation, empHRIS) || "";
-          } else if (mode === "EDIT") {
-            delete rowObj["Designation on Salary Month"]; // 🔥 KEY LINE
+              getEmpDesignation(
+                empName,
+                empStation,
+                empHRIS
+              ) || "";
           }
 
           // 🔥 CATEGORY
           rowObj["Category"] = type;
-          // 🔥 FORCE STRING (CRITICAL)
-          rowObj["Arrears Details"] = rowObj["Arrears Details"] || "";
-          rowObj["Recovery Details"] = rowObj["Recovery Details"] || "";
-          //console.log("ROW:", rowObj);
+
+          // 🔥 FORCE STRING
+          rowObj["Arrears Details"] =
+            rowObj["Arrears Details"] || "";
+
+          rowObj["Recovery Details"] =
+            rowObj["Recovery Details"] || "";
+
           data.push(rowObj);
         });
 
@@ -11901,71 +13034,369 @@
       }
 
       /* =========================
-      🔹 COLLECT DATA
-    ========================= */
-      const goData = getTableData("PB_GOEditTbl", "GO");
-      const npsData = getTableData("PB_NPSEditTbl", "NPS");
+        🔹 COLLECT TABLE DATA
+      ========================= */
+      const goData =
+        getTableData("PB_GOEditTbl", "GO");
 
-      const data = [...goData, ...npsData];
+      const npsData =
+        getTableData("PB_NPSEditTbl", "NPS");
+
+      let data = [...goData, ...npsData];
 
       if (!data.length) {
         alert("No data to save");
         return;
       }
 
-      //console.log("Saving Mode:", mode, data);
-
       /* =========================
-      🔹 SEND TO BACKEND
-    ========================= */
+        🔥 LOAD LATEST PBDB
+      ========================= */
       try {
+
+        const latestPB = await fetch(
+          "https://office-management-f425.onrender.com/pb"
+        ).then(r => r.json());
+
+        const latestHeaders =
+          latestPB.headers || [];
+
+        const latestRows =
+          latestPB.rows || [];
+
+        /* =========================
+          🔥 KEY CREATOR
+        ========================= */
+        function makeKey(rowObj) {
+
+          return [
+            rowObj["Salary Month"],
+            rowObj["HRIS"],
+            rowObj["Category"]
+          ]
+            .map(v =>
+              String(v || "")
+                .trim()
+                .toLowerCase()
+            )
+            .join("|");
+        }
+
+        /* =========================
+          🔥 BUILD LATEST MAP
+        ========================= */
+        const latestMap = {};
+
+        latestRows.forEach(r => {
+
+          let obj = {};
+
+          latestHeaders.forEach((h, i) => {
+            obj[h] = r[i];
+          });
+
+          latestMap[makeKey(obj)] = obj;
+        });
+
+        /* =========================
+          🔥 MERGE LATEST + USER
+        ========================= */
+        const mergedData = data.map(userRow => {
+
+          const key =
+            makeKey(userRow);
+
+          const latestRow =
+            latestMap[key] || {};
+
+          return {
+
+            // 🔥 latest sheet values
+            ...latestRow,
+
+            // 🔥 overwrite only edited values
+            ...userRow
+          };
+        });
+
+        /* =========================
+          🔥 FILTER ONLY CHANGED ROWS
+        ========================= */
+        const changedData = [];
+
+        /* =========================
+          🔧 NORMALIZE
+        ========================= */
+        function normalize(val) {
+
+          // null / undefined
+          if (
+            val === null ||
+            val === undefined
+          ) {
+            return "0.00";
+          }
+
+          let str =
+            String(val).trim();
+
+          // 🔥 remove ₹ and commas
+          str = str.replace(/[₹,]/g, "");
+
+          // 🔥 blank = zero
+          if (
+            str === ""
+            ||
+            str === "-"
+          ) {
+            return "0.00";
+          }
+
+          // 🔥 numeric compare
+          if (!isNaN(str)) {
+
+            return Number(str || 0)
+              .toFixed(2);
+          }
+
+          // 🔥 text compare
+          return str
+            .replace(/\r/g, "")
+            .trim()
+            .toLowerCase();
+        }
+
+        /* =========================
+          🔍 CHECK EACH ROW
+        ========================= */
+        data.forEach(userRow => {
+
+          const key =
+            makeKey(userRow);
+
+          const latestRow =
+            latestMap[key] || {};
+
+          let changed = false;
+
+          // =========================
+          // 🔍 COMPARE ONLY SHEET HEADERS
+          // =========================
+          latestHeaders.forEach(header => {
+
+            // ❌ Ignore metadata
+            if (
+              header === "Last Updated"
+              ||
+              header === "_lastUpdated"
+            ) {
+              return;
+            }
+
+            const oldVal =
+              normalize(latestRow[header]);
+
+            const newVal =
+              normalize(userRow[header]);
+
+            if (oldVal !== newVal) {
+              changed = true;
+            }
+          });
+
+          // =========================
+          // 🔥 PUSH ONLY CHANGED ROW
+          // =========================
+          if (changed) {
+
+            changedData.push({
+
+              // latest sheet values
+              ...latestRow,
+
+              // overwrite edited values
+              ...userRow
+            });
+          }
+        });
+
+        /* =========================
+          ❌ NO CHANGES
+        ========================= */
+        if (!changedData.length) {
+
+          alert(
+            "ℹ️ No changes detected.\n\n"
+            +
+            "Nothing was updated."
+          );
+
+          return;
+        }
+
+        /* =========================
+          🔥 SAVE TO BACKEND
+        ========================= */
         const res = await fetch(
           "https://office-management-f425.onrender.com/pb/update",
           {
             method: "POST",
+
             headers: {
               "Content-Type": "application/json",
             },
+
             body: JSON.stringify({
-              data,
-              mode, // 🔥 ADD / EDIT
+              data: changedData,
+              mode
             }),
-          },
+          }
         );
 
         const result = await res.json();
 
+        // =========================
+        // ✅ SUCCESS
+        // =========================
         if (result.status === "success") {
-          alert(
-            `✅ ${mode} Success!\nUpdated: ${result.updated} \n Added: ${result.added}`,
-          );
 
-          // 🔥 STEP 1: reload PBDB (data + table)
+          // =========================
+          // 🔥 UPDATED EMPLOYEES
+          // =========================
+          const updatedEmployees =
+            result.updatedEmployees || [];
+
+          // =========================
+          // ➕ ADDED EMPLOYEES
+          // =========================
+          const addedEmployees =
+            result.addedEmployees || [];
+
+          // =========================
+          // 🔥 UPDATED LIST
+          // =========================
+          const updatedList =
+            updatedEmployees
+              .map(e =>
+                `• ${e.employee} `
+                +
+                `(${e.month} - ${e.category})`
+              )
+              .join("\n");
+
+          // =========================
+          // ➕ ADDED LIST
+          // =========================
+          const addedList =
+            addedEmployees
+              .map(e =>
+                `• ${e.employee} `
+                +
+                `(${e.month} - ${e.category})`
+              )
+              .join("\n");
+
+          // =========================
+          // 🔥 FINAL MESSAGE
+          // =========================
+          let msg =
+            `✅ ${mode} Success!\n\n`;
+
+          // 🔄 UPDATED
+          if (updatedList) {
+
+            msg +=
+              `UPDATED EMPLOYEES:\n`
+              +
+              updatedList
+              +
+              `\n\n`;
+          }
+
+          // ➕ ADDED
+          if (addedList) {
+
+            msg +=
+              `ADDED EMPLOYEES:\n`
+              +
+              addedList;
+          }
+
+          alert(msg);
+
+          // =========================
+          // 🔥 RELOAD PBDB
+          // =========================
           await loadTable("pb", "PBDB");
 
-          // 🔥 STEP 2: refresh UI
+          // =========================
+          // 🔥 REFRESH UI
+          // =========================
           applyFilters();
+
           refreshPBView();
 
-          // 🔥 STEP 3: SMALL DELAY (ensures pbData updated)
+          // =========================
+          // 🔥 REFRESH IT TABLE
+          // =========================
           setTimeout(() => {
-            const empName = id("ITPage_Emp")?.value;
-            const selectedFY = id("ITPage_FY")?.value;
 
-            if (!empName || !selectedFY) return;
+            const empName =
+              id("ITPage_Emp")?.value;
 
-            renderCalculatedITTable(empName, selectedFY, "calculated");
+            const selectedFY =
+              id("ITPage_FY")?.value;
+
+            if (!empName || !selectedFY) {
+              return;
+            }
+
+            renderCalculatedITTable(
+              empName,
+              selectedFY,
+              "calculated"
+            );
+
           }, 100);
-
-          //console.log("✅ Full UI refreshed");
-        } else {
-          alert("❌ Error: " + result.message);
         }
+        /* =========================
+          ⚠️ CONFLICT
+        ========================= */
+        else if (
+          result.status === "conflict"
+        ) {
+
+          alert(
+            "⚠️ Some rows were modified "
+            +
+            "by another user.\n"
+            +
+            "Please reload and try again."
+          );
+        }
+
+        /* =========================
+          ❌ ERROR
+        ========================= */
+        else {
+
+          alert(
+            "❌ Error: "
+            +
+            result.message
+          );
+        }
+
       } catch (err) {
+
         console.error(err);
-        alert("❌ Server error");
+
+        alert(
+          "❌ Server error"
+        );
       }
     }
+
 
     const daInput = id("PayBillPage_DA%");
     const errorEl = id("DA_Error");
@@ -11993,15 +13424,20 @@
         // =========================
         qsa("#PB_NPSEditTbl tbody tr").forEach((tr) => {
           const npse = tr._cells?.["DAA on NPSE"];
+          const npse2 = tr._cells?.["DAA on NPSE ded"];
           const npsc = tr._cells?.["DAA on NPSC"];
+          const nps = tr._cells?.["DAA on NPS"];
 
           if (npse) npse.dataset.auto = "true";
+          if (npse2) npse2.dataset.auto = "true";
           if (npsc) npsc.dataset.auto = "true";
+          if (nps) nps.dataset.auto = "true";
         });
 
         // =========================
         // 🔥 STEP ORDER (CRITICAL)
         // =========================
+        updateDAColumn(value);
         updateAndRenderDAA(); // 2️⃣ updates DAA based on new DA
         setupManualDAAHandlers();
         recalculateAllRows(); // 1️⃣ updates DA, TA, HRA, etc.
@@ -24677,6 +26113,340 @@
     on("DutyexcelBtn", "click", () => {
       exportDutyChartExcel();
     });
+
+
+
+    /* =========================================================
+      FULL LOGOUT RESET
+    ========================================================= */
+
+    function logout2() {
+
+      /* =========================================
+        CLEAR SESSION
+      ========================================= */
+
+      currentUser = null;
+      currentRole = null;
+
+      /* =========================================
+        RESET ALL INPUTS
+      ========================================= */
+
+      qsa("input").forEach(el => {
+
+        if (
+          el.type === "checkbox"
+          ||
+          el.type === "radio"
+        ) {
+
+          el.checked = false;
+
+        } else {
+
+          el.value = "";
+        }
+      });
+
+      /* =========================================
+        RESET ONLY LOGIN SELECTS
+      ========================================= */
+
+      const stationDropdown =
+        id("loginStationDropdown");
+
+      const userDropdown =
+        id("loginUserDropdown");
+
+      /* station */
+      if (stationDropdown) {
+
+        stationDropdown.selectedIndex = 0;
+
+        stationDropdown.value = "";
+      }
+
+      /* user */
+      if (userDropdown) {
+
+        userDropdown.innerHTML =
+          `<option value="" hidden>
+            Select User
+          </option>`;
+
+        userDropdown.selectedIndex = 0;
+
+        userDropdown.value = "";
+
+        userDropdown.disabled = true;
+      }
+
+      /* =========================================
+        RESET TEXTAREAS
+      ========================================= */
+
+      qsa("textarea").forEach(t => {
+        t.value = "";
+      });
+
+      /* =========================================
+        HIDE ALL SECTIONS
+        EXCEPT DASHBOARD
+      ========================================= */
+
+      qsa(".sectionPage").forEach(section => {
+
+        section.style.display =
+          section.id === "DashBoard"
+            ? "block"
+            : "none";
+      });
+
+      /* =========================================
+        CLEAR 2ND COLUMN VALUES of Employee Details
+      ========================================= */
+
+      qsa(".Emp-Table-Wrapper table").forEach(table => {
+
+        table.querySelectorAll("tr").forEach(tr => {
+
+          const secondCell = tr.children[1];
+
+          if (!secondCell) return;
+
+          /* clear text */
+          secondCell.textContent = "";
+        });
+      });
+
+      /* =========================================
+        CLEAR COMPLETE TABLE
+      ========================================= */
+
+      [
+        "PB_GOViewTbl", "PB_NPSViewTbl","PB_NPSEditTbl","PB_GOEditTbl"
+      ].forEach(tableId => {
+
+        const table = id(tableId);
+
+        if (!table) return;
+
+        table.innerHTML = "";
+      });
+
+      
+      /* =========================================
+        CLEAR ONLY TBODY INSIDE BudgetTableWrapper
+      ========================================= */
+
+      qsa(".BudgetTableWrapper table tbody")
+        .forEach(tbody => {
+
+          tbody.innerHTML = "";
+        });
+
+      /* =========================================
+        CLEAR SALARY SLIP
+      ========================================= */
+        resetSalarySlipFields();
+        renderNoDataRow(id("SalarySlipBreakup")?.querySelector("tbody"), 7);
+        renderNoDataRow(id("SalarySlipFYDetails")?.querySelector("tbody"), 7,);
+
+      /* =========================================
+        RESET SEARCH/FILTERS
+      ========================================= */
+
+      qsa(`
+        input[type='search'],
+        .filter-input
+      `).forEach(el => {
+
+        el.value = "";
+      });
+
+      /* =========================================
+        REMOVE ACTIVE STATES
+      ========================================= */
+
+      qsa(`
+        .active,
+        .selected,
+        .open,
+        .show
+      `).forEach(el => {
+
+        el.classList.remove(
+          "active",
+          "selected",
+          "open",
+          "show"
+        );
+      });
+
+      /* =========================================
+        RESET PASSWORD FIELD
+      ========================================= */
+
+      const pwd =
+        id("loginPasswordInput");
+
+      if (pwd) {
+
+        pwd.type = "password";
+        pwd.value = "";
+      }
+
+      const eyeIcon =
+        qs("#togglePassword i");
+
+      if (eyeIcon) {
+
+        eyeIcon.textContent =
+          "visibility_off";
+      }
+
+      /* =========================================
+        CLEAR ERRORS
+      ========================================= */
+
+      if (id("loginError")) {
+        id("loginError").innerHTML = "";
+      }
+
+      if (id("capsWarning")) {
+        id("capsWarning")
+          .classList.remove("show");
+      }
+
+      /* =========================================
+        RESET GLOBAL VARIABLES
+      ========================================= */
+
+      if (typeof selectedEmployee !== "undefined") {
+        selectedEmployee = null;
+      }
+
+      if (typeof selectedMonth !== "undefined") {
+        selectedMonth = null;
+      }
+
+      if (typeof currentFY !== "undefined") {
+        currentFY = null;
+      }
+
+      /* =========================================
+        CLEAR CUSTOM CACHE
+      ========================================= */
+
+      if (typeof pbData !== "undefined") {
+        pbData = [];
+      }
+
+      if (typeof dutyData !== "undefined") {
+        dutyData = [];
+      }
+
+      if (typeof lieuData !== "undefined") {
+        lieuData = [];
+      }
+
+      /* =========================================
+        RESET PAGE DISPLAY
+      ========================================= */
+
+      id("mainPage").style.display =
+        "none";
+
+      id("loginPage").style.display =
+        "flex";
+
+      /* =========================================
+        SCROLL TOP
+      ========================================= */
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+      /* =========================================
+        OPTIONAL CUSTOM RESET
+      ========================================= */
+
+      if (
+        typeof resetAppState ===
+        "function"
+      ) {
+
+        resetAppState();
+      }
+    }
+
+    function logout() {
+
+      /* =========================================
+        RESET PASSWORD FIELD
+      ========================================= */
+
+      const pwd =
+        id("loginPasswordInput");
+
+      if (pwd) {
+
+        pwd.type = "password";
+        pwd.value = "";
+      }
+
+      const eyeIcon =
+        qs("#togglePassword i");
+
+      if (eyeIcon) {
+
+        eyeIcon.textContent =
+          "visibility_off";
+      }
+
+      /* =========================================
+        CLEAR ERRORS
+      ========================================= */
+
+      if (id("loginError")) {
+        id("loginError").innerHTML = "";
+      }
+
+      if (id("capsWarning")) {
+        id("capsWarning")
+          .classList.remove("show");
+      }
+
+
+      /* =========================================
+        RESET PAGE DISPLAY
+      ========================================= */
+
+      id("mainPage").style.display =
+        "none";
+
+      id("loginPage").style.display =
+        "flex";
+
+      /* =========================================
+        SCROLL TOP
+      ========================================= */
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+      console.clear();
+    }
+
+    id("logoutBtn")
+  ?.addEventListener(
+    "click",
+    logout
+  );
   </script>
 </body>
 
