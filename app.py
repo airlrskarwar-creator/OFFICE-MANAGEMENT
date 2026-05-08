@@ -27,22 +27,47 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 
 client = gspread.authorize(creds)
 
-# ✅ OPEN ALL SHEETS PROPERLY
-spreadsheet = client.open("AKASHAVANI")
+# ✅ OPEN ALL WORKSHEETS PROPERLY
+# =========================
+# OPEN FILES
+# =========================
 
-emp_sheet = spreadsheet.worksheet("EmpDB")
-sbg_sheet = spreadsheet.worksheet("BudgetDB")
-sbgexp_sheet = spreadsheet.worksheet("SBGexpenditure")
-pb_sheet = spreadsheet.worksheet("PBDB")
-cpc_sheet = spreadsheet.worksheet("CPC7DB")
-city_sheet = spreadsheet.worksheet("CityZoneDB")
-qtrs_sheet = spreadsheet.worksheet("QtrsRateDB")
-comm_sheet = spreadsheet.worksheet("CommFactDB")
-it_sheet = spreadsheet.worksheet("ITDB")
-dg_sheet = spreadsheet.worksheet("DGlog")
-hsd_sheet = spreadsheet.worksheet("HSDlog")
-eb_sheet = spreadsheet.worksheet("EBlog")
-duty_sheet = spreadsheet.worksheet("DutyChart")
+emp_file = client.open("Employee Database")
+sbg_file = client.open("SBG Database")
+sbgexp_file = client.open("Budget Expenditures")
+pb_file = client.open("Pay Bill")
+ref_file = client.open("Reference Database")
+dg_file = client.open("DG Log Book")
+diesel_file = client.open("Diesel Registers")
+eb_file = client.open("Electricity Bill Register")
+duty_file = client.open("Duty Chart Register")
+
+# =========================
+# WORKSHEETS
+# =========================
+
+emp_sheet = emp_file.worksheet("EmpDB")
+
+sbg_sheet = sbg_file.worksheet("BudgetDB")
+
+sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditure")
+
+pb_sheet = pb_file.worksheet("PBDB")
+
+# 🔥 REFERENCE DATABASE
+cpc_sheet = ref_file.worksheet("CPC7DB")
+city_sheet = ref_file.worksheet("CityZoneDB")
+qtrs_sheet = ref_file.worksheet("QtrsRateDB")
+comm_sheet = ref_file.worksheet("CommFactDB")
+it_sheet = ref_file.worksheet("ITDB")
+
+dg_sheet = dg_file.worksheet("DGlog")
+
+hsd_sheet = diesel_file.worksheet("HSDlog")
+
+eb_sheet = eb_file.worksheet("EBlog")
+
+duty_sheet = duty_file.worksheet("DutyChart")
 
 
 # =========================
