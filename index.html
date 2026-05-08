@@ -5163,7 +5163,7 @@ DOM SHORTCUTS
           observer.observe(document.body, { childList: true, subtree: true });
 
           // 🔍 DEBUG
-          console.log('Employee Disabled:', isRestrictedUser);
+          //console.log('Employee Disabled:', isRestrictedUser);
         });
       }
 
@@ -5913,7 +5913,7 @@ DOM SHORTCUTS
 
       //============================🔥 GET DATA FROM SHEET🔥===========================//
       async function loadTable(api, tableId, shouldRender = true) {
-        console.log('🔥 loadTable:', api);
+        console.log('🌐 loadTable:', api);
 
         try {
           const res = await fetch(`https://office-management-f425.onrender.com/${api}`);
@@ -6981,7 +6981,7 @@ DOM SHORTCUTS
               // 🎯 Type-specific actions
               handleTypeEffects(type, value);
 
-              console.log(type, value);
+              //console.log(type, value);
             });
           });
         });
@@ -10980,179 +10980,6 @@ DOM SHORTCUTS
 
       const DEBUG_EMP = 'Abhijin P. R.'; // 🔥 change anytime
 
-      function calculateTaxFromSlabs(income, slabs) {
-        let tax = 0;
-
-        const headers = itData.headers;
-
-        const lowerIdx = headers.indexOf('Lower Limit');
-        const upperIdx = headers.indexOf('Upper Limit');
-        const rateIdx = headers.indexOf('Rate');
-
-        slabs.forEach((s) => {
-          let lower = parseFloat(s[lowerIdx]) || 0;
-          let upper = s[upperIdx] ? parseFloat(s[upperIdx]) : Infinity;
-          let rate = parseFloat(s[rateIdx]) || 0;
-
-          if (income > lower) {
-            let taxable = Math.min(income, upper) - lower;
-            tax += (taxable * rate) / 100;
-          }
-        });
-
-        return tax;
-      }
-
-      function getSlabs(fy, regime) {
-        if (!itData || !itData.headers || !itData.rows) return [];
-
-        return itData.rows.filter((r) => r[itData.headers.indexOf('Financial Year')] === fy && r[itData.headers.indexOf('Regime')] === regime);
-
-        //if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
-        //  console.log("---- SLAB BREAKDOWN ----");
-        //}
-
-        //if (income > lower) {
-
-        //  let taxable = Math.min(income, upper) - lower;
-        //  let slabTax = taxable * rate / 100;
-
-        //  if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
-        //    console.log({
-        //      lower,
-        //      upper,
-        //      rate,
-        //      taxable,
-        //      slabTax
-        //    });
-        //  }
-
-        //  tax += slabTax;
-        //}
-      }
-
-      function calculateEmployeeIT(empName, selectedFY, regime) {
-        const result = calculateFYGrossFinal(empName, selectedFY);
-
-        if (!result.isActive) return 0;
-
-        let netGross = result.total;
-
-        const slabs = getSlabs(selectedFY, regime);
-        if (slabs.length === 0) return 0;
-
-        const headers = itData.headers;
-
-        const stdIdx = headers.indexOf('Standard Deduction');
-        const rebateLimitIdx = headers.indexOf('Rebate Upto');
-        const rebateIdx = headers.indexOf('Rebate');
-
-        const stdDeduction = parseFloat(slabs[0][stdIdx]) || 0;
-        const rebateLimit = parseFloat(slabs[0][rebateLimitIdx]) || 0;
-        const rebateAmount = parseFloat(slabs[0][rebateIdx]) || 0;
-
-        // 🔹 Step 1: Taxable Income
-        let taxableIncome = Math.max(0, netGross - stdDeduction);
-
-        // 🔹 Step 2: Slab Tax
-        let tax = calculateTaxFromSlabs(taxableIncome, slabs);
-
-        // 🔥 Step 3: Rebate Logic (FINAL CORRECT)
-        let finalTax = tax;
-        let cess = 0;
-
-        if (taxableIncome <= rebateLimit) {
-          finalTax = Math.max(0, tax - rebateAmount);
-        }
-
-        cess = finalTax * 0.04; // 4% cess on final tax
-
-        finalTax += cess;
-
-        //window.currentDebugEmp = empName;
-        //if (empName === DEBUG_EMP) {
-
-        //console.log("---- TAX CALC ----");
-
-        //console.log("Net Gross:", netGross);
-        //console.log("Std Deduction:", stdDeduction);
-
-        //console.log("Taxable Income:", taxableIncome);
-
-        //console.log("Slabs Used:", slabs);
-
-        //console.log("Tax Before Rebate:", tax);
-
-        //if (taxableIncome <= rebateLimit) {
-        //  console.log("Rebate Applied:", rebateAmount);
-        //} else {
-        //  console.log("Rebate NOT Applied");
-        //}
-
-        //console.log("Final Tax:", finalTax);
-        //}
-
-        return finalTax;
-      }
-
-      function getPaidITTillMonth(empName, selectedFY, currentMonth) {
-        const headers = pbData.headers;
-        const rows = pbData.rows;
-
-        const empIndex = headers.indexOf('Employee Name');
-        const monthIndex = headers.indexOf('Salary Month');
-
-        // 🔥 CHANGE THIS TO YOUR ACTUAL COLUMN
-        const itIndex = headers.indexOf('Net IT'); // ⚠️ verify this
-
-        let total = 0;
-
-        rows.forEach((row) => {
-          if (String(row[empIndex]).trim() !== String(empName).trim()) return;
-
-          const m = row[monthIndex];
-          if (!m) return;
-          const fy = getFinancialYear(m);
-
-          if (fy !== selectedFY) return;
-
-          if (monthToNumber(m) > monthToNumber(currentMonth)) return;
-
-          total += parseFloat(row[itIndex]) || 0;
-        });
-
-        return total;
-      }
-
-      function getRemainingMonths(selectedFY, currentMonth, superMonth) {
-        const startYear = parseInt(selectedFY.split('-')[0]);
-
-        const fyMonths = [`Mar-${startYear}`, `Apr-${startYear}`, `May-${startYear}`, `Jun-${startYear}`, `Jul-${startYear}`, `Aug-${startYear}`, `Sep-${startYear}`, `Oct-${startYear}`, `Nov-${startYear}`, `Dec-${startYear}`, `Jan-${startYear + 1}`, `Feb-${startYear + 1}`];
-
-        const currentNum = monthToNumber(currentMonth);
-        const superNum = superMonth ? monthToNumber(superMonth) : Infinity;
-
-        let count = 0;
-        //console.log("DEBUG MONTH NUMBERS");
-        //console.log("currentMonth:", currentMonth, "=>", currentNum);
-        //console.log("superMonth:", superMonth, "=>", superNum);
-
-        fyMonths.forEach((m) => {
-          //console.log(m, "=>", monthToNumber(m));
-          const mNum = monthToNumber(m);
-
-          // 🔥 STRICTLY future months only
-          if (mNum <= currentNum) return;
-
-          // 🔥 stop after retirement
-          if (mNum > superNum) return;
-
-          count++;
-        });
-
-        return count || 1;
-      }
-
       function calculateMonthlyIT(empName, selectedFY, regime, currentMonth) {
         // 🔥 STEP 1: Get tax calculation (you already have this logic somewhere)
         const taxData = calculateEmployeeTax(empName, selectedFY, regime);
@@ -11197,43 +11024,6 @@ DOM SHORTCUTS
           it,
           cess,
           total
-        };
-      }
-
-      function calculateMonthlyIT2(empName, selectedFY, regime, currentMonth) {
-        // 🔥 FIX MONTH INPUT
-        if (!isNaN(currentMonth)) {
-          const el = id('PayBillPage_SalMonth');
-          currentMonth = el.options[el.selectedIndex]?.text;
-        }
-
-        const result = calculateFYGrossFinal(empName, selectedFY);
-        if (!result.isActive) {
-          return { it: 0, cess: 0, total: 0 };
-        }
-
-        // 🔹 Total tax (before cess)
-        const totalTax = calculateEmployeeIT(empName, selectedFY, regime);
-
-        const remainingMonths = getRemainingMonths(selectedFY, currentMonth, result.superMonth);
-
-        const paidIT = getPaidITTillMonth(empName, selectedFY, currentMonth);
-
-        const balanceTax = Math.max(0, totalTax - (paidIT || 0));
-
-        // 🔥 MONTHLY IT (before cess)
-        const monthlyIT = Math.round(balanceTax / (remainingMonths * 1.04));
-
-        // 🔥 CESS (4%)
-        const monthlyCess = Math.round(monthlyIT * 0.04);
-
-        // 🔥 TOTAL
-        const monthlyTotal = monthlyIT + monthlyCess;
-
-        return {
-          it: monthlyIT,
-          cess: monthlyCess,
-          total: monthlyTotal
         };
       }
 
@@ -14964,9 +14754,9 @@ DEBUG
           // 🔥 SUCCESS → green
           clearSyncStatus('sbgDatabase', 'db', true);
 
-          console.log('✅ SBG totals updated from SBGExp');
+          console.log('📡 SBG Budgets Sync Success');
         } catch (err) {
-          console.error('❌ SBG Calculation Failed:', err);
+          console.error('❌ SBG Budgets Sync Failed:', err);
 
           // 🔴 ERROR → red
           clearSyncStatus('sbgDatabase', 'db', false);
