@@ -93,7 +93,7 @@ duty_sheet = duty_file.worksheet("DutyChart")
 sbg_sheet = sbg_file.worksheet("BudgetDB")
 
 # 🔥 BUDGET EXPENDITURES
-sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditureDB")
+sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditure")
 
 # 🔥 DG LOG
 dg_sheet = dg_file.worksheet("DGlog")
