@@ -27,41 +27,54 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 
 client = gspread.authorize(creds)
 
-# ✅ OPEN ALL WORKSHEETS PROPERLY
-# =========================
-# OPEN FILES
-# =========================
-
 # =========================================================
 # GOOGLE SHEETS DATABASE FILES
 # =========================================================
 
-# 🔥 EMPLOYEE DATABASE
-emp_file = client.open_by_key("1YAOtydebgF1-XTqJ5ypYDQRK06t5XU7Q5redoGmuow0")
-
-# 🔥 PAY BILL
-pb_file = client.open_by_key("1EAQcIzUBoG5U-dkOAOaHozwtxFURbW0a4l248-RNL18")
-
-# 🔥 DUTY CHART
-duty_file = client.open_by_key("1rphBbU2_2xFeX-Htj1PpYvsZID5kKUcJ6Ho8Kg8Auao")
-
-# 🔥 SBG DATABASE
-sbg_file = client.open_by_key("1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE")
-
 # 🔥 BUDGET EXPENDITURES
-sbgexp_file = client.open_by_key("1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY")
+sbgexp_file = client.open_by_key(
+    "1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY"
+)
 
 # 🔥 DG LOG BOOK
-dg_file = client.open_by_key("1-9VoQ961MHS7rJf1P5o3ItKH4jsxo4GxNN-oz4ezrn0")
+dg_file = client.open_by_key(
+    "1-9VoQ961MHS7rJf1P5o3ItKH4jsxo4GxNN-oz4ezrn0"
+)
 
-# 🔥 DIESEL REGISTERS
-diesel_file = client.open_by_key("1a-zsw9-AdssijOlyyxxaD-XEDmuSBr9lJHYK9awuKEo")
+# 🔥 DIESEL REGISTER
+diesel_file = client.open_by_key(
+    "1a-zsw9-AdssijOlyyxxaD-XEDmuSBr9lJHYK9awuKEo"
+)
 
-# 🔥 ELECTRICITY BILL REGISTER
-eb_file = client.open_by_key("1r9x-S1m9fAuVwB16cVH3E9-jHEIMOCtQrHH24OjopA0")
+# 🔥 DUTY CHART
+duty_file = client.open_by_key(
+    "1rphBbU2_2xFeX-Htj1PpYvsZID5kKUcJ6Ho8Kg8Auao"
+)
+
+# 🔥 ELECTRICITY REGISTER
+eb_file = client.open_by_key(
+    "1r9x-S1m9fAuVwB16cVH3E9-jHEIMOCtQrHH24OjopA0"
+)
+
+# 🔥 EMPLOYEE DATABASE
+emp_file = client.open_by_key(
+    "1YAOtydebgF1-XTqJ5ypYDQRK06t5XU7Q5redoGmuow0"
+)
+
+# 🔥 PAY BILL
+pb_file = client.open_by_key(
+    "1EAQcIzUBoG5U-dkOAOaHozwtxFURbW0a4l248-RNL18"
+)
 
 # 🔥 REFERENCE DATABASE
-ref_file = client.open_by_key("1T8mzTxvyQfVJp5eOAr8w7SZxkY7XbWNw-E4muvgZB1A")
+ref_file = client.open_by_key(
+    "1T8mzTxvyQfVJp5eOAr8w7SZxkY7XbWNw-E4muvgZB1A"
+)
+
+# 🔥 SBG DATABASE
+sbg_file = client.open_by_key(
+    "1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE"
+)
 
 # =========================================================
 # WORKSHEETS
@@ -79,16 +92,16 @@ duty_sheet = duty_file.worksheet("DutyChart")
 # 🔥 SBG
 sbg_sheet = sbg_file.worksheet("BudgetDB")
 
-# 🔥 BUDGET EXPENDITURE
+# 🔥 BUDGET EXPENDITURES
 sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditureDB")
 
 # 🔥 DG LOG
 dg_sheet = dg_file.worksheet("DGlog")
 
-# 🔥 HSD LOG
+# 🔥 DIESEL LOG
 hsd_sheet = diesel_file.worksheet("HSDlog")
 
-# 🔥 EB LOG
+# 🔥 ELECTRICITY LOG
 eb_sheet = eb_file.worksheet("EBlog")
 
 # =========================================================
