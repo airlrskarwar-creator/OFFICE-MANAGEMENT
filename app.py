@@ -500,8 +500,8 @@ def update_pb():
             "status": "error",
             "message": str(e)
         }), 500
-    
-    
+
+
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
     try:
@@ -641,7 +641,7 @@ def update_sbgexp():
     except Exception as e:
         print("❌ ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
-    
+
 
 @app.route("/sbg/bulk-update", methods=["POST"])
 def bulk_update_sbg():
@@ -707,32 +707,55 @@ def update_duty():
         req_data = request.get_json()
 
         rows = req_data.get("data", [])
-        role = (req_data.get("role") or "").upper()
+
+        role = (
+            req_data.get("role") or ""
+        ).upper()
+
+        # 🔥 TOGGLE MODE
+        # True  = Duty Mode
+        # False = Requirement Mode
+        duty_mode = req_data.get(
+            "dutyMode",
+            False
+        )
 
         if not rows:
+
             return jsonify({
                 "status": "error",
                 "message": "No data"
             }), 400
 
         all_values = duty_sheet.get_all_values()
+
         headers = all_values[0]
 
-        # =========================
+        # =====================================================
         # 🔥 DATE → ROW MAP
-        # =========================
+        # =====================================================
+
         date_row_map = {}
 
-        for i, r in enumerate(all_values[2:], start=3):
+        for i, r in enumerate(
+            all_values[2:],
+            start=3
+        ):
+
             if r and r[0].strip():
-                date_row_map[r[0].strip()] = i
+
+                date_row_map[
+                    r[0].strip()
+                ] = i
 
         updates = []
+
         new_rows = []
 
-        # =========================
+        # =====================================================
         # 🔥 PROCESS ROWS
-        # =========================
+        # =====================================================
+
         for obj in rows:
 
             date = obj.get("Date")
@@ -740,59 +763,120 @@ def update_duty():
             if not date:
                 continue
 
-            # 🔥 IMPORTANT
             row_data = [None] * len(headers)
 
             for idx, h in enumerate(headers):
 
+                # =====================================================
+                # 🔥 DATE COLUMN
+                # =====================================================
+
                 if h == "Date":
+
                     row_data[idx] = date
+
                     continue
 
                 val = obj.get(h)
 
-                # =========================
-                # 🔥 ENGG / MASTER
-                # =========================
-                if role in ["ENGG", "MASTER"]:
+                # =====================================================
+                # 🔥 MASTER
+                # =====================================================
 
-                    # ✅ ONLY DUTY COLUMNS
+                if role == "MASTER":
+
+                    # 🔥 DUTY MODE
+                    if duty_mode:
+
+                        # ✅ SAVE ONLY DUTY COLUMNS
+                        if h.endswith("Duty"):
+
+                            row_data[idx] = (
+                                val
+                                if val is not None
+                                else ""
+                            )
+
+                    # 🔥 REQUIREMENT MODE
+                    else:
+
+                        # ✅ SAVE REQUIREMENT + LIEU
+                        if (
+                            "Requirement" in h
+                            or "lieu" in h
+                        ):
+
+                            row_data[idx] = (
+                                val
+                                if val is not None
+                                else ""
+                            )
+
+                # =====================================================
+                # 🔥 ENGG
+                # =====================================================
+
+                elif role == "ENGG":
+
+                    # ✅ ALWAYS SAVE ONLY DUTY
                     if h.endswith("Duty"):
-                        row_data[idx] = val if val is not None else ""
 
-                # =========================
-                # 🔥 NORMAL USERS
-                # =========================
+                        row_data[idx] = (
+                            val
+                            if val is not None
+                            else ""
+                        )
+
+                # =====================================================
+                # 🔥 USERS / ADMIN
+                # =====================================================
+
                 else:
 
-                    # ✅ ONLY REQUIREMENT + LIEU
-                    if "Requirement" in h or "lieu" in h:
-                        row_data[idx] = val if val is not None else ""
+                    # ✅ ALWAYS SAVE REQUIREMENT + LIEU
+                    if (
+                        "Requirement" in h
+                        or "lieu" in h
+                    ):
 
-            # =========================
+                        row_data[idx] = (
+                            val
+                            if val is not None
+                            else ""
+                        )
+
+            # =====================================================
             # 🔥 UPDATE EXISTING ROW
-            # =========================
+            # =====================================================
+
             if date in date_row_map:
 
                 row_index = date_row_map[date]
 
-                for col_idx, value in enumerate(row_data, start=1):
+                for col_idx, value in enumerate(
+                    row_data,
+                    start=1
+                ):
 
-                    # 🔥 SKIP untouched columns
+                    # 🔥 SKIP UNTOUCHED
                     if value is None:
                         continue
 
                     updates.append({
-                        "range": gspread.utils.rowcol_to_a1(
+
+                        "range":
+                        gspread.utils.rowcol_to_a1(
                             row_index,
                             col_idx
                         ),
+
                         "values": [[value]]
                     })
 
-            # =========================
+            # =====================================================
             # 🔥 NEW ROW
-            # =========================
+            # =====================================================
+
             else:
 
                 new_rows.append([
@@ -800,17 +884,25 @@ def update_duty():
                     for v in row_data
                 ])
 
-        # =========================
+        # =====================================================
         # 🔥 BATCH UPDATE
-        # =========================
-        if updates:
-            duty_sheet.batch_update(updates)
+        # =====================================================
 
-        # =========================
+        if updates:
+
+            duty_sheet.batch_update(
+                updates
+            )
+
+        # =====================================================
         # 🔥 APPEND NEW ROWS
-        # =========================
+        # =====================================================
+
         if new_rows:
-            duty_sheet.append_rows(new_rows)
+
+            duty_sheet.append_rows(
+                new_rows
+            )
 
         return jsonify({
             "status": "success"
