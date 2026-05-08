@@ -5192,19 +5192,25 @@ DOM SHORTCUTS
 
         const users = Object.values(getUserMap()).filter((u) => u.station === station);
 
-        // 🔥 ROLE USERS
-        ROLE_USERS.forEach((r) => {
+        // 🔥 ROLE USERS (NO PASSWORDS)
+        ['MASTER', 'ENGG', 'ADMIN'].forEach((role) => {
           const opt = document.createElement('option');
-          opt.value = r.user;
-          opt.textContent = `🔑 ${r.user}`;
+
+          opt.value = role;
+
+          opt.textContent = `🔑 ${role}`;
+
           dropdown.appendChild(opt);
         });
 
         // 🔥 NORMAL USERS
         users.forEach((u) => {
           const opt = document.createElement('option');
+
           opt.value = u.user;
+
           opt.textContent = `👤 ${u.user}`;
+
           dropdown.appendChild(opt);
         });
 
@@ -5297,7 +5303,7 @@ DOM SHORTCUTS
       }
 
       // ========================= LOGIN ========================= //
-      on('loginBtn', 'click', () => {
+      on('loginBtn', 'click', async () => {
         const station = stationEl.value;
         const user = userEl.value;
         const password = pwdEl.value;
@@ -5305,28 +5311,49 @@ DOM SHORTCUTS
         if (!station) {
           return (errormsg.textContent = '❌ Select station');
         }
+
         if (!user) {
           return (errormsg.textContent = '❌ Select user');
         }
+
         if (!password) {
           return (errormsg.textContent = '❌ Enter password');
         }
 
         // 🔥 ROLE LOGIN
-        const roleUser = ROLE_USERS.find((r) => r.user === user);
+        try {
+          const res = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              station,
+              user,
+              password
+            })
+          });
 
-        if (roleUser) {
-          if (password !== roleUser.password) {
-            return (errormsg.textContent = '❌ Incorrect password');
+          const data = await res.json();
+
+          // 🔥 ROLE USER SUCCESS
+          if (data.success) {
+            window.currentStation = station;
+            window.currentInitial = data.initial || '';
+
+            loginSuccess(data.user, data.displayName || data.user, station);
+
+            return;
           }
-
-          window.currentStation = station;
-          loginSuccess(user, user, station);
+        } catch (err) {
+          console.error(err);
+          errormsg.textContent = '❌ Server error';
           return;
         }
 
         // 🔥 NORMAL USER
         const record = window.userList.find((u) => u.user === user);
+
         if (!record) {
           return (errormsg.textContent = '❌ User not found');
         }
@@ -5454,12 +5481,6 @@ DOM SHORTCUTS
 
         DEFAULT: ['SalarySlipPage', 'EmpPage', 'DutyPage']
       };
-
-      const ROLE_USERS = [
-        { user: 'MASTER', password: 'master@11051993' },
-        { user: 'ENGG', password: 'engg@225344' },
-        { user: 'ADMIN', password: 'admin@221902' }
-      ];
 
       function applyUserAccess(user) {
         const buttons = document.querySelectorAll('.menu-btn');
@@ -12388,8 +12409,7 @@ DOM SHORTCUTS
               renderCalculatedITTable(empName, selectedFY, 'calculated');
             }, 100);
           } else if (result.status === 'conflict') {
-
-          /* =========================
+            /* =========================
           ⚠️ CONFLICT
           ========================= */
             // 🔥 STOP SYNC
@@ -12397,8 +12417,7 @@ DOM SHORTCUTS
 
             alert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
           } else {
-
-          /* =========================
+            /* =========================
           ❌ ERROR
           ========================= */
             // 🔥 STOP SYNC
