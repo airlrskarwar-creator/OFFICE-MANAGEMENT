@@ -32,42 +32,78 @@ client = gspread.authorize(creds)
 # OPEN FILES
 # =========================
 
-emp_file = client.open("Employee Database")
-sbg_file = client.open("SBG Database")
-sbgexp_file = client.open("Budget Expenditures")
-pb_file = client.open("Pay Bill")
-ref_file = client.open("Reference Database")
-dg_file = client.open("DG Log Book")
-diesel_file = client.open("Diesel Registers")
-eb_file = client.open("Electricity Bill Register")
-duty_file = client.open("Duty Chart Register")
+# =========================================================
+# GOOGLE SHEETS DATABASE FILES
+# =========================================================
 
-# =========================
-# WORKSHEETS
-# =========================
+# 🔥 EMPLOYEE DATABASE
+emp_file = client.open_by_key("1YAOtydebgF1-XTqJ5ypYDQRK06t5XU7Q5redoGmuow0")
 
-emp_sheet = emp_file.worksheet("EmpDB")
+# 🔥 PAY BILL
+pb_file = client.open_by_key("1EAQcIzUBoG5U-dkOAOaHozwtxFURbW0a4l248-RNL18")
 
-sbg_sheet = sbg_file.worksheet("BudgetDB")
+# 🔥 DUTY CHART
+duty_file = client.open_by_key("1rphBbU2_2xFeX-Htj1PpYvsZID5kKUcJ6Ho8Kg8Auao")
 
-sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditure")
+# 🔥 SBG DATABASE
+sbg_file = client.open_by_key("1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE")
 
-pb_sheet = pb_file.worksheet("PBDB")
+# 🔥 BUDGET EXPENDITURES
+sbgexp_file = client.open_by_key("1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY")
+
+# 🔥 DG LOG BOOK
+dg_file = client.open_by_key("1-9VoQ961MHS7rJf1P5o3ItKH4jsxo4GxNN-oz4ezrn0")
+
+# 🔥 DIESEL REGISTERS
+diesel_file = client.open_by_key("1a-zsw9-AdssijOlyyxxaD-XEDmuSBr9lJHYK9awuKEo")
+
+# 🔥 ELECTRICITY BILL REGISTER
+eb_file = client.open_by_key("1r9x-S1m9fAuVwB16cVH3E9-jHEIMOCtQrHH24OjopA0")
 
 # 🔥 REFERENCE DATABASE
-cpc_sheet = ref_file.worksheet("CPC7DB")
-city_sheet = ref_file.worksheet("CityZoneDB")
-qtrs_sheet = ref_file.worksheet("QtrsRateDB")
-comm_sheet = ref_file.worksheet("CommFactDB")
-it_sheet = ref_file.worksheet("ITDB")
+ref_file = client.open_by_key("1T8mzTxvyQfVJp5eOAr8w7SZxkY7XbWNw-E4muvgZB1A")
 
+# =========================================================
+# WORKSHEETS
+# =========================================================
+
+# 🔥 EMPLOYEE
+emp_sheet = emp_file.worksheet("EmpDB")
+
+# 🔥 PAY BILL
+pb_sheet = pb_file.worksheet("PBDB")
+
+# 🔥 DUTY CHART
+duty_sheet = duty_file.worksheet("DutyChart")
+
+# 🔥 SBG
+sbg_sheet = sbg_file.worksheet("BudgetDB")
+
+# 🔥 BUDGET EXPENDITURE
+sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditureDB")
+
+# 🔥 DG LOG
 dg_sheet = dg_file.worksheet("DGlog")
 
+# 🔥 HSD LOG
 hsd_sheet = diesel_file.worksheet("HSDlog")
 
+# 🔥 EB LOG
 eb_sheet = eb_file.worksheet("EBlog")
 
-duty_sheet = duty_file.worksheet("DutyChart")
+# =========================================================
+# REFERENCE DATABASE SHEETS
+# =========================================================
+
+cpc_sheet = ref_file.worksheet("CPC7DB")
+
+city_sheet = ref_file.worksheet("CityZoneDB")
+
+qtrs_sheet = ref_file.worksheet("QtrsRateDB")
+
+comm_sheet = ref_file.worksheet("CommFactDB")
+
+it_sheet = ref_file.worksheet("ITDB")
 
 
 # =========================
