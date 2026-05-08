@@ -546,10 +546,14 @@
 
       .input-box input::placeholder {
         color: rgba(255, 255, 255, 0.45);
+        font-size: 13px;
+        letter-spacing: 1px;
       }
 
       .input-box input {
         margin-left: 0px;
+        font-size: 22px;
+        letter-spacing: 2.5px;
       }
 
       /* =========================================================
@@ -2918,7 +2922,8 @@
         color: #ffffff;
       }
 
-      .ITpanelDiv {
+      .itPanelDiv,
+      .pensionPanelDiv {
         display: flex;
         flex-direction: column;
         text-align: center;
@@ -2930,12 +2935,14 @@
         background: rgb(215, 255, 201);
       }
 
-      .ITpanelDiv label {
+      .itPanelDiv label,
+      .pensionPanelDiv label {
         font-weight: bold;
         font-size: 11px;
       }
 
-      .ITpanelDiv span {
+      .itPanelDiv span,
+      .pensionPanelDiv span {
         font-family: 'Rozha One', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         text-align: center;
         font-size: 20px;
@@ -4630,23 +4637,23 @@
           </div>
           <input type="hidden" id="paidMonthCountInput" />
           <div id="ITInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; margin: 4px">
-            <div class="ITpanelDiv">
+            <div class="itPanelDiv">
               <label>Best Regime Option</label>
-              <span id="PanelRegime">0</span>
+              <span id="PanelRegime">-</span>
             </div>
-            <div class="ITpanelDiv">
+            <div class="itPanelDiv">
               <label>Calculated Gross Income</label>
               <span id="PanelGross">0</span>
             </div>
-            <div class="ITpanelDiv">
+            <div class="itPanelDiv">
               <label>Calculated Income Tax</label>
               <span id="PanelCalcIT">0</span>
             </div>
-            <div class="ITpanelDiv">
+            <div class="itPanelDiv">
               <label>TDS Recovered</label>
               <span id="PanelTDS">0</span>
             </div>
-            <div class="ITpanelDiv" id="PanelITHighlight">
+            <div class="itPanelDiv" id="PanelITHighlight">
               <label>IT to be Recovered ( - Refund / + Payable )</label>
               <span id="PanelIT">0</span>
             </div>
@@ -4686,23 +4693,23 @@
               </div>
             </div>
             <div id="PensionInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; margin: 0px 4px">
-              <div class="ITpanelDiv">
+              <div class="pensionPanelDiv">
                 <label>Leave Encashment</label>
                 <span id="PanelLeaveEncash">0</span>
               </div>
-              <div class="ITpanelDiv">
+              <div class="pensionPanelDiv">
                 <label>Gratuity</label>
                 <span id="PanelGratuity">0</span>
               </div>
-              <div class="ITpanelDiv">
+              <div class="pensionPanelDiv">
                 <label>Commutation</label>
                 <span id="PanelCommutation">0</span>
               </div>
-              <div class="ITpanelDiv">
+              <div class="pensionPanelDiv">
                 <label>Total Pension Benifits</label>
                 <span id="PanelTotBenifits">0</span>
               </div>
-              <div class="ITpanelDiv">
+              <div class="pensionPanelDiv">
                 <label>Residual Pension</label>
                 <span id="PanelResidualPension">0</span>
               </div>
@@ -4791,7 +4798,7 @@
               </button>
             </div>
           </div>
-          <table id="PensionInputPanel" style="width: 100%; padding: 4px; margin: 5px; border-radius: 8px; border: solid 1px rgb(189, 189, 189); font-weight: bold">
+          <table id="SBGPanel" style="width: 100%; padding: 4px; margin: 5px; border-radius: 8px; border: solid 1px rgb(189, 189, 189); font-weight: bold">
             <tr>
               <td>Sanctioned SBG</td>
               <td>
@@ -5260,6 +5267,8 @@ DOM SHORTCUTS
           pwdEl.type = isHidden ? 'text' : 'password';
 
           toggleBtn.querySelector('i').textContent = isHidden ? 'visibility' : 'visibility_off';
+          pwdEl.style.fontSize = isHidden ? '13px' : '22px';
+          pwdEl.style.letterSpacing = isHidden ? '0.5px' : '2.5px';
         }
 
         // 🔥 ENTER LOGIN
@@ -5633,10 +5642,10 @@ DOM SHORTCUTS
         Chart.register(columnLabelPlugin);
         await loadTable('emp', 'EmpDB', false);
         populateloginStationDropdown();
-        initButtons();
       });
 
       function initUI() {
+        initButtons();
         startDigitalClock();
         id('todayDate').textContent = getTodayFormatted();
         loadSidebarState();
@@ -6613,6 +6622,7 @@ DOM SHORTCUTS
         enableAllButtons();
 
         const station = id(sourceId).value;
+
         if (!station) return;
 
         // 🔁 Sync all station dropdowns
@@ -6620,15 +6630,25 @@ DOM SHORTCUTS
 
         // 🔄 Filters
         filters.station = station;
+
         applyFilters();
 
-        if (filters.employee) {
-          setValueSelect('employee', filters.employee);
-          fillEmpDetails(filters.employee);
-        }
+        // 🔥 RESET EMPLOYEE DROPDOWN
+        filters.employee = '';
+
+        setValueSelect('employee', '');
+
+        selectMap.employee.forEach((eid) => {
+          const el = id(eid);
+
+          if (el) {
+            el.selectedIndex = -1;
+          }
+        });
 
         // 🌆 Zone logic
         const zone = getCityZone(station) || {};
+
         const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
 
         let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
@@ -6639,12 +6659,14 @@ DOM SHORTCUTS
         // Apply zone values
         ['PayBillPage', 'EmpPage'].forEach((page) => {
           id(`${page}_TAZone`).value = val(zone.ta);
+
           id(`${page}_HRAZone`).value = val(zone.hra);
         });
 
         id('PayBillPage_HRA%').value = percent;
 
         recalculateAllRows();
+
         refreshPBView();
       }
 
@@ -6835,9 +6857,10 @@ DOM SHORTCUTS
             filters.fy = sortedFY.at(-1) || '';
           }
 
-          if (!valid.employee.has(filters.employee)) {
-            filters.employee = [...valid.employee].sort().at(-1) || '';
-          }
+          // To select 1st employee on Station Dropdown Change
+          //if (!valid.employee.has(filters.employee)) {
+          //  filters.employee = [...valid.employee].sort().at(-1) || '';
+          //}
         }
 
         // ================= MONTH =================
@@ -6950,6 +6973,9 @@ DOM SHORTCUTS
 
             case 'employee':
               fillEmpDetails(value);
+              if (value && value !== 'Select') {
+                enableAllButtons();
+              }
               break;
           }
 
@@ -8308,9 +8334,22 @@ DOM SHORTCUTS
       //=============================================================================//
 
       function fillEmpDetails(empName) {
-        if (!empName || !window.empCalcHeaders) return;
+        if (!window.empCalcHeaders) return;
 
         let headers = window.empCalcHeaders;
+
+        // 🔥 CLEAR IF EMPTY / SELECT / -1
+        if (!empName || empName === 'Select') {
+          headers.forEach((col) => {
+            let el = id(col);
+            if (el) {
+              el.textContent = '';
+            }
+          });
+
+          return;
+        }
+
         let rows = window.empCalcRows;
 
         let empIdx = headers.indexOf('Employee Name');
@@ -8318,16 +8357,28 @@ DOM SHORTCUTS
         let row = rows.find((r) => r[empIdx] === empName);
 
         if (!row) {
-          console.warn('Employee not found:', empName);
+          headers.forEach((col) => {
+            let el = id(col);
+            if (el) {
+              el.textContent = '';
+            }
+          });
+
           return;
         }
 
         headers.forEach((col, i) => {
           let el = id(col);
-
           if (el) {
             el.textContent = row[i] ?? '';
           }
+        });
+      }
+
+      function clearEmpPage() {
+        // 🔥 CLEAR ALL TABLE CELLS
+        document.querySelectorAll('#EmpPage td[id]').forEach((el) => {
+          el.textContent = '';
         });
       }
 
@@ -12144,8 +12195,8 @@ DOM SHORTCUTS
           });
 
           /* =========================
-    🔥 MERGE LATEST + USER
-  ========================= */
+            🔥 MERGE LATEST + USER
+          ========================= */
           const mergedData = data.map((userRow) => {
             const key = makeKey(userRow);
 
@@ -12161,13 +12212,13 @@ DOM SHORTCUTS
           });
 
           /* =========================
-    🔥 FILTER ONLY CHANGED ROWS
-  ========================= */
+            🔥 FILTER ONLY CHANGED ROWS
+          ========================= */
           const changedData = [];
 
           /* =========================
-    🔧 NORMALIZE
-  ========================= */
+            🔧 NORMALIZE
+          ========================= */
           function normalize(val) {
             // null / undefined
             if (val === null || val === undefined) {
@@ -12194,8 +12245,8 @@ DOM SHORTCUTS
           }
 
           /* =========================
-    🔍 CHECK EACH ROW
-  ========================= */
+            🔍 CHECK EACH ROW
+          ========================= */
           data.forEach((userRow) => {
             const key = makeKey(userRow);
 
@@ -12236,17 +12287,20 @@ DOM SHORTCUTS
           });
 
           /* =========================
-    ❌ NO CHANGES
-  ========================= */
+            ❌ NO CHANGES
+          ========================= */
           if (!changedData.length) {
             alert('ℹ️ No changes detected.\n\n' + 'Nothing was updated.');
 
             return;
           }
-
           /* =========================
-    🔥 SAVE TO BACKEND
-  ========================= */
+          🔥 SAVE TO BACKEND
+          ========================= */
+
+          // 🔥 START SYNC ANIMATION
+          setSyncStatus('pbDatabase');
+
           const res = await fetch('https://office-management-f425.onrender.com/pb/update', {
             method: 'POST',
 
@@ -12301,12 +12355,16 @@ DOM SHORTCUTS
               msg += `ADDED EMPLOYEES:\n` + addedList;
             }
 
-            alert(msg);
-
             // =========================
             // 🔥 RELOAD PBDB
             // =========================
             await loadTable('pb', 'PBDB');
+
+            // 🔥 STOP SYNC
+            clearSyncStatus('pbDatabase');
+
+            // 🔥 SHOW ALERT AFTER SYNC
+            alert(msg);
 
             // =========================
             // 🔥 REFRESH UI
@@ -12330,14 +12388,22 @@ DOM SHORTCUTS
               renderCalculatedITTable(empName, selectedFY, 'calculated');
             }, 100);
           } else if (result.status === 'conflict') {
-            /* =========================
-    ⚠️ CONFLICT
-  ========================= */
+
+          /* =========================
+          ⚠️ CONFLICT
+          ========================= */
+            // 🔥 STOP SYNC
+            clearSyncStatus('pbDatabase', 'db', false);
+
             alert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
           } else {
-            /* =========================
-    ❌ ERROR
-  ========================= */
+
+          /* =========================
+          ❌ ERROR
+          ========================= */
+            // 🔥 STOP SYNC
+            clearSyncStatus('pbDatabase', 'db', false);
+
             alert('❌ Error: ' + result.message);
           }
         } catch (err) {
@@ -15084,7 +15150,7 @@ DEBUG
         // =========================
         // ❌ INVALID FILTER
         // =========================
-        if (!station || !budget || !fy || station === 'Select' || budget === 'Select Budget' || fy === 'Select') {
+        if (!station || !budget || !fy || id('BudgetUnderSelect')?.selectedIndex === -1 || station === 'Select' || budget === 'Select Budget' || fy === 'Select') {
           toggleSBGButtons('allDisabled');
 
           const tr = document.createElement('tr');
@@ -17087,8 +17153,25 @@ DEBUG
         const empName = id('SalSlipPage_Emp')?.value;
         const month = id('SalSlipPage_SalMonth')?.value;
 
-        if (!empName || empName === 'Select') return;
-        if (!month || month === 'Select') return;
+        // 🔥 CLEAR IF NO EMPLOYEE
+        if (!empName || id('SalSlipPage_Emp')?.selectedIndex === -1) {
+          resetSalarySlipFields();
+
+          renderSalaryBreakup([], [], [], 0, 0, 0, true);
+
+          renderFYBreakup([], 0, 0, 0, 0, true);
+
+          return;
+        }
+
+        // 🔥 CLEAR IF NO MONTH
+        if (!month || id('SalSlipPage_SalMonth')?.selectedIndex === -1) {
+          renderSalaryBreakup([], [], [], 0, 0, 0, true);
+
+          renderFYBreakup([], 0, 0, 0, 0, true);
+
+          return;
+        }
 
         // 🔥 Update header
         id('SalarySlipHeaderMonth').textContent = formatMonthYear(month);
@@ -19472,7 +19555,7 @@ DEBUG
                 el.textContent = '0';
               });
             id('ITInfoPanel')
-              .querySelectorAll('.ITpanelDiv')
+              .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
                 el.style.background = 'rgb(215, 255, 201)';
               });
@@ -19609,7 +19692,7 @@ DEBUG
               });
 
             id('ITInfoPanel')
-              .querySelectorAll('.ITpanelDiv')
+              .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
                 el.style.background = 'rgb(215, 255, 201)';
               });
@@ -19894,7 +19977,7 @@ DEBUG
                 el.textContent = '0';
               });
             id('ITInfoPanel')
-              .querySelectorAll('.ITpanelDiv')
+              .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
                 el.style.background = 'rgb(215, 255, 201)';
               });
@@ -19990,7 +20073,7 @@ DEBUG
                 el.textContent = '0';
               });
             id('ITInfoPanel')
-              .querySelectorAll('.ITpanelDiv')
+              .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
                 el.style.background = 'rgb(215, 255, 201)';
               });
@@ -24455,6 +24538,52 @@ DEBUG
           top: 0,
           behavior: 'smooth'
         });
+
+        // 🔥 RESET ALL EMPLOYEE DROPDOWNS
+        selectMap.employee.forEach((eid) => {
+          const el = id(eid);
+
+          if (!el) return;
+
+          el.value = '';
+
+          el.selectedIndex = -1;
+        });
+
+        // 🔥 RESET FILTER
+        filters.employee = '';
+        filters.fy = '';
+        filters.month = '';
+        clearEmpPage();
+
+        // 🔥 RESET BUDGET UNDER DROPDOWN
+        const budgetUnder = id('BudgetUnderSelect');
+
+        if (budgetUnder) {
+          budgetUnder.value = '';
+
+          budgetUnder.selectedIndex = -1;
+        }
+
+        const itWrapper = qs('.ITtableWrapper');
+        const pensionWrapper = qs('.PensionTableWrapper');
+
+        if (itWrapper) itWrapper.innerHTML = '';
+        qsa('.itPanelDiv span').forEach((s) => (s.textContent = s.id === 'PanelRegime' ? '-' : '0'));
+        id('salaryMode').checked = true;
+        id('PanelITHighlight').style.background = 'rgb(215, 255, 201)';
+
+        if (pensionWrapper) pensionWrapper.innerHTML = '';
+        qsa('.pensionPanelDiv span').forEach((s) => (s.textContent = '0'));
+        id('PensionFor').selectedIndex = 0;
+        id('VRS_Death_Date').value = '';
+        id('CommutationOpted').checked = true;
+        id('CommutationOption').value = '40%';
+        id('PensionEL').value = '300';
+        id('PensionHPL').value = '200';
+
+        qsa('#SBGPanel input').forEach((s) => (s.value = '0'));
+
         console.clear();
       }
 
