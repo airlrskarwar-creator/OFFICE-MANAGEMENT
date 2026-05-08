@@ -28,6 +28,25 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 client = gspread.authorize(creds)
 
 # =========================================================
+# 🔐 ROLE USERS
+# =========================================================
+
+ROLE_USERS = [
+    {
+        "user": "MASTER",
+        "password": "master@11051993"
+    },
+    {
+        "user": "ENGG",
+        "password": "engg@225344"
+    },
+    {
+        "user": "ADMIN",
+        "password": "admin@221902"
+    }
+]
+
+# =========================================================
 # GOOGLE SHEETS DATABASE FILES
 # =========================================================
 
@@ -103,6 +122,8 @@ hsd_sheet = diesel_file.worksheet("HSDlog")
 
 # 🔥 ELECTRICITY LOG
 eb_sheet = eb_file.worksheet("EBlog")
+
+
 
 # =========================================================
 # REFERENCE DATABASE SHEETS
@@ -197,6 +218,145 @@ def get_eb():
 def get_duty():
     return jsonify(sheet_to_json(duty_sheet))
 
+
+# =========================================================
+# 🔐 LOGIN API
+# =========================================================
+
+@app.route("/login", methods=["POST"])
+def login():
+
+    try:
+
+        data = request.get_json()
+
+        station = (
+            data.get("station") or ""
+        ).strip()
+
+        user = (
+            data.get("user") or ""
+        ).strip().upper()
+
+        password = (
+            data.get("password") or ""
+        ).strip()
+
+        # =====================================================
+        # 🔥 ROLE LOGIN
+        # =====================================================
+
+        role_user = next(
+
+            (
+                r for r in ROLE_USERS
+
+                if (
+                    r["user"].upper() == user
+                    and
+                    r["password"] == password
+                )
+            ),
+
+            None
+        )
+
+        if role_user:
+
+            return jsonify({
+
+                "success": True,
+
+                "user": role_user["user"],
+
+                "displayName":
+                    role_user["user"],
+
+                "station": station,
+
+                "role":
+                    role_user["user"]
+            })
+
+        # =====================================================
+        # 🔥 NORMAL USER LOGIN
+        # =====================================================
+
+        emp_data = emp_sheet.get_all_records()
+
+        found_user = next(
+
+            (
+                emp for emp in emp_data
+
+                if (
+                    str(
+                        emp.get("User", "")
+                    ).strip().upper()
+                    ==
+                    user
+                )
+            ),
+
+            None
+        )
+
+        if not found_user:
+
+            return jsonify({
+                "success": False,
+                "message": "User not found"
+            })
+
+        stored_password = str(
+            found_user.get("Password", "")
+        ).strip()
+
+        if stored_password != password:
+
+            return jsonify({
+                "success": False,
+                "message": "Incorrect password"
+            })
+
+        return jsonify({
+
+            "success": True,
+
+            "user":
+                found_user.get("User", ""),
+
+            "displayName":
+                found_user.get(
+                    "Employee Name",
+                    user
+                ),
+
+            "initial":
+                found_user.get(
+                    "Initial",
+                    ""
+                ),
+
+            "station": station,
+
+            "role": "USER"
+        })
+
+    except Exception as e:
+
+        print(
+            "❌ LOGIN ERROR:",
+            str(e)
+        )
+
+        return jsonify({
+
+            "success": False,
+
+            "message": str(e)
+
+        }), 500
 
 
 @app.route("/pb/update", methods=["POST"])
