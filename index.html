@@ -11853,54 +11853,87 @@ DOM SHORTCUTS
 
       let pbProgressSource = null;
 
+      // 🔥 START LISTENING TO BACKEND PROGRESS
       function startPBProgress() {
+        // close previous connection if exists
         if (pbProgressSource) {
           pbProgressSource.close();
-
-          pbProgressSource = null;
         }
 
         pbProgressSource = new EventSource('https://office-management-f425.onrender.com/pb/progress');
 
-        console.log('✅ SSE CONNECTED');
+        // show loader immediately
+        showPBLoader(0, 'Initializing Save...');
 
         pbProgressSource.onmessage = (event) => {
           const data = JSON.parse(event.data);
 
-          console.log(data);
+          const progress = Number(data.progress || 0);
+          const message = data.message || 'Saving...';
 
-          updateLoader(data.percent, data.message, 'sync');
+          // 🔥 UPDATE UI
+          updatePBLoader(progress, message);
 
-          /* 🔥 COMPLETE */
-
-          if (data.percent >= 100) {
+          // 🔥 CLOSE ONLY AFTER FINAL REPAINT
+          if (progress >= 100) {
             setTimeout(() => {
-              hideLoader();
+              stopPBProgress();
 
-              /* 🔥 SAFE CLOSE */
-
-              if (pbProgressSource) {
-                pbProgressSource.close();
-
-                pbProgressSource = null;
+              // optional success popup
+              if (data.done) {
+                showAlert('success', 'Pay Bill Database Saved Successfully');
               }
-            }, 1000);
+            }, 300); // allow browser repaint
           }
         };
 
-        /* 🔥 ERROR */
+        pbProgressSource.onerror = () => {
+          stopPBProgress();
 
-        pbProgressSource.onerror = (err) => {
-          console.error('❌ SSE ERROR', err);
-
-          /* 🔥 SAFE CLOSE */
-
-          if (pbProgressSource) {
-            pbProgressSource.close();
-
-            pbProgressSource = null;
-          }
+          showAlert('error', 'Connection lost while saving');
         };
+      }
+
+      // 🔥 STOP PROGRESS
+      function stopPBProgress() {
+        if (pbProgressSource) {
+          pbProgressSource.close();
+          pbProgressSource = null;
+        }
+
+        hidePBLoader();
+      }
+
+      // 🔥 SHOW LOADER
+      function showPBLoader(progress = 0, text = 'Loading...') {
+        const loader = document.getElementById('globalLoader');
+
+        loader.style.display = 'flex';
+
+        updatePBLoader(progress, text);
+      }
+
+      // 🔥 HIDE LOADER
+      function hidePBLoader() {
+        const loader = document.getElementById('globalLoader');
+
+        loader.style.display = 'none';
+      }
+
+      // 🔥 UPDATE PROGRESS UI
+      function updatePBLoader(progress, text) {
+        const bar = document.getElementById('loaderBar');
+        const percent = document.getElementById('loaderPercent');
+        const apiName = document.getElementById('loaderApiName');
+
+        // smooth progress
+        bar.style.width = `${progress}%`;
+
+        // percentage text
+        percent.textContent = `${progress}%`;
+
+        // message text
+        apiName.textContent = text;
       }
 
       on('PBaddBtn', 'click', async () => {
