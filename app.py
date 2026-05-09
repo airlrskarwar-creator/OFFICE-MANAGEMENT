@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from datetime import datetime
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
