@@ -382,7 +382,7 @@ def pb_progress_stream():
                     })}\n\n"
                 )
 
-                time.sleep(0.5)
+                time.sleep(0.05)
 
             except GeneratorExit:
                 print("🔌 SSE Disconnected")
@@ -537,6 +537,7 @@ def update_pb():
 
             pb_progress["message"] = (
                 f"Saving {processed}/{total_rows} employees"
+                time.sleep(0.08)
             )
 
             # =========================
