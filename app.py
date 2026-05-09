@@ -537,9 +537,8 @@ def update_pb():
 
             pb_progress["message"] = (
                 f"Saving {processed}/{total_rows} employees"
-                time.sleep(0.08)
             )
-
+            time.sleep(0.08)
             # =========================
             # 🔑 BUILD KEY
             # =========================
