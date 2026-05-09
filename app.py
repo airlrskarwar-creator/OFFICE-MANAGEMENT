@@ -406,29 +406,40 @@ def pb_progress_stream():
 
     def generate():
 
-        while True:
-            try:
-                yield (
-                    f"data: "
-                    f"{json.dumps({
-                        **pb_progress,
-                        'ts': time.time()
-                    })}\n\n"
-                )
+        last_sent = None
 
-                time.sleep(0.3)
+        while True:
+
+            try:
+
+                current = json.dumps({
+                    **pb_progress,
+                    "ts": time.time()
+                })
+
+                # ✅ send only if changed
+                if current != last_sent:
+
+                    yield f"data: {current}\n\n"
+
+                    last_sent = current
+
+                # ✅ heartbeat
+                yield ": keepalive\n\n"
+
+                time.sleep(0.5)
 
             except GeneratorExit:
-                print("🔌 SSE Disconnected")
+                print("🔌 SSE disconnected")
                 break
 
             except Exception as e:
-                print("❌ SSE ERROR:", e)
+                print("❌ SSE ERROR:", str(e))
                 break
 
     return Response(
         stream_with_context(generate()),
-        mimetype='text/event-stream',
+        mimetype="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
@@ -574,7 +585,6 @@ def update_pb():
             pb_progress["message"] = (
                 f"Saving {processed}/{total_rows} employees"
             )
-            time.sleep(0.08)
             # =========================
             # 🔑 BUILD KEY
             # =========================
@@ -1310,5 +1320,6 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=port,
-        threaded=True
+        threaded=True,
+        debug=False
     )
