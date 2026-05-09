@@ -11853,87 +11853,83 @@ DOM SHORTCUTS
 
       let pbProgressSource = null;
 
-      // 🔥 START LISTENING TO BACKEND PROGRESS
+      /* =========================
+🔥 START BACKEND PROGRESS
+========================= */
+
       function startPBProgress() {
-        // close previous connection if exists
-        if (pbProgressSource) {
-          pbProgressSource.close();
+        if (window.pbProgressSource) {
+          window.pbProgressSource.close();
         }
 
-        pbProgressSource = new EventSource('https://office-management-f425.onrender.com/pb/progress');
+        const source = new EventSource(`https://office-management-f425.onrender.com/pb/progress`);
 
-        // show loader immediately
-        showPBLoader(0, 'Initializing Save...');
+        window.pbProgressSource = source;
 
-        pbProgressSource.onmessage = (event) => {
+        source.onmessage = (event) => {
           const data = JSON.parse(event.data);
 
-          const progress = Number(data.progress || 0);
-          const message = data.message || 'Saving...';
+          console.log('PB:', data);
 
-          // 🔥 UPDATE UI
-          updatePBLoader(progress, message);
+          updateLoader(data.percent, data.message);
 
-          // 🔥 CLOSE ONLY AFTER FINAL REPAINT
-          if (progress >= 100) {
+          // ✅ close at completion
+          if (data.percent >= 100) {
             setTimeout(() => {
-              stopPBProgress();
-
-              // optional success popup
-              if (data.done) {
-                showAlert('success', 'Pay Bill Database Saved Successfully');
-              }
-            }, 300); // allow browser repaint
+              source.close();
+            }, 1000);
           }
         };
 
-        pbProgressSource.onerror = () => {
-          stopPBProgress();
+        source.onerror = (err) => {
+          console.error('SSE ERROR', err);
 
-          showAlert('error', 'Connection lost while saving');
+          source.close();
+
+          // ✅ auto reconnect
+          setTimeout(() => {
+            if (loaderEl.style.display !== 'none') {
+              startPBProgress();
+            }
+          }, 1000);
         };
       }
 
-      // 🔥 STOP PROGRESS
+      /* =========================
+🔥 PROGRESS TEXTS
+========================= */
+
+      function getPBProgressMessage(progress) {
+        if (progress <= 5) return 'Connecting to Server...';
+
+        if (progress <= 15) return 'Preparing Pay Bill Data...';
+
+        if (progress <= 25) return 'Validating Employee Records...';
+
+        if (progress <= 40) return 'Processing Salary Details...';
+
+        if (progress <= 55) return 'Updating Database...';
+
+        if (progress <= 70) return 'Writing Changes to Backend...';
+
+        if (progress <= 85) return 'Finalizing Save Operation...';
+
+        if (progress < 100) return 'Completing Synchronization...';
+
+        return 'Completed Successfully';
+      }
+
+      /* =========================
+🔥 STOP PROGRESS
+========================= */
+
       function stopPBProgress() {
         if (pbProgressSource) {
           pbProgressSource.close();
           pbProgressSource = null;
         }
 
-        hidePBLoader();
-      }
-
-      // 🔥 SHOW LOADER
-      function showPBLoader(progress = 0, text = 'Loading...') {
-        const loader = document.getElementById('globalLoader');
-
-        loader.style.display = 'flex';
-
-        updatePBLoader(progress, text);
-      }
-
-      // 🔥 HIDE LOADER
-      function hidePBLoader() {
-        const loader = document.getElementById('globalLoader');
-
-        loader.style.display = 'none';
-      }
-
-      // 🔥 UPDATE PROGRESS UI
-      function updatePBLoader(progress, text) {
-        const bar = document.getElementById('loaderBar');
-        const percent = document.getElementById('loaderPercent');
-        const apiName = document.getElementById('loaderApiName');
-
-        // smooth progress
-        bar.style.width = `${progress}%`;
-
-        // percentage text
-        percent.textContent = `${progress}%`;
-
-        // message text
-        apiName.textContent = text;
+        hideLoader();
       }
 
       on('PBaddBtn', 'click', async () => {
@@ -12449,6 +12445,9 @@ DOM SHORTCUTS
 
             // =================🔥 RELOAD PBDB====================
             await loadTable('pb', 'PBDB');
+
+            stopPBProgress();
+            hideLoader();
 
             // 🔥 STOP SYNC
             clearSyncStatus('pbDatabase');
