@@ -402,6 +402,10 @@ def pb_progress_stream():
 # 🔥 PB UPDATE
 # =========================
 
+# =========================
+# 🔥 PB UPDATE
+# =========================
+
 @app.route("/pb/update", methods=["POST"])
 def update_pb():
 
@@ -411,13 +415,21 @@ def update_pb():
 
         global pb_progress
 
-        # 🔥 RESET
-        pb_progress["percent"] = 0
+        # =========================
+        # 🔥 START PROGRESS
+        # =========================
+
+        pb_progress["percent"] = 1
         pb_progress["message"] = "Starting..."
 
         req_data = request.get_json()
 
+        print("🔥 PB UPDATE HIT")
+        print("🔥 REQUEST DATA:", req_data)
+
         edit_rows = req_data.get("data", [])
+
+        print("🔥 ROW COUNT:", len(edit_rows))
 
         if not edit_rows:
 
@@ -446,7 +458,6 @@ def update_pb():
         # =========================
 
         month_idx = headers.index("Salary Month")
-        emp_idx = headers.index("Employee Name")
 
         hris_idx = (
             headers.index("HRIS")
