@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from datetime import datetime
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
+from flask import Response
 import gspread
 import os
 import json
@@ -26,6 +27,11 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 )
 
 client = gspread.authorize(creds)
+
+pb_progress = {
+    "percent": 0,
+    "message": "Idle"
+}
 
 # =========================================================
 # 🔐 ROLE USERS
@@ -359,17 +365,57 @@ def login():
         }), 500
 
 
+@app.route('/pb/progress')
+def pb_progress_stream():
+
+    def generate():
+
+        last = None
+
+        while True:
+
+            data = json.dumps(pb_progress)
+
+            if data != last:
+
+                yield f"data: {data}\n\n"
+
+                last = data
+
+            time.sleep(0.2)
+
+    return Response(
+        generate(),
+        mimetype='text/event-stream'
+    )
+
+
+# =========================
+# 🔥 PB UPDATE
+# =========================
+
 @app.route("/pb/update", methods=["POST"])
 def update_pb():
 
     try:
+
         from datetime import datetime
+
+        global pb_progress
+
+        # 🔥 RESET
+        pb_progress["percent"] = 0
+        pb_progress["message"] = "Starting..."
 
         req_data = request.get_json()
 
         edit_rows = req_data.get("data", [])
 
         if not edit_rows:
+
+            pb_progress["percent"] = 100
+            pb_progress["message"] = "No Data"
+
             return jsonify({
                 "status": "error",
                 "message": "No data received"
@@ -378,6 +424,10 @@ def update_pb():
         # =========================
         # 📥 READ SHEET
         # =========================
+
+        pb_progress["percent"] = 5
+        pb_progress["message"] = "Reading PB Database..."
+
         data = pb_sheet.get_all_values()
 
         headers = data[0]
@@ -386,6 +436,7 @@ def update_pb():
         # =========================
         # 🔍 COLUMN INDEXES
         # =========================
+
         month_idx = headers.index("Salary Month")
         emp_idx = headers.index("Employee Name")
 
@@ -407,12 +458,17 @@ def update_pb():
         # =========================
         # 🔧 CLEAN
         # =========================
+
         def clean(val):
             return str(val or "").strip().lower()
 
         # =========================
         # 🔑 ROW MAP
         # =========================
+
+        pb_progress["percent"] = 10
+        pb_progress["message"] = "Preparing Row Map..."
+
         row_map = {}
 
         for i, r in enumerate(rows):
@@ -430,6 +486,7 @@ def update_pb():
         # =========================
         # 🔥 TRACKERS
         # =========================
+
         update_cells = []
         new_rows = []
 
@@ -439,13 +496,34 @@ def update_pb():
         conflicts = []
 
         # =========================
+        # 🔥 PROGRESS
+        # =========================
+
+        total_rows = len(edit_rows)
+        processed = 0
+
+        # =========================
         # 🔄 PROCESS ROWS
         # =========================
+
         for row_obj in edit_rows:
+
+            processed += 1
+
+            progress = int(
+                10 + ((processed / total_rows) * 70)
+            )
+
+            pb_progress["percent"] = progress
+
+            pb_progress["message"] = (
+                f"Saving {processed}/{total_rows} employees"
+            )
 
             # =========================
             # 🔑 BUILD KEY
             # =========================
+
             key = f"{clean(row_obj.get('Salary Month'))}"
 
             if hris_idx >= 0:
@@ -457,15 +535,13 @@ def update_pb():
             # =========================
             # 🔄 EXISTING ROW
             # =========================
+
             if key in row_map:
 
                 row_num = row_map[key]
 
                 existing_row = rows[row_num - 2]
 
-                # =========================
-                # 🔥 ENSURE SAFE LENGTH
-                # =========================
                 while len(existing_row) < len(headers):
                     existing_row.append("")
 
@@ -474,6 +550,7 @@ def update_pb():
                 # =========================
                 # 🔥 CONFLICT CHECK
                 # =========================
+
                 if last_updated_idx >= 0:
 
                     sheet_timestamp = (
@@ -503,15 +580,15 @@ def update_pb():
                         continue
 
                 # =========================
-                # 🔥 MERGE ONLY SENT FIELDS
+                # 🔥 MERGE
                 # =========================
+
                 for col_idx, header in enumerate(headers):
 
                     if header in row_obj:
 
                         val = row_obj.get(header, "")
 
-                        # 🔥 Preserve designation
                         if (
                             header.strip().lower()
                             ==
@@ -524,8 +601,9 @@ def update_pb():
                         merged_row[col_idx] = val
 
                 # =========================
-                # 🔥 CHECK ROW CHANGED
+                # 🔥 ROW CHANGED
                 # =========================
+
                 row_changed = False
 
                 ignore_compare = {
@@ -535,7 +613,6 @@ def update_pb():
 
                 for i, header in enumerate(headers):
 
-                    # 🔥 Ignore timestamp fields
                     if header in ignore_compare:
                         continue
 
@@ -555,13 +632,13 @@ def update_pb():
                         row_changed = True
                         break
 
-                # ❌ Skip if no changes
                 if not row_changed:
                     continue
 
                 # =========================
-                # 🔥 UPDATE TIMESTAMP
+                # 🔥 TIMESTAMP
                 # =========================
+
                 if last_updated_idx >= 0:
 
                     merged_row[last_updated_idx] = (
@@ -569,8 +646,9 @@ def update_pb():
                     )
 
                 # =========================
-                # 🔥 TRACK UPDATED EMPLOYEE
+                # 🔥 TRACK UPDATE
                 # =========================
+
                 updated_employees.append({
                     "employee": row_obj.get(
                         "Employee Name",
@@ -587,8 +665,9 @@ def update_pb():
                 })
 
                 # =========================
-                # 🔥 UPDATE ONLY CHANGED CELLS
+                # 🔥 UPDATE CELLS
                 # =========================
+
                 for col_idx, val in enumerate(
                     merged_row,
                     start=1
@@ -596,8 +675,10 @@ def update_pb():
 
                     header = headers[col_idx - 1]
 
-                    # 🔥 Ignore timestamp compare
-                    if header in ["Last Updated", "_lastUpdated"]:
+                    if header in [
+                        "Last Updated",
+                        "_lastUpdated"
+                    ]:
                         continue
 
                     old_val = str(
@@ -606,7 +687,6 @@ def update_pb():
 
                     new_val = str(val).strip()
 
-                    # ❌ Skip unchanged cell
                     if old_val == new_val:
                         continue
 
@@ -623,6 +703,7 @@ def update_pb():
             # =========================
             # ➕ NEW ROW
             # =========================
+
             else:
 
                 new_row = []
@@ -643,9 +724,6 @@ def update_pb():
 
                 new_rows.append(new_row)
 
-                # =========================
-                # 🔥 TRACK ADDED EMPLOYEE
-                # =========================
                 added_employees.append({
                     "employee": row_obj.get(
                         "Employee Name",
@@ -662,44 +740,35 @@ def update_pb():
                 })
 
         # =========================
-        # 🔥 REMOVE DUPLICATES
-        # =========================
-        updated_employees = list({
-            (
-                x["employee"],
-                x["month"],
-                x["category"]
-            ): x
-            for x in updated_employees
-        }.values())
-
-        added_employees = list({
-            (
-                x["employee"],
-                x["month"],
-                x["category"]
-            ): x
-            for x in added_employees
-        }.values())
-
-        # =========================
         # 🔥 APPLY UPDATES
         # =========================
+
+        pb_progress["percent"] = 85
+        pb_progress["message"] = "Updating PB Database..."
+
         if update_cells:
 
             pb_sheet.batch_update(update_cells)
 
         # =========================
-        # ➕ APPEND NEW ROWS
+        # ➕ APPEND ROWS
         # =========================
+
+        pb_progress["percent"] = 92
+        pb_progress["message"] = "Appending New Rows..."
+
         if new_rows:
 
             pb_sheet.append_rows(new_rows)
 
         # =========================
-        # ⚠️ CONFLICT RESPONSE
+        # ⚠️ CONFLICT
         # =========================
+
         if conflicts:
+
+            pb_progress["percent"] = 100
+            pb_progress["message"] = "Conflict Found"
 
             return jsonify({
                 "status": "conflict",
@@ -711,19 +780,24 @@ def update_pb():
             })
 
         # =========================
-        # ✅ SUCCESS
+        # ✅ COMPLETE
         # =========================
+
+        pb_progress["percent"] = 100
+        pb_progress["message"] = "Completed"
+
         return jsonify({
             "status": "success",
-
             "updatedEmployees":
                 updated_employees,
-
             "addedEmployees":
                 added_employees
         })
 
     except Exception as e:
+
+        pb_progress["percent"] = 100
+        pb_progress["message"] = "Error"
 
         print(
             "❌ PB UPDATE ERROR:",
