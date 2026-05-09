@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
 from flask import Response
+from flask import stream_with_context
 import gspread
 import os
 import json
@@ -370,25 +371,23 @@ def pb_progress_stream():
 
     def generate():
 
-        last = None
-
         while True:
 
-            data = json.dumps(pb_progress)
+            yield (
+                f"data: {json.dumps(pb_progress)}\n\n"
+            )
 
-            if data != last:
-
-                yield f"data: {data}\n\n"
-
-                last = data
-
-            time.sleep(0.2)
+            time.sleep(0.3)
 
     return Response(
-        generate(),
-        mimetype='text/event-stream'
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
     )
-
 
 # =========================
 # 🔥 PB UPDATE
@@ -1248,4 +1247,8 @@ if __name__ == "__main__":
     # 🔥 start self-ping thread
     threading.Thread(target=self_ping, daemon=True).start()
 
-    app.run(host="0.0.0.0", port=port)
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        threaded=True
+    )
