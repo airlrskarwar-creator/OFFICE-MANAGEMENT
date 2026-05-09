@@ -372,12 +372,21 @@ def pb_progress_stream():
     def generate():
 
         while True:
+            try:
+                yield (
+                    f"data: "
+                    f"{json.dumps(pb_progress)}\n\n"
+                )
 
-            yield (
-                f"data: {json.dumps(pb_progress)}\n\n"
-            )
+                time.sleep(0.5)
 
-            time.sleep(0.3)
+            except GeneratorExit:
+                print("🔌 SSE Disconnected")
+                break
+
+            except Exception as e:
+                print("❌ SSE ERROR:", e)
+                break
 
     return Response(
         stream_with_context(generate()),
