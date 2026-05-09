@@ -375,7 +375,10 @@ def pb_progress_stream():
             try:
                 yield (
                     f"data: "
-                    f"{json.dumps(pb_progress)}\n\n"
+                    f"{json.dumps({
+                        **pb_progress,
+                        'ts': time.time()
+                    })}\n\n"
                 )
 
                 time.sleep(0.5)
@@ -397,10 +400,6 @@ def pb_progress_stream():
             "X-Accel-Buffering": "no"
         }
     )
-
-# =========================
-# 🔥 PB UPDATE
-# =========================
 
 # =========================
 # 🔥 PB UPDATE
