@@ -5,6 +5,9 @@ from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
 from flask import Response
 from flask import stream_with_context
+from requests.exceptions import SSLError
+from urllib3.exceptions import ProtocolError
+import socket
 import gspread
 import os
 import json
@@ -34,6 +37,37 @@ pb_progress = {
     "percent": 0,
     "message": "Idle"
 }
+
+# =========================================================
+# 🔥 SAFE GOOGLE SHEET RETRY
+# =========================================================
+
+def safe_sheet_call(func, retries=5, delay=2):
+
+    last_error = None
+
+    for attempt in range(retries):
+
+        try:
+            return func()
+
+        except (
+            SSLError,
+            ProtocolError,
+            ConnectionResetError,
+            socket.error,
+            requests.exceptions.RequestException
+        ) as e:
+
+            print(f"🔁 GOOGLE API RETRY {attempt + 1}/{retries}")
+
+            print("ERROR:", str(e))
+
+            last_error = e
+
+            time.sleep(delay)
+
+    raise last_error
 
 # =========================================================
 # 🔐 ROLE USERS
@@ -382,7 +416,7 @@ def pb_progress_stream():
                     })}\n\n"
                 )
 
-                time.sleep(0.05)
+                time.sleep(0.3)
 
             except GeneratorExit:
                 print("🔌 SSE Disconnected")
@@ -448,7 +482,9 @@ def update_pb():
         pb_progress["percent"] = 5
         pb_progress["message"] = "Reading PB Database..."
 
-        data = pb_sheet.get_all_values()
+        data = safe_sheet_call(
+            lambda: pb_sheet.get_all_values()
+        )
 
         headers = data[0]
         rows = data[1:]
@@ -767,7 +803,9 @@ def update_pb():
 
         if update_cells:
 
-            pb_sheet.batch_update(update_cells)
+            safe_sheet_call(
+                lambda: pb_sheet.batch_update(update_cells)
+            )
 
         # =========================
         # ➕ APPEND ROWS
@@ -778,7 +816,9 @@ def update_pb():
 
         if new_rows:
 
-            pb_sheet.append_rows(new_rows)
+            safe_sheet_call(
+                lambda: pb_sheet.append_rows(new_rows)
+            )
 
         # =========================
         # ⚠️ CONFLICT
