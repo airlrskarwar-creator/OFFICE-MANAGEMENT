@@ -552,8 +552,8 @@
 
       .input-box input {
         margin-left: 0px;
-        font-size: 22px;
-        letter-spacing: 2.5px;
+        font-size: 20px;
+        letter-spacing: 1.7px;
       }
 
       /* =========================================================
@@ -1438,6 +1438,62 @@
         background: white;
       }
 
+      /* ================= DISABLED BUTTON ================= */
+
+      .menu-btn:disabled,
+      .logout-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+        background: #f3f4f6 !important;
+        color: #9ca3af !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: grayscale(100%);
+        border-radius: 6px;
+      }
+
+      /* ================= DISABLED ICON ================= */
+
+      .menu-btn:disabled svg,
+      .logout-btn:disabled svg {
+        opacity: 0.5;
+        color: #9ca3af !important;
+        stroke: #9ca3af !important;
+        filter: grayscale(100%);
+      }
+
+      /* ================= DISABLED TEXT ================= */
+
+      .menu-btn:disabled span,
+      .logout-btn:disabled span {
+        color: #9ca3af !important;
+        text-shadow: none !important;
+      }
+
+      /* ================= REMOVE ACTIVE EFFECT ================= */
+
+      .menu-btn.active:disabled {
+        margin-left: 0 !important;
+        background: #f3f4f6 !important;
+        color: #9ca3af !important;
+        box-shadow: none !important;
+      }
+
+      /* ================= REMOVE ACTIVE BAR ================= */
+
+      .menu-btn.active:disabled::before {
+        display: none;
+      }
+
+      /* ================= DISABLE HOVER ================= */
+
+      .menu-btn:disabled:hover,
+      .logout-btn:disabled:hover {
+        background: #f3f4f6 !important;
+        color: #9ca3af !important;
+      }
+
       /* ======TOOLTIP============= */
       .menu-btn::after,
       .logout-btn::after {
@@ -1889,24 +1945,25 @@
         text-align: center;
       }
 
+      /* ================= IT TABLE WIDTH ================= */
+
       #PB_GOITCalc th,
       #PB_GOITCalc td,
       #PB_NPSITCalc th,
       #PB_NPSITCalc td {
         width: 180px !important;
         max-width: 180px !important;
+        min-width: 180px !important;
+
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-      }
 
-      #PB_GOITCalc td:first-child,
-      #PB_NPSITCalc td:first-child {
-        padding: 0 6px;
+        box-sizing: border-box;
       }
 
       /* ================= TOGGLE ================= */
-      /* safer than absolute */
+
       #PB_GOEditTbl,
       #PB_GOITCalc,
       #PB_NPSITCalc,
@@ -1916,16 +1973,6 @@
 
       .hidden-col {
         display: none;
-      }
-
-      #PB_GOEditTbl tbody tr:not(:last-child) td:not(:first-child),
-      #PB_NPSEditTbl tbody tr:not(:last-child) td:not(:first-child) {
-        padding: 0;
-      }
-
-      #PB_GOEditTbl td:first-child,
-      #PB_NPSEditTbl td:first-child {
-        padding: 0 8px;
       }
 
       .edit-mode #PB_GOEditTbl,
@@ -1940,42 +1987,26 @@
         display: none;
       }
 
-      #PB_GOEditTbl td,
-      #PB_NPSEditTbl td {
-        height: 22px;
-        min-width: 90px;
-      }
-
-      #PB_NPSITCalc td,
-      #PB_GOITCalc td {
-        height: 23.7px;
-      }
-
-      #PB_GOEditTbl td *,
-      #PB_NPSEditTbl td * {
-        line-height: 1 !important;
-      }
-
-      #PB_NPSITCalc td *,
-      #PB_GOITCalc td * {
-        line-height: 1.3 !important;
-      }
+      /* ================= TABLE ================= */
 
       #PB_GOViewTbl,
       #PB_GOEditTbl,
       #PB_NPSViewTbl,
-      #PB_NPSEditTbl {
-        /* 🔥 content decides width */
+      #PB_NPSEditTbl,
+      #PB_GOITCalc,
+      #PB_NPSITCalc {
         width: max-content;
-        /* 🔥 still fill wrapper minimum */
         min-width: 100%;
-        /* 🔥 prevent unnecessary stretch */
         flex: 0 0 auto;
-        table-layout: auto;
+
         border-spacing: 0 !important;
+        border-collapse: separate;
+
+        table-layout: fixed;
       }
 
-      /* ================= CELLS ================= */
+      /* ================= CELL COMMON ================= */
+
       .PB-Table-WrapperGO th,
       .PB-Table-WrapperGO td,
       .PB-Table-WrapperNPS th,
@@ -1985,87 +2016,114 @@
       .budgetfromPB-table th,
       .budgetfromPB-table td {
         padding: 5px 8px;
+
         border-bottom: 1px solid #e5e7eb;
         border-right: dotted 1px #d7dae0;
+
+        box-sizing: border-box;
+        vertical-align: middle;
       }
 
-      /* =========================
-      🔥 AUTO CONTENT WIDTH
-    ========================= */
-      #PB_GOViewTbl th,
-      #PB_GOViewTbl td,
-      #PB_NPSViewTbl th,
-      #PB_NPSViewTbl td,
-      #PB_GOEditTbl th,
+      /* ================= HEIGHT ================= */
+
       #PB_GOEditTbl td,
-      #PB_NPSEditTbl th,
-      #PB_NPSEditTbl td {
-        width: max-content;
-        white-space: nowrap;
+      #PB_NPSEditTbl td,
+      #PB_GOITCalc td,
+      #PB_NPSITCalc td {
+        height: 22px;
+        min-width: 90px;
       }
 
-      #PB_GOViewTbl td:not(:first-child),
-      #PB_NPSViewTbl td:not(:first-child),
-      #PB_GOEditTbl td:not(:first-child),
-      #PB_NPSEditTbl td:not(:first-child) {
-        width: 1%;
+      #PB_GOEditTbl td *,
+      #PB_NPSEditTbl td *,
+      #PB_GOITCalc td *,
+      #PB_NPSITCalc td * {
+        line-height: 1 !important;
       }
 
-      /* ================= HOVER ================= */
-      .PB-Table-WrapperGO tbody tr:hover td,
-      .PB-Table-WrapperNPS tbody tr:hover td {
-        background: #eef6ff;
+      /* ================= REMOVE EXTRA PADDING ================= */
+
+      #PB_GOEditTbl tbody tr:not(:last-child) td:not(:first-child),
+      #PB_NPSEditTbl tbody tr:not(:last-child) td:not(:first-child) {
+        padding: 0;
       }
 
-      /* ================= TITLE ROW ================= */
-      .pb-title-div {
-        width: 100%;
-        text-align: center;
-        font-weight: 600;
-        font-size: 11px;
-        padding: 8px;
-        background: linear-gradient(90deg, #f5f7fa, #e4ecf7);
-        border: 1px solid #d0d7e2;
-        position: sticky;
-        top: 0;
-        z-index: 999;
-        margin: 0 2px;
-        margin-bottom: -10px;
-      }
+      /* ================= HEADER ================= */
 
-      /* ================= HEADER ROW ================= */
       .PB-Table-Wrapper thead tr th,
       .budget-table thead tr th,
       .budgetfromPB-table tr th {
         position: sticky;
         top: 0;
+
         z-index: 9;
+
         font-weight: 600;
         letter-spacing: 0.3px;
+
         height: 30px;
+
         padding: 2px 6px;
+
         text-align: left;
+
         border-bottom: 2px solid #374151;
         border-right: dotted 1px lightgray;
+
         background: #1f4e79;
         color: #ffffff;
+
         font-size: 11px;
       }
 
-      /* ================= STICKY FIRST COLUMN ================= */
+      /* ================= VIEW TABLE STICKY ================= */
+
+      #PB_GOViewTbl th:first-child,
+      #PB_GOViewTbl td:first-child,
+      #PB_NPSViewTbl th:first-child,
+      #PB_NPSViewTbl td:first-child,
+      #PB_GOITCalc th:first-child,
+      #PB_GOITCalc td:first-child,
+      #PB_NPSITCalc th:first-child,
+      #PB_NPSITCalc td:first-child {
+        position: sticky;
+
+        left: 0;
+
+        z-index: 10;
+
+        background: white;
+
+        white-space: nowrap;
+
+        min-width: 200px;
+        width: 200px;
+        max-width: 200px;
+      }
+
+      /* ================= EDIT TABLE STICKY ================= */
+
       #PB_GOEditTbl th:first-child,
-      #PB_NPSEditTbl th:first-child,
       #PB_GOEditTbl td:first-child,
+      #PB_NPSEditTbl th:first-child,
       #PB_NPSEditTbl td:first-child {
         position: sticky;
+
+        /* 🔥 AFTER IT TABLE */
         left: 180px;
-        z-index: 8;
-        white-space: nowrap;
-        /* 🔥 IMPORTANT FIX */
+
+        z-index: 20;
+
         background: white;
+
+        white-space: nowrap;
+
         min-width: 210px;
         width: 210px;
+        max-width: 210px;
       }
+
+      /* ================= SECOND COLUMN ================= */
 
       #PB_GOEditTbl th:nth-child(2),
       #PB_NPSEditTbl th:nth-child(2),
@@ -2073,34 +2131,12 @@
       #PB_NPSEditTbl td:nth-child(2) {
         min-width: 70px;
         width: 70px;
+
         text-align: center;
       }
 
-      #PB_GOViewTbl th:first-child,
-      #PB_GOViewTbl td:first-child,
-      #PB_NPSViewTbl th:first-child,
-      #PB_NPSViewTbl td:first-child,
-      .budgetfromPB-table td:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 8;
-        white-space: nowrap;
-        /* 🔥 IMPORTANT FIX */
-        background: white;
-        min-width: 210px;
-        width: 210px;
-      }
+      /* ================= HEADER FIRST COLUMN ================= */
 
-      .budget-table td:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 8;
-        white-space: nowrap;
-        /* 🔥 IMPORTANT FIX */
-        background: white;
-      }
-
-      /* header row first column */
       #PB_GOViewTbl thead tr th:first-child,
       #PB_NPSViewTbl thead tr th:first-child,
       #PB_GOEditTbl thead tr th:first-child,
@@ -2108,11 +2144,13 @@
       #PB_GOITCalc thead tr th:first-child,
       #PB_NPSITCalc thead tr th:first-child {
         z-index: 50;
+
         background: #1f4e79;
         color: #ffffff;
       }
 
       /* ================= SEPARATOR ================= */
+
       #PB_GOViewTbl td:first-child,
       #PB_NPSViewTbl td:first-child,
       #PB_GOEditTbl td:first-child,
@@ -2128,20 +2166,32 @@
         box-shadow: 2px 0 0 #e5e7eb;
       }
 
+      /* ================= HOVER ================= */
+
+      .PB-Table-WrapperGO tbody tr:hover td,
+      .PB-Table-WrapperNPS tbody tr:hover td {
+        background: #eef6ff;
+      }
+
       /* ================= TOTAL ROW ================= */
+
       .total-row td {
         position: sticky;
+
         bottom: -1px;
-        /* 🔥 fixes tiny scroll gap */
+
         background: #fef3c7;
+
         font-weight: 600;
+
         z-index: 20;
+
         padding: 6px 4px !important;
-        /* 🔥 solid separator */
+
         border-top: 2px solid #f59e0b;
-        /* 🔥 cover scrolling behind */
+
         background-clip: padding-box;
-        /* 🔥 remove rendering gap */
+
         box-shadow: 0 2px 0 #fef3c7;
       }
 
@@ -2152,7 +2202,38 @@
       #PB_GOITCalc tr:last-child td:first-child,
       #PB_NPSITCalc tr:last-child td:first-child {
         border-top: 2px solid #f59e0b;
+
         background: #fef3c7;
+
+        z-index: 999;
+      }
+
+      /* ================= TITLE ================= */
+
+      .pb-title-div {
+        width: 100%;
+
+        text-align: center;
+
+        font-weight: 600;
+
+        font-size: 11px;
+
+        padding: 8px;
+
+        background: linear-gradient(90deg, #f5f7fa, #e4ecf7);
+
+        border: 1px solid #d0d7e2;
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 999;
+
+        margin: 0 2px;
+
+        margin-bottom: -10px;
       }
 
       /*========== TEXT INPUT */
@@ -3147,7 +3228,7 @@
       }
 
       /* Table styling */
-      .sbg-table {
+      .dashboard-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 11px;
@@ -3158,17 +3239,17 @@
           transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      .sbg-table.hide {
+      .dashboard-table.hide {
         opacity: 0;
         transform: translateY(-40px);
       }
 
-      .sbg-table.show {
+      .dashboard-table.show {
         opacity: 1;
         transform: translateY(0);
       }
 
-      .sbg-table tbody tr {
+      .dashboard-table tbody tr {
         transition:
           transform 0.1s cubic-bezier(0.22, 1, 0.36, 1),
           box-shadow 0.1s ease,
@@ -3178,7 +3259,7 @@
       }
 
       /* highlighted row */
-      .sbg-table tbody tr.highlight {
+      .dashboard-table tbody tr.highlight {
         background: #dbeafe !important;
         transform: scaleY(1.12) translateY(-2px);
         position: relative;
@@ -3187,11 +3268,11 @@
         font-weight: bold;
       }
 
-      .sbg-table td.sno {
+      .dashboard-table td.sno {
         text-align: center;
       }
 
-      .sbg-table td.sno span {
+      .dashboard-table td.sno span {
         display: inline-block;
         background: #2563eb;
         color: #fff;
@@ -3216,7 +3297,7 @@
       }
 
       /* Sticky header */
-      .sbg-table th {
+      .dashboard-table th {
         position: sticky;
         background: #e2f0ff;
         font-weight: 600;
@@ -3225,26 +3306,26 @@
       }
 
       /* Cells */
-      .sbg-table th,
-      .sbg-table td {
+      .dashboard-table th,
+      .dashboard-table td {
         padding: 5px 6px;
         border-bottom: 1px solid #e5e7eb;
         text-align: left;
       }
 
       /* First column left aligned */
-      .sbg-table th:first-child,
-      .sbg-table td:first-child {
+      .dashboard-table th:first-child,
+      .dashboard-table td:first-child {
         text-align: left;
       }
 
       /* Row hover */
-      .sbg-table tbody tr:hover {
+      .dashboard-table tbody tr:hover {
         background: #f3f4f6;
       }
 
       /* Negative values */
-      .sbg-table td.negative {
+      .dashboard-table td.negative {
         color: #dc2626;
         font-weight: 500;
       }
@@ -3545,10 +3626,6 @@
           /* Softer watermark on small screens */
         }
 
-        table {
-          padding: 1px;
-        }
-
         .button-bar {
           flex-direction: column;
           align-items: stretch;
@@ -3685,16 +3762,16 @@
           height: 100%;
         }
 
-        .side-list {
-          display: flex;
+        .table-box,
+        .chart-box {
           overflow-x: auto;
-          overflow-y: hidden;
-          height: auto;
         }
 
-        .side-btn {
-          min-width: 120px;
-          margin-right: 6px;
+        .side-list {
+          display: flex;
+          overflow-x: hidden;
+          overflow-y: auto;
+          height: auto;
         }
 
         .dashboard-footer {
@@ -3719,13 +3796,6 @@
           font-size: 14px;
         }
 
-        table th,
-        table td {
-          padding: 3px !important;
-          width: 1%;
-          white-space: nowrap;
-        }
-
         .PensionInfoPanel {
           overflow-x: auto;
           width: 100%;
@@ -3735,8 +3805,6 @@
           height: 100%;
         }
 
-        .PB-Table-WrapperGO,
-        .PB-Table-WrapperNPS,
         .BudgetTableWrapper,
         .BudgetTablefromPBWrapper {
           flex-direction: column;
@@ -3977,12 +4045,12 @@
                   <div class="chart-box">
                     <div class="chart-scroll">
                       <div id="chartInner">
-                        <canvas id="sbgBarChart"></canvas>
+                        <canvas id="dashboardBarChart"></canvas>
                       </div>
                     </div>
                   </div>
                   <div class="table-box">
-                    <table id="dashBoardTable" class="sbg-table"></table>
+                    <table id="dashBoardTable" class="dashboard-table"></table>
                   </div>
                 </div>
                 <div class="side-list" id="yearList">
@@ -5138,13 +5206,13 @@ DOM SHORTCUTS
 
         const isRestrictedUser = !['MASTER', 'ADMIN', 'ENGG'].includes(role);
 
-        document.querySelectorAll('.stationDropdown').forEach((stationEl) => {
+        qsa('.stationDropdown').forEach((stationEl) => {
           stationEl.value = loginStation;
           stationEl.dispatchEvent(new Event('change'));
           stationEl.disabled = isRestrictedUser;
         });
 
-        document.querySelectorAll('.employeeDropdown').forEach((empEl) => {
+        qsa('.employeeDropdown').forEach((empEl) => {
           if ([...empEl.options].some((opt) => opt.value === user)) {
             empEl.value = user;
             empEl.dispatchEvent(new Event('change'));
@@ -5153,7 +5221,7 @@ DOM SHORTCUTS
           const observer = new MutationObserver(() => {
             const role = userRole?.trim().toUpperCase();
 
-            document.querySelectorAll('.employeeDropdown').forEach((empEl) => {
+            qsa('.employeeDropdown').forEach((empEl) => {
               if (empEl.disabled !== isRestrictedUser) {
                 empEl.disabled = isRestrictedUser;
               }
@@ -5273,8 +5341,8 @@ DOM SHORTCUTS
           pwdEl.type = isHidden ? 'text' : 'password';
 
           toggleBtn.querySelector('i').textContent = isHidden ? 'visibility' : 'visibility_off';
-          pwdEl.style.fontSize = isHidden ? '13px' : '22px';
-          pwdEl.style.letterSpacing = isHidden ? '0.5px' : '2.5px';
+          pwdEl.style.fontSize = isHidden ? '13px' : '20px';
+          pwdEl.style.letterSpacing = isHidden ? '1px' : '1.7px';
         }
 
         // 🔥 ENTER LOGIN
@@ -5422,7 +5490,7 @@ DOM SHORTCUTS
         // 🔥 SHOW ONLY DASHBOARD
         show('DashBoard');
 
-        const dashboardBtn = document.querySelector('.menu-btn[data-page="DashBoard"]');
+        const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
 
         if (dashboardBtn) {
           addClass(dashboardBtn, 'active');
@@ -5483,7 +5551,7 @@ DOM SHORTCUTS
       };
 
       function applyUserAccess(user) {
-        const buttons = document.querySelectorAll('.menu-btn');
+        const buttons = qsa('.menu-btn');
 
         const role = user?.trim().toUpperCase();
         const access = ACCESS_RULES[role] || ACCESS_RULES.DEFAULT;
@@ -5771,7 +5839,7 @@ DOM SHORTCUTS
       }
 
       function startDigitalClock() {
-        const clock = document.getElementById('digitalClock');
+        const clock = id('digitalClock');
 
         function update() {
           const now = new Date();
@@ -5803,7 +5871,7 @@ DOM SHORTCUTS
       //==========================Dashboard Footer Database Script =============================//
 
       function updateDBBadge() {
-        const icons = document.querySelectorAll('.dashboard-footer-database .material-symbols-outlined');
+        const icons = qsa('.dashboard-footer-database .material-symbols-outlined');
 
         let total = icons.length;
         let success = 0;
@@ -5992,18 +6060,42 @@ DOM SHORTCUTS
         }
       }
 
+      let loaderInterval = null;
+
       function showLoader() {
         const loader = id('globalLoader');
+
         if (!loader) return;
+
         loader.style.display = 'flex';
-        loader.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+          loader.classList.remove('hidden');
+        });
       }
 
       function hideLoader() {
         const loader = id('globalLoader');
+
         if (!loader) return;
+
         loader.classList.add('hidden');
-        loader.style.display = 'none';
+
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 300);
+      }
+
+      /* ================= COMPLETE ================= */
+
+      function completeLoader() {
+        clearInterval(loaderInterval);
+
+        updateLoader(100, 'Completed', 'sync');
+
+        setTimeout(() => {
+          hideLoader();
+        }, 400);
       }
 
       function updateLoader(percent, apiName = '', type = 'download') {
@@ -7538,7 +7630,7 @@ DOM SHORTCUTS
         return { labels, sbgArr, usedArr };
       }
 
-      function renderSBGBarChart(year, station) {
+      function renderdashboardBarChart(year, station) {
         const data = getSBGDataforChart(year, station);
         if (!data) return;
 
@@ -7546,7 +7638,7 @@ DOM SHORTCUTS
 
         const remainingArr = sbgArr.map((sbg, i) => Math.max(sbg - usedArr[i], 0));
 
-        const ctx = id('sbgBarChart');
+        const ctx = id('dashboardBarChart');
 
         if (window.barChart) window.barChart.destroy();
 
@@ -7816,7 +7908,7 @@ DOM SHORTCUTS
       }
 
       function renderSBGCharts(year, station) {
-        renderSBGBarChart(year, station);
+        renderdashboardBarChart(year, station);
         renderSBGDashBoardTable(year, station);
       }
 
@@ -7843,7 +7935,7 @@ DOM SHORTCUTS
           btn.textContent = st;
 
           btn.onclick = () => {
-            document.querySelectorAll('#stationList .side-btn').forEach((b) => b.classList.remove('active'));
+            qsa('#stationList .side-btn').forEach((b) => b.classList.remove('active'));
 
             btn.classList.add('active');
 
@@ -7866,7 +7958,7 @@ DOM SHORTCUTS
           btn.textContent = yr;
 
           btn.onclick = () => {
-            document.querySelectorAll('#yearList .side-btn').forEach((b) => b.classList.remove('active'));
+            qsa('#yearList .side-btn').forEach((b) => b.classList.remove('active'));
 
             btn.classList.add('active');
 
@@ -7952,7 +8044,7 @@ DOM SHORTCUTS
 
         const { labels, incomeArr, taxArr, grossArr, totalIncome, totalTax, totalGross } = data;
 
-        const ctx = id('sbgBarChart');
+        const ctx = id('dashboardBarChart');
 
         if (window.barChart) window.barChart.destroy();
 
@@ -8289,7 +8381,7 @@ DOM SHORTCUTS
         });
 
         // 🔥 DEFAULT PAGE AFTER LOGIN
-        const dashboardBtn = document.querySelector('.menu-btn[data-page="DashBoard"]');
+        const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
 
         if (dashboardBtn) {
           openPage('DashBoard', dashboardBtn);
@@ -8398,7 +8490,7 @@ DOM SHORTCUTS
 
       function clearEmpPage() {
         // 🔥 CLEAR ALL TABLE CELLS
-        document.querySelectorAll('#EmpPage td[id]').forEach((el) => {
+        qsa('#EmpPage td[id]').forEach((el) => {
           el.textContent = '';
         });
       }
@@ -9118,10 +9210,41 @@ DOM SHORTCUTS
 
         let isFullEdit = false;
 
-        btn.onclick = async () => {
-          // ✅ overwrite instead of clone
+        /* ================= RESET FUNCTION ================= */
 
+        btn.resetPBToggle = () => {
+          isFullEdit = false;
+
+          const wrapper = qs('.PB-Table-Wrapper');
+          const printBtn = id('PBprintBtn');
+          const excelBtn = id('PBexcelBtn');
+
+          btn.classList.remove(config.className);
+
+          btn.querySelector('span').textContent = config.defaultText;
+
+          updateIcon(btn, config.defaultIcon);
+
+          enableAllButtons();
+
+          toggleFilters(false);
+
+          if (printBtn) {
+            printBtn.disabled = false;
+          }
+
+          if (excelBtn) {
+            excelBtn.disabled = false;
+          }
+
+          wrapper?.classList.remove('edit-mode');
+        };
+
+        /* ================= CLICK ================= */
+
+        btn.onclick = async () => {
           if (isPBProcessing) return;
+
           isPBProcessing = true;
 
           const printBtn = id('PBprintBtn');
@@ -9129,40 +9252,40 @@ DOM SHORTCUTS
           const wrapper = qs('.PB-Table-Wrapper');
 
           try {
+            /* ================= ENTER EDIT MODE ================= */
+
             if (!isFullEdit) {
               isFullEdit = true;
 
               btn.classList.add(config.className);
+
               deactivateOthers(btn);
+
               toggleFilters(true);
 
-              if (printBtn) printBtn.disabled = true;
-              if (excelBtn) excelBtn.disabled = true;
+              if (printBtn) {
+                printBtn.disabled = true;
+              }
+
+              if (excelBtn) {
+                excelBtn.disabled = true;
+              }
 
               wrapper?.classList.add('edit-mode');
 
               btn.querySelector('span').textContent = config.activeText;
+
               updateIcon(btn, config.activeIcon);
 
               refreshPBView();
+
               return;
             }
 
-            isFullEdit = false;
+            /* ================= SECOND CLICK ================= */
 
-            btn.classList.remove(config.className);
-            enableAllButtons();
-            toggleFilters(false);
-
-            wrapper?.classList.remove('edit-mode');
-
-            if (printBtn) printBtn.disabled = false;
-            if (excelBtn) excelBtn.disabled = false;
-
-            btn.querySelector('span').textContent = config.defaultText;
-            updateIcon(btn, config.defaultIcon);
-
-            refreshPBView();
+            // 🔥 DO NOTHING HERE
+            // 🔥 savePBData() handles reset AFTER alert
           } catch (err) {
             console.error('❌ Error:', err);
           } finally {
@@ -11590,7 +11713,7 @@ DOM SHORTCUTS
       }
 
       function recalculateAllRows() {
-        document.querySelectorAll('#PB_GOEditTbl tbody tr:not(.total-row), #PB_NPSEditTbl tbody tr:not(.total-row)').forEach((tr) => {
+        qsa('#PB_GOEditTbl tbody tr:not(.total-row), #PB_NPSEditTbl tbody tr:not(.total-row)').forEach((tr) => {
           recalculateRow(tr, tr.closest('table')?.id);
         });
 
@@ -11728,20 +11851,79 @@ DOM SHORTCUTS
         setDAPercent();
       }
 
-      on('PBaddBtn', 'click', () => {
-        //console.log("BTN isAddMode:", isAddMode);
+      let pbProgressSource = null;
+
+      function startPBProgress() {
+        if (pbProgressSource) {
+          pbProgressSource.close();
+
+          pbProgressSource = null;
+        }
+
+        pbProgressSource = new EventSource('https://office-management-f425.onrender.com/pb/progress');
+
+        console.log('✅ SSE CONNECTED');
+
+        pbProgressSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+
+          console.log(data);
+
+          updateLoader(data.percent, data.message, 'sync');
+
+          /* 🔥 COMPLETE */
+
+          if (data.percent >= 100) {
+            setTimeout(() => {
+              hideLoader();
+
+              /* 🔥 SAFE CLOSE */
+
+              if (pbProgressSource) {
+                pbProgressSource.close();
+
+                pbProgressSource = null;
+              }
+            }, 1000);
+          }
+        };
+
+        /* 🔥 ERROR */
+
+        pbProgressSource.onerror = (err) => {
+          console.error('❌ SSE ERROR', err);
+
+          /* 🔥 SAFE CLOSE */
+
+          if (pbProgressSource) {
+            pbProgressSource.close();
+
+            pbProgressSource = null;
+          }
+        };
+      }
+
+      on('PBaddBtn', 'click', async () => {
         const monthEl = id('PayBillPage_SalMonth');
         const station = id('PayBillPage_Station')?.value;
-
         if (!monthEl || !station) return;
         isEditMode = false;
-        if (!isAddMode) {
-          // 🔥 FIRST CLICK → ENTER ADD MODE
-          isAddMode = true;
 
-          console.log('ADD MODE ACTIVATED');
+        // ================= FIRST CLICK =================
+        if (!isAddMode) {
+          isAddMode = true;
+          // 🔥 ENTER EDIT MODE UI
+          document.body.classList.add('edit-mode');
+
+          // 🔥 DISABLE SIDEBAR
+          qsa('.menu-list button').forEach((btn) => {
+            btn.disabled = true;
+          });
+
+          id('logoutBtn').disabled = true;
 
           const currentMonth = String(monthEl.value || '').trim();
+
           const nextMonth = getNextMonthStr(currentMonth);
 
           copyPreviousMonthData(nextMonth, station);
@@ -11756,36 +11938,64 @@ DOM SHORTCUTS
           refreshPBView();
 
           const el = id('PayBillPage_SalMonth');
+
           if (el) {
             el.value = nextMonth;
-            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(
+              new Event('change', {
+                bubbles: true
+              })
+            );
           }
 
           updateFYDropdown(nextMonth);
-        } else {
-          // 🔥 SECOND CLICK → SAVE
-          console.log('SAVE MODE ACTIVE');
-          savePBData('ADD');
-          isAddMode = false;
-        }
-      });
 
-      on('PBeditBtn', 'click', () => {
-        const monthEl = id('PayBillPage_SalMonth');
-        const station = id('PayBillPage_Station')?.value;
-
-        if (!monthEl || !station) return;
-        isAddMode = false;
-        if (isEditMode) {
-          setupManualDAAHandlers();
-          savePBData('EDIT');
-          isEditMode = false;
           return;
         }
 
+        // ================= SAVE =================
+        setSyncStatus('pbDatabase');
+
+        await savePBData('ADD');
+
+        return;
+      });
+
+      on('PBeditBtn', 'click', async () => {
+        const monthEl = id('PayBillPage_SalMonth');
+
+        const station = id('PayBillPage_Station')?.value;
+
+        if (!monthEl || !station) return;
+
+        isAddMode = false;
+
+        /* ================= SAVE ================= */
+
+        if (isEditMode) {
+          setupManualDAAHandlers();
+          setSyncStatus('pbDatabase');
+
+          await savePBData('EDIT');
+
+          return;
+        }
+
+        /* ================= ENTER EDIT MODE ================= */
+
         isEditMode = true;
 
-        console.log('EDIT MODE ACTIVE');
+        /* 🔥 SHOW EDIT TABLES */
+
+        qs('.PB-Table-Wrapper')?.classList.add('edit-mode');
+
+        /* 🔥 DISABLE SIDEBAR */
+
+        qsa('.menu-list button').forEach((btn) => {
+          btn.disabled = true;
+        });
+
+        id('logoutBtn').disabled = true;
       });
 
       async function savePBData(mode = 'ADD') {
@@ -11798,9 +12008,7 @@ DOM SHORTCUTS
           return;
         }
 
-        /* =========================
-  🔹 EMP LOOKUP (HRIS)
-========================= */
+        /* =========================🔹 EMP LOOKUP (HRIS)========================= */
         const empHeaders = window.empCalcHeaders;
         const empRows = window.empCalcRows;
 
@@ -11839,18 +12047,14 @@ DOM SHORTCUTS
           return '';
         }
 
-        /* =========================
-  🔹 CLEAN NUMBER
-========================= */
+        /* =========================🔹 CLEAN NUMBER========================= */
         function cleanNumber(val) {
           return String(val || '')
             .replace(/[₹,]/g, '')
             .trim();
         }
 
-        /* =========================
-  🔹 CELL VALUE READER
-========================= */
+        /* =========================🔹 CELL VALUE READER ========================= */
         function getCellValue(cell, colName) {
           if (!cell) return '';
 
@@ -11879,9 +12083,7 @@ DOM SHORTCUTS
           return cleanNumber(cell.textContent || '');
         }
 
-        /* =========================
-  🔹 TABLE DATA EXTRACTOR
-========================= */
+        /* =========================🔹 TABLE DATA EXTRACTOR ========================= */
         function getTableData(tableId, type) {
           const table = id(tableId);
 
@@ -11953,9 +12155,7 @@ DOM SHORTCUTS
           return data;
         }
 
-        /* =========================
-  🔹 COLLECT TABLE DATA
-========================= */
+        /* =========================🔹 COLLECT TABLE DATA ========================= */
         const goData = getTableData('PB_GOEditTbl', 'GO');
 
         const npsData = getTableData('PB_NPSEditTbl', 'NPS');
@@ -11967,9 +12167,7 @@ DOM SHORTCUTS
           return;
         }
 
-        /* =========================
-  🔥 LOAD LATEST PBDB
-========================= */
+        /* ========================= 🔥 LOAD LATEST PBDB ========================= */
         try {
           const latestPB = await fetch('https://office-management-f425.onrender.com/pb').then((r) => r.json());
 
@@ -11977,9 +12175,7 @@ DOM SHORTCUTS
 
           const latestRows = latestPB.rows || [];
 
-          /* =========================
-    🔥 KEY CREATOR
-  ========================= */
+          /* ========================= 🔥 KEY CREATOR ========================= */
           function makeKey(rowObj) {
             return [rowObj['Salary Month'], rowObj['HRIS'], rowObj['Category']]
               .map((v) =>
@@ -11990,9 +12186,12 @@ DOM SHORTCUTS
               .join('|');
           }
 
-          /* =========================
-    🔥 BUILD LATEST MAP
-  ========================= */
+          /* ========================= 🔥 BUILD LATEST MAP ========================= */
+
+          const currentMonth = salaryMonth;
+
+          /* ========================= 🔥 BUILD CURRENT MONTH MAP ========================= */
+
           const latestMap = {};
 
           latestRows.forEach((r) => {
@@ -12002,12 +12201,15 @@ DOM SHORTCUTS
               obj[h] = r[i];
             });
 
+            // 🔥 FILTER ONLY CURRENT MONTH
+            const rowMonth = String(obj['Salary Month'] || '').trim();
+
+            if (rowMonth !== currentMonth) return;
+
             latestMap[makeKey(obj)] = obj;
           });
 
-          /* =========================
-            🔥 MERGE LATEST + USER
-          ========================= */
+          /* ========================= 🔥 MERGE LATEST + USER ========================= */
           const mergedData = data.map((userRow) => {
             const key = makeKey(userRow);
 
@@ -12022,95 +12224,141 @@ DOM SHORTCUTS
             };
           });
 
-          /* =========================
-            🔥 FILTER ONLY CHANGED ROWS
-          ========================= */
+          /* ========================= 🔍 CHECK EACH ROW ========================= */
+
           const changedData = [];
 
-          /* =========================
-            🔧 NORMALIZE
-          ========================= */
-          function normalize(val) {
-            // null / undefined
+          /* ========================= 🔧 NORMALIZE ========================= */
+
+          function normalize(val, header = '') {
+            // 🔥 NULL / UNDEFINED
             if (val === null || val === undefined) {
-              return '0.00';
+              return '';
             }
 
-            let str = String(val).trim();
+            let str = String(val).replace(/[₹,]/g, '').replace(/\r/g, '').replace(/\s+/g, ' ').trim();
 
-            // 🔥 remove ₹ and commas
-            str = str.replace(/[₹,]/g, '');
+            const h = String(header).toLowerCase().trim();
 
-            // 🔥 blank = zero
-            if (str === '' || str === '-') {
-              return '0.00';
+            /* ========================= 🔥 CHECKBOX COLUMNS ========================= */
+
+            const checkboxCols = ['ta entitled', 'hra entitled', 'disability'];
+
+            if (checkboxCols.includes(h)) {
+              str = str.toLowerCase();
+
+              if (['true', 'yes', 'checked', '1', 'TRUE'].includes(str)) {
+                return 'true';
+              }
+
+              return 'false';
             }
 
-            // 🔥 numeric compare
-            if (!isNaN(str)) {
-              return Number(str || 0).toFixed(2);
+            /* ========================= 🔥 SELECT COLUMNS ========================= */
+
+            const selectCols = ['qtrs type', 'level of disability', 'pay level', '7cpc index'];
+
+            if (selectCols.includes(h)) {
+              if (str === '--' || str === '-') {
+                return '';
+              }
+
+              return str.toLowerCase();
             }
 
-            // 🔥 text compare
-            return str.replace(/\r/g, '').trim().toLowerCase();
+            /* ========================= 🔥 EMPTY ========================= */
+
+            if (str === '--' || str === '-') {
+              return '';
+            }
+
+            /* ========================= 🔥 NUMBER ========================= */
+
+            if (!isNaN(str) && str !== '') {
+              return Number(str).toFixed(2);
+            }
+
+            /* ========================= 🔥 TEXT ========================= */
+
+            return str.toLowerCase();
           }
 
-          /* =========================
-            🔍 CHECK EACH ROW
-          ========================= */
+          /* ========================= 🔥 IGNORE FIELDS ========================= */
+
+          const ignoreFields = ['Gross Income', 'Total Deduction', 'Net Income', 'Last Updated', '_lastUpdated'];
+
+          /* ========================= 🔍 COMPARE ========================= */
+
           data.forEach((userRow) => {
             const key = makeKey(userRow);
 
-            const latestRow = latestMap[key] || {};
+            const latestRow = latestMap[key];
+
+            // 🔥 NEW ROW
+            if (!latestRow) {
+              changedData.push({
+                ...userRow
+              });
+
+              return;
+            }
 
             let changed = false;
 
-            // =========================
-            // 🔍 COMPARE ONLY SHEET HEADERS
-            // =========================
-            latestHeaders.forEach((header) => {
-              // ❌ Ignore metadata
-              if (header === 'Last Updated' || header === '_lastUpdated') {
+            Object.keys(userRow).forEach((header) => {
+              // ❌ IGNORE
+              if (ignoreFields.includes(header)) {
                 return;
               }
 
-              const oldVal = normalize(latestRow[header]);
+              const oldVal = normalize(latestRow[header], header);
 
-              const newVal = normalize(userRow[header]);
+              const newVal = normalize(userRow[header], header);
 
+              // 🔥 CHANGED
               if (oldVal !== newVal) {
+                console.log('Changed:', header, '| OLD:', oldVal, '| NEW:', newVal);
+
                 changed = true;
               }
             });
 
-            // =========================
-            // 🔥 PUSH ONLY CHANGED ROW
-            // =========================
+            // 🔥 PUSH ONLY CHANGED ROWS
             if (changed) {
               changedData.push({
-                // latest sheet values
                 ...latestRow,
-
-                // overwrite edited values
                 ...userRow
               });
             }
           });
 
-          /* =========================
-            ❌ NO CHANGES
-          ========================= */
+          /* ========================= ❌ NO CHANGES ========================= */
+
           if (!changedData.length) {
             alert('ℹ️ No changes detected.\n\n' + 'Nothing was updated.');
 
             return;
           }
+
+          /* =========================
+          🔥 START LOADER ONLY NOW
+          ========================= */
+
+          showLoader();
+
+          setSyncStatus('pbDatabase');
+
+          startPBProgress();
+
+          /* =========================
+          🔥 INITIAL UI PROGRESS
+          ========================= */
+
+          updateLoader(1, 'Preparing Save...', 'sync');
+
           /* =========================
           🔥 SAVE TO BACKEND
           ========================= */
-
-          // 🔥 START SYNC ANIMATION
-          setSyncStatus('pbDatabase');
 
           const res = await fetch('https://office-management-f425.onrender.com/pb/update', {
             method: 'POST',
@@ -12158,17 +12406,15 @@ DOM SHORTCUTS
 
             // 🔄 UPDATED
             if (updatedList) {
-              msg += `UPDATED EMPLOYEES:\n` + updatedList + `\n\n`;
+              msg += `🔄 UPDATED EMPLOYEES:\n` + updatedList + `\n\n`;
             }
 
             // ➕ ADDED
             if (addedList) {
-              msg += `ADDED EMPLOYEES:\n` + addedList;
+              msg += `➕ ADDED EMPLOYEES:\n` + addedList;
             }
 
-            // =========================
-            // 🔥 RELOAD PBDB
-            // =========================
+            // =================🔥 RELOAD PBDB====================
             await loadTable('pb', 'PBDB');
 
             // 🔥 STOP SYNC
@@ -12177,16 +12423,26 @@ DOM SHORTCUTS
             // 🔥 SHOW ALERT AFTER SYNC
             alert(msg);
 
-            // =========================
-            // 🔥 REFRESH UI
-            // =========================
-            applyFilters();
+            /* ===================🔥 EXIT EDIT/ADD MODE====================== */
 
+            isAddMode = false;
+            isEditMode = false;
+
+            qs('.PB-Table-Wrapper')?.classList.remove('edit-mode');
+            id('PBeditBtn')?.resetPBToggle?.();
+            id('PBaddBtn')?.resetPBToggle?.();
+
+            /* ==============================🔥 REFRESH UI==================== */
+
+            applyFilters();
             refreshPBView();
 
-            // =========================
-            // 🔥 REFRESH IT TABLE
-            // =========================
+            qsa('.menu-list button').forEach((btn) => {
+              btn.disabled = false;
+            });
+            id('logoutBtn').disabled = false;
+
+            // ========================= 🔥 REFRESH IT TABLE =========================
             setTimeout(() => {
               const empName = id('ITPage_Emp')?.value;
 
@@ -12199,17 +12455,13 @@ DOM SHORTCUTS
               renderCalculatedITTable(empName, selectedFY, 'calculated');
             }, 100);
           } else if (result.status === 'conflict') {
-            /* =========================
-          ⚠️ CONFLICT
-          ========================= */
+            /* ========================= ⚠️ CONFLICT ========================= */
             // 🔥 STOP SYNC
             clearSyncStatus('pbDatabase', 'db', false);
 
             alert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
           } else {
-            /* =========================
-          ❌ ERROR
-          ========================= */
+            /* ========================= ❌ ERROR ========================= */
             // 🔥 STOP SYNC
             clearSyncStatus('pbDatabase', 'db', false);
 
@@ -12267,9 +12519,7 @@ DOM SHORTCUTS
         });
       });
 
-      /* ==================================================================
-🔥🔥🔥🔥 HELPERS 🔥🔥🔥🔥
-=====================================================================*/
+      /* ================================================================== 🔥🔥🔥🔥 HELPERS 🔥🔥🔥🔥 =====================================================================*/
       function createEl(tag, props = {}, children = []) {
         const el = document.createElement(tag);
 
@@ -12289,9 +12539,7 @@ DOM SHORTCUTS
         if (el) el.innerHTML = '';
       }
 
-      /* =========================
-CLASS HELPERS
-========================= */
+      /* ========================= CLASS HELPERS ========================= */
       function addClass(el, cls) {
         if (typeof el === 'string') el = id(el);
         el?.classList.add(cls);
@@ -12307,17 +12555,13 @@ CLASS HELPERS
         el?.classList.toggle(cls);
       }
 
-      /* =========================
-EVENT HELPERS
-========================= */
+      /* ========================= EVENT HELPERS ========================= */
       function on(el, event, handler) {
         if (typeof el === 'string') el = id(el);
         el?.addEventListener(event, handler);
       }
 
-      /* =========================
-DATA HELPERS
-========================= */
+      /* ========================= DATA HELPERS ========================= */
       function groupBy(arr, key) {
         return arr.reduce((acc, obj) => {
           const k = obj[key];
@@ -12330,9 +12574,7 @@ DATA HELPERS
         return [...new Map(arr.map((item) => [item[key], item])).values()];
       }
 
-      /* =========================
-FORMAT HELPERS
-========================= */
+      /* ========================= FORMAT HELPERS ========================= */
 
       function formatNumber(num) {
         return Number(num || 0).toLocaleString('en-IN');
@@ -12473,9 +12715,7 @@ FORMAT HELPERS
 
         return input.value;
       }
-      /* =========================
-SAFE VALUE HELPERS
-========================= */
+      /* ========================= AFE VALUE HELPERS ========================= */
       function val(v, def = '') {
         return v === null || v === undefined ? def : v;
       }
@@ -12490,9 +12730,7 @@ SAFE VALUE HELPERS
           .trim();
       }
 
-      /* =========================
-VISIBILITY HELPERS
-========================= */
+      /* ========================= VISIBILITY HELPERS ========================= */
       function show(el) {
         if (typeof el === 'string') el = id(el);
         if (el) el.style.display = 'block';
@@ -12506,9 +12744,7 @@ VISIBILITY HELPERS
       function getColIndex(headers, name) {
         return headers.findIndex((h) => h.toLowerCase().trim() === name.toLowerCase());
       }
-      /* =========================
-DEBUG
-========================= */
+      /* ========================= DEBUG ========================= */
       function log(...args) {
         console.log(...args);
       }
@@ -13191,8 +13427,8 @@ DEBUG
 
         updatePBPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'block'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
 
         pbmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -13203,8 +13439,8 @@ DEBUG
 
         updatePBPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'none'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
 
         pbmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -15684,7 +15920,7 @@ DEBUG
         const doc = document.implementation.createHTMLDocument('SBG Expenditure');
 
         // 🔥 COPY STYLES
-        document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
             doc.head.appendChild(el.cloneNode(true));
           } catch {}
@@ -17279,7 +17515,7 @@ DEBUG
         // =========================
         // 🔥 COPY STYLES
         // =========================
-        document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
             doc.head.appendChild(el.cloneNode(true));
           } catch (e) {}
@@ -17380,8 +17616,8 @@ DEBUG
 
         updateSSPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'block'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
 
         ssmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -17392,8 +17628,8 @@ DEBUG
 
         updateSSPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'none'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
 
         ssmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -19646,7 +19882,7 @@ DEBUG
         // =========================
         // 🔥 COPY STYLES
         // =========================
-        document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
             doc.head.appendChild(el.cloneNode(true));
           } catch (e) {}
@@ -19922,8 +20158,8 @@ DEBUG
 
         updateITPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'block'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
 
         itmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -19934,8 +20170,8 @@ DEBUG
 
         updateITPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'none'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
 
         itmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -21244,8 +21480,8 @@ DEBUG
 
         updatePensionPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'block'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
 
         pensionmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -21256,8 +21492,8 @@ DEBUG
 
         updatePensionPrintMenuState();
 
-        document.querySelectorAll('.print-option').forEach((el) => (el.style.display = 'none'));
-        document.querySelectorAll('.excel-option').forEach((el) => (el.style.display = 'block'));
+        qsa('.print-option').forEach((el) => (el.style.display = 'none'));
+        qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
 
         pensionmenu.classList.add('show'); // ✅ ALWAYS OPEN
       });
@@ -21317,7 +21553,7 @@ DEBUG
       });
 
       function handlePensionChange() {
-        document.querySelectorAll('.Pensionaction-group button').forEach((btn) => {
+        qsa('.Pensionaction-group button').forEach((btn) => {
           btn.disabled = false;
         });
 
@@ -21410,7 +21646,7 @@ DEBUG
         // =========================
         // 🔥 COPY ALL STYLES
         // =========================
-        document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
             doc.head.appendChild(el.cloneNode(true));
           } catch {}
@@ -22307,8 +22543,8 @@ DEBUG
       // 🔥 EVENT BINDING
       // =========================
       function initDropdowns(dutyData) {
-        const yearSelect = document.getElementById('DutyChartFYSelect');
-        const monthSelect = document.getElementById('DutyChartMonthSelect');
+        const yearSelect = id('DutyChartFYSelect');
+        const monthSelect = id('DutyChartMonthSelect');
 
         populateYearDropdown(dutyData);
 
@@ -23393,13 +23629,13 @@ DEBUG
         // 🔥 HELPERS
         // =====================================================
 
-        const reqSelect = document.querySelector(`#dutyRequirementTable .req-select[data-emp="${emp}"][data-date="${dateStr}"]`);
-        const reqLieu = document.querySelector(`#dutyRequirementTable .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
+        const reqSelect = qs(`#dutyRequirementTable .req-select[data-emp="${emp}"][data-date="${dateStr}"]`);
+        const reqLieu = qs(`#dutyRequirementTable .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
 
-        const editSelect = document.querySelector(`#editableRequirementContainer .req-select[data-emp="${emp}"][data-date="${dateStr}"]`);
-        const editLieu = document.querySelector(`#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
+        const editSelect = qs(`#editableRequirementContainer .req-select[data-emp="${emp}"][data-date="${dateStr}"]`);
+        const editLieu = qs(`#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
 
-        const reqText = document.querySelector(`#editableRequirementContainer .req-text[data-emp="${emp}"][data-date="${dateStr}"]`);
+        const reqText = qs(`#editableRequirementContainer .req-text[data-emp="${emp}"][data-date="${dateStr}"]`);
 
         // =====================================================
         // 🔥 HELPERS
@@ -23513,7 +23749,7 @@ DEBUG
           // 🔥 OPTIONAL: still compare with requirement if needed
           let reqVal = '';
 
-          const reqCell = document.querySelector(`.req-text[data-emp="${emp}"][data-date="${dateStr}"]`);
+          const reqCell = qs(`.req-text[data-emp="${emp}"][data-date="${dateStr}"]`);
 
           if (reqCell) {
             reqVal = reqCell.textContent
@@ -23557,7 +23793,7 @@ DEBUG
             else if (v === 'C/O') {
               cell = cells[5];
 
-              let lieuInput = document.querySelector(`#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
+              let lieuInput = qs(`#editableRequirementContainer .lieu-input[data-emp="${emp}"][data-date="${dateStr}"]`);
               let lieuText = emp;
 
               if (lieuInput && lieuInput.value) {
@@ -24160,7 +24396,7 @@ DEBUG
         });
 
         // 6. DATA ROWS
-        const tableRows = document.querySelectorAll('#dutyChartTable tbody tr');
+        const tableRows = qsa('#dutyChartTable tbody tr');
         let currentRow = 4;
 
         tableRows.forEach((tr, index) => {
