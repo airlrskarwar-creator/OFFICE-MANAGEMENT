@@ -11871,13 +11871,15 @@ DOM SHORTCUTS
 
           console.log('PB:', data);
 
-          updateLoader(data.percent, data.message);
+          updateLoader(data.percent, data.message, 'sync');
 
-          // ✅ close at completion
+          // ✅ COMPLETE
           if (data.percent >= 100) {
             setTimeout(() => {
+              completeLoader();
+
               source.close();
-            }, 1000);
+            }, 800);
           }
         };
 
@@ -11886,9 +11888,10 @@ DOM SHORTCUTS
 
           source.close();
 
-          // ✅ auto reconnect
           setTimeout(() => {
-            if (loaderEl.style.display !== 'none') {
+            const loader = id('globalLoader');
+
+            if (loader && loader.style.display !== 'none') {
               startPBProgress();
             }
           }, 1000);
@@ -12447,7 +12450,6 @@ DOM SHORTCUTS
             await loadTable('pb', 'PBDB');
 
             stopPBProgress();
-            hideLoader();
 
             // 🔥 STOP SYNC
             clearSyncStatus('pbDatabase');
