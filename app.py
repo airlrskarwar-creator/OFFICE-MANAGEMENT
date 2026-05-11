@@ -704,6 +704,8 @@ def update_pb():
                     "_lastUpdated"
                 }
 
+                changed_columns = []
+
                 for i, header in enumerate(headers):
 
                     if header in ignore_compare:
@@ -731,6 +733,8 @@ def update_pb():
                             "🔥 CHANGED:",
                             header
                         )
+
+                        changed_columns.append(header)
 
                         row_changed = True
                         break
@@ -773,7 +777,8 @@ def update_pb():
                     "category": row_obj.get(
                         "Category",
                         ""
-                    )
+                    ),
+                    "changedColumns": changed_columns
                 })
 
                 # =========================
