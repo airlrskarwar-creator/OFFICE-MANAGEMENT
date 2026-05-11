@@ -12349,15 +12349,23 @@ DOM SHORTCUTS
             🔥 RELOAD PB
             ========================= */
 
-            await loadTable('pb', 'PBDB');
-
+            // 🔥 SHOW SUCCESS FAST
             setTimeout(() => {
               stopPBProgress();
 
               clearSyncStatus('pbDatabase');
 
               alert(msg);
-            }, 1200);
+            }, 500);
+
+            // 🔥 RELOAD PB IN BACKGROUND
+            loadTable('pb', 'PBDB')
+              .then(() => {
+                applyFilters();
+
+                refreshPBView();
+              })
+              .catch(console.error);
 
             /* =========================
             🔥 EXIT EDIT MODE
