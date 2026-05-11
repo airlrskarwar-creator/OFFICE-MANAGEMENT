@@ -1069,7 +1069,7 @@
       }
 
       .custom-alert-box {
-        width: min(700px, 92vw);
+        width: min(600px, 92vw);
         max-height: 85vh;
         background: #111827;
         color: #fff;
@@ -12092,6 +12092,10 @@ DOM SHORTCUTS
         return;
       });
 
+      /* =========================
+      🔥 EDIT BUTTON
+      ========================= */
+
       on('PBeditBtn', 'click', async () => {
         const monthEl = id('PayBillPage_SalMonth');
 
@@ -12105,6 +12109,7 @@ DOM SHORTCUTS
 
         if (isEditMode) {
           setupManualDAAHandlers();
+
           setSyncStatus('pbDatabase');
 
           await savePBData('EDIT');
@@ -12127,6 +12132,19 @@ DOM SHORTCUTS
         });
 
         id('logoutBtn').disabled = true;
+
+        /* =========================
+        🔥 SAVE ORIGINAL SNAPSHOT
+        ========================= */
+
+        const goSnapshot = getTableData('PB_GOEditTbl', 'GO', monthEl.value, station, id('PayBillPage_DA%').value, 'EDIT');
+
+        const npsSnapshot = getTableData('PB_NPSEditTbl', 'NPS', monthEl.value, station, id('PayBillPage_DA%').value, 'EDIT');
+
+        window.originalPBEditData = JSON.stringify({
+          go: goSnapshot,
+          nps: npsSnapshot
+        });
       });
 
       function exitPBEditMode() {
@@ -12158,186 +12176,221 @@ DOM SHORTCUTS
         });
       }
 
+      /* =========================
+        🔹 EMP LOOKUP
+    ========================= */
+
+      function getEmpLookupData() {
+        const empHeaders = window.empCalcHeaders || [];
+        const empRows = window.empCalcRows || [];
+        return {
+          empHeaders,
+          empRows,
+          empNameIdx: empHeaders.indexOf('Employee Name'),
+          hrisIdx: empHeaders.indexOf('HRIS'),
+          stationIdx: empHeaders.indexOf('Station'),
+          designationIdx: empHeaders.indexOf('Designation')
+        };
+      }
+
+      function getHRIS(empName, station) {
+        const { empRows, empNameIdx, hrisIdx, stationIdx } = getEmpLookupData();
+        for (let r of empRows) {
+          if (String(r?.[empNameIdx] || '').trim() === String(empName || '').trim() && String(r?.[stationIdx] || '').trim() === String(station || '').trim()) {
+            return r?.[hrisIdx] || '';
+          }
+        }
+        return '';
+      }
+
+      function getEmpDesignation(empName, station, hris) {
+        const { empRows, hrisIdx, designationIdx } = getEmpLookupData();
+        const clean = (v) =>
+          String(v || '')
+            .replace(/\s+/g, '')
+            .toLowerCase();
+        const cleanHRIS = clean(hris);
+        for (let r of empRows) {
+          const rowHRIS = clean(r?.[hrisIdx]);
+          if (cleanHRIS && rowHRIS === cleanHRIS) {
+            return r?.[designationIdx] || '';
+          }
+        }
+        return '';
+      }
+
+      /* =========================
+      🔹 TABLE DATA
+      ========================= */
+
+      function getTableData(tableId, type, salaryMonth, station, daPercent, mode) {
+        const table = id(tableId);
+
+        if (!table) return [];
+
+        const headers = Array.from(table.querySelectorAll('thead th')).map((th) => th.innerText.trim());
+
+        const rows = table.querySelectorAll('tbody tr');
+
+        let data = [];
+
+        rows.forEach((tr) => {
+          if (tr.innerText.toLowerCase().includes('total')) {
+            return;
+          }
+
+          const cells = tr.querySelectorAll('td');
+
+          let rowObj = {};
+
+          headers.forEach((h, i) => {
+            const cell = cells[i];
+
+            if (!cell) {
+              rowObj[h] = '';
+
+              return;
+            }
+
+            try {
+              rowObj[h] = getPBCellValue(cell, h);
+            } catch (err) {
+              console.warn('Cell error:', h, err);
+
+              rowObj[h] = '';
+            }
+          });
+
+          /* 🔥 FORCE VALUES */
+
+          rowObj['Salary Month'] = salaryMonth;
+
+          rowObj['Pay Drawn Station'] = station;
+
+          rowObj['DA%'] = daPercent;
+
+          /* 🔥 HRIS */
+
+          const empName = rowObj['Employee Name'];
+
+          const empStation = rowObj['Pay Drawn Station'];
+
+          rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
+
+          /* 🔥 DESIGNATION */
+
+          if (mode === 'ADD') {
+            const empHRIS = rowObj['HRIS'];
+
+            rowObj['Designation on Salary Month'] = getEmpDesignation(empName, empStation, empHRIS) || '';
+          } else {
+            rowObj['Designation on Salary Month'] = rowObj['Designation on Salary Month'] || '';
+          }
+
+          /* 🔥 CATEGORY */
+
+          rowObj['Category'] = type;
+
+          /* 🔥 FORCE STRING */
+
+          rowObj['Arrears Details'] = rowObj['Arrears Details'] || '';
+
+          rowObj['Recovery Details'] = rowObj['Recovery Details'] || '';
+
+          data.push(rowObj);
+        });
+
+        return data;
+      }
+
+      /* =========================
+        🔹 CLEAN NUMBER
+        ========================= */
+
+      function cleanNumber(val) {
+        return String(val || '')
+          .replace(/[₹,]/g, '')
+          .trim();
+      }
+
+      /* =========================
+        🔹 CELL VALUE
+        ========================= */
+
+      function getPBCellValue(cell, colName) {
+        if (!cell) return '';
+
+        /* 🔹 TEXTAREA */
+
+        if (colName === 'Arrears Details' || colName === 'Recovery Details') {
+          const textarea = cell.querySelector('textarea');
+
+          return textarea ? textarea.value.trim() : '';
+        }
+
+        /* 🔹 CHECKBOX */
+
+        const checkbox = cell.querySelector("input[type='checkbox']");
+
+        if (checkbox) return checkbox.checked;
+
+        /* 🔹 INPUT */
+
+        const input = cell.querySelector("input:not([type='checkbox'])");
+
+        if (input) return cleanNumber(input.value);
+
+        /* 🔹 SELECT */
+
+        const select = cell.querySelector('select');
+
+        if (select) return select.value || '';
+
+        return cleanNumber(cell.textContent || '');
+      }
+
+      /* =========================
+      🔥 SAVE PB DATA
+      ========================= */
+
       async function savePBData(mode = 'ADD') {
         const salaryMonth = id('PayBillPage_SalMonth').value;
+
         const station = id('PayBillPage_Station').value;
+
         const daPercent = id('PayBillPage_DA%').value;
 
         if (!salaryMonth || !station) {
           showCustomAlert('Month or Station missing');
+
           return;
         }
 
-        /* =========================🔹 EMP LOOKUP (HRIS)========================= */
-        const empHeaders = window.empCalcHeaders;
-        const empRows = window.empCalcRows;
+        /* =========================
+        🔹 COLLECT DATA
+        ========================= */
 
-        const empNameIdx = empHeaders.indexOf('Employee Name');
-        const hrisIdx = empHeaders.indexOf('HRIS');
-        const stationIdx = empHeaders.indexOf('Station');
-        const designationIdx = empHeaders.indexOf('Designation');
+        const goData = getTableData('PB_GOEditTbl', 'GO', salaryMonth, station, daPercent, mode);
 
-        function getHRIS(empName, station) {
-          for (let r of empRows) {
-            if (String(r[empNameIdx]).trim() === String(empName).trim() && String(r[stationIdx]).trim() === String(station).trim()) {
-              return r[hrisIdx] || '';
-            }
-          }
-
-          return '';
-        }
-
-        function getEmpDesignation(empName, station, hris) {
-          const clean = (v) =>
-            String(v || '')
-              .replace(/\s+/g, '')
-              .toLowerCase();
-
-          const cleanHRIS = clean(hris);
-
-          for (let r of empRows) {
-            const rowHRIS = clean(r[hrisIdx]);
-
-            // 🔥 PRIORITY HRIS MATCH
-            if (cleanHRIS && rowHRIS === cleanHRIS) {
-              return r[designationIdx] || '';
-            }
-          }
-
-          return '';
-        }
-
-        /* =========================🔹 CLEAN NUMBER========================= */
-        function cleanNumber(val) {
-          return String(val || '')
-            .replace(/[₹,]/g, '')
-            .trim();
-        }
-
-        /* =========================🔹 CELL VALUE READER ========================= */
-        function getCellValue(cell, colName) {
-          if (!cell) return '';
-
-          // 🔹 TEXTAREA
-          if (colName === 'Arrears Details' || colName === 'Recovery Details') {
-            const textarea = cell.querySelector('textarea');
-
-            return textarea ? textarea.value.trim() : '';
-          }
-
-          // 🔹 CHECKBOX
-          const checkbox = cell.querySelector("input[type='checkbox']");
-
-          if (checkbox) return checkbox.checked;
-
-          // 🔹 INPUT
-          const input = cell.querySelector("input:not([type='checkbox'])");
-
-          if (input) return cleanNumber(input.value);
-
-          // 🔹 SELECT
-          const select = cell.querySelector('select');
-
-          if (select) return select.value || '';
-
-          return cleanNumber(cell.textContent || '');
-        }
-
-        /* =========================🔹 TABLE DATA EXTRACTOR ========================= */
-        function getTableData(tableId, type) {
-          const table = id(tableId);
-
-          if (!table) return [];
-
-          const headers = Array.from(table.querySelectorAll('thead th')).map((th) => th.innerText.trim());
-
-          const rows = table.querySelectorAll('tbody tr');
-
-          let data = [];
-
-          rows.forEach((tr) => {
-            // ❌ Skip total row
-            if (tr.innerText.toLowerCase().includes('total')) {
-              return;
-            }
-
-            const cells = tr.querySelectorAll('td');
-
-            let rowObj = {};
-
-            headers.forEach((h, i) => {
-              const cell = cells[i];
-
-              if (!cell) {
-                rowObj[h] = '';
-                return;
-              }
-
-              try {
-                rowObj[h] = getCellValue(cell, h);
-              } catch (err) {
-                console.warn('Cell error:', h, err);
-
-                rowObj[h] = '';
-              }
-            });
-
-            // 🔥 FORCE VALUES
-            rowObj['Salary Month'] = salaryMonth;
-            rowObj['Pay Drawn Station'] = station;
-            rowObj['DA%'] = daPercent;
-
-            // 🔥 HRIS
-            const empName = rowObj['Employee Name'];
-
-            const empStation = rowObj['Pay Drawn Station'];
-
-            rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
-
-            // 🔥 DESIGNATION ONLY FOR ADD MODE
-            if (mode === 'ADD') {
-              const empHRIS = rowObj['HRIS'];
-
-              rowObj['Designation on Salary Month'] = getEmpDesignation(empName, empStation, empHRIS) || '';
-            }
-
-            // 🔥 EDIT MODE → KEEP EXISTING VALUE
-            else {
-              rowObj['Designation on Salary Month'] = rowObj['Designation on Salary Month'] || '';
-            }
-
-            // 🔥 CATEGORY
-            rowObj['Category'] = type;
-
-            // 🔥 FORCE STRING
-            rowObj['Arrears Details'] = rowObj['Arrears Details'] || '';
-
-            rowObj['Recovery Details'] = rowObj['Recovery Details'] || '';
-
-            data.push(rowObj);
-          });
-
-          return data;
-        }
-
-        /* =========================🔹 COLLECT TABLE DATA ========================= */
-        const goData = getTableData('PB_GOEditTbl', 'GO');
-
-        const npsData = getTableData('PB_NPSEditTbl', 'NPS');
+        const npsData = getTableData('PB_NPSEditTbl', 'NPS', salaryMonth, station, daPercent, mode);
 
         let data = [...goData, ...npsData];
 
+        /* =========================
+        ❌ EMPTY
+        ========================= */
+
         if (!data.length) {
           showCustomAlert('No data to save');
+
           return;
         }
 
-        /* ========================= 🔥 LOAD LATEST PBDB ========================= */
-        try {
-          /* =========================
-          🔥 START LOADER
-          ========================= */
+        /* =========================
+        🔥 START LOADER
+        ========================= */
 
+        try {
           showLoader();
 
           setSyncStatus('pbDatabase');
@@ -12347,7 +12400,7 @@ DOM SHORTCUTS
           updateLoader(1, 'Preparing Save...', 'sync');
 
           /* =========================
-          🔥 SAVE TO BACKEND
+          🔥 SAVE
           ========================= */
 
           const res = await fetch('https://office-management-f425.onrender.com/pb/update', {
@@ -12375,69 +12428,65 @@ DOM SHORTCUTS
             const addedEmployees = result.addedEmployees || [];
 
             /* =========================
-            ℹ️ NO CHANGES
+            🔥 NO CHANGE
             ========================= */
 
             if (!updatedEmployees.length && !addedEmployees.length) {
-              stopPBProgress();
-
-              clearSyncStatus('pbDatabase');
-
-              showCustomAlert('ℹ️ No changes detected.\n\nNothing was updated.');
-
               exitPBEditMode();
-
+              stopPBProgress();
+              clearSyncStatus('pbDatabase');
+              showCustomAlert('ℹ️ No changes detected.\n\nNothing was updated.');
               return;
             }
 
             /* =========================
-            🔥 SUCCESS MESSAGE
+            ✅ SUCCESS MESSAGE
             ========================= */
 
             let msg = `✅ ${mode} Success!\n\n`;
 
-            /* =========================
-            🔄 UPDATED EMPLOYEES
-            ========================= */
+            /* 🔄 UPDATED */
 
             if (updatedEmployees.length) {
               msg += `🔄 UPDATED EMPLOYEES:\n`;
 
               msg += updatedEmployees
                 .map((e) => {
-                  const changedCols = (e.changedColumns || []).join(', ');
+                  const changedCols = (e.changedColumns || []).join(', 🔃');
 
-                  return `• ${e.employee} (${e.month})\n` + `   Changed: ${changedCols}`;
+                  return `🧑‍💼 ${e.employee} (${e.month})\n` + `⦿ Updated: 🔃${changedCols}`;
                 })
                 .join('\n\n');
 
               msg += '\n\n';
             }
 
-            /* =========================
-            ➕ ADDED EMPLOYEES
-            ========================= */
+            /* ➕ ADDED */
 
             if (addedEmployees.length) {
               msg += `➕ ADDED EMPLOYEES:\n`;
 
-              msg += addedEmployees.map((e) => `• ${e.employee} (${e.month})`).join('\n');
+              msg += addedEmployees.map((e) => `🧑‍💼 ${e.employee} (${e.month})`).join('\n');
             }
 
             /* =========================
-            🔥 RELOAD PB
+            🔥 STOP LOADER
             ========================= */
 
-            // 🔥 SHOW SUCCESS FAST
-            setTimeout(() => {
-              stopPBProgress();
+            stopPBProgress();
 
-              clearSyncStatus('pbDatabase');
+            clearSyncStatus('pbDatabase');
 
-              showCustomAlert(msg);
-            }, 500);
+            /* =========================
+            🔥 SHOW MESSAGE
+            ========================= */
 
-            // 🔥 RELOAD PB IN BACKGROUND
+            showCustomAlert(msg);
+
+            /* =========================
+            🔥 BACKGROUND REFRESH
+            ========================= */
+
             loadTable('pb', 'PBDB')
               .then(() => {
                 applyFilters();
@@ -12452,22 +12501,6 @@ DOM SHORTCUTS
 
             exitPBEditMode();
 
-            /* =========================
-            🔥 REFRESH IT TABLE
-            ========================= */
-
-            setTimeout(() => {
-              const empName = id('ITPage_Emp')?.value;
-
-              const selectedFY = id('ITPage_FY')?.value;
-
-              if (!empName || !selectedFY) {
-                return;
-              }
-
-              renderCalculatedITTable(empName, selectedFY, 'calculated');
-            }, 100);
-
             return;
           }
 
@@ -12480,7 +12513,7 @@ DOM SHORTCUTS
 
             clearSyncStatus('pbDatabase', 'db', false);
 
-            showCustomAlert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
+            showCustomAlert('⚠️ Some rows were modified by another user.\nPlease reload and try again.');
 
             return;
           }
