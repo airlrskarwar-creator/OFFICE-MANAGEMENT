@@ -4010,7 +4010,7 @@
     </div>
     <div id="customAlert" class="custom-alert hidden">
       <div class="custom-alert-box">
-        <div class="custom-alert-header">Success Message</div>
+        <div class="custom-alert-header">🔔 Alert Message</div>
 
         <div id="customAlertMsg" class="custom-alert-body"></div>
         <button id="customAlertOk">OK</button>
@@ -11937,66 +11937,72 @@ DOM SHORTCUTS
 ========================= */
 
       function startPBProgress() {
-        // 🔥 CLOSE OLD CONNECTION
         if (window.pbProgressSource) {
           window.pbProgressSource.close();
-          window.pbProgressSource = null;
         }
 
-        const source = new EventSource('https://office-management-f425.onrender.com/pb/progress');
+        const source = new EventSource(`https://office-management-f425.onrender.com/pb/progress`);
 
         window.pbProgressSource = source;
 
-        let completed = false;
+        /* =========================
+  🔥 FAKE SMOOTH PROGRESS
+  ========================= */
+
+        let fakeProgress = 12;
+
+        const fakeInterval = setInterval(() => {
+          if (fakeProgress < 85) {
+            fakeProgress += 1;
+
+            updateLoader(fakeProgress, getPBProgressMessage(fakeProgress), 'sync');
+          }
+        }, 400);
+
+        /* =========================
+  🔥 REAL SSE PROGRESS
+  ========================= */
 
         source.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
+          const data = JSON.parse(event.data);
 
-            console.log('PB:', data);
+          console.log('PB:', data);
 
-            updateLoader(data.percent || 0, data.message || getPBProgressMessage(data.percent), 'sync');
+          // 🔥 STOP FAKE IF REAL PROGRESS IS HIGHER
+          if (data.percent > fakeProgress) {
+            fakeProgress = data.percent;
 
-            // ✅ COMPLETE
-            if (Number(data.percent) >= 100) {
-              completed = true;
+            updateLoader(data.percent, data.message, 'sync');
+          }
 
-              setTimeout(() => {
-                completeLoader();
+          // ✅ COMPLETE
+          if (data.percent >= 100) {
+            clearInterval(fakeInterval);
 
-                source.close();
+            setTimeout(() => {
+              completeLoader();
 
-                window.pbProgressSource = null;
-              }, 800);
-            }
-          } catch (err) {
-            console.error('PB SSE Parse Error:', err);
+              source.close();
+            }, 800);
           }
         };
 
         source.onerror = (err) => {
-          console.warn('PB SSE CLOSED');
+          console.error('SSE ERROR', err);
 
-          // 🔥 PREVENT INFINITE RECONNECT
+          clearInterval(fakeInterval);
+
           source.close();
 
-          window.pbProgressSource = null;
+          setTimeout(() => {
+            const loader = id('globalLoader');
 
-          // ❌ ONLY RECONNECT IF NOT COMPLETED
-          if (!completed) {
-            setTimeout(() => {
-              const loader = id('globalLoader');
-
-              const visible = loader && loader.style.display !== 'none' && !loader.classList.contains('hidden');
-
-              if (visible) {
-                startPBProgress();
-              }
-            }, 1500);
-          }
+            if (loader && loader.style.display !== 'none') {
+              startPBProgress();
+            }
+          }, 1000);
         };
       }
-
       /* =========================
 🔥 PROGRESS TEXTS
 ========================= */
@@ -12361,7 +12367,7 @@ DOM SHORTCUTS
         const daPercent = id('PayBillPage_DA%').value;
 
         if (!salaryMonth || !station) {
-          showCustomAlert('Month or Station missing');
+          showCustomAlert('❌ Month or Station missing');
 
           return;
         }
@@ -12381,7 +12387,7 @@ DOM SHORTCUTS
         ========================= */
 
         if (!data.length) {
-          showCustomAlert('No data to save');
+          showCustomAlert('🚫 No data to save');
 
           return;
         }
@@ -12435,7 +12441,7 @@ DOM SHORTCUTS
               exitPBEditMode();
               stopPBProgress();
               clearSyncStatus('pbDatabase');
-              showCustomAlert('ℹ️ No changes detected.\n\nNothing was updated.');
+              showCustomAlert('ℹ️ No changes detected.\n\n 🚫 Nothing was updated.');
               return;
             }
 
@@ -13542,7 +13548,7 @@ DOM SHORTCUTS
             const goHTML = buildPrintPayBillTable('GO');
             const npsHTML = buildPrintPayBillTable('NPS');
 
-            if (!goHTML) return showCustomAlert('No Pay Bill data');
+            if (!goHTML) return showCustomAlert('🚫 No Pay Bill data');
 
             openPrintWindow(buildPrintPayBillHTML(goHTML, npsHTML));
           }
@@ -13556,7 +13562,7 @@ DOM SHORTCUTS
             const daaNPS = id('daaNPSTableCalculation')?.outerHTML || '';
 
             if (!daaGO && !daaNPS) {
-              showCustomAlert('No DAA data');
+              showCustomAlert('🚫 No DAA data');
               refreshPBView('view');
               return;
             }
@@ -15977,7 +15983,7 @@ DOM SHORTCUTS
 
         const table = wrapper.querySelector('table');
         if (!table) {
-          showCustomAlert('No data to print');
+          showCustomAlert('🚫 No data to print');
           return '';
         }
 
@@ -16197,7 +16203,7 @@ DOM SHORTCUTS
 
         const table = wrapper.querySelector('table');
         if (!table) {
-          showCustomAlert('No data to export');
+          showCustomAlert('🚫 No data to export');
           return;
         }
 
@@ -17453,7 +17459,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station && String(r[monthIndex]).trim() === selectedMonth).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            showCustomAlert('No employees found for selected month');
+            showCustomAlert('🚫 No employees found for selected month');
             return;
           }
         }
@@ -17566,7 +17572,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station && String(r[monthIndex]).trim() === selectedMonth).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            showCustomAlert('No employees found');
+            showCustomAlert('🚫 No employees found');
             return '';
           }
         }
@@ -19933,7 +19939,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            showCustomAlert('No employees found');
+            showCustomAlert('🚫 No employees found');
             return '';
           }
         }
@@ -21697,7 +21703,7 @@ DOM SHORTCUTS
           employees = [...new Set(rows.filter((r) => String(r[stationIdx]).trim() === station).map((r) => r[nameIdx]))];
 
           if (!employees.length) {
-            showCustomAlert('No employees found');
+            showCustomAlert('🚫 No employees found');
             return '';
           }
         }
@@ -24054,7 +24060,7 @@ DOM SHORTCUTS
         // =====================================================
 
         if (!payload.length) {
-          showCustomAlert('❌ No data to save');
+          showCustomAlert('🚫 No data to save');
 
           return;
         }
