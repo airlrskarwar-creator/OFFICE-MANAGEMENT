@@ -539,13 +539,10 @@ def update_pb():
 
         for i, r in enumerate(rows):
 
-            key = f"{clean(r[month_idx])}"
+           key = f"{clean(r[month_idx])}"
 
-            if hris_idx >= 0:
-                key += f"|{clean(r[hris_idx])}"
-
-            if category_idx >= 0:
-                key += f"|{clean(r[category_idx])}"
+        if hris_idx >= 0:
+            key += f"|{clean(r[hris_idx])}"
 
             row_map[key] = i + 2
 
@@ -593,9 +590,6 @@ def update_pb():
 
             if hris_idx >= 0:
                 key += f"|{clean(row_obj.get('HRIS'))}"
-
-            if category_idx >= 0:
-                key += f"|{clean(row_obj.get('Category'))}"
 
             # =========================
             # 🔄 EXISTING ROW
