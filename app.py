@@ -737,7 +737,6 @@ def update_pb():
                         changed_columns.append(header)
 
                         row_changed = True
-                        break
 
                 if not row_changed:
 
