@@ -11858,43 +11858,63 @@ DOM SHORTCUTS
 ========================= */
 
       function startPBProgress() {
+        // 🔥 CLOSE OLD CONNECTION
         if (window.pbProgressSource) {
           window.pbProgressSource.close();
+          window.pbProgressSource = null;
         }
 
-        const source = new EventSource(`https://office-management-f425.onrender.com/pb/progress`);
+        const source = new EventSource('https://office-management-f425.onrender.com/pb/progress');
 
         window.pbProgressSource = source;
 
+        let completed = false;
+
         source.onmessage = (event) => {
-          const data = JSON.parse(event.data);
+          try {
+            const data = JSON.parse(event.data);
 
-          console.log('PB:', data);
+            console.log('PB:', data);
 
-          updateLoader(data.percent, data.message, 'sync');
+            updateLoader(data.percent || 0, data.message || getPBProgressMessage(data.percent), 'sync');
 
-          // ✅ COMPLETE
-          if (data.percent >= 100) {
-            setTimeout(() => {
-              completeLoader();
+            // ✅ COMPLETE
+            if (Number(data.percent) >= 100) {
+              completed = true;
 
-              source.close();
-            }, 800);
+              setTimeout(() => {
+                completeLoader();
+
+                source.close();
+
+                window.pbProgressSource = null;
+              }, 800);
+            }
+          } catch (err) {
+            console.error('PB SSE Parse Error:', err);
           }
         };
 
         source.onerror = (err) => {
-          console.error('SSE ERROR', err);
+          console.warn('PB SSE CLOSED');
 
+          // 🔥 PREVENT INFINITE RECONNECT
           source.close();
 
-          setTimeout(() => {
-            const loader = id('globalLoader');
+          window.pbProgressSource = null;
 
-            if (loader && loader.style.display !== 'none') {
-              startPBProgress();
-            }
-          }, 1000);
+          // ❌ ONLY RECONNECT IF NOT COMPLETED
+          if (!completed) {
+            setTimeout(() => {
+              const loader = id('globalLoader');
+
+              const visible = loader && loader.style.display !== 'none' && !loader.classList.contains('hidden');
+
+              if (visible) {
+                startPBProgress();
+              }
+            }, 1500);
+          }
         };
       }
 
@@ -12029,6 +12049,35 @@ DOM SHORTCUTS
 
         id('logoutBtn').disabled = true;
       });
+
+      function exitPBEditMode() {
+        isAddMode = false;
+        isEditMode = false;
+
+        document.body.classList.remove('edit-mode');
+
+        qs('.PB-Table-Wrapper')?.classList.remove('edit-mode');
+
+        id('PBeditBtn')?.resetPBToggle?.();
+
+        id('PBaddBtn')?.resetPBToggle?.();
+
+        qsa('.menu-list button').forEach((btn) => {
+          btn.disabled = false;
+        });
+
+        id('logoutBtn').disabled = false;
+
+        // 🔥 FORCE VIEW TABLE REFRESH
+        applyFilters();
+
+        refreshPBView();
+
+        // 🔥 FORCE REPAINT
+        requestAnimationFrame(() => {
+          refreshPBView();
+        });
+      }
 
       async function savePBData(mode = 'ADD') {
         const salaryMonth = id('PayBillPage_SalMonth').value;
@@ -12166,11 +12215,16 @@ DOM SHORTCUTS
 
             rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
 
-            // 🔥 DESIGNATION
+            // 🔥 DESIGNATION ONLY FOR ADD MODE
             if (mode === 'ADD') {
               const empHRIS = rowObj['HRIS'];
 
               rowObj['Designation on Salary Month'] = getEmpDesignation(empName, empStation, empHRIS) || '';
+            }
+
+            // 🔥 EDIT MODE → KEEP EXISTING VALUE
+            else {
+              rowObj['Designation on Salary Month'] = rowObj['Designation on Salary Month'] || '';
             }
 
             // 🔥 CATEGORY
@@ -12201,179 +12255,8 @@ DOM SHORTCUTS
 
         /* ========================= 🔥 LOAD LATEST PBDB ========================= */
         try {
-          const latestPB = await fetch('https://office-management-f425.onrender.com/pb').then((r) => r.json());
-
-          const latestHeaders = latestPB.headers || [];
-
-          const latestRows = latestPB.rows || [];
-
-          /* ========================= 🔥 KEY CREATOR ========================= */
-          function makeKey(rowObj) {
-            return [rowObj['Salary Month'], rowObj['HRIS'], rowObj['Category']]
-              .map((v) =>
-                String(v || '')
-                  .trim()
-                  .toLowerCase()
-              )
-              .join('|');
-          }
-
-          /* ========================= 🔥 BUILD LATEST MAP ========================= */
-
-          const currentMonth = salaryMonth;
-
-          /* ========================= 🔥 BUILD CURRENT MONTH MAP ========================= */
-
-          const latestMap = {};
-
-          latestRows.forEach((r) => {
-            let obj = {};
-
-            latestHeaders.forEach((h, i) => {
-              obj[h] = r[i];
-            });
-
-            // 🔥 FILTER ONLY CURRENT MONTH
-            const rowMonth = String(obj['Salary Month'] || '').trim();
-
-            if (rowMonth !== currentMonth) return;
-
-            latestMap[makeKey(obj)] = obj;
-          });
-
-          /* ========================= 🔥 MERGE LATEST + USER ========================= */
-          const mergedData = data.map((userRow) => {
-            const key = makeKey(userRow);
-
-            const latestRow = latestMap[key] || {};
-
-            return {
-              // 🔥 latest sheet values
-              ...latestRow,
-
-              // 🔥 overwrite only edited values
-              ...userRow
-            };
-          });
-
-          /* ========================= 🔍 CHECK EACH ROW ========================= */
-
-          const changedData = [];
-
-          /* ========================= 🔧 NORMALIZE ========================= */
-
-          function normalize(val, header = '') {
-            // 🔥 NULL / UNDEFINED
-            if (val === null || val === undefined) {
-              return '';
-            }
-
-            let str = String(val).replace(/[₹,]/g, '').replace(/\r/g, '').replace(/\s+/g, ' ').trim();
-
-            const h = String(header).toLowerCase().trim();
-
-            /* ========================= 🔥 CHECKBOX COLUMNS ========================= */
-
-            const checkboxCols = ['ta entitled', 'hra entitled', 'disability'];
-
-            if (checkboxCols.includes(h)) {
-              str = str.toLowerCase();
-
-              if (['true', 'yes', 'checked', '1', 'TRUE'].includes(str)) {
-                return 'true';
-              }
-
-              return 'false';
-            }
-
-            /* ========================= 🔥 SELECT COLUMNS ========================= */
-
-            const selectCols = ['qtrs type', 'level of disability', 'pay level', '7cpc index'];
-
-            if (selectCols.includes(h)) {
-              if (str === '--' || str === '-') {
-                return '';
-              }
-
-              return str.toLowerCase();
-            }
-
-            /* ========================= 🔥 EMPTY ========================= */
-
-            if (str === '--' || str === '-') {
-              return '';
-            }
-
-            /* ========================= 🔥 NUMBER ========================= */
-
-            if (!isNaN(str) && str !== '') {
-              return Number(str).toFixed(2);
-            }
-
-            /* ========================= 🔥 TEXT ========================= */
-
-            return str.toLowerCase();
-          }
-
-          /* ========================= 🔥 IGNORE FIELDS ========================= */
-
-          const ignoreFields = ['Gross Income', 'Total Deduction', 'Net Income', 'Last Updated', '_lastUpdated'];
-
-          /* ========================= 🔍 COMPARE ========================= */
-
-          data.forEach((userRow) => {
-            const key = makeKey(userRow);
-
-            const latestRow = latestMap[key];
-
-            // 🔥 NEW ROW
-            if (!latestRow) {
-              changedData.push({
-                ...userRow
-              });
-
-              return;
-            }
-
-            let changed = false;
-
-            Object.keys(userRow).forEach((header) => {
-              // ❌ IGNORE
-              if (ignoreFields.includes(header)) {
-                return;
-              }
-
-              const oldVal = normalize(latestRow[header], header);
-
-              const newVal = normalize(userRow[header], header);
-
-              // 🔥 CHANGED
-              if (oldVal !== newVal) {
-                console.log('Changed:', header, '| OLD:', oldVal, '| NEW:', newVal);
-
-                changed = true;
-              }
-            });
-
-            // 🔥 PUSH ONLY CHANGED ROWS
-            if (changed) {
-              changedData.push({
-                ...latestRow,
-                ...userRow
-              });
-            }
-          });
-
-          /* ========================= ❌ NO CHANGES ========================= */
-
-          if (!changedData.length) {
-            alert('ℹ️ No changes detected.\n\n' + 'Nothing was updated.');
-
-            return;
-          }
-
           /* =========================
-          🔥 START LOADER ONLY NOW
+          🔥 START LOADER
           ========================= */
 
           showLoader();
@@ -12381,10 +12264,6 @@ DOM SHORTCUTS
           setSyncStatus('pbDatabase');
 
           startPBProgress();
-
-          /* =========================
-          🔥 INITIAL UI PROGRESS
-          ========================= */
 
           updateLoader(1, 'Preparing Save...', 'sync');
 
@@ -12400,83 +12279,96 @@ DOM SHORTCUTS
             },
 
             body: JSON.stringify({
-              data: changedData,
+              data,
               mode
             })
           });
 
           const result = await res.json();
 
-          // =========================
-          // ✅ SUCCESS
-          // =========================
+          /* =========================
+          ✅ SUCCESS
+          ========================= */
+
           if (result.status === 'success') {
-            // =========================
-            // 🔥 UPDATED EMPLOYEES
-            // =========================
             const updatedEmployees = result.updatedEmployees || [];
 
-            // =========================
-            // ➕ ADDED EMPLOYEES
-            // =========================
             const addedEmployees = result.addedEmployees || [];
 
-            // =========================
-            // 🔥 UPDATED LIST
-            // =========================
-            const updatedList = updatedEmployees.map((e) => `• ${e.employee} ` + `(${e.month} - ${e.category})`).join('\n');
+            /* =========================
+            ℹ️ NO CHANGES
+            ========================= */
 
-            // =========================
-            // ➕ ADDED LIST
-            // =========================
-            const addedList = addedEmployees.map((e) => `• ${e.employee} ` + `(${e.month} - ${e.category})`).join('\n');
+            if (!updatedEmployees.length && !addedEmployees.length) {
+              stopPBProgress();
 
-            // =========================
-            // 🔥 FINAL MESSAGE
-            // =========================
+              clearSyncStatus('pbDatabase');
+
+              alert('ℹ️ No changes detected.\n\nNothing was updated.');
+
+              exitPBEditMode();
+
+              return;
+            }
+
+            /* =========================
+            🔥 SUCCESS MESSAGE
+            ========================= */
+
             let msg = `✅ ${mode} Success!\n\n`;
 
-            // 🔄 UPDATED
-            if (updatedList) {
-              msg += `🔄 UPDATED EMPLOYEES:\n` + updatedList + `\n\n`;
+            /* =========================
+            🔄 UPDATED EMPLOYEES
+            ========================= */
+
+            if (updatedEmployees.length) {
+              msg += `🔄 UPDATED EMPLOYEES:\n`;
+
+              msg += updatedEmployees
+                .map((e) => {
+                  const changedCols = (e.changedColumns || []).join(', ');
+
+                  return `• ${e.employee} (${e.month})\n` + `   Changed: ${changedCols}`;
+                })
+                .join('\n\n');
+
+              msg += '\n\n';
             }
 
-            // ➕ ADDED
-            if (addedList) {
-              msg += `➕ ADDED EMPLOYEES:\n` + addedList;
+            /* =========================
+            ➕ ADDED EMPLOYEES
+            ========================= */
+
+            if (addedEmployees.length) {
+              msg += `➕ ADDED EMPLOYEES:\n`;
+
+              msg += addedEmployees.map((e) => `• ${e.employee} (${e.month})`).join('\n');
             }
 
-            // =================🔥 RELOAD PBDB====================
+            /* =========================
+            🔥 RELOAD PB
+            ========================= */
+
             await loadTable('pb', 'PBDB');
 
-            stopPBProgress();
+            setTimeout(() => {
+              stopPBProgress();
 
-            // 🔥 STOP SYNC
-            clearSyncStatus('pbDatabase');
+              clearSyncStatus('pbDatabase');
 
-            // 🔥 SHOW ALERT AFTER SYNC
-            alert(msg);
+              alert(msg);
+            }, 1200);
 
-            /* ===================🔥 EXIT EDIT/ADD MODE====================== */
+            /* =========================
+            🔥 EXIT EDIT MODE
+            ========================= */
 
-            isAddMode = false;
-            isEditMode = false;
+            exitPBEditMode();
 
-            qs('.PB-Table-Wrapper')?.classList.remove('edit-mode');
-            id('PBeditBtn')?.resetPBToggle?.();
-            id('PBaddBtn')?.resetPBToggle?.();
+            /* =========================
+            🔥 REFRESH IT TABLE
+            ========================= */
 
-            /* ==============================🔥 REFRESH UI==================== */
-
-            applyFilters();
-            refreshPBView();
-
-            qsa('.menu-list button').forEach((btn) => {
-              btn.disabled = false;
-            });
-            id('logoutBtn').disabled = false;
-
-            // ========================= 🔥 REFRESH IT TABLE =========================
             setTimeout(() => {
               const empName = id('ITPage_Emp')?.value;
 
@@ -12488,21 +12380,39 @@ DOM SHORTCUTS
 
               renderCalculatedITTable(empName, selectedFY, 'calculated');
             }, 100);
-          } else if (result.status === 'conflict') {
-            /* ========================= ⚠️ CONFLICT ========================= */
-            // 🔥 STOP SYNC
+
+            return;
+          }
+
+          /* =========================
+          ⚠️ CONFLICT
+          ========================= */
+
+          if (result.status === 'conflict') {
+            stopPBProgress();
+
             clearSyncStatus('pbDatabase', 'db', false);
 
             alert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
-          } else {
-            /* ========================= ❌ ERROR ========================= */
-            // 🔥 STOP SYNC
-            clearSyncStatus('pbDatabase', 'db', false);
 
-            alert('❌ Error: ' + result.message);
+            return;
           }
+
+          /* =========================
+          ❌ ERROR
+          ========================= */
+
+          stopPBProgress();
+
+          clearSyncStatus('pbDatabase', 'db', false);
+
+          alert('❌ Error: ' + (result.message || 'Unknown error'));
         } catch (err) {
           console.error(err);
+
+          stopPBProgress();
+
+          clearSyncStatus('pbDatabase', 'db', false);
 
           alert('❌ Server error');
         }
