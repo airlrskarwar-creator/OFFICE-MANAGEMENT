@@ -469,11 +469,9 @@ def update_pb():
 
         req_data = request.get_json()
 
-        print("🔥 PB UPDATE HIT")
-        print("🔥 REQUEST DATA:", req_data)
-
         edit_rows = req_data.get("data", [])
 
+        print("🔥 PB UPDATE HIT")
         print("🔥 ROW COUNT:", len(edit_rows))
 
         if not edit_rows:
@@ -511,11 +509,6 @@ def update_pb():
             if "HRIS" in headers else -1
         )
 
-        category_idx = (
-            headers.index("Category")
-            if "Category" in headers else -1
-        )
-
         last_updated_idx = (
             headers.index("Last Updated")
             if "Last Updated" in headers else -1
@@ -527,6 +520,39 @@ def update_pb():
 
         def clean(val):
             return str(val or "").strip().lower()
+
+        # =========================
+        # 🔥 NORMALIZE
+        # =========================
+
+        def normalize(val):
+
+            if val is None:
+                return ""
+
+            val = (
+                str(val)
+                .replace("₹", "")
+                .replace(",", "")
+                .replace("\r", "")
+                .replace("\n", " ")
+                .strip()
+                .lower()
+            )
+
+            if val in ["true", "yes", "checked", "1"]:
+                return "true"
+
+            if val in ["false", "no", "0", "unchecked"]:
+                return "false"
+
+            if val in ["--", "-"]:
+                return ""
+
+            try:
+                return f"{float(val):.2f}"
+            except:
+                return val
 
         # =========================
         # 🔑 ROW MAP
@@ -547,6 +573,7 @@ def update_pb():
             row_map[key] = i + 2
 
         print("🔥 ROW MAP COUNT:", len(row_map))
+
         # =========================
         # 🔥 TRACKERS
         # =========================
@@ -583,6 +610,7 @@ def update_pb():
             pb_progress["message"] = (
                 f"Saving {processed}/{total_rows} employees"
             )
+
             # =========================
             # 🔑 BUILD KEY
             # =========================
@@ -649,6 +677,7 @@ def update_pb():
 
                         val = row_obj.get(header, "")
 
+                        # 🔥 KEEP OLD DESIGNATION
                         if (
                             header.strip().lower()
                             ==
@@ -659,39 +688,6 @@ def update_pb():
                                 val = merged_row[col_idx]
 
                         merged_row[col_idx] = val
-
-                # =========================
-                # 🔥 NORMALIZE
-                # =========================
-
-                def normalize(val):
-
-                    if val is None:
-                        return ""
-
-                    val = (
-                        str(val)
-                        .replace("₹", "")
-                        .replace(",", "")
-                        .replace("\r", "")
-                        .replace("\n", " ")
-                        .strip()
-                        .lower()
-                    )
-
-                    if val in ["true", "yes", "checked", "1"]:
-                        return "true"
-
-                    if val in ["false", "no", "0", "unchecked"]:
-                        return "false"
-
-                    if val in ["--", "-"]:
-                        return ""
-
-                    try:
-                        return f"{float(val):.2f}"
-                    except:
-                        return val
 
                 # =========================
                 # 🔥 ROW CHANGED
@@ -718,36 +714,13 @@ def update_pb():
 
                     new_val = normalize(merged_row[i])
 
-                    print(
-                        "COMPARE:",
-                        header,
-                        "| OLD:",
-                        old_val,
-                        "| NEW:",
-                        new_val
-                    )
-
                     if old_val != new_val:
-
-                        print(
-                            "🔥 CHANGED:",
-                            header
-                        )
 
                         changed_columns.append(header)
 
                         row_changed = True
 
                 if not row_changed:
-
-                    print(
-                        "✅ NO CHANGE:",
-                        row_obj.get(
-                            "Employee Name",
-                            ""
-                        )
-                    )
-
                     continue
 
                 # =========================
@@ -797,11 +770,11 @@ def update_pb():
                     ]:
                         continue
 
-                    old_val = str(
+                    old_val = normalize(
                         existing_row[col_idx - 1]
-                    ).strip()
+                    )
 
-                    new_val = str(val).strip()
+                    new_val = normalize(val)
 
                     if old_val == new_val:
                         continue
