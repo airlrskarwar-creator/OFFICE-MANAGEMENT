@@ -1050,6 +1050,63 @@
         }
       }
 
+      /* =========================================================
+      ALERT MESSAGE CSS
+      ========================================================= */
+
+      .custom-alert {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+      }
+
+      .custom-alert.hidden {
+        display: none;
+      }
+
+      .custom-alert-box {
+        width: min(700px, 92vw);
+        max-height: 85vh;
+        background: #111827;
+        color: #fff;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .custom-alert-header {
+        padding: 16px 20px;
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .custom-alert-body {
+        padding: 18px 20px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        font-size: 14px;
+        max-height: 60vh;
+      }
+
+      #customAlertOk {
+        margin: 14px 20px 20px auto;
+        border: 0;
+        background: #60a5fa;
+        color: #000;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
       /* =============APP LAYOUT=========== */
       .watermark {
         width: calc(100vw - 70%);
@@ -3951,6 +4008,14 @@
         <div id="loaderPercent" class="loader-percent">0%</div>
       </div>
     </div>
+    <div id="customAlert" class="custom-alert hidden">
+      <div class="custom-alert-box">
+        <div class="custom-alert-header">Success Message</div>
+
+        <div id="customAlertMsg" class="custom-alert-body"></div>
+        <button id="customAlertOk">OK</button>
+      </div>
+    </div>
     <div class="app" id="mainPage">
       <div class="left-panel collapsed" id="sidebar">
         <!-- Toggle button -->
@@ -6121,6 +6186,20 @@ DOM SHORTCUTS
           icon.textContent = type === 'sync' ? 'sync' : 'download';
         }
       }
+
+      function showCustomAlert(message) {
+        const modal = id('customAlert');
+
+        const msgBox = id('customAlertMsg');
+
+        msgBox.textContent = message;
+
+        modal.classList.remove('hidden');
+      }
+
+      id('customAlertOk')?.addEventListener('click', () => {
+        id('customAlert')?.classList.add('hidden');
+      });
 
       /* =========================================================
         LOAD ALL DATA WITH LOADER
@@ -12085,7 +12164,7 @@ DOM SHORTCUTS
         const daPercent = id('PayBillPage_DA%').value;
 
         if (!salaryMonth || !station) {
-          alert('Month or Station missing');
+          showCustomAlert('Month or Station missing');
           return;
         }
 
@@ -12249,7 +12328,7 @@ DOM SHORTCUTS
         let data = [...goData, ...npsData];
 
         if (!data.length) {
-          alert('No data to save');
+          showCustomAlert('No data to save');
           return;
         }
 
@@ -12304,7 +12383,7 @@ DOM SHORTCUTS
 
               clearSyncStatus('pbDatabase');
 
-              alert('ℹ️ No changes detected.\n\nNothing was updated.');
+              showCustomAlert('ℹ️ No changes detected.\n\nNothing was updated.');
 
               exitPBEditMode();
 
@@ -12355,7 +12434,7 @@ DOM SHORTCUTS
 
               clearSyncStatus('pbDatabase');
 
-              alert(msg);
+              showCustomAlert(msg);
             }, 500);
 
             // 🔥 RELOAD PB IN BACKGROUND
@@ -12401,7 +12480,7 @@ DOM SHORTCUTS
 
             clearSyncStatus('pbDatabase', 'db', false);
 
-            alert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
+            showCustomAlert('⚠️ Some rows were modified ' + 'by another user.\n' + 'Please reload and try again.');
 
             return;
           }
@@ -12414,7 +12493,7 @@ DOM SHORTCUTS
 
           clearSyncStatus('pbDatabase', 'db', false);
 
-          alert('❌ Error: ' + (result.message || 'Unknown error'));
+          showCustomAlert('❌ Error: ' + (result.message || 'Unknown error'));
         } catch (err) {
           console.error(err);
 
@@ -12422,7 +12501,7 @@ DOM SHORTCUTS
 
           clearSyncStatus('pbDatabase', 'db', false);
 
-          alert('❌ Server error');
+          showCustomAlert('❌ Server error');
         }
       }
 
@@ -13345,7 +13424,7 @@ DOM SHORTCUTS
         const win = window.open('', '_blank');
 
         if (!win) {
-          alert('Allow Popups for this website to enable printing');
+          showCustomAlert('Allow Popups for this website to enable printing');
           return;
         }
 
@@ -13430,7 +13509,7 @@ DOM SHORTCUTS
             const goHTML = buildPrintPayBillTable('GO');
             const npsHTML = buildPrintPayBillTable('NPS');
 
-            if (!goHTML) return alert('No Pay Bill data');
+            if (!goHTML) return showCustomAlert('No Pay Bill data');
 
             openPrintWindow(buildPrintPayBillHTML(goHTML, npsHTML));
           }
@@ -13444,7 +13523,7 @@ DOM SHORTCUTS
             const daaNPS = id('daaNPSTableCalculation')?.outerHTML || '';
 
             if (!daaGO && !daaNPS) {
-              alert('No DAA data');
+              showCustomAlert('No DAA data');
               refreshPBView('view');
               return;
             }
@@ -15725,7 +15804,7 @@ DOM SHORTCUTS
         }
 
         if (!data.length) {
-          alert('❌ No valid data');
+          showCustomAlert('❌ No valid data');
           return false;
         }
 
@@ -15744,7 +15823,7 @@ DOM SHORTCUTS
           const result = await res.json();
 
           if (result?.status === 'success') {
-            alert('✅ Uploaded Successfully');
+            showCustomAlert('✅ Uploaded Successfully');
 
             await reloadSBGExpData();
             await updateBudgetDBFromSBGExp();
@@ -15756,12 +15835,12 @@ DOM SHORTCUTS
             return true;
           } else {
             console.error(result);
-            alert('❌ Save failed');
+            showCustomAlert('❌ Save failed');
             return false;
           }
         } catch (err) {
           console.error(err);
-          alert('❌ Network error');
+          showCustomAlert('❌ Network error');
           return false;
         }
       }
@@ -15865,7 +15944,7 @@ DOM SHORTCUTS
 
         const table = wrapper.querySelector('table');
         if (!table) {
-          alert('No data to print');
+          showCustomAlert('No data to print');
           return '';
         }
 
@@ -16085,7 +16164,7 @@ DOM SHORTCUTS
 
         const table = wrapper.querySelector('table');
         if (!table) {
-          alert('No data to export');
+          showCustomAlert('No data to export');
           return;
         }
 
@@ -17341,7 +17420,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station && String(r[monthIndex]).trim() === selectedMonth).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            alert('No employees found for selected month');
+            showCustomAlert('No employees found for selected month');
             return;
           }
         }
@@ -17454,7 +17533,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station && String(r[monthIndex]).trim() === selectedMonth).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            alert('No employees found');
+            showCustomAlert('No employees found');
             return '';
           }
         }
@@ -19821,7 +19900,7 @@ DOM SHORTCUTS
           employees = [...new Set(pbData.rows.filter((r) => String(r[stationIndex]).trim() === station).map((r) => r[nameIndex]))];
 
           if (!employees.length) {
-            alert('No employees found');
+            showCustomAlert('No employees found');
             return '';
           }
         }
@@ -21585,7 +21664,7 @@ DOM SHORTCUTS
           employees = [...new Set(rows.filter((r) => String(r[stationIdx]).trim() === station).map((r) => r[nameIdx]))];
 
           if (!employees.length) {
-            alert('No employees found');
+            showCustomAlert('No employees found');
             return '';
           }
         }
@@ -23942,7 +24021,7 @@ DOM SHORTCUTS
         // =====================================================
 
         if (!payload.length) {
-          alert('❌ No data to save');
+          showCustomAlert('❌ No data to save');
 
           return;
         }
@@ -23981,7 +24060,7 @@ DOM SHORTCUTS
           } catch {
             console.error('Server returned HTML:', text);
 
-            alert('❌ Server error (not JSON)');
+            showCustomAlert('❌ Server error (not JSON)');
 
             return;
           }
@@ -23991,14 +24070,14 @@ DOM SHORTCUTS
           // =====================================================
 
           if (result.status === 'success') {
-            alert('✅ Saved successfully');
+            showCustomAlert('✅ Saved successfully');
           } else {
-            alert('❌ Save failed');
+            showCustomAlert('❌ Save failed');
           }
         } catch (err) {
           console.error(err);
 
-          alert('❌ Network error');
+          showCustomAlert('❌ Network error');
         }
       }
 
