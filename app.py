@@ -666,6 +666,39 @@ def update_pb():
                         merged_row[col_idx] = val
 
                 # =========================
+                # 🔥 NORMALIZE
+                # =========================
+
+                def normalize(val):
+
+                    if val is None:
+                        return ""
+
+                    val = (
+                        str(val)
+                        .replace("₹", "")
+                        .replace(",", "")
+                        .replace("\r", "")
+                        .replace("\n", " ")
+                        .strip()
+                        .lower()
+                    )
+
+                    if val in ["true", "yes", "checked", "1"]:
+                        return "true"
+
+                    if val in ["false", "no", "0", "unchecked"]:
+                        return "false"
+
+                    if val in ["--", "-"]:
+                        return ""
+
+                    try:
+                        return f"{float(val):.2f}"
+                    except:
+                        return val
+
+                # =========================
                 # 🔥 ROW CHANGED
                 # =========================
 
@@ -684,20 +717,39 @@ def update_pb():
                     old_val = ""
 
                     if i < len(existing_row):
-                        old_val = str(
-                            existing_row[i]
-                        ).strip()
+                        old_val = normalize(existing_row[i])
 
-                    new_val = str(
-                        merged_row[i]
-                    ).strip()
+                    new_val = normalize(merged_row[i])
+
+                    print(
+                        "COMPARE:",
+                        header,
+                        "| OLD:",
+                        old_val,
+                        "| NEW:",
+                        new_val
+                    )
 
                     if old_val != new_val:
+
+                        print(
+                            "🔥 CHANGED:",
+                            header
+                        )
 
                         row_changed = True
                         break
 
                 if not row_changed:
+
+                    print(
+                        "✅ NO CHANGE:",
+                        row_obj.get(
+                            "Employee Name",
+                            ""
+                        )
+                    )
+
                     continue
 
                 # =========================
