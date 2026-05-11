@@ -840,7 +840,10 @@ def update_pb():
         if update_cells:
 
             safe_sheet_call(
-                lambda: pb_sheet.batch_update(update_cells)
+                lambda: pb_sheet.batch_update(
+                    update_cells,
+                    value_input_option="USER_ENTERED"
+                )
             )
 
         # =========================
