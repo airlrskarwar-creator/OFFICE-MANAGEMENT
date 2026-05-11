@@ -754,8 +754,10 @@ def update_pb():
                 })
 
                 # =========================
-                # 🔥 UPDATE CELLS
+                # 🔥 UPDATE FULL ROW
                 # =========================
+
+                row_changed_data = []
 
                 for col_idx, val in enumerate(
                     merged_row,
@@ -768,6 +770,7 @@ def update_pb():
                         "Last Updated",
                         "_lastUpdated"
                     ]:
+                        row_changed_data.append(val)
                         continue
 
                     old_val = normalize(
@@ -776,18 +779,17 @@ def update_pb():
 
                     new_val = normalize(val)
 
-                    if old_val == new_val:
-                        continue
+                    row_changed_data.append(val)
 
-                    update_cells.append({
-                        "range": (
-                            gspread.utils.rowcol_to_a1(
-                                row_num,
-                                col_idx
-                            )
-                        ),
-                        "values": [[val]]
-                    })
+                # 🔥 UPDATE ENTIRE ROW IN ONE API CALL
+                update_cells.append({
+                    "range": (
+                        f"A{row_num}:"
+                        f"{gspread.utils.rowcol_to_a1(row_num, len(headers))[:-len(str(row_num))]}"
+                        f"{row_num}"
+                    ),
+                    "values": [row_changed_data]
+                })
 
             # =========================
             # ➕ NEW ROW
