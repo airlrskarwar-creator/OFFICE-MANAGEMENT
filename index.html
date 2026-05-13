@@ -1073,8 +1073,8 @@
       }
 
       .custom-alert-box {
-        width: min(600px, 92vw);
-        max-height: 80vh;
+        width: min(500px, 80vw);
+        max-height: 70vh;
         background: #111827;
         color: #fff;
         border-radius: 18px;
@@ -1979,7 +1979,8 @@
       .PB-Table-WrapperGO,
       .PB-Table-WrapperNPS,
       .BudgetTableWrapper,
-      .BudgetTablefromPBWrapper {
+      .BudgetTablefromPBWrapper,
+      .EBtableWrapper {
         flex: 1;
         /* 🔥 equal height */
         min-height: 0;
@@ -2001,7 +2002,8 @@
       .PB-Table-WrapperGO table:not(#PB_GOITCalc),
       .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
       .budget-table,
-      .budgetfromPB-table {
+      .budgetfromPB-table,
+      .EBtableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -2128,10 +2130,8 @@
         width: max-content;
         min-width: 100%;
         flex: 0 0 auto;
-
         border-spacing: 0 !important;
         border-collapse: separate;
-
         table-layout: fixed;
       }
 
@@ -2144,12 +2144,12 @@
       .budget-table th,
       .budget-table td,
       .budgetfromPB-table th,
-      .budgetfromPB-table td {
+      .budgetfromPB-table td,
+      .EBtableWrapper th,
+      .EBtableWrapper td {
         padding: 5px 8px;
-
         border-bottom: 1px solid #e5e7eb;
         border-right: dotted 1px #d7dae0;
-
         box-sizing: border-box;
         vertical-align: middle;
       }
@@ -2182,27 +2182,20 @@
 
       .PB-Table-Wrapper thead tr th,
       .budget-table thead tr th,
-      .budgetfromPB-table tr th {
+      .budgetfromPB-table tr th,
+      .EBtableWrapper thead tr th {
         position: sticky;
         top: 0;
-
         z-index: 9;
-
         font-weight: 600;
         letter-spacing: 0.3px;
-
         height: 30px;
-
         padding: 2px 6px;
-
         text-align: left;
-
         border-bottom: 2px solid #374151;
         border-right: dotted 1px lightgray;
-
         background: #1f4e79;
         color: #ffffff;
-
         font-size: 11px;
       }
 
@@ -5079,6 +5072,111 @@
           <div class="header">
             <h2>Electricity Log Register</h2>
           </div>
+          <div class="Selection-bar">
+            <div class="select-group">
+              <label for="EBpage_Station">Station :</label>
+              <select id="EBpage_Station" class="stationDropdown"></select>
+            </div>
+            <div class="select-group">
+              <label for="EBpage_FY">FY :</label>
+              <select id="EBpage_FY"></select>
+            </div>
+            <div class="select-group">
+              <label for="EBpage_Month">Month :</label>
+              <select id="EBpage_Month"></select>
+            </div>
+            <div class="EBaction-group">
+              <button id="EBeditBtn">
+                <i data-lucide="edit"></i>
+                <span>Edit</span>
+              </button>
+              <button id="EBaddBtn">
+                <i data-lucide="plus"></i>
+                <span>Add</span>
+              </button>
+              <button id="EBprintBtn">
+                <i data-lucide="printer"></i>
+                <span>Print</span>
+              </button>
+              <button id="EBexcelBtn">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Excel</span>
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: row; gap: 10px">
+            <div style="width: 40%">
+              <table style="border-collapse: collapse">
+                <colgroup>
+                  <col style="width: 40%" />
+                  <col style="width: 15%" />
+                  <col style="width: 15%" />
+                  <col style="width: 15%" />
+                  <col style="width: 15%" />
+                </colgroup>
+                <tbody>
+                  <tr>
+                    <td>Billing Month</td>
+                    <td colspan="4"><input id="EBbillMonth" /></td>
+                  </tr>
+                  <tr>
+                    <td>Payment Month</td>
+                    <td colspan="4"><input id="EBpayMonth" /></td>
+                  </tr>
+                  <tr>
+                    <td>Contract Demand (KVA)</td>
+                    <td colspan="4"><input id="CD" /></td>
+                  </tr>
+                  <tr>
+                    <td>Billing Demand (KVA)</td>
+                    <td colspan="4"><input id="BD" /></td>
+                  </tr>
+                  <tr>
+                    <td>Recorded Demand (KVA)</td>
+                    <td colspan="4"><input id="RD" /></td>
+                  </tr>
+                  <tr>
+                    <td>Recorded PF (cosφ)</td>
+                    <td colspan="4"><input id="PF" /></td>
+                  </tr>
+                  <tr>
+                    <td>Consumption Details</td>
+                    <td>Prev Reading</td>
+                    <td>Present Reading</td>
+                    <td>Diffrence</td>
+                    <td>Consumption</td>
+                  </tr>
+                  <tr>
+                    <td>KWh Consumption</td>
+                    <td><input id="prevKWh" /></td>
+                    <td><input disabled id="preKWh" /></td>
+                    <td><input disabled id="diffKWh" /></td>
+                    <td><input disabled id="consKWh" /></td>
+                  </tr>
+                  <tr>
+                    <td>KVAh Consumption</td>
+                    <td><input id="prevKVAh" /></td>
+                    <td><input disabled id="preKVAh" /></td>
+                    <td><input disabled id="diffKVAh" /></td>
+                    <td><input disabled id="consKVAh" /></td>
+                  </tr>
+                  <tr>
+                    <td>Interest on Security Deposit</td>
+                    <td colspan="4"><input id="securityDeposit" /></td>
+                  </tr>
+                  <tr>
+                    <td>Tax</td>
+                    <td colspan="4"><input id="EBtax" /></td>
+                  </tr>
+                  <tr>
+                    <td>Final Amount</td>
+                    <td colspan="4"><input id="EBbillAmount" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="EBtableWrapper" style="width: 60%"></div>
+          </div>
         </div>
         <div class="SectionPage" id="DutyPage" style="display: none">
           <div class="header">
@@ -5880,6 +5978,7 @@ DOM SHORTCUTS
         refreshPBView();
         initDropdowns(dutyData);
         renderFromDropdowns();
+        loadEBMonthsByFY();
       }
 
       function initButtons() {
@@ -6291,21 +6390,21 @@ DOM SHORTCUTS
         if (message.includes('❌') || message.toLowerCase().includes('error')) {
           header.classList.add('error');
 
-          title = '❌ Error';
+          title = '🔔 Error Message';
         }
 
         // ⚠️ WARNING / NO CHANGE
         else if (message.includes('⚠️') || message.includes('ℹ️') || message.toLowerCase().includes('no changes')) {
           header.classList.add('warning');
 
-          title = '⚠️ Notice';
+          title = '🔔 Notice Message';
         }
 
         // ✅ SUCCESS
         else if (message.includes('✅') || message.toLowerCase().includes('success')) {
           header.classList.add('success');
 
-          title = '✅ Success';
+          title = '🔔 Success Message';
         }
 
         // 🔵 DEFAULT
@@ -6923,9 +7022,9 @@ DOM SHORTCUTS
       };
 
       const selectMap = {
-        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station'],
+        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBpage_Station'],
         employee: ['EmpPage_Emp', 'ITPage_Emp', 'PensionPage_Emp', 'SalSlipPage_Emp', 'PayBillPage_Emp'],
-        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY'],
+        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBpage_FY'],
         month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth']
       };
 
@@ -12561,10 +12660,6 @@ DOM SHORTCUTS
           return;
         }
 
-        /* =========================
-        🔥 START LOADER
-        ========================= */
-
         try {
           setSyncStatus('pbDatabase');
           let loaderStarted = false;
@@ -12598,12 +12693,18 @@ DOM SHORTCUTS
           ========================= */
 
           if (result.status === 'nochange') {
-            if (loaderStarted) {
-              stopPBProgress();
-            }
+            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
+
             clearSyncStatus('pbDatabase');
             exitPBEditMode();
-            showCustomAlert('ℹ️ No changes detected.\n\nNo Data was changed & updated.');
+            if (loaderStarted) {
+              stopPBProgress();
+              setTimeout(() => {
+                showCustomAlert(noChangeMsg);
+              }, 450);
+            } else {
+              showCustomAlert(noChangeMsg);
+            }
             return;
           }
 
@@ -12620,44 +12721,20 @@ DOM SHORTCUTS
             ========================= */
 
             let msg = `
-              <div style="
-                font-size:14px;
-                font-weight:700;
-                color:#7dffb3;
-                margin-bottom:18px;
-              ">
-                ✅ ${mode} Success!
-              </div>
-              `;
+              <div style="font-size:14px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">✅ ${mode} Success!</div>
+            `;
 
             /* 🔄 UPDATED */
 
             if (updatedEmployees.length) {
-              msg += `
-                <div style="
-                  margin-bottom:10px;
-                  font-size:13px;
-                  font-weight:700;
-                  color:#8ec5ff;
-                ">
-                  🔄 UPDATED EMPLOYEES
-                </div>
-                `;
+              //msg += `<div style=" margin-bottom:10px;font-size:13px;font-weight:700;color:#8ec5ff;">🔄 UPDATED EMPLOYEES</div>`;
 
               msg += updatedEmployees
                 .map((e) => {
                   const changedCols = (e.changedColumns || [])
                     .map(
                       (col) => `
-                        <span style="
-                          display:inline-block;
-                          padding:2px 6px;
-                          margin:3px;
-                          border-radius:10px;
-                          background:rgba(255,255,255,0.08);
-                          border:1px solid rgba(255,255,255,0.06);
-                          font-size:12px;
-                        ">
+                        <span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:12px;">
                           🔃 ${col}
                         </span>
                       `
@@ -12665,56 +12742,19 @@ DOM SHORTCUTS
                     .join('');
 
                   return `
-                    <div style="
-                      margin-bottom:16px;
-                      padding:8px;
-                      border-radius:16px;
-                      background:rgba(255,255,255,0.05);
-                      border:1px solid rgba(255,255,255,0.08);
-                    ">
+                    <div style="margin-bottom:16px;padding:8px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
 
-                      <div style="
-                        font-size:13px;
-                        font-weight:700;
-                        margin-bottom:10px;
-                      ">
+                      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">
                         🧑‍💼 ${e.employee}
-
-                        <span style="
-                          opacity:.7;
-                          font-size:12px;
-                          margin-left:4px;
-                        ">
-                          (${e.month})
-                        </span>
+                        <span style="opacity:.7;font-size:12px;margin-left:4px;">(${e.month})</span>
                       </div>
 
-                      <div style="
-                        display:flex;
-                        align-items:flex-start;
-                        gap:8px;
-                      ">
-                        <i class="material-icons"
-                          style="
-                            font-size:18px;
-                            color:#67b7ff;
-                            margin-top:3px;
-                          ">
-                          sync
-                        </i>
-
-                        <div style="
-                          flex:1;
-                          display:flex;
-                          flex-wrap:wrap;
-                          gap:6px;
-                        ">
-                          ${changedCols}
-                        </div>
+                      <div style="display:flex;align-items:flex-start;gap:4px;">
+                        <i class="material-icons" style="font-size:18px;color:#67b7ff;margin-top:3px;">sync</i>
+                        <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">${changedCols}</div>
                       </div>
-
                     </div>
-                    `;
+                  `;
                 })
                 .join('');
             }
@@ -12723,59 +12763,22 @@ DOM SHORTCUTS
 
             if (addedEmployees.length) {
               msg += `
-                <div style="
-                  margin-top:18px;
-                  margin-bottom:12px;
-                  font-size:15px;
-                  font-weight:700;
-                  color:#ffd37d;
-                ">
-                  ➕ ADDED EMPLOYEES
-                </div>
-                `;
+                <div style="margin-top:18px;margin-bottom:12px;font-size:15px;font-weight:700;color:#ffd37d;">➕ ADDED EMPLOYEES</div>
+              `;
 
               msg += addedEmployees
                 .map(
                   (e) => `
-                    <div style="
-                      padding:10px 14px;
-                      margin-bottom:10px;
-                      border-radius:14px;
-                      background:rgba(255,255,255,0.05);
-                      border:1px solid rgba(255,255,255,0.08);
-                    ">
-                      🧑‍💼 ${e.employee}
-
-                      <span style="
-                        opacity:.7;
-                        font-size:12px;
-                      ">
-                        (${e.month})
-                      </span>
-                    </div>
-                    `
+                  <div style="padding:10px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                    🧑‍💼 ${e.employee}
+                    <span style="opacity:.7;font-size:12px;">(${e.month})</span>
+                  </div>
+                `
                 )
                 .join('');
             }
 
-            /* =========================
-            🔥 STOP LOADER
-            ========================= */
-
-            if (loaderStarted) {
-              stopPBProgress();
-            }
             clearSyncStatus('pbDatabase');
-
-            /* =========================
-            🔥 SHOW MESSAGE
-            ========================= */
-
-            showCustomAlert(msg);
-
-            /* =========================
-            🔥 BACKGROUND REFRESH
-            ========================= */
 
             loadTable('pb', 'PBDB')
               .then(() => {
@@ -12784,11 +12787,16 @@ DOM SHORTCUTS
               })
               .catch(console.error);
 
-            /* =========================
-            🔥 EXIT EDIT MODE
-            ========================= */
-
             exitPBEditMode();
+
+            if (loaderStarted) {
+              stopPBProgress();
+              setTimeout(() => {
+                showCustomAlert(msg);
+              }, 450);
+            } else {
+              showCustomAlert(msg);
+            }
 
             return;
           }
@@ -12798,12 +12806,18 @@ DOM SHORTCUTS
           ========================= */
 
           if (result.status === 'conflict') {
+            clearSyncStatus('pbDatabase', 'db', false);
+
+            const conflictMsg = '⚠️ Some rows were modified by another user.<br><br>Please reload and try again.';
+
             if (loaderStarted) {
               stopPBProgress();
+              setTimeout(() => {
+                showCustomAlert(conflictMsg);
+              }, 450);
+            } else {
+              showCustomAlert(conflictMsg);
             }
-
-            clearSyncStatus('pbDatabase', 'db', false);
-            showCustomAlert('⚠️ Some rows were modified by another user.\nPlease reload and try again.');
 
             return;
           }
@@ -12812,23 +12826,33 @@ DOM SHORTCUTS
           ❌ ERROR
           ========================= */
 
-          if (loaderStarted) {
-            stopPBProgress();
-          }
-
           clearSyncStatus('pbDatabase', 'db', false);
 
-          showCustomAlert('❌ Error: ' + (result.message || 'Unknown error'));
+          const errorMsg = '❌ Error: ' + (result.message || 'Unknown error');
+
+          if (loaderStarted) {
+            stopPBProgress();
+            setTimeout(() => {
+              showCustomAlert(errorMsg);
+            }, 450);
+          } else {
+            showCustomAlert(errorMsg);
+          }
         } catch (err) {
           console.error(err);
 
-          if (loaderStarted) {
-            stopPBProgress();
-          }
-
           clearSyncStatus('pbDatabase', 'db', false);
 
-          showCustomAlert('❌ Server error');
+          const serverMsg = '❌ Server error';
+
+          if (loaderStarted) {
+            stopPBProgress();
+            setTimeout(() => {
+              showCustomAlert(serverMsg);
+            }, 450);
+          } else {
+            showCustomAlert(serverMsg);
+          }
         }
       }
 
@@ -15526,9 +15550,9 @@ DOM SHORTCUTS
 
         table.innerHTML = `
     <colgroup>
-      <col style="width: 5%;">
-      <col style="width: 10%;">
-      <col style="width: 15%;">
+      <col style="width: 8%;">
+      <col style="width: 8%;">
+      <col style="width: 14%;">
       <col style="width: 18%;">
       <col style="width: 32%;">
       <col style="width: 10%;">
@@ -24888,6 +24912,310 @@ DOM SHORTCUTS
 
       on('DutyexcelBtn', 'click', () => {
         exportDutyChartExcel();
+      });
+
+      //=================================================== Electricity Bill Page =======================================//
+
+      /* =========================
+      🔥 LOAD EB MONTH DROPDOWN
+      ========================= */
+
+      function loadEBMonthsByFY() {
+        if (!ebData || !ebData.rows) {
+          console.warn('❌ ebData not loaded');
+          return;
+        }
+
+        const select = id('EBpage_Month');
+
+        const fySelect = id('EBpage_FY');
+
+        if (!select || !fySelect) return;
+
+        const selectedFY = fySelect.value;
+
+        const monthMap = new Map();
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        /* =========================
+        🔥 FILTER MONTHS
+        ========================= */
+
+        ebData.rows.forEach((row) => {
+          // 🔥 COLUMN A = Month-Year
+          const monthStr = String(row[0] || '').trim();
+
+          if (!monthStr) return;
+
+          // 🔥 FORMAT: MMM-YYYY
+          const parts = monthStr.split('-');
+
+          if (parts.length !== 2) return;
+
+          const mon = parts[0];
+
+          const yyyy = parts[1];
+
+          const mm = monthNames.indexOf(mon) + 1;
+
+          if (!mm || !yyyy) return;
+
+          /* =========================
+          🔥 FY CHECK
+          ========================= */
+
+          const fy = getFinancialYear(monthStr);
+
+          if (selectedFY && fy !== selectedFY) {
+            return;
+          }
+
+          // 🔥 SORT KEY
+          const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
+
+          monthMap.set(key, monthStr);
+        });
+
+        /* =========================
+        🔥 SORT MONTHS
+        ========================= */
+
+        const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
+
+        /* =========================
+        🔥 RESET DROPDOWN
+        ========================= */
+
+        select.innerHTML = '';
+
+        // ✅ ALL MONTHS
+        const allOpt = document.createElement('option');
+
+        allOpt.value = 'ALL';
+
+        allOpt.textContent = 'All Months';
+
+        allOpt.selected = true;
+
+        select.appendChild(allOpt);
+
+        /* =========================
+        ⚠️ NO DATA
+        ========================= */
+
+        if (!sortedMonths.length) {
+          console.warn('⚠ No months found for selected FY');
+
+          return;
+        }
+
+        /* =========================
+        🔥 ADD MONTH OPTIONS
+        ========================= */
+
+        sortedMonths.forEach((month) => {
+          const opt = document.createElement('option');
+
+          opt.value = month;
+
+          opt.textContent = month;
+
+          select.appendChild(opt);
+        });
+
+        //console.log('✅ EB Months:', sortedMonths);
+      }
+
+      /* =========================
+      🔥 FY CHANGE
+      ========================= */
+
+      on('EBpage_FY', 'change', () => {
+        loadEBMonthsByFY();
+        filterEBTable();
+      });
+
+      /* =========================
+      🔥 FILTER EB TABLE
+      ========================= */
+
+      function filterEBTable() {
+        const wrapper = qs('.EBtableWrapper');
+
+        if (!wrapper) return;
+
+        /* =========================
+        🔥 HEADERS
+        ========================= */
+
+        const headers = ebData?.headers || [];
+
+        /* =========================
+        🔥 HIDE COLUMNS BY NAME
+        ========================= */
+
+        const hiddenColumnNames = ['EB Station', 'Prev KWh', 'Prev KVAh', 'Difference KWh', 'Difference KVAh', 'Interest on Deposit', 'Tax'];
+
+        // 🔥 FIND COLUMN INDEXES
+        const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
+
+        // 🔥 VISIBLE HEADERS
+        const visibleHeaders = headers.filter((_, i) => !hiddenCols.includes(i));
+
+        /* =========================
+        🔥 RESET
+        ========================= */
+
+        wrapper.innerHTML = '';
+
+        /* =========================
+        🔥 FILTERS
+        ========================= */
+
+        const station = id('EBpage_Station')?.value || '';
+
+        const fy = id('EBpage_FY')?.value || '';
+
+        /* =========================
+        🔥 GET ROWS
+        ========================= */
+
+        const allRows = ebData?.rows || [];
+
+        /* =========================
+        🔥 FILTER DATA
+        ========================= */
+
+        const rows = allRows.filter((row) => {
+          // 🔥 COLUMN A = Month-Year
+          const monthStr = String(row[0] || '').trim();
+
+          // 🔥 COLUMN B = Station
+          const rowStation = String(row[1] || '').trim();
+
+          // 🔥 FY
+          const rowFY = getFinancialYear(monthStr);
+
+          /* =========================
+            🔥 STATION FILTER
+            ========================= */
+
+          if (station && rowStation !== station) {
+            return false;
+          }
+
+          /* =========================
+            🔥 FY FILTER
+            ========================= */
+
+          if (fy && rowFY !== fy) {
+            return false;
+          }
+
+          return true;
+        });
+
+        /* =========================
+        🔥 BUILD TABLE
+        ========================= */
+
+        let html = `
+          <table class="data-table">
+            <colgroup>
+              <col style="width:10%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:10%">
+              <col style="width:10%">
+              <col style="width:10%">
+              <col style="width:10%">
+              <col style="width:10%">
+            </colgroup>
+            <thead><tr>`;
+
+        /* 🔥 HEADERS */
+
+        headers.forEach((h, i) => {
+          if (hiddenCols.includes(i)) {
+            return;
+          }
+
+          html += `<th>${h}</th>`;
+        });
+
+        html += `</tr></thead><tbody>
+        `;
+
+        /* =========================
+        🚫 NO DATA
+        ========================= */
+
+        if (!rows.length) {
+          html += `
+            <tr>
+              <td colspan="${visibleHeaders.length}"
+                  style="
+                    text-align:center;
+                    padding:20px;
+                    font-weight:700;
+                    color:#ef4444;
+                  ">
+                ==============🚫 No Data Found 🚫==============
+              </td>
+            </tr>
+          `;
+        } else {
+          /* 🔥 ROWS */
+
+          rows.forEach((row) => {
+            html += `<tr>`;
+
+            row.forEach((cell, i) => {
+              if (hiddenCols.includes(i)) {
+                return;
+              }
+
+              html += `
+                <td>${cell ?? ''}</td>
+              `;
+            });
+
+            html += `</tr>`;
+          });
+        }
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        /* =========================
+        🔥 RENDER
+        ========================= */
+
+        wrapper.innerHTML = html;
+      }
+
+      /* =========================
+      🔥 FILTER EVENTS
+      ========================= */
+
+      on('EBpage_Station', 'change', () => {
+        filterEBTable();
+      });
+
+      on('EBpage_FY', 'change', () => {
+        loadEBMonthsByFY();
+
+        filterEBTable();
+      });
+
+      on('EBpage_Month', 'change', () => {
+        filterEBTable();
       });
 
       /* =========================================================
