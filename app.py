@@ -829,6 +829,21 @@ def update_pb():
                         ""
                     )
                 })
+        # =========================
+        # ℹ️ NO CHANGES
+        # =========================
+
+        if not update_cells and not new_rows:
+
+            pb_progress["percent"] = 100
+            pb_progress["message"] = "No Changes"
+
+            return jsonify({
+                "status": "nochange",
+                "message": "No changes detected",
+                "updatedEmployees": [],
+                "addedEmployees": []
+            })
 
         # =========================
         # 🔥 APPLY UPDATES
