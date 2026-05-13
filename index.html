@@ -214,6 +214,7 @@
         position: relative;
         padding: 24px;
         background: linear-gradient(135deg, #edf4ff 0%, #f7fbff 50%, #eefdf5 100%);
+        transition: all 0.2s ease-in-out;
       }
 
       /* =========================================================
@@ -844,9 +845,10 @@
         font-weight: 400;
       }
 
-      /* =========================================================
-          LOADING PAGE
-      ========================================================= */
+      /* =========================
+      🔥 GLOBAL LOADER
+      ========================= */
+
       #globalLoader {
         position: fixed;
         inset: 0;
@@ -854,21 +856,23 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(175, 202, 255, 0.959);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        opacity: 1;
+        visibility: visible;
         transition:
           opacity 0.35s ease,
-          visibility 0.35s ease;
+          visibility 0.35s ease,
+          backdrop-filter 0.35s ease;
       }
 
-      /* =========================================================
-      HIDDEN
-      ========================================================= */
       #globalLoader.hidden {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
       }
 
       /* =========================================================
@@ -1070,7 +1074,7 @@
 
       .custom-alert-box {
         width: min(600px, 92vw);
-        max-height: 85vh;
+        max-height: 80vh;
         background: #111827;
         color: #fff;
         border-radius: 18px;
@@ -1080,20 +1084,69 @@
         flex-direction: column;
       }
 
+      /* =========================
+      🔥 ALERT HEADER COLORS
+      ========================= */
+
       .custom-alert-header {
-        padding: 16px 20px;
-        font-size: 20px;
+        padding: 10px 12px;
+        font-size: 14px;
         font-weight: 700;
+        color: #fff;
+        text-align: center;
+        transition: all 0.25s ease;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       }
 
+      /* ✅ SUCCESS */
+
+      .custom-alert-header.success {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+      }
+
+      /* ❌ ERROR */
+
+      .custom-alert-header.error {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+      }
+
+      /* ⚠️ WARNING / NO CHANGE */
+
+      .custom-alert-header.warning {
+        background: linear-gradient(135deg, #ca8a04, #facc15);
+
+        color: #111;
+      }
+
+      /* 🔵 INFO */
+
+      .custom-alert-header.info {
+        background: linear-gradient(135deg, #2563eb, #60a5fa);
+      }
+
       .custom-alert-body {
-        padding: 18px 20px;
+        padding: 10px 12px;
         overflow-y: auto;
-        white-space: pre-wrap;
-        line-height: 1.6;
-        font-size: 14px;
-        max-height: 60vh;
+        /* 🔥 IMPORTANT */
+        white-space: normal;
+
+        line-height: 1.3;
+        font-size: 13px;
+        max-height: 50vh;
+
+        /* 🔥 FIX ALIGNMENT */
+        display: block;
+        text-align: left;
+        word-break: break-word;
+        scrollbar-width: thin;
+      }
+
+      .custom-alert-body .material-icons {
+        vertical-align: middle;
+      }
+
+      .custom-alert-body span {
+        line-height: 1.3;
       }
 
       #customAlertOk {
@@ -1120,10 +1173,21 @@
         /* behind content */
       }
 
+      /* =========================
+      🔥 APP ANIMATION
+      ========================= */
+
       .app {
         display: none;
         height: 100vh;
-        overflow: visible;
+        overflow: hidden;
+        transition: all 0.45s ease;
+        pointer-events: none;
+      }
+
+      .app.loaded {
+        display: block;
+        pointer-events: auto;
       }
 
       /* =============SIDEBAR=========== */
@@ -1136,8 +1200,8 @@
         min-width: 160px;
         display: flex;
         flex-direction: column;
-        background: linear-gradient(180deg, #f8fbff 0%, #eaf2ff 100%);
-        color: #1f2937;
+        background: linear-gradient(180deg, #343434 0%, #000000 100%);
+        color: #18d8ff;
         box-shadow: inset -1px 0 0 #dbeafe;
         overflow: visible;
         transition: all 0.25s ease;
@@ -1340,7 +1404,7 @@
 
       .sidebar-header:hover {
         background: #e5e7eb;
-        transform: scale(1.05);
+        color: blue;
       }
 
       .sidebar-logo {
@@ -1353,8 +1417,12 @@
       .app-title {
         font-size: 12px;
         font-weight: 600;
-        color: #111827;
+        color: #18d8ff;
         transition: opacity 0.2s ease;
+      }
+
+      .sidebar-header:hover .app-title {
+        color: blue;
       }
 
       .sidebar-toggle {
@@ -1371,7 +1439,7 @@
       .menu-list {
         flex: 1;
         overflow-y: auto;
-        padding: 10px;
+        padding: 6px;
         scrollbar-width: none;
       }
 
@@ -1389,30 +1457,30 @@
         align-items: center;
         gap: 12px;
         width: 100%;
-        padding: 8px 15px;
+        padding: 9px 8px;
         margin-bottom: 4px;
         border: none;
         border-radius: 6px;
         background: transparent;
-        color: #374151;
+        color: #18d8ff;
         cursor: pointer;
         transition: all 0.25s ease;
       }
 
       /* ========= END BUTTON BASE ============== */
       /* ICON (Lucide fix) */
-      .menu-btn svg,
-      .logout-btn svg {
-        width: 18px;
-        height: 18px;
+      .menu-btn i,
+      .logout-btn i {
+        width: 20px;
+        height: 20px;
         flex-shrink: 0;
-        transition: all 0.25s ease;
+        transition: all 0.2s ease;
       }
 
       /* Bigger icon collapsed */
-      .left-panel.collapsed .menu-btn svg {
-        width: 20px;
-        height: 20px;
+      .left-panel.collapsed .menu-btn i {
+        width: 22px;
+        height: 22px;
       }
 
       /* TEXT */
@@ -1420,6 +1488,7 @@
       .logout-btn span {
         white-space: nowrap;
         transition: opacity 0.2s ease;
+        padding-top: 4px;
       }
 
       /* COLLAPSED TEXT */
@@ -1446,6 +1515,14 @@
       .menu-btn:hover {
         background: #e0f2fe;
         color: #1d4ed8;
+      }
+
+      .menu-btn:hover i {
+        transform: scale(1.03);
+      }
+
+      .left-panel.collapsed:hover .menu-btn i {
+        transform: scale(1.03);
       }
 
       /* ACTIVE */
@@ -1502,8 +1579,8 @@
         opacity: 0.45;
         cursor: not-allowed;
         pointer-events: none;
-        background: #f3f4f6 !important;
-        color: #9ca3af !important;
+        background: #2a2a2a !important;
+        color: #c4c4c4 !important;
         box-shadow: none !important;
         text-shadow: none !important;
         filter: grayscale(100%);
@@ -1512,10 +1589,10 @@
 
       /* ================= DISABLED ICON ================= */
 
-      .menu-btn:disabled svg,
-      .logout-btn:disabled svg {
+      .menu-btn:disabled i,
+      .logout-btn:disabled i {
         opacity: 0.5;
-        color: #9ca3af !important;
+        color: #c4c4c4 !important;
         stroke: #9ca3af !important;
         filter: grayscale(100%);
       }
@@ -1524,7 +1601,7 @@
 
       .menu-btn:disabled span,
       .logout-btn:disabled span {
-        color: #9ca3af !important;
+        color: #c4c4c4 !important;
         text-shadow: none !important;
       }
 
@@ -1532,15 +1609,10 @@
 
       .menu-btn.active:disabled {
         margin-left: 0 !important;
-        background: #f3f4f6 !important;
-        color: #9ca3af !important;
+        background: #67676789 !important;
+        color: #c4c4c4 !important;
         box-shadow: none !important;
-      }
-
-      /* ================= REMOVE ACTIVE BAR ================= */
-
-      .menu-btn.active:disabled::before {
-        display: none;
+        border-radius: 6px;
       }
 
       /* ================= DISABLE HOVER ================= */
@@ -1594,9 +1666,9 @@
 
       /* HEADER */
       .header {
-        padding: 5px;
-        background: linear-gradient(180deg, #f8fbff, #eaf2ff);
-        border-bottom: 1px solid #dbeafe;
+        padding: 5px 5px 5px 10px;
+        background: rgba(45, 82, 147);
+        box-shadow: inset 0 -4px 0 0 #44d0ff;
         display: flex;
         flex-direction: row;
       }
@@ -1604,9 +1676,10 @@
       .header h2 {
         font-size: 13px;
         font-weight: bold;
-        padding: 5px;
+        padding: 5px 5px 5px 10px;
         text-align: center;
         width: 100%;
+        color: white;
       }
 
       /* ===========BUTTON BAR============== */
@@ -2985,7 +3058,7 @@
         margin: 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 155px);
+        height: calc(100vh - 165px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -3756,13 +3829,14 @@
 
         /* Sidebar collapse */
         .left-panel {
-          width: 30px !important;
-          min-width: 30px !important;
-          padding: 2px;
+          width: 60px !important;
+          min-width: 60px !important;
         }
 
         /* Hide text */
-        .left-panel .menu-btn span {
+        .left-panel .menu-btn span,
+        .logout-btn span,
+        .sidebar-header .app-title {
           display: none;
         }
 
@@ -3770,26 +3844,7 @@
           display: none;
         }
 
-        /* Center icons */
-        .left-panel .menu-btn {
-          justify-content: center;
-          padding: 4px 0;
-        }
-
-        /* Active button adjust */
-        .left-panel .menu-btn.active {
-          border-radius: 999px 0 0 999px;
-          margin-left: 0px;
-          width: 20px;
-        }
-
         .menu-footer {
-          padding: 2px;
-        }
-
-        .logout-btn {
-          width: 20px;
-          height: 20px;
           padding: 2px;
         }
 
@@ -3847,10 +3902,6 @@
 
         .req-select {
           width: 100% !important;
-        }
-
-        .material-symbols-outlined {
-          font-size: 14px;
         }
 
         .PensionInfoPanel {
@@ -3913,6 +3964,7 @@
   </head>
 
   <body>
+    <!-- 🔥 LOGIN MODAL -->
     <div id="loginPage">
       <div class="login-container">
         <!-- ======================================
@@ -3988,6 +4040,27 @@
         <p>, Technician, Akashvani Karwar</p>
       </div>
     </div>
+
+    <!-- 🔥 LOGOUT CONFIRM MODAL -->
+    <div id="logoutConfirm" class="custom-alert hidden">
+      <div class="custom-alert-box" style="max-width: 420px">
+        <div class="custom-alert-header">🚪 Logout Confirmation</div>
+
+        <div class="custom-alert-body" style="text-align: center; padding: 30px 20px">
+          <div style="font-size: 60px; margin-bottom: 14px">🔐</div>
+
+          <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px">Do you want to Logout?</div>
+
+          <div style="opacity: 0.7; font-size: 13px">Your current session will be closed.</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 0 20px 20px">
+          <button id="logoutNoBtn" style="border: none; background: #374151; color: #fff; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600">No</button>
+
+          <button id="logoutYesBtn" style="border: none; background: #ef4444; color: #fff; padding: 10px 22px; border-radius: 12px; cursor: pointer; font-weight: 700">Yes</button>
+        </div>
+      </div>
+    </div>
     <!-- =========================================================
       GLOBAL LOADER
   ========================================================= -->
@@ -4010,8 +4083,7 @@
     </div>
     <div id="customAlert" class="custom-alert hidden">
       <div class="custom-alert-box">
-        <div class="custom-alert-header">🔔 Alert Message</div>
-
+        <div id="customAlertHeader" class="custom-alert-header">🔔 Alert Message</div>
         <div id="customAlertMsg" class="custom-alert-body"></div>
         <button id="customAlertOk">OK</button>
       </div>
@@ -4036,7 +4108,7 @@
           </button>
           <!-- Pay Bill -->
           <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
-            <i class="material-symbols-outlined">description</i>
+            <i class="material-symbols-outlined">book_5</i>
             <span>Pay Bill</span>
           </button>
           <!-- Salary Slip -->
@@ -4769,7 +4841,7 @@
             </div>
           </div>
           <input type="hidden" id="paidMonthCountInput" />
-          <div id="ITInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; margin: 4px">
+          <div id="ITInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; box-shadow: 0 2px 0 0 rgba(171, 171, 171, 0.696); padding: 2px; margin: 2px">
             <div class="itPanelDiv">
               <label>Best Regime Option</label>
               <span id="PanelRegime">-</span>
@@ -4825,7 +4897,7 @@
                 </div>
               </div>
             </div>
-            <div id="PensionInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; margin: 0px 4px">
+            <div id="PensionInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between">
               <div class="pensionPanelDiv">
                 <label>Leave Encashment</label>
                 <span id="PanelLeaveEncash">0</span>
@@ -4847,7 +4919,7 @@
                 <span id="PanelResidualPension">0</span>
               </div>
             </div>
-            <table style="height: 40px">
+            <table style="height: 38px; box-shadow: 0 2px 0 0 rgba(171, 171, 171, 0.696)">
               <colgroup>
                 <col style="width: 100px" />
                 <col style="width: 500px" />
@@ -4889,7 +4961,7 @@
               </tr>
             </table>
           </div>
-          <div class="PensionTableWrapper" style="height: calc(100vh - 180px)"></div>
+          <div class="PensionTableWrapper" style="height: calc(100vh - 195px)"></div>
         </div>
         <div class="SectionPage" id="BudgetPage" style="display: none">
           <div class="header">
@@ -5075,7 +5147,6 @@
             <button onclick="showSheet('HSDlog', this)">HSD Log</button>
             <button onclick="showSheet('EBlog', this)">EB Log</button>
             <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
-            <button onclick="showSheet('Login', this)">Login ID</button>
           </div>
           <div class="DB-Table-Wrapper">
             <table id="EmpDB"></table>
@@ -5092,7 +5163,6 @@
             <table id="HSDlog" style="display: none"></table>
             <table id="EBlog" style="display: none"></table>
             <table id="DutyChart" style="display: none"></table>
-            <table id="Login" style="display: none"></table>
           </div>
         </div>
         <div class="dashboard-footer">
@@ -5513,30 +5583,21 @@ DOM SHORTCUTS
       async function loginSuccess(user, displayName, loginStation) {
         // 🔥 CURRENT USER
         window.currentUser = user;
-
-        /* =====================================
-    LOAD REMAINING DATA
-    ===================================== */
-
-        initUI();
-
-        await loadAllData();
-
-        initAfterData();
-
-        initBindings();
-
-        initDefaultView();
-
-        initPostSetup();
-
-        applyUserAccess(user);
-
         // 🔥 PAGE SWITCH
         id('loginPage').style.display = 'none';
 
         id('mainPage').style.display = 'flex';
+        /* =====================================
+        LOAD REMAINING DATA
+        ===================================== */
 
+        initUI();
+        await loadAllData();
+        initAfterData();
+        initBindings();
+        initDefaultView();
+        initPostSetup();
+        applyUserAccess(user);
         // 🔥 WELCOME TEXT
         id('welcomeUser').textContent = `Welcome ${displayName}`;
 
@@ -6130,37 +6191,58 @@ DOM SHORTCUTS
       function showLoader() {
         const loader = id('globalLoader');
 
+        const app = qs('.app');
+
         if (!loader) return;
 
+        // 🔥 SHOW LOADER
         loader.style.display = 'flex';
 
         requestAnimationFrame(() => {
           loader.classList.remove('hidden');
         });
+
+        // 🔥 HIDE APP SMOOTHLY
+        app?.classList.remove('loaded');
       }
+
+      /* =========================
+      🔥 HIDE LOADER
+      ========================= */
 
       function hideLoader() {
         const loader = id('globalLoader');
 
+        const app = qs('.app');
+
         if (!loader) return;
 
+        // 🔥 FADE OUT LOADER
         loader.classList.add('hidden');
 
+        // 🔥 SHOW APP SMOOTHLY
+        requestAnimationFrame(() => {
+          app?.classList.add('loaded');
+        });
+
+        // 🔥 REMOVE AFTER ANIMATION
         setTimeout(() => {
           loader.style.display = 'none';
-        }, 300);
+        }, 350);
       }
 
-      /* ================= COMPLETE ================= */
+      /* =========================
+      🔥 COMPLETE LOADER
+      ========================= */
 
       function completeLoader() {
         clearInterval(loaderInterval);
 
-        updateLoader(100, 'Completed', 'sync');
+        updateLoader(100, 'Completed', 'check_circle');
 
         setTimeout(() => {
           hideLoader();
-        }, 400);
+        }, 500);
       }
 
       function updateLoader(percent, apiName = '', type = 'download') {
@@ -6192,8 +6274,52 @@ DOM SHORTCUTS
 
         const msgBox = id('customAlertMsg');
 
-        msgBox.textContent = message;
+        const header = id('customAlertHeader');
 
+        if (!modal || !msgBox || !header) return;
+
+        // 🔥 RESET CLASSES
+        header.classList.remove('success', 'error', 'warning', 'info');
+
+        /* =========================
+        🔥 DETECT ALERT TYPE
+        ========================= */
+
+        let title = '🔔 Alert Message';
+
+        // ❌ ERROR
+        if (message.includes('❌') || message.toLowerCase().includes('error')) {
+          header.classList.add('error');
+
+          title = '❌ Error';
+        }
+
+        // ⚠️ WARNING / NO CHANGE
+        else if (message.includes('⚠️') || message.includes('ℹ️') || message.toLowerCase().includes('no changes')) {
+          header.classList.add('warning');
+
+          title = '⚠️ Notice';
+        }
+
+        // ✅ SUCCESS
+        else if (message.includes('✅') || message.toLowerCase().includes('success')) {
+          header.classList.add('success');
+
+          title = '✅ Success';
+        }
+
+        // 🔵 DEFAULT
+        else {
+          header.classList.add('info');
+        }
+
+        // 🔥 SET HEADER TITLE
+        header.innerHTML = title;
+
+        // 🔥 SET MESSAGE
+        msgBox.innerHTML = message;
+
+        // 🔥 SHOW MODAL
         modal.classList.remove('hidden');
       }
 
@@ -11933,25 +12059,35 @@ DOM SHORTCUTS
       let pbProgressSource = null;
 
       /* =========================
-🔥 START BACKEND PROGRESS
-========================= */
+      🔥 START BACKEND PROGRESS
+      ========================= */
 
       function startPBProgress() {
-        if (window.pbProgressSource) {
-          window.pbProgressSource.close();
+        // 🔥 CLOSE OLD SSE
+        if (pbProgressSource) {
+          pbProgressSource.close();
+          pbProgressSource = null;
         }
 
-        const source = new EventSource(`https://office-management-f425.onrender.com/pb/progress`);
+        // 🔥 CLEAR OLD INTERVAL
+        if (window.pbFakeInterval) {
+          clearInterval(window.pbFakeInterval);
+          window.pbFakeInterval = null;
+        }
 
-        window.pbProgressSource = source;
+        const source = new EventSource('https://office-management-f425.onrender.com/pb/progress');
+
+        pbProgressSource = source;
 
         /* =========================
-  🔥 FAKE SMOOTH PROGRESS
-  ========================= */
+        🔥 FAKE SMOOTH PROGRESS
+        ========================= */
 
         let fakeProgress = 12;
 
-        const fakeInterval = setInterval(() => {
+        updateLoader(fakeProgress, getPBProgressMessage(fakeProgress), 'sync');
+
+        window.pbFakeInterval = setInterval(() => {
           if (fakeProgress < 85) {
             fakeProgress += 1;
 
@@ -11960,52 +12096,81 @@ DOM SHORTCUTS
         }, 400);
 
         /* =========================
-  🔥 REAL SSE PROGRESS
-  ========================= */
+        🔥 REAL SSE PROGRESS
+        ========================= */
 
         source.onmessage = (event) => {
-          const data = JSON.parse(event.data);
+          try {
+            const data = JSON.parse(event.data);
 
-          console.log('PB:', data);
+            //console.log('PB:', data);
 
-          // 🔥 STOP FAKE IF REAL PROGRESS IS HIGHER
-          if (data.percent > fakeProgress) {
-            fakeProgress = data.percent;
+            // 🔥 IGNORE IDLE EVENTS
+            if (data.message === 'Idle') {
+              return;
+            }
 
-            updateLoader(data.percent, data.message, 'sync');
-          }
+            // 🔥 SYNC REAL PROGRESS
+            fakeProgress = Math.max(fakeProgress, data.percent || 0);
 
-          // ✅ COMPLETE
-          if (data.percent >= 100) {
-            clearInterval(fakeInterval);
+            updateLoader(fakeProgress, data.message || getPBProgressMessage(fakeProgress), 'sync');
 
-            setTimeout(() => {
-              completeLoader();
+            /* =========================
+            ✅ COMPLETE
+            ========================= */
 
-              source.close();
-            }, 800);
+            if (data.percent >= 100) {
+              // 🔥 STOP FAKE PROGRESS
+              if (window.pbFakeInterval) {
+                clearInterval(window.pbFakeInterval);
+                window.pbFakeInterval = null;
+              }
+
+              updateLoader(100, data.message || 'Completed Successfully', 'check_circle');
+
+              setTimeout(() => {
+                completeLoader();
+
+                source.close();
+
+                if (pbProgressSource === source) {
+                  pbProgressSource = null;
+                }
+              }, 500);
+            }
+          } catch (err) {
+            console.error('PB SSE Parse Error:', err);
           }
         };
+
+        /* =========================
+        ❌ SSE ERROR
+        ========================= */
 
         source.onerror = (err) => {
-          console.error('SSE ERROR', err);
+          console.warn('PB SSE Closed');
 
-          clearInterval(fakeInterval);
+          // 🔥 STOP FAKE LOADER
+          if (window.pbFakeInterval) {
+            clearInterval(window.pbFakeInterval);
+            window.pbFakeInterval = null;
+          }
 
+          // 🔥 CLOSE CONNECTION
           source.close();
 
-          setTimeout(() => {
-            const loader = id('globalLoader');
+          // 🔥 CLEAR ACTIVE SOURCE
+          if (pbProgressSource === source) {
+            pbProgressSource = null;
+          }
 
-            if (loader && loader.style.display !== 'none') {
-              startPBProgress();
-            }
-          }, 1000);
+          // ❌ NO AUTO RECONNECT
         };
       }
+
       /* =========================
-🔥 PROGRESS TEXTS
-========================= */
+      🔥 PROGRESS TEXTS
+      ========================= */
 
       function getPBProgressMessage(progress) {
         if (progress <= 5) return 'Connecting to Server...';
@@ -12028,14 +12193,24 @@ DOM SHORTCUTS
       }
 
       /* =========================
-🔥 STOP PROGRESS
-========================= */
+      🔥 STOP PROGRESS
+      ========================= */
 
       function stopPBProgress() {
+        // 🔥 STOP SSE
         if (pbProgressSource) {
           pbProgressSource.close();
           pbProgressSource = null;
         }
+
+        // 🔥 STOP FAKE PROGRESS
+        if (window.pbFakeInterval) {
+          clearInterval(window.pbFakeInterval);
+          window.pbFakeInterval = null;
+        }
+
+        // 🔥 RESET LOADER
+        updateLoader(0, 'Idle', 'sync');
 
         hideLoader();
       }
@@ -12361,14 +12536,11 @@ DOM SHORTCUTS
 
       async function savePBData(mode = 'ADD') {
         const salaryMonth = id('PayBillPage_SalMonth').value;
-
         const station = id('PayBillPage_Station').value;
-
         const daPercent = id('PayBillPage_DA%').value;
 
         if (!salaryMonth || !station) {
           showCustomAlert('❌ Month or Station missing');
-
           return;
         }
 
@@ -12377,9 +12549,7 @@ DOM SHORTCUTS
         ========================= */
 
         const goData = getTableData('PB_GOEditTbl', 'GO', salaryMonth, station, daPercent, mode);
-
         const npsData = getTableData('PB_NPSEditTbl', 'NPS', salaryMonth, station, daPercent, mode);
-
         let data = [...goData, ...npsData];
 
         /* =========================
@@ -12388,7 +12558,6 @@ DOM SHORTCUTS
 
         if (!data.length) {
           showCustomAlert('🚫 No data to save');
-
           return;
         }
 
@@ -12397,13 +12566,19 @@ DOM SHORTCUTS
         ========================= */
 
         try {
-          showLoader();
-
           setSyncStatus('pbDatabase');
+          let loaderStarted = false;
 
-          startPBProgress();
+          /* =========================
+          🔥 DELAY LOADER
+          ========================= */
 
-          updateLoader(1, 'Preparing Save...', 'sync');
+          const loaderTimer = setTimeout(() => {
+            loaderStarted = true;
+            showLoader();
+            startPBProgress();
+            updateLoader(5, 'Checking Database...', 'manage_search');
+          }, 700);
 
           /* =========================
           🔥 SAVE
@@ -12411,18 +12586,26 @@ DOM SHORTCUTS
 
           const res = await fetch('https://office-management-f425.onrender.com/pb/update', {
             method: 'POST',
-
-            headers: {
-              'Content-Type': 'application/json'
-            },
-
-            body: JSON.stringify({
-              data,
-              mode
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, mode })
           });
 
           const result = await res.json();
+          clearTimeout(loaderTimer);
+
+          /* =========================
+          ℹ️ NO CHANGES
+          ========================= */
+
+          if (result.status === 'nochange') {
+            if (loaderStarted) {
+              stopPBProgress();
+            }
+            clearSyncStatus('pbDatabase');
+            exitPBEditMode();
+            showCustomAlert('ℹ️ No changes detected.\n\nNo Data was changed & updated.');
+            return;
+          }
 
           /* =========================
           ✅ SUCCESS
@@ -12430,57 +12613,158 @@ DOM SHORTCUTS
 
           if (result.status === 'success') {
             const updatedEmployees = result.updatedEmployees || [];
-
             const addedEmployees = result.addedEmployees || [];
-
-            /* =========================
-            🔥 NO CHANGE
-            ========================= */
-
-            if (!updatedEmployees.length && !addedEmployees.length) {
-              exitPBEditMode();
-              stopPBProgress();
-              clearSyncStatus('pbDatabase');
-              showCustomAlert('ℹ️ No changes detected.\nNo Data was changed & updated.');
-              return;
-            }
 
             /* =========================
             ✅ SUCCESS MESSAGE
             ========================= */
 
-            let msg = `✅ ${mode} Success!\n\n`;
+            let msg = `
+              <div style="
+                font-size:14px;
+                font-weight:700;
+                color:#7dffb3;
+                margin-bottom:18px;
+              ">
+                ✅ ${mode} Success!
+              </div>
+              `;
 
             /* 🔄 UPDATED */
 
             if (updatedEmployees.length) {
-              msg += `🔄 UPDATED EMPLOYEES:\n`;
+              msg += `
+                <div style="
+                  margin-bottom:10px;
+                  font-size:13px;
+                  font-weight:700;
+                  color:#8ec5ff;
+                ">
+                  🔄 UPDATED EMPLOYEES
+                </div>
+                `;
 
               msg += updatedEmployees
                 .map((e) => {
-                  const changedCols = (e.changedColumns || []).join(', 🔃');
+                  const changedCols = (e.changedColumns || [])
+                    .map(
+                      (col) => `
+                        <span style="
+                          display:inline-block;
+                          padding:2px 6px;
+                          margin:3px;
+                          border-radius:10px;
+                          background:rgba(255,255,255,0.08);
+                          border:1px solid rgba(255,255,255,0.06);
+                          font-size:12px;
+                        ">
+                          🔃 ${col}
+                        </span>
+                      `
+                    )
+                    .join('');
 
-                  return `🧑‍💼 ${e.employee} (${e.month})\n` + `⦿ Updated: 🔃${changedCols}`;
+                  return `
+                    <div style="
+                      margin-bottom:16px;
+                      padding:8px;
+                      border-radius:16px;
+                      background:rgba(255,255,255,0.05);
+                      border:1px solid rgba(255,255,255,0.08);
+                    ">
+
+                      <div style="
+                        font-size:13px;
+                        font-weight:700;
+                        margin-bottom:10px;
+                      ">
+                        🧑‍💼 ${e.employee}
+
+                        <span style="
+                          opacity:.7;
+                          font-size:12px;
+                          margin-left:4px;
+                        ">
+                          (${e.month})
+                        </span>
+                      </div>
+
+                      <div style="
+                        display:flex;
+                        align-items:flex-start;
+                        gap:8px;
+                      ">
+                        <i class="material-icons"
+                          style="
+                            font-size:18px;
+                            color:#67b7ff;
+                            margin-top:3px;
+                          ">
+                          sync
+                        </i>
+
+                        <div style="
+                          flex:1;
+                          display:flex;
+                          flex-wrap:wrap;
+                          gap:6px;
+                        ">
+                          ${changedCols}
+                        </div>
+                      </div>
+
+                    </div>
+                    `;
                 })
-                .join('\n\n');
-
-              msg += '\n\n';
+                .join('');
             }
 
             /* ➕ ADDED */
 
             if (addedEmployees.length) {
-              msg += `➕ ADDED EMPLOYEES:\n`;
+              msg += `
+                <div style="
+                  margin-top:18px;
+                  margin-bottom:12px;
+                  font-size:15px;
+                  font-weight:700;
+                  color:#ffd37d;
+                ">
+                  ➕ ADDED EMPLOYEES
+                </div>
+                `;
 
-              msg += addedEmployees.map((e) => `🧑‍💼 ${e.employee} (${e.month})`).join('\n');
+              msg += addedEmployees
+                .map(
+                  (e) => `
+                    <div style="
+                      padding:10px 14px;
+                      margin-bottom:10px;
+                      border-radius:14px;
+                      background:rgba(255,255,255,0.05);
+                      border:1px solid rgba(255,255,255,0.08);
+                    ">
+                      🧑‍💼 ${e.employee}
+
+                      <span style="
+                        opacity:.7;
+                        font-size:12px;
+                      ">
+                        (${e.month})
+                      </span>
+                    </div>
+                    `
+                )
+                .join('');
             }
 
             /* =========================
             🔥 STOP LOADER
             ========================= */
 
-            stopPBProgress();
-
+            if (loaderStarted) {
+              stopPBProgress();
+            }
             clearSyncStatus('pbDatabase');
 
             /* =========================
@@ -12496,7 +12780,6 @@ DOM SHORTCUTS
             loadTable('pb', 'PBDB')
               .then(() => {
                 applyFilters();
-
                 refreshPBView();
               })
               .catch(console.error);
@@ -12515,10 +12798,11 @@ DOM SHORTCUTS
           ========================= */
 
           if (result.status === 'conflict') {
-            stopPBProgress();
+            if (loaderStarted) {
+              stopPBProgress();
+            }
 
             clearSyncStatus('pbDatabase', 'db', false);
-
             showCustomAlert('⚠️ Some rows were modified by another user.\nPlease reload and try again.');
 
             return;
@@ -12528,7 +12812,9 @@ DOM SHORTCUTS
           ❌ ERROR
           ========================= */
 
-          stopPBProgress();
+          if (loaderStarted) {
+            stopPBProgress();
+          }
 
           clearSyncStatus('pbDatabase', 'db', false);
 
@@ -12536,7 +12822,9 @@ DOM SHORTCUTS
         } catch (err) {
           console.error(err);
 
-          stopPBProgress();
+          if (loaderStarted) {
+            stopPBProgress();
+          }
 
           clearSyncStatus('pbDatabase', 'db', false);
 
@@ -24702,7 +24990,31 @@ DOM SHORTCUTS
         console.clear();
       }
 
-      id('logoutBtn')?.addEventListener('click', logout);
+      //id('logoutBtn')?.addEventListener('click', logout);
+
+      // 🔥 LOGOUT BUTTON CLICK
+      id('logoutBtn')?.addEventListener('click', () => {
+        id('logoutConfirm')?.classList.remove('hidden');
+      });
+
+      // ❌ NO BUTTON
+      id('logoutNoBtn')?.addEventListener('click', () => {
+        id('logoutConfirm')?.classList.add('hidden');
+      });
+
+      // ✅ YES BUTTON
+      id('logoutYesBtn')?.addEventListener('click', () => {
+        id('logoutConfirm')?.classList.add('hidden');
+
+        // 🔥 YOUR LOGOUT LOGIC
+        //logout();
+
+        // OR:
+        location.reload();
+
+        // OR:
+        // window.location.href = 'login.html';
+      });
     </script>
   </body>
 </html>
