@@ -1337,6 +1337,352 @@ def update_duty():
         }), 500
 
 
+# =========================================
+# 🔥 UPDATE EB DATA
+# =========================================
+
+@app.route("/eb/update", methods=["POST"])
+def update_eb():
+
+    try:
+
+        req_data = request.get_json()
+
+        rows = req_data.get("data", [])
+
+        print("🔥 EB UPDATE HIT")
+        print("🔥 ROW COUNT:", len(rows))
+
+        if not rows:
+
+            return jsonify({
+                "status": "error",
+                "message": "No data received"
+            }), 400
+
+        # =========================================
+        # 🔥 READ SHEET
+        # =========================================
+
+        all_values = eb_sheet.get_all_values()
+
+        if not all_values:
+
+            return jsonify({
+                "status": "error",
+                "message": "Sheet empty"
+            }), 400
+
+        headers = all_values[0]
+
+        data_rows = all_values[1:]
+
+        # =========================================
+        # 🔥 COLUMN INDEXES
+        # =========================================
+
+        month_idx = (
+            headers.index("Month-Year")
+            if "Month-Year" in headers else -1
+        )
+
+        station_idx = (
+            headers.index("EB Station")
+            if "EB Station" in headers else -1
+        )
+
+        ref_idx = (
+            headers.index("Reference")
+            if "Reference" in headers else -1
+        )
+
+        # =========================================
+        # 🔥 CLEAN FUNCTION
+        # =========================================
+
+        def clean(val):
+
+            return (
+                str(val or "")
+                .strip()
+                .lower()
+            )
+
+        # =========================================
+        # 🔥 EXISTING ROW MAP
+        # KEY:
+        # Month-Year + Station + Reference
+        # =========================================
+
+        row_map = {}
+
+        for i, r in enumerate(
+            data_rows,
+            start=2
+        ):
+
+            key = ""
+
+            # 🔥 MONTH
+            if month_idx >= 0:
+
+                key += clean(
+                    r[month_idx]
+                    if len(r) > month_idx
+                    else ""
+                )
+
+            # 🔥 STATION
+            if station_idx >= 0:
+
+                key += (
+                    "|" +
+                    clean(
+                        r[station_idx]
+                        if len(r) > station_idx
+                        else ""
+                    )
+                )
+
+            # 🔥 REFERENCE
+            if ref_idx >= 0:
+
+                key += (
+                    "|" +
+                    clean(
+                        r[ref_idx]
+                        if len(r) > ref_idx
+                        else ""
+                    )
+                )
+
+            row_map[key] = {
+
+                "row_num": i,
+
+                "row_data": r
+            }
+
+        print(
+            "🔥 EXISTING ROWS:",
+            len(row_map)
+        )
+
+        # =========================================
+        # 🔥 TRACKERS
+        # =========================================
+
+        updates = []
+
+        new_rows = []
+
+        updated_keys = []
+
+        added_keys = []
+
+        skipped_keys = []
+
+        # =========================================
+        # 🔥 PROCESS ROWS
+        # =========================================
+
+        for obj in rows:
+
+            # =====================================
+            # 🔥 UNIQUE KEY
+            # =====================================
+
+            key = ""
+
+            # 🔥 MONTH
+            if month_idx >= 0:
+
+                key += clean(
+                    obj.get(
+                        "Month-Year"
+                    )
+                )
+
+            # 🔥 STATION
+            if station_idx >= 0:
+
+                key += (
+                    "|" +
+                    clean(
+                        obj.get(
+                            "EB Station"
+                        )
+                    )
+                )
+
+            # 🔥 REFERENCE
+            if ref_idx >= 0:
+
+                key += (
+                    "|" +
+                    clean(
+                        obj.get(
+                            "Reference"
+                        )
+                    )
+                )
+
+            # =====================================
+            # 🔥 BUILD ROW
+            # =====================================
+
+            row_data = []
+
+            for h in headers:
+
+                row_data.append(
+                    obj.get(h, "")
+                )
+
+            # =====================================
+            # 🔥 UPDATE EXISTING
+            # =====================================
+
+            if key in row_map:
+
+                existing = row_map[key]
+
+                row_num = existing["row_num"]
+
+                existing_row = existing["row_data"]
+
+                # =================================
+                # 🔥 CHECK CHANGES
+                # =================================
+
+                existing_clean = [
+                    clean(x)
+                    for x in existing_row
+                ]
+
+                new_clean = [
+                    clean(x)
+                    for x in row_data
+                ]
+
+                # =================================
+                # ⏭ NO CHANGE
+                # =================================
+
+                if existing_clean == new_clean:
+
+                    skipped_keys.append(
+                        key
+                    )
+
+                    print(
+                        "⏭ SKIPPED:",
+                        key
+                    )
+
+                    continue
+
+                # =================================
+                # 🔥 UPDATE
+                # =================================
+
+                updates.append({
+
+                    "range":
+                    f"A{row_num}",
+
+                    "values":
+                    [row_data]
+
+                })
+
+                updated_keys.append(
+                    key
+                )
+
+            # =====================================
+            # 🔥 NEW ROW
+            # =====================================
+
+            else:
+
+                new_rows.append(
+                    row_data
+                )
+
+                added_keys.append(
+                    key
+                )
+
+        # =========================================
+        # 🔥 APPLY UPDATES
+        # =========================================
+
+        if updates:
+
+            eb_sheet.batch_update(
+                updates,
+                value_input_option="USER_ENTERED"
+            )
+
+            print(
+                "✅ UPDATED:",
+                len(updates)
+            )
+
+        # =========================================
+        # 🔥 APPEND NEW ROWS
+        # =========================================
+
+        if new_rows:
+
+            eb_sheet.append_rows(
+                new_rows,
+                value_input_option="USER_ENTERED"
+            )
+
+            print(
+                "✅ ADDED:",
+                len(new_rows)
+            )
+
+        # =========================================
+        # 🔥 SUCCESS
+        # =========================================
+
+        return jsonify({
+
+            "status":
+            "success",
+
+            "updated":
+            updated_keys,
+
+            "added":
+            added_keys,
+
+            "skipped":
+            skipped_keys
+        })
+
+    except Exception as e:
+
+        print(
+            "❌ EB UPDATE ERROR:",
+            str(e)
+        )
+
+        return jsonify({
+
+            "status":
+            "error",
+
+            "message":
+            str(e)
+
+        }), 500
+
+
 @app.route("/health")
 def health():
     return "OK", 200
