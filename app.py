@@ -1391,11 +1391,6 @@ def update_eb():
             if "EB Station" in headers else -1
         )
 
-        ref_idx = (
-            headers.index("Reference")
-            if "Reference" in headers else -1
-        )
-
         # =========================================
         # 🔥 CLEAN FUNCTION
         # =========================================
@@ -1408,60 +1403,33 @@ def update_eb():
                 .lower()
             )
 
-        # =========================================
-        # 🔥 EXISTING ROW MAP
-        # KEY:
-        # Month-Year + Station + Reference
-        # =========================================
+        # =====================================
+        # 🔥 UNIQUE KEY
+        # Month + Station
+        # =====================================
 
-        row_map = {}
+        key = ""
 
-        for i, r in enumerate(
-            data_rows,
-            start=2
-        ):
+        # 🔥 MONTH
+        if month_idx >= 0:
 
-            key = ""
-
-            # 🔥 MONTH
-            if month_idx >= 0:
-
-                key += clean(
-                    r[month_idx]
-                    if len(r) > month_idx
-                    else ""
+            key += clean(
+                obj.get(
+                    "Month-Year"
                 )
+            )
 
-            # 🔥 STATION
-            if station_idx >= 0:
+        # 🔥 STATION
+        if station_idx >= 0:
 
-                key += (
-                    "|" +
-                    clean(
-                        r[station_idx]
-                        if len(r) > station_idx
-                        else ""
+            key += (
+                "|" +
+                clean(
+                    obj.get(
+                        "EB Station"
                     )
                 )
-
-            # 🔥 REFERENCE
-            if ref_idx >= 0:
-
-                key += (
-                    "|" +
-                    clean(
-                        r[ref_idx]
-                        if len(r) > ref_idx
-                        else ""
-                    )
-                )
-
-            row_map[key] = {
-
-                "row_num": i,
-
-                "row_data": r
-            }
+            )
 
         print(
             "🔥 EXISTING ROWS:",
