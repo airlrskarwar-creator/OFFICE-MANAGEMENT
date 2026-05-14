@@ -79,10 +79,10 @@
       select:focus,
       input:focus {
         outline: none;
-        border-color: #6366f1;
-        background-color: #151a36;
+        border-color: #44d0ff;
+        background-color: rgba(43, 82, 145);
         color: white;
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 0 2px #75d6ff;
         background-image: url("data:image/svg+xml;utf8,<svg fill='%23ffffff' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
       }
 
@@ -1178,16 +1178,24 @@
       ========================= */
 
       .app {
-        display: none;
         height: 100vh;
         overflow: hidden;
-        transition: all 0.45s ease;
+        opacity: 0;
+        visibility: hidden;
         pointer-events: none;
+        transform: scale(0.985);
+
+        transition:
+          opacity 0.35s ease,
+          transform 0.35s ease,
+          visibility 0.35s;
       }
 
       .app.loaded {
-        display: block;
+        opacity: 1;
+        visibility: visible;
         pointer-events: auto;
+        transform: scale(1);
       }
 
       /* =============SIDEBAR=========== */
@@ -3132,17 +3140,20 @@
         flex-direction: column;
         text-align: center;
         justify-content: center;
-        box-shadow: 0px 0px 2px 1px gray;
         border-radius: 8px;
         width: 280px;
-        padding: 2px;
-        background: rgb(215, 255, 201);
+        padding: 4px 4px 4px 10px;
+        color: white !important;
+        box-shadow: inset 0 -4px 0 0 #44d0ff;
+        background: rgba(43, 82, 145);
       }
 
       .itPanelDiv label,
       .pensionPanelDiv label {
         font-weight: bold;
-        font-size: 11px;
+        font-size: 12px;
+        color: white;
+        padding-bottom: 2px;
       }
 
       .itPanelDiv span,
@@ -3151,8 +3162,8 @@
         text-align: center;
         font-size: 20px;
         font-weight: bold;
-        padding: 2px;
         line-height: 25px;
+        color: white;
       }
 
       .katex {
@@ -3735,6 +3746,80 @@
         cursor: not-allowed;
       }
 
+      #SBGPanel {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        height: 40px;
+        justify-content: space-between;
+        padding: 4px 8px;
+        overflow: hidden;
+      }
+
+      #ITInfoPanel {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 2px 8px 4px 8px;
+        overflow: hidden;
+        box-shadow: inset 0 -1px 0 0 #44d0ff;
+        height: 55px;
+        overflow: hidden;
+      }
+
+      #PensionInfoPanel {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 2px 8px 4px 8px;
+        overflow: hidden;
+        box-shadow: none;
+        height: 55px;
+        overflow: hidden;
+      }
+
+      .pensionMainInputDiv {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 2px 8px 4px 8px;
+        box-shadow: inset 0 -1px 0 0 #44d0ff;
+        height: 30px;
+        overflow: hidden;
+      }
+
+      .pensionMainInputDiv div {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      #SBGPanel div {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: space-between;
+        height: 32px;
+        align-items: center;
+      }
+
+      .SBGinputs {
+        font-size: 12px;
+        font-weight: bold;
+        width: 150px;
+        border-radius: 6px;
+        text-align: center;
+        height: 100%;
+        color: white !important;
+        box-shadow: inset 0 -4px 0 0 #44d0ff;
+        background: rgba(43, 82, 145) !important;
+      }
+
       /* ===============================================
         RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
       =================================================== */
@@ -3951,6 +4036,28 @@
           right: 0px;
           justify-content: center;
           top: 0;
+        }
+
+        #SBGPanel {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+        #SBGPanel div {
+          min-height: 32px;
+        }
+
+        #ITInfoPanel,
+        #PensionInfoPanel {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+
+        .pensionMainInputDiv {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
         }
       }
     </style>
@@ -4834,7 +4941,7 @@
             </div>
           </div>
           <input type="hidden" id="paidMonthCountInput" />
-          <div id="ITInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between; box-shadow: 0 2px 0 0 rgba(171, 171, 171, 0.696); padding: 2px; margin: 2px">
+          <div id="ITInfoPanel">
             <div class="itPanelDiv">
               <label>Best Regime Option</label>
               <span id="PanelRegime">-</span>
@@ -4890,7 +4997,7 @@
                 </div>
               </div>
             </div>
-            <div id="PensionInfoPanel" style="display: flex; flex-direction: row; gap: 10px; justify-content: space-between">
+            <div id="PensionInfoPanel">
               <div class="pensionPanelDiv">
                 <label>Leave Encashment</label>
                 <span id="PanelLeaveEncash">0</span>
@@ -4912,49 +5019,36 @@
                 <span id="PanelResidualPension">0</span>
               </div>
             </div>
-            <table style="height: 38px; box-shadow: 0 2px 0 0 rgba(171, 171, 171, 0.696)">
-              <colgroup>
-                <col style="width: 100px" />
-                <col style="width: 500px" />
-                <col style="width: 250px" />
-                <col style="width: 100px" />
-                <col style="width: 90px" />
-                <col style="width: 100px" />
-                <col style="width: 90px" />
-              </colgroup>
-              <tr>
-                <td style="padding-left: 10px; font-weight: bold">Calculation For :</td>
-                <td style="padding-left: 10px">
-                  <div style="display: flex; align-items: center; gap: 6px">
-                    <select id="PensionFor" style="min-width: 210px; max-width: 210px">
-                      <option value="Superannuation">Superannuation</option>
-                      <option value="VRS">VRS</option>
-                      <option value="FamPen_inService">Family Pension (in service)</option>
-                      <option value="FamPen_afterService">Family Pension (after retirement)</option>
-                    </select>
-                    <label style="margin-left: 10px; font-weight: bold">Last Working Date :</label>
-                    <input disabled type="date" id="VRS_Death_Date" style="width: 110px" />
-                  </div>
-                </td>
-                <td style="text-align: right; padding-left: 10px">
-                  <div style="display: flex; align-items: center; gap: 6px">
-                    <input type="checkbox" id="CommutationOpted" checked style="height: 18px; width: 18px; margin: 0" />
-                    <label for="CommutationOpted" style="margin: 0; margin-left: 2px; font-weight: bold">Commutation Option :</label>
-                    <select id="CommutationOption" style="width: 60px; min-width: 60px"></select>
-                  </div>
-                </td>
-                <td style="padding-left: 10px; font-weight: bold">EL Available :</td>
-                <td>
-                  <input type="number" id="PensionEL" value="300" />
-                </td>
-                <td style="padding-left: 10px; font-weight: bold">HPL Available :</td>
-                <td>
-                  <input type="number" id="PensionHPL" value="200" />
-                </td>
-              </tr>
-            </table>
+            <div class="pensionMainInputDiv">
+              <div>
+                Calculation For :
+                <select id="PensionFor" style="min-width: 210px; max-width: 210px">
+                  <option value="Superannuation">Superannuation</option>
+                  <option value="VRS">VRS</option>
+                  <option value="FamPen_inService">Family Pension (in service)</option>
+                  <option value="FamPen_afterService">Family Pension (after retirement)</option>
+                </select>
+                <div>
+                  <label style="margin-left: 10px; font-weight: bold">Last Working Date :</label>
+                  <input disabled type="date" id="VRS_Death_Date" style="width: 110px" />
+                </div>
+              </div>
+              <div>
+                <input type="checkbox" id="CommutationOpted" checked style="height: 18px; width: 18px; margin: 0" />
+                <label for="CommutationOpted" style="margin: 0; margin-left: 2px; font-weight: bold">Commutation Option :</label>
+                <select id="CommutationOption" style="width: 60px; min-width: 60px"></select>
+              </div>
+              <div>
+                EL Available :
+                <input type="number" id="PensionEL" value="300" />
+              </div>
+              <div>
+                HPL Available :
+                <input type="number" id="PensionHPL" value="200" />
+              </div>
+            </div>
           </div>
-          <div class="PensionTableWrapper" style="height: calc(100vh - 195px)"></div>
+          <div class="PensionTableWrapper" style="height: calc(100vh - 200px)"></div>
         </div>
         <div class="SectionPage" id="BudgetPage" style="display: none">
           <div class="header">
@@ -4996,33 +5090,31 @@
               </button>
             </div>
           </div>
-          <table id="SBGPanel" style="width: 100%; padding: 4px; margin: 5px; border-radius: 8px; border: solid 1px rgb(189, 189, 189); font-weight: bold">
-            <tr>
-              <td>Sanctioned SBG</td>
-              <td>
-                <input disabled id="SBGsanctioned" style="font-size: 12px; font-weight: bold; width: 150px" />
-              </td>
-              <td>SBG Utilised</td>
-              <td>
-                <input disabled id="SBGutilised" style="font-size: 12px; font-weight: bold; width: 150px" />
-              </td>
-              <td>Available SBG</td>
-              <td>
-                <input disabled id="SBGavailable" style="font-size: 12px; font-weight: bold; width: 150px" />
-              </td>
-              <td>Calculated SBG</td>
-              <td>
-                <input disabled id="SBGcalculated" style="font-size: 12px; font-weight: bold; width: 150px" />
-              </td>
-              <td>Revised SBG</td>
-              <td>
-                <input disabled id="SBGrevised" style="font-size: 12px; font-weight: bold; width: 150px" />
-              </td>
-            </tr>
-          </table>
+          <div id="SBGPanel">
+            <div>
+              Sanctioned SBG
+              <input disabled id="SBGsanctioned" class="SBGinputs" />
+            </div>
+            <div>
+              Utilised SBG :
+              <input disabled id="SBGutilised" class="SBGinputs" />
+            </div>
+            <div>
+              Available SBG :
+              <input disabled id="SBGavailable" class="SBGinputs" />
+            </div>
+            <div>
+              Required SBG :
+              <input disabled id="SBGcalculated" class="SBGinputs" />
+            </div>
+            <div>
+              Revised SBG :
+              <input disabled id="SBGrevised" class="SBGinputs" />
+            </div>
+          </div>
           <div style="display: flex">
             <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none"></div>
-            <div class="BudgetTableWrapper" id="BudgetTableWrapper" style="max-height: calc(100vh - 140px)"></div>
+            <div class="BudgetTableWrapper" id="BudgetTableWrapper" style="max-height: calc(100vh - 190px)"></div>
           </div>
         </div>
         <div class="SectionPage" id="DGlogPage" style="display: none">
@@ -5346,8 +5438,8 @@
     </div>
     <script>
       /* =========================
-DOM SHORTCUTS
-========================= */
+      DOM SHORTCUTS
+      ========================= */
       const id = document.getElementById.bind(document);
       const qs = document.querySelector.bind(document);
       const qsa = document.querySelectorAll.bind(document);
@@ -5372,6 +5464,80 @@ DOM SHORTCUTS
       let ebData = {};
       let dutyData = {};
       let currentYear = '';
+
+      /* ===========================================================================================
+                          🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
+    ================================================================================================== */
+
+      window.addEventListener('resize', moveIndicator);
+
+      document.addEventListener('visibilitychange', () => {
+        // 🔥 TAB BECAME ACTIVE
+        if (!document.hidden && window.loaderCompleted) {
+          hideLoader();
+
+          window.loaderCompleted = false;
+        }
+      });
+
+      /* =========================================
+      🔥 GLOBAL APP STATE
+      ========================================= */
+
+      window.appDataLoading = false;
+      window.appDataLoaded = false;
+      window.backgroundLoadPromise = null;
+
+      /* =========================================
+      🔥 DOM READY
+      ========================================= */
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        Chart.register(xAxisPillPlugin);
+        Chart.register(columnLabelPlugin);
+
+        // =========================================
+        // 🔥 LOGIN PAGE STAYS VISIBLE
+        // =========================================
+
+        hideLoader();
+        id('loginPage').style.display = 'flex';
+
+        id('mainPage').style.display = 'none';
+
+        // 🔥 APP READY
+        qs('.app')?.classList.add('loaded');
+
+        // =========================================
+        // 🔥 LOAD EMP FOR LOGIN
+        // =========================================
+
+        await loadTable('emp', 'EmpDB', false);
+
+        populateloginStationDropdown();
+
+        // =========================================
+        // 🔥 START BACKGROUND LOADING
+        // =========================================
+
+        window.appDataLoading = true;
+
+        window.backgroundLoadPromise = (async () => {
+          try {
+            console.log('🚀 Background loading started');
+
+            await loadAllData(false);
+
+            window.appDataLoaded = true;
+
+            console.log('✅ Background loading completed');
+          } catch (err) {
+            console.error('❌ Background loading failed', err);
+          } finally {
+            window.appDataLoading = false;
+          }
+        })();
+      });
 
       // Prevent infinite reload loop
       if (!sessionStorage.getItem('reloaded')) {
@@ -5673,36 +5839,73 @@ DOM SHORTCUTS
         }, 0);
       });
 
-      // ========================= SUCCESS HANDLER ========================= //
       /* =========================================
-    LOGIN SUCCESS
-  ========================================= */
-
+        LOGIN SUCCESS
+      ========================================= */
       async function loginSuccess(user, displayName, loginStation) {
         // 🔥 CURRENT USER
         window.currentUser = user;
+
+        // =====================================
         // 🔥 PAGE SWITCH
+        // =====================================
+
         id('loginPage').style.display = 'none';
 
         id('mainPage').style.display = 'flex';
+
+        qs('.app')?.classList.add('loaded');
+
         /* =====================================
-        LOAD REMAINING DATA
+        🔥 IF DATA STILL LOADING
+        ===================================== */
+
+        if (!window.appDataLoaded) {
+          showLoader();
+
+          try {
+            if (window.backgroundLoadPromise) {
+              await window.backgroundLoadPromise;
+            }
+          } catch (err) {
+            console.error('❌ Background loading failed', err);
+          }
+
+          hideLoader();
+        }
+
+        /* =====================================
+        🔥 INIT APP
         ===================================== */
 
         initUI();
-        await loadAllData();
+
         initAfterData();
+
         initBindings();
+
         initDefaultView();
+
         initPostSetup();
+
         applyUserAccess(user);
+
+        // =====================================
         // 🔥 WELCOME TEXT
+        // =====================================
+
         id('welcomeUser').textContent = `Welcome ${displayName}`;
 
-        // 🔥 APPLY STATION + USER CONTROL
+        // =====================================
+        // 🔥 APPLY USER CONTROL
+        // =====================================
+
         applyStation_UserControl(loginStation, user, user);
 
+        // =====================================
         // 🔥 RESET MENU
+        // =====================================
+
         qsa('.menu-btn').forEach((btn) => {
           removeClass(btn, 'active');
         });
@@ -5711,7 +5914,10 @@ DOM SHORTCUTS
           hide(page);
         });
 
-        // 🔥 SHOW ONLY DASHBOARD
+        // =====================================
+        // 🔥 SHOW DASHBOARD
+        // =====================================
+
         show('DashBoard');
 
         const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
@@ -5720,7 +5926,10 @@ DOM SHORTCUTS
           addClass(dashboardBtn, 'active');
         }
 
-        // 🔥 APPLY LOGIN STATION TO ALL PAGES
+        // =====================================
+        // 🔥 APPLY LOGIN STATION
+        // =====================================
+
         setTimeout(() => {
           // 🔥 SYNC ALL STATION DROPDOWNS
           syncSelect('station', loginStation);
@@ -5730,7 +5939,10 @@ DOM SHORTCUTS
 
           applyFilters();
 
+          // =====================================
           // 🔥 ZONE LOGIC
+          // =====================================
+
           const zone = getCityZone(loginStation) || {};
 
           const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
@@ -5743,7 +5955,10 @@ DOM SHORTCUTS
             percent += 1;
           }
 
+          // =====================================
           // 🔥 APPLY ZONE VALUES
+          // =====================================
+
           ['PayBillPage', 'EmpPage'].forEach((page) => {
             if (id(`${page}_TAZone`)) {
               id(`${page}_TAZone`).value = val(zone.ta);
@@ -5761,6 +5976,14 @@ DOM SHORTCUTS
           recalculateAllRows();
 
           refreshPBView();
+        }, 0);
+
+        // =====================================
+        // 🔥 LOCK REQUIREMENT TABLE
+        // =====================================
+
+        setTimeout(() => {
+          lockRequirementTableForUser(user);
         }, 0);
       }
 
@@ -5930,32 +6153,6 @@ DOM SHORTCUTS
           td.classList.toggle('disabled-cell', !isCurrentUser);
         });
       }
-
-      /* ===========================================================================================
-                          🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
-    ================================================================================================== */
-
-      window.addEventListener('resize', moveIndicator);
-
-      document.addEventListener('visibilitychange', () => {
-        // 🔥 TAB BECAME ACTIVE
-        if (!document.hidden && window.loaderCompleted) {
-          hideLoader();
-
-          window.loaderCompleted = false;
-        }
-      });
-
-      /* =========================================
-    DOM READY
-  ========================================= */
-
-      document.addEventListener('DOMContentLoaded', async () => {
-        Chart.register(xAxisPillPlugin);
-        Chart.register(columnLabelPlugin);
-        await loadTable('emp', 'EmpDB', false);
-        populateloginStationDropdown();
-      });
 
       function initUI() {
         initButtons();
@@ -6426,80 +6623,110 @@ DOM SHORTCUTS
         id('customAlert')?.classList.add('hidden');
       });
 
-      /* =========================================================
-        LOAD ALL DATA WITH LOADER
-      ========================================================= */
+      async function loadAllData(showLoadingUI = true) {
+        // =========================================
+        // 🔥 SHOW LOADER ONLY WHEN NEEDED
+        // =========================================
 
-      async function loadAllData() {
-        showLoader();
+        if (showLoadingUI) {
+          showLoader();
+        }
 
         let visualProgress = 0;
 
-        // ===================🔥 TASKS====================//
-
         const tasks = [
+          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB'), loadTable('city', 'CityZoneDB'), loadTable('comm', 'CommFactDB'), loadTable('it', 'ITDB')])],
           ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart')],
-          ['Loading Pay Bill Data...', () => loadTable('pb', 'PBDB')],
-          ['Loading CPC Data...', () => loadTable('cpc', 'CPC7DB')],
+          [
+            'Loading Pay Bill Data...',
+            async () => {
+              // 🔥 WAIT PB LOAD
+              await Promise.all([loadTable('cpc', 'CPC7DB'), loadTable('pb', 'PBDB')]);
+              // 🔥 NOW SAFE
+              buildEmpDBWithCalc();
+              // 🔥 NOW SAFE
+              await syncPBtoSBG();
+            }
+          ],
           ['Loading DG Log...', () => loadTable('dg', 'DGlog')],
           ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog')],
           ['Loading Electricity Log...', () => loadTable('eb', 'EBlog')],
-          ['Calculating Employee Data...', () => buildEmpDBWithCalc()],
-          ['Syncing Budget Data...', () => syncPBtoSBG(), 'sync'],
           ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB')],
           ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB')],
+
           [
             'Rendering Budget Tables...',
             () => {
               renderBudgetfromPBData();
               renderFilterMainBudgetExpTable();
             }
-          ],
-
-          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB'), loadTable('city', 'CityZoneDB'), loadTable('comm', 'CommFactDB'), loadTable('it', 'ITDB')])]
+          ]
         ];
 
-        // ========================= 🔥 ANIMATE=====================================//
+        /* =========================================
+        🔥 BACKGROUND MODE
+        ========================================= */
+
+        if (!showLoadingUI) {
+          await Promise.all(tasks.map(([_, task]) => Promise.resolve().then(task)));
+
+          return;
+        }
+
+        /* =========================================
+        🔥 LOADER MODE
+        ========================================= */
 
         function animateProgress(target, apiName, type = 'download') {
           return new Promise((resolve) => {
             const start = visualProgress;
             const diff = target - start;
             const startTime = Date.now();
+
             const timer = setInterval(() => {
               const progress = Math.min((Date.now() - startTime) / 450, 1);
+
               const eased = 1 - Math.pow(1 - progress, 3);
+
               visualProgress = start + diff * eased;
+
               updateLoader(visualProgress, apiName, type);
 
               if (progress >= 1) {
                 clearInterval(timer);
+
                 visualProgress = target;
+
                 updateLoader(target, apiName, type);
+
                 resolve();
               }
             }, 16);
           });
         }
 
-        // ===========================🔥 RUN TASKS ===============================//
+        /* =========================================
+        🔥 RUN TASKS
+        ========================================= */
 
         for (let i = 0; i < tasks.length; i++) {
           const [title, task, type = 'download'] = tasks[i];
+
           const target = ((i + 1) / tasks.length) * 100;
+
           await Promise.all([animateProgress(target, title, type), Promise.resolve().then(task)]);
         }
 
-        // =========================🔥 COMPLETE ==============================//
+        /* =========================================
+        🔥 COMPLETE
+        ========================================= */
 
         await animateProgress(100, 'Application Ready');
 
         updateLoader(100, 'Application Ready');
 
-        // 🔥 MARK COMPLETE
         window.loaderCompleted = true;
 
-        // 🔥 ACTIVE TAB → HIDE NOW
         if (!document.hidden) {
           hideLoader();
 
@@ -6538,8 +6765,8 @@ DOM SHORTCUTS
       }
 
       /* =========================
-🔥 UNIVERSAL DATE UTILITY
-========================= */
+      🔥 UNIVERSAL DATE UTILITY
+      ========================= */
 
       const DateUtil = (() => {
         const monthMap = {
@@ -15396,20 +15623,41 @@ DOM SHORTCUTS
       let isSyncRunning = false;
 
       async function syncPBtoSBG() {
+        // 🔥 PREVENT MULTIPLE RUNS
         if (isSyncRunning) return;
+
+        // 🔥 WAIT FOR PB DATA
+        if (!pbData || !pbData.headers || !pbData.rows || !pbData.rows.length) {
+          console.warn('⏳ PB data not ready for SBG sync');
+
+          return;
+        }
+
         isSyncRunning = true;
 
         try {
           const pbRows = buildPBBudgetRows();
 
+          // 🔥 NO VALID ROWS
+          if (!pbRows || !pbRows.length) {
+            console.warn('⚠ No PB budget rows generated');
+
+            return;
+          }
+
           await updateSBGSheet(pbRows, 'replace');
 
           await reloadSBGExpData();
+
           await loadSBGData();
+
           await updateBudgetDBFromSBGExp();
+
           await onLoadCalculateAndUpdateSBGFromExp();
+
+          console.log('✅ SBG Budget Sync Success');
         } catch (err) {
-          console.error('SBG Sync Failed:', err);
+          console.error('❌ SBG Sync Failed:', err);
         } finally {
           isSyncRunning = false;
         }
@@ -19032,9 +19280,9 @@ DOM SHORTCUTS
         const panelITtobeRecovered = Math.min(newPendingTDS, oldPendingTDS);
 
         if (panelITtobeRecovered <= 0) {
-          id('PanelITHighlight').style.background = '#8cffb8';
+          id('PanelITHighlight').style.background = '#00a13d';
         } else if (panelITtobeRecovered > 0) {
-          id('PanelITHighlight').style.background = '#ffb18c';
+          id('PanelITHighlight').style.background = '#ff4040';
         }
 
         id('PanelGross').innerText = formatCurrency(bestGross);
@@ -19325,9 +19573,9 @@ DOM SHORTCUTS
             id('PanelIT').innerText = formatCurrency(panelITtobeRecovered);
 
             if (panelITtobeRecovered <= 0) {
-              id('PanelITHighlight').style.background = '#8cffb8';
+              id('PanelITHighlight').style.background = '#00a13d';
             } else if (panelITtobeRecovered > 0) {
-              id('PanelITHighlight').style.background = '#ffb18c';
+              id('PanelITHighlight').style.background = '#ff4040';
             }
 
             // ✅ UPDATE TABLE
@@ -19984,7 +20232,7 @@ DOM SHORTCUTS
             id('ITInfoPanel')
               .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
-                el.style.background = 'rgb(215, 255, 201)';
+                el.style.background = 'rgba(43, 82, 145)';
               });
           }
 
@@ -20121,7 +20369,7 @@ DOM SHORTCUTS
             id('ITInfoPanel')
               .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
-                el.style.background = 'rgb(215, 255, 201)';
+                el.style.background = 'rgba(0, 196, 7)';
               });
             wrapper.innerHTML = ''; // 🔥 clear table UI
           }
@@ -20406,7 +20654,7 @@ DOM SHORTCUTS
             id('ITInfoPanel')
               .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
-                el.style.background = 'rgb(215, 255, 201)';
+                el.style.background = 'rgba(0, 196, 7)';
               });
           }
 
@@ -20502,7 +20750,7 @@ DOM SHORTCUTS
             id('ITInfoPanel')
               .querySelectorAll('.itPanelDiv')
               .forEach((el) => {
-                el.style.background = 'rgb(215, 255, 201)';
+                el.style.background = 'rgba(0, 196, 7)';
               });
             wrapper.innerHTML = ''; // 🔥 clear table UI
           }
@@ -25302,7 +25550,7 @@ DOM SHORTCUTS
         if (itWrapper) itWrapper.innerHTML = '';
         qsa('.itPanelDiv span').forEach((s) => (s.textContent = s.id === 'PanelRegime' ? '-' : '0'));
         id('salaryMode').checked = true;
-        id('PanelITHighlight').style.background = 'rgb(215, 255, 201)';
+        id('PanelITHighlight').style.background = 'rgba(0, 196, 7)';
 
         if (pensionWrapper) pensionWrapper.innerHTML = '';
         qsa('.pensionPanelDiv span').forEach((s) => (s.textContent = '0'));
