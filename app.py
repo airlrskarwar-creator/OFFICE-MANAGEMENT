@@ -1354,7 +1354,6 @@ def update_eb():
         print("🔥 ROW COUNT:", len(rows))
 
         if not rows:
-
             return jsonify({
                 "status": "error",
                 "message": "No data received"
@@ -1367,88 +1366,60 @@ def update_eb():
         all_values = eb_sheet.get_all_values()
 
         if not all_values:
-
             return jsonify({
                 "status": "error",
                 "message": "Sheet empty"
             }), 400
 
         headers = all_values[0]
-
         data_rows = all_values[1:]
 
         # =========================================
         # 🔥 COLUMN INDEXES
         # =========================================
 
-        month_idx = (
-            headers.index("Month-Year")
-            if "Month-Year" in headers else -1
-        )
-
-        station_idx = (
-            headers.index("EB Station")
-            if "EB Station" in headers else -1
-        )
+        month_idx = headers.index("Month-Year") if "Month-Year" in headers else -1
+        station_idx = headers.index("EB Station") if "EB Station" in headers else -1
 
         # =========================================
         # 🔥 CLEAN FUNCTION
         # =========================================
 
         def clean(val):
+            return str(val or "").strip().lower()
 
-            return (
-                str(val or "")
-                .strip()
-                .lower()
-            )
+        # =========================================
+        # 🔥 BUILD EXISTING ROW MAP
+        # =========================================
 
-        # =====================================
-        # 🔥 UNIQUE KEY
-        # Month + Station
-        # =====================================
+        row_map = {}
 
-        key = ""
+        for i, row in enumerate(data_rows, start=2):
 
-        # 🔥 MONTH
-        if month_idx >= 0:
+            key = ""
 
-            key += clean(
-                obj.get(
-                    "Month-Year"
-                )
-            )
+            if month_idx >= 0:
+                key += clean(row[month_idx] if month_idx < len(row) else "")
 
-        # 🔥 STATION
-        if station_idx >= 0:
+            if station_idx >= 0:
+                key += "|" + clean(row[station_idx] if station_idx < len(row) else "")
 
-            key += (
-                "|" +
-                clean(
-                    obj.get(
-                        "EB Station"
-                    )
-                )
-            )
+            row_map[key] = {
+                "row_num": i,
+                "row_data": row
+            }
 
-        print(
-            "🔥 EXISTING ROWS:",
-            len(row_map)
-        )
+        print("🔥 EXISTING ROWS:", len(row_map))
 
         # =========================================
         # 🔥 TRACKERS
         # =========================================
 
         updates = []
-
         new_rows = []
-
-        updated_keys = []
-
-        added_keys = []
-
-        skipped_keys = []
+        updated_rows = []
+        added_rows = []
+        skipped_rows = []
 
         # =========================================
         # 🔥 PROCESS ROWS
@@ -1456,56 +1427,15 @@ def update_eb():
 
         for obj in rows:
 
-            # =====================================
-            # 🔥 UNIQUE KEY
-            # =====================================
-
             key = ""
 
-            # 🔥 MONTH
             if month_idx >= 0:
+                key += clean(obj.get("Month-Year"))
 
-                key += clean(
-                    obj.get(
-                        "Month-Year"
-                    )
-                )
-
-            # 🔥 STATION
             if station_idx >= 0:
+                key += "|" + clean(obj.get("EB Station"))
 
-                key += (
-                    "|" +
-                    clean(
-                        obj.get(
-                            "EB Station"
-                        )
-                    )
-                )
-
-            # 🔥 REFERENCE
-            if ref_idx >= 0:
-
-                key += (
-                    "|" +
-                    clean(
-                        obj.get(
-                            "Reference"
-                        )
-                    )
-                )
-
-            # =====================================
-            # 🔥 BUILD ROW
-            # =====================================
-
-            row_data = []
-
-            for h in headers:
-
-                row_data.append(
-                    obj.get(h, "")
-                )
+            row_data = [obj.get(h, "") for h in headers]
 
             # =====================================
             # 🔥 UPDATE EXISTING
@@ -1519,19 +1449,8 @@ def update_eb():
 
                 existing_row = existing["row_data"]
 
-                # =================================
-                # 🔥 CHECK CHANGES
-                # =================================
-
-                existing_clean = [
-                    clean(x)
-                    for x in existing_row
-                ]
-
-                new_clean = [
-                    clean(x)
-                    for x in row_data
-                ]
+                existing_clean = [clean(x) for x in existing_row]
+                new_clean = [clean(x) for x in row_data]
 
                 # =================================
                 # ⏭ NO CHANGE
@@ -1539,48 +1458,60 @@ def update_eb():
 
                 if existing_clean == new_clean:
 
-                    skipped_keys.append(
-                        key
-                    )
+                    skipped_rows.append({
+                        "month": obj.get("Month-Year", ""),
+                        "station": obj.get("EB Station", "")
+                    })
 
-                    print(
-                        "⏭ SKIPPED:",
-                        key
-                    )
+                    print("⏭ SKIPPED:", key)
 
                     continue
+
+                # =================================
+                # 🔥 CHANGED COLUMNS
+                # =================================
+
+                changed_columns = []
+
+                for idx, header in enumerate(headers):
+
+                    old_val = clean(existing_row[idx]) if idx < len(existing_row) else ""
+                    new_val = clean(row_data[idx])
+
+                    if old_val != new_val:
+                        changed_columns.append(header)
 
                 # =================================
                 # 🔥 UPDATE
                 # =================================
 
                 updates.append({
-
-                    "range":
-                    f"A{row_num}",
-
-                    "values":
-                    [row_data]
-
+                    "range": f"A{row_num}",
+                    "values": [row_data]
                 })
 
-                updated_keys.append(
-                    key
-                )
+                updated_rows.append({
+                    "month": obj.get("Month-Year", ""),
+                    "station": obj.get("EB Station", ""),
+                    "reference": obj.get("Reference", ""),
+                    "finalAmount": obj.get("Final Amount", 0),
+                    "changedColumns": changed_columns
+                })
 
             # =====================================
-            # 🔥 NEW ROW
+            # ➕ NEW ROW
             # =====================================
 
             else:
 
-                new_rows.append(
-                    row_data
-                )
+                new_rows.append(row_data)
 
-                added_keys.append(
-                    key
-                )
+                added_rows.append({
+                    "month": obj.get("Month-Year", ""),
+                    "station": obj.get("EB Station", ""),
+                    "reference": obj.get("Reference", ""),
+                    "finalAmount": obj.get("Final Amount", 0)
+                })
 
         # =========================================
         # 🔥 APPLY UPDATES
@@ -1593,13 +1524,10 @@ def update_eb():
                 value_input_option="USER_ENTERED"
             )
 
-            print(
-                "✅ UPDATED:",
-                len(updates)
-            )
+            print("✅ UPDATED:", len(updates))
 
         # =========================================
-        # 🔥 APPEND NEW ROWS
+        # ➕ APPEND NEW ROWS
         # =========================================
 
         if new_rows:
@@ -1609,45 +1537,40 @@ def update_eb():
                 value_input_option="USER_ENTERED"
             )
 
-            print(
-                "✅ ADDED:",
-                len(new_rows)
-            )
+            print("✅ ADDED:", len(new_rows))
 
         # =========================================
-        # 🔥 SUCCESS
+        # ℹ️ NO CHANGES
+        # =========================================
+
+        if not updates and not new_rows:
+
+            return jsonify({
+                "status": "nochange",
+                "message": "No changes detected",
+                "updated": [],
+                "added": [],
+                "skipped": skipped_rows
+            })
+
+        # =========================================
+        # ✅ SUCCESS
         # =========================================
 
         return jsonify({
-
-            "status":
-            "success",
-
-            "updated":
-            updated_keys,
-
-            "added":
-            added_keys,
-
-            "skipped":
-            skipped_keys
+            "status": "success",
+            "updated": updated_rows,
+            "added": added_rows,
+            "skipped": skipped_rows
         })
 
     except Exception as e:
 
-        print(
-            "❌ EB UPDATE ERROR:",
-            str(e)
-        )
+        print("❌ EB UPDATE ERROR:", str(e))
 
         return jsonify({
-
-            "status":
-            "error",
-
-            "message":
-            str(e)
-
+            "status": "error",
+            "message": str(e)
         }), 500
 
 
