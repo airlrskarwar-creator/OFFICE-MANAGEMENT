@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.cdnfonts.com/css/digital-7-mono" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="data:," />
     <!-- Icon -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -1162,7 +1163,7 @@
 
       /* =============APP LAYOUT=========== */
       .watermark {
-        width: calc(100vw - 70%);
+        width: calc(100vw - 75%);
         height: calc(100vh - 40%);
         opacity: 0.06;
         position: absolute;
@@ -2554,7 +2555,8 @@
       .ITaction-group,
       .Pensionaction-group,
       .DGaction-group,
-      .Dutyaction-group {
+      .Dutyaction-group,
+      .EBaction-group {
         display: flex;
         gap: 10px;
         padding: 1px 1px;
@@ -2574,7 +2576,8 @@
       .ITaction-group button,
       .Pensionaction-group button,
       .DGaction-group button,
-      .Dutyaction-group button {
+      .Dutyaction-group button,
+      .EBaction-group button {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -2597,7 +2600,8 @@
       .ITaction-group button:disabled,
       .Pensionaction-group button:disabled,
       .DGaction-group button:disabled,
-      .Dutyaction-group button:disabled {
+      .Dutyaction-group button:disabled,
+      .EBaction-group button:disabled {
         opacity: 0.3;
         background: #ffffff;
         cursor: not-allowed;
@@ -2611,7 +2615,8 @@
       .ITaction-group button:not(:disabled):hover,
       .Pensionaction-group button:not(:disabled):hover,
       .DGaction-group button:not(:disabled):hover,
-      .Dutyaction-group button:not(:disabled):hover {
+      .Dutyaction-group button:not(:disabled):hover,
+      .EBaction-group button:not(:disabled):hover {
         padding: 4px 8px;
         background: #ffffff;
         border-color: #cbd5e1;
@@ -2625,7 +2630,8 @@
       .ITaction-group button:not(:disabled):hover span,
       .Pensionaction-group button:not(:disabled):hover span,
       .DGaction-group button:not(:disabled):hover span,
-      .Dutyaction-group button:not(:disabled):hover span {
+      .Dutyaction-group button:not(:disabled):hover span,
+      .EBaction-group button:not(:disabled):hover span {
         max-width: 120px;
         opacity: 1;
         transition: max-width 2s ease;
@@ -2639,7 +2645,8 @@
       .ITaction-group button:not(:disabled):hover svg,
       .Pensionaction-group button:not(:disabled):hover svg,
       .DGaction-group button:not(:disabled):hover svg,
-      .Dutyaction-group button:not(:disabled):hover svg {
+      .Dutyaction-group button:not(:disabled):hover svg,
+      .EBaction-group button:not(:disabled):hover svg {
         width: 16px;
         height: 16px;
       }
@@ -2651,7 +2658,8 @@
       .ITaction-group button svg,
       .Pensionaction-group button svg,
       .DGaction-group button svg,
-      .Dutyaction-group button svg {
+      .Dutyaction-group button svg,
+      .EBaction-group button svg {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
@@ -2664,7 +2672,8 @@
       .ITaction-group button span,
       .Pensionaction-group button span,
       .DGaction-group button span,
-      .Dutyaction-group button span {
+      .Dutyaction-group button span,
+      .EBaction-group button span {
         max-width: 0;
         overflow: hidden;
         white-space: nowrap;
@@ -2681,7 +2690,8 @@
       .ITaction-group button:active,
       .Pensionaction-group button:active,
       .DGaction-group button:active,
-      .Dutyaction-group button:active {
+      .Dutyaction-group button:active,
+      .EBaction-group button:active {
         transform: scale(0.96);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       }
@@ -2690,14 +2700,16 @@
       .action-group button:nth-child(1),
       .SBGaction-group button:nth-child(1),
       .DGaction-group button:nth-child(1),
-      .Dutyaction-group button:nth-child(1) {
+      .Dutyaction-group button:nth-child(1),
+      .EBaction-group button:nth-child(1) {
         color: #1d4ed8;
       }
 
       .action-group button:nth-child(1):hover,
       .SBGaction-group button:nth-child(1):hover,
       .DGaction-group button:nth-child(1):hover,
-      .Dutyaction-group button:nth-child(1):hover {
+      .Dutyaction-group button:nth-child(1):hover,
+      .EBaction-group button:nth-child(1):hover {
         background: #eef5ff;
       }
 
@@ -2705,14 +2717,16 @@
       .action-group button:nth-child(2),
       .SBGaction-group button:nth-child(2),
       .DGaction-group button:nth-child(2),
-      .Dutyaction-group button:nth-child(2) {
+      .Dutyaction-group button:nth-child(2),
+      .EBaction-group button:nth-child(2) {
         color: #805e15;
       }
 
       .action-group button:nth-child(2):hover,
       .SBGaction-group button:nth-child(2):hover,
       .DGaction-group button:nth-child(2):hover,
-      .Dutyaction-group button:nth-child(2):hover {
+      .Dutyaction-group button:nth-child(2):hover,
+      .EBaction-group button:nth-child(2):hover {
         background: #ecfdf5;
       }
 
@@ -2723,7 +2737,8 @@
       .ITaction-group button:nth-child(1),
       .Pensionaction-group button:nth-child(1),
       .DGaction-group button:nth-child(3),
-      .Dutyaction-group button:nth-child(3) {
+      .Dutyaction-group button:nth-child(3),
+      .EBaction-group button:nth-child(3) {
         color: #334155;
       }
 
@@ -2733,7 +2748,8 @@
       .ITaction-group button:nth-child(1):hover,
       .Pensionaction-group button:nth-child(1):hover,
       .DGaction-group button:nth-child(3):hover,
-      .Dutyaction-group button:nth-child(3):hover {
+      .Dutyaction-group button:nth-child(3):hover,
+      .EBaction-group button:nth-child(3):hover {
         background: #f1f5f9;
       }
 
@@ -2742,8 +2758,7 @@
       .SSaction-group button:nth-child(2),
       .ITaction-group button:nth-child(2),
       .Pensionaction-group button:nth-child(2),
-      .DGaction-group button:nth-child(4),
-      .Dutyaction-group button:nth-child(4) {
+      .DGaction-group button:nth-child(4) {
         color: #217346;
       }
 
@@ -2752,8 +2767,7 @@
       .SSaction-group button:nth-child(2):hover,
       .ITaction-group button:nth-child(2):hover,
       .Pensionaction-group button:nth-child(2):hover,
-      .DGaction-group button:nth-child(4):hover,
-      .Dutyaction-group button:nth-child(4):hover {
+      .DGaction-group button:nth-child(4):hover {
         background: #f1f5f9;
       }
 
@@ -2761,7 +2775,8 @@
       .action-group button.upload-mode,
       .SBGaction-group button.upload-mode,
       .DGaction-group button.upload-mode,
-      .Dutyaction-group button.upload-mode {
+      .Dutyaction-group button.upload-mode,
+      .EBaction-group button.upload-mode {
         background: #16a34a !important;
         color: #ffffff !important;
         box-shadow:
@@ -2772,7 +2787,8 @@
       .action-group button.upload-mode:hover,
       .SBGaction-group button.upload-mode:hover,
       .DGaction-group button.upload-mode:hover,
-      .Dutyaction-group button.upload-mode:hover {
+      .Dutyaction-group button.upload-mode:hover,
+      .EBaction-group button.upload-mode:hover {
         background: #15803d !important;
       }
 
@@ -3059,7 +3075,7 @@
         margin: 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 165px);
+        height: calc(100vh - 180px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -3142,28 +3158,28 @@
         justify-content: center;
         border-radius: 8px;
         width: 280px;
-        padding: 4px 4px 4px 10px;
-        color: white !important;
+        padding: 8px 4px 15px 4px !important;
         box-shadow: inset 0 -4px 0 0 #44d0ff;
-        background: rgba(43, 82, 145);
+        background: rgba(43, 82, 145, 0.6);
       }
 
       .itPanelDiv label,
       .pensionPanelDiv label {
         font-weight: bold;
         font-size: 12px;
-        color: white;
-        padding-bottom: 2px;
+        color: black;
+        padding: 10px 4px 4px 4px !important;
       }
 
       .itPanelDiv span,
       .pensionPanelDiv span {
-        font-family: 'Rozha One', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-family: 'inter', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         text-align: center;
         font-size: 20px;
         font-weight: bold;
         line-height: 25px;
-        color: white;
+        color: black;
+        padding-bottom: 5px;
       }
 
       .katex {
@@ -3764,7 +3780,7 @@
         padding: 2px 8px 4px 8px;
         overflow: hidden;
         box-shadow: inset 0 -1px 0 0 #44d0ff;
-        height: 55px;
+        height: 65px;
         overflow: hidden;
       }
 
@@ -3776,7 +3792,7 @@
         padding: 2px 8px 4px 8px;
         overflow: hidden;
         box-shadow: none;
-        height: 55px;
+        height: 65px;
         overflow: hidden;
       }
 
@@ -3815,9 +3831,155 @@
         border-radius: 6px;
         text-align: center;
         height: 100%;
-        color: white !important;
         box-shadow: inset 0 -4px 0 0 #44d0ff;
-        background: rgba(43, 82, 145) !important;
+        background: rgba(43, 82, 145, 0.6) !important;
+      }
+
+      #EBinputTable input {
+        width: 100%;
+      }
+
+      #EBinputTable td {
+        border: solid 1px lightgray;
+        padding: 2px;
+      }
+
+      #EBinputTableDiv table td:first-child {
+        padding-left: 5px;
+      }
+
+      #EBinputTable td label {
+        padding: 4px;
+        text-align: center !important;
+        font-weight: bold;
+        width: 100% !important;
+        height: 100%;
+        display: block;
+      }
+
+      #EBinputTableDiv {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      #EBinputTableDiv .EBleftPanel {
+        flex: 0 0 500px;
+        min-width: 500px;
+      }
+
+      #EBinputTableDiv .EBtableWrapper {
+        flex: 1;
+        min-width: 0;
+        height: calc(100vh - 200px);
+        border: solid 1px silver;
+        overflow: auto;
+      }
+
+      .EBpanelDiv {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px;
+        box-shadow: inset 0 -1px 0 0 #44d0ff;
+        border-radius: 4px;
+      }
+
+      .EBpanelDiv div {
+        min-width: 150px;
+        padding: 2px;
+        width: 100%;
+        border: solid 1px lightgray;
+        border-radius: 8px;
+      }
+
+      .EBpanelDiv div:nth-child(1),
+      .EBpanelDiv div:nth-child(2),
+      .EBpanelDiv div:nth-child(3) {
+        box-shadow: inset 0 -4px 0 0 #44d0ff;
+        background: rgba(43, 82, 145, 0.6) !important;
+      }
+
+      .EBpanelDiv label {
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+        min-height: 24px;
+        padding-top: 4px;
+      }
+
+      .EBpanelDiv input {
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .DGpanelDiv {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 4px;
+        padding: 4px;
+        box-shadow: inset 0 -1px 0 0 #44d0ff;
+        border-radius: 4px;
+        flex-wrap: wrap;
+      }
+
+      .DGpanelDiv div {
+        min-width: 100px;
+      }
+
+      .DGgroup {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 5px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgb(120, 120, 120);
+        width: 300px;
+      }
+
+      .DGrow {
+        display: flex;
+        gap: 2px;
+      }
+
+      .DGfield {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .DGpanelDiv input,
+      .DGpanelDiv select {
+        width: 100%;
+        text-align: center;
+      }
+
+      .DGpanelDiv input:not([type='date']):not([type='time']),
+      .DGpanelDiv label {
+        width: 80px;
+        text-align: center;
+      }
+
+      .DGpanelDiv label {
+        padding-bottom: 4px;
+      }
+
+      .DGtitle {
+        font-weight: 700;
+        opacity: 0.9;
+        width: 100% !important;
+        border-bottom: dotted 1px gray;
+        padding-bottom: 4px;
       }
 
       /* ===============================================
@@ -4059,6 +4221,27 @@
           overflow-y: auto;
           gap: 4px;
         }
+
+        #EBinputTableDiv {
+          flex-direction: column;
+        }
+
+        #EBinputTableDiv .EBleftPanel {
+          width: 100%;
+          min-width: 100%;
+        }
+
+        #EBinputTableDiv .EBtableWrapper {
+          width: 100%;
+          min-width: 100%;
+          height: auto;
+          min-height: 500px;
+        }
+        .EBpanelDiv {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
       }
     </style>
   </head>
@@ -4116,11 +4299,13 @@
               </span>
             </div>
           </div>
+          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999" onclick="shortcut()">⚡ Shortcut</button>
           <!-- LOGIN BUTTON -->
           <button id="loginBtn">
             <i class="material-icons">login</i>
             <p>Login</p>
           </button>
+
           <!-- ERROR -->
           <div id="loginError"></div>
           <!-- CAPS WARNING -->
@@ -5048,7 +5233,7 @@
               </div>
             </div>
           </div>
-          <div class="PensionTableWrapper" style="height: calc(100vh - 200px)"></div>
+          <div class="PensionTableWrapper" style="height: calc(100vh - 210px)"></div>
         </div>
         <div class="SectionPage" id="BudgetPage" style="display: none">
           <div class="header">
@@ -5135,13 +5320,9 @@
               <select id="DGPage_Month"></select>
             </div>
             <div class="DGaction-group">
-              <button id="DGeditBtn">
-                <i data-lucide="edit"></i>
-                <span>Edit</span>
-              </button>
-              <button id="DGaddBtn">
-                <i data-lucide="plus"></i>
-                <span>Add</span>
+              <button id="DGsaveBtn">
+                <i data-lucide="save"></i>
+                <span>Save</span>
               </button>
               <button id="DGprintBtn">
                 <i data-lucide="printer"></i>
@@ -5153,6 +5334,136 @@
               </button>
             </div>
           </div>
+          <div class="DGpanelDiv">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>DG Run Date</label>
+              <input id="DGdate" type="date" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Select DG</label>
+              <select id="StationDGList"></select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Purpose</label>
+              <select id="DGoperationPurpose">
+                <option value="Failure" selected>Failure</option>
+                <option value="Test">Test</option>
+              </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Start Time</label>
+              <input id="DGstartTime" type="time" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Stop Time</label>
+              <input id="DGstopTime" type="time" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Duration</label>
+              <input id="DGduration" type="time" />
+            </div>
+          </div>
+          <div class="DGpanelDiv">
+            <!-- ================================= -->
+            <!-- 🔥 PHASE TO PHASE VOLTAGE -->
+            <!-- ================================= -->
+
+            <div class="DGgroup">
+              <label class="DGtitle">Phase to Phase Voltage</label>
+
+              <div class="DGrow">
+                <div class="DGfield">
+                  <label>Vry</label>
+                  <input id="DGRY" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Vyb</label>
+                  <input id="DGYB" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Vbr</label>
+                  <input id="DGBR" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ================================= -->
+            <!-- 🔥 PHASE TO NEUTRAL -->
+            <!-- ================================= -->
+
+            <div class="DGgroup">
+              <label class="DGtitle">Phase to Neutral Voltage</label>
+
+              <div class="DGrow">
+                <div class="DGfield">
+                  <label>Vrn</label>
+                  <input id="DGVRN" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Vyn</label>
+                  <input id="DGVYN" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Vbn</label>
+                  <input id="DGVBN" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ================================= -->
+            <!-- 🔥 CURRENT -->
+            <!-- ================================= -->
+
+            <div class="DGgroup">
+              <label class="DGtitle">Phase Current</label>
+
+              <div class="DGrow">
+                <div class="DGfield">
+                  <label>Ir</label>
+                  <input id="DGIR" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Iy</label>
+                  <input id="DGIY" />
+                </div>
+
+                <div class="DGfield">
+                  <label>Ib</label>
+                  <input id="DGIB" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ================================= -->
+            <!-- 🔥 OTHER INPUTS -->
+            <!-- ================================= -->
+
+            <div class="DGfield">
+              <label>HSD Level</label>
+              <input id="DGhsdLevel" />
+            </div>
+
+            <div class="DGfield">
+              <label>Pressure</label>
+              <input id="DGpressure" />
+            </div>
+
+            <div class="DGfield">
+              <label>Temperature</label>
+              <input id="DGtemp" />
+            </div>
+
+            <div class="DGfield">
+              <label>HMR</label>
+              <input id="HMR" />
+            </div>
+          </div>
+
           <div class="DGlogTableWrapper" id="DGlogTableWrapper" style="max-height: calc(100vh - 140px)"></div>
         </div>
         <div class="SectionPage" id="HSDlogPage" style="display: none">
@@ -5178,13 +5489,9 @@
               <select id="EBpage_Month"></select>
             </div>
             <div class="EBaction-group">
-              <button id="EBeditBtn">
-                <i data-lucide="edit"></i>
-                <span>Edit</span>
-              </button>
-              <button id="EBaddBtn">
-                <i data-lucide="plus"></i>
-                <span>Add</span>
+              <button id="EBsaveBtn">
+                <i data-lucide="save"></i>
+                <span>Save</span>
               </button>
               <button id="EBprintBtn">
                 <i data-lucide="printer"></i>
@@ -5196,9 +5503,35 @@
               </button>
             </div>
           </div>
-          <div style="display: flex; flex-direction: row; gap: 10px">
-            <div style="width: 40%">
-              <table style="border-collapse: collapse">
+          <div class="EBpanelDiv">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>RR No.</label>
+              <input disabled id="RR" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Tariff</label>
+              <input disabled id="Tariff" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>ID No.</label>
+              <input disabled id="ID" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Contract Demand (KVA)</label>
+              <input required id="CD" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Billing Demand (KVA)</label>
+              <input required id="BD" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <label>Meter Constant</label>
+              <input required id="MC" />
+            </div>
+          </div>
+          <div id="EBinputTableDiv">
+            <div class="EBleftPanel">
+              <table style="border-collapse: collapse" id="EBinputTable">
                 <colgroup>
                   <col style="width: 40%" />
                   <col style="width: 15%" />
@@ -5206,51 +5539,54 @@
                   <col style="width: 15%" />
                   <col style="width: 15%" />
                 </colgroup>
+                <thead>
+                  <tr><th colspan="5" style="background: #1f4e79; color: #ffffff; padding: 4px; height: 30px">Electricity Bill Details</th></tr>
+                </thead>
                 <tbody>
                   <tr>
-                    <td>Billing Month</td>
-                    <td colspan="4"><input id="EBbillMonth" /></td>
+                    <td>Billing for the Month</td>
+                    <td colspan="4"><input required id="EBbillMonth" type="month" /></td>
+                  </tr>
+                  <tr>
+                    <td>Reference No.</td>
+                    <td colspan="4"><input required id="EBref" /></td>
                   </tr>
                   <tr>
                     <td>Payment Month</td>
-                    <td colspan="4"><input id="EBpayMonth" /></td>
-                  </tr>
-                  <tr>
-                    <td>Contract Demand (KVA)</td>
-                    <td colspan="4"><input id="CD" /></td>
-                  </tr>
-                  <tr>
-                    <td>Billing Demand (KVA)</td>
-                    <td colspan="4"><input id="BD" /></td>
+                    <td colspan="4"><input disabled id="EBpayMonth" type="month" /></td>
                   </tr>
                   <tr>
                     <td>Recorded Demand (KVA)</td>
-                    <td colspan="4"><input id="RD" /></td>
+                    <td colspan="4"><input required id="RD" /></td>
+                  </tr>
+                  <tr>
+                    <td>MD Meter</td>
+                    <td colspan="4"><input required id="MD" /></td>
                   </tr>
                   <tr>
                     <td>Recorded PF (cosφ)</td>
-                    <td colspan="4"><input id="PF" /></td>
+                    <td colspan="4"><input required id="PF" /></td>
                   </tr>
                   <tr>
-                    <td>Consumption Details</td>
-                    <td>Prev Reading</td>
-                    <td>Present Reading</td>
-                    <td>Diffrence</td>
-                    <td>Consumption</td>
+                    <td><label>Consumption Details</label></td>
+                    <td><label>Present Reading</label></td>
+                    <td><label>Prev Reading</label></td>
+                    <td><label>Difference Reading</label></td>
+                    <td><label>Consumption</label></td>
                   </tr>
                   <tr>
                     <td>KWh Consumption</td>
-                    <td><input id="prevKWh" /></td>
-                    <td><input disabled id="preKWh" /></td>
-                    <td><input disabled id="diffKWh" /></td>
-                    <td><input disabled id="consKWh" /></td>
+                    <td><input required id="preKWh" /></td>
+                    <td><input disabled id="prevKWh" value="0" /></td>
+                    <td><input disabled id="diffKWh" value="0" /></td>
+                    <td><input required id="consKWh" value="0" /></td>
                   </tr>
                   <tr>
                     <td>KVAh Consumption</td>
-                    <td><input id="prevKVAh" /></td>
-                    <td><input disabled id="preKVAh" /></td>
-                    <td><input disabled id="diffKVAh" /></td>
-                    <td><input disabled id="consKVAh" /></td>
+                    <td><input required id="preKVAh" /></td>
+                    <td><input disabled id="prevKVAh" value="0" /></td>
+                    <td><input disabled id="diffKVAh" value="0" /></td>
+                    <td><input required id="consKVAh" value="0" /></td>
                   </tr>
                   <tr>
                     <td>Interest on Security Deposit</td>
@@ -5262,12 +5598,12 @@
                   </tr>
                   <tr>
                     <td>Final Amount</td>
-                    <td colspan="4"><input id="EBbillAmount" /></td>
+                    <td colspan="4"><input required id="EBbillAmount" /></td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="EBtableWrapper" style="width: 60%"></div>
+            <div class="EBtableWrapper"></div>
           </div>
         </div>
         <div class="SectionPage" id="DutyPage" style="display: none">
@@ -5419,9 +5755,9 @@
               </div>
             </div>
           </div>
-          <div style="display: flex; flex-direction: row; gap: 10px">
+          <div style="display: flex; flex-direction: row; gap: 10px; font-weight: bold">
             <span class="material-symbols-outlined" style="color: blue">account_circle</span>
-            <span id="welcomeUser"></span>
+            <span id="welcomeUser" style="padding-top: 2px"></span>
           </div>
           <div style="display: flex; flex-direction: row; gap: 50px">
             <div style="display: flex; flex-direction: row; gap: 10px">
@@ -5496,29 +5832,29 @@
         Chart.register(xAxisPillPlugin);
         Chart.register(columnLabelPlugin);
 
-        // =========================================
-        // 🔥 LOGIN PAGE STAYS VISIBLE
-        // =========================================
+        /* =====================================
+        🔥 INITIAL PAGE STATE
+        ===================================== */
 
-        hideLoader();
         id('loginPage').style.display = 'flex';
 
         id('mainPage').style.display = 'none';
 
-        // 🔥 APP READY
         qs('.app')?.classList.add('loaded');
 
-        // =========================================
-        // 🔥 LOAD EMP FOR LOGIN
-        // =========================================
+        hideLoader();
+
+        /* =====================================
+        🔥 LOGIN DATA
+        ===================================== */
 
         await loadTable('emp', 'EmpDB', false);
 
         populateloginStationDropdown();
 
-        // =========================================
-        // 🔥 START BACKGROUND LOADING
-        // =========================================
+        /* =====================================
+        🔥 START BACKGROUND LOADING
+        ===================================== */
 
         window.appDataLoading = true;
 
@@ -5839,6 +6175,62 @@
         }, 0);
       });
 
+      async function shortcut() {
+        const station = id('loginStationDropdown');
+
+        const user = id('loginUserDropdown');
+
+        const password = id('loginPasswordInput');
+
+        const loginBtn = id('loginBtn');
+
+        if (!station || !user || !password || !loginBtn) {
+          console.warn('❌ Login elements not found');
+          return;
+        }
+
+        // 🔥 DELAY HELPER
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        /* =====================================
+        🔥 STATION
+        ===================================== */
+
+        station.value = 'AV KARWAR';
+
+        station.dispatchEvent(new Event('change'));
+
+        await wait(100);
+
+        /* =====================================
+        🔥 USER
+        ===================================== */
+
+        user.value = 'MASTER';
+
+        user.dispatchEvent(new Event('change'));
+
+        await wait(100);
+
+        /* =====================================
+        🔥 PASSWORD
+        ===================================== */
+
+        password.focus();
+
+        password.value = 'master@11051993';
+
+        password.dispatchEvent(new Event('input'));
+
+        await wait(100);
+
+        /* =====================================
+        🔥 LOGIN
+        ===================================== */
+
+        loginBtn.click();
+      }
+
       /* =========================================
         LOGIN SUCCESS
       ========================================= */
@@ -5846,30 +6238,38 @@
         // 🔥 CURRENT USER
         window.currentUser = user;
 
-        // =====================================
-        // 🔥 PAGE SWITCH
-        // =====================================
+        /* =====================================
+        🔥 HIDE LOGIN PAGE
+        ===================================== */
 
         id('loginPage').style.display = 'none';
+
+        /* =====================================
+        🔥 SHOW MAIN PAGE
+        ===================================== */
 
         id('mainPage').style.display = 'flex';
 
         qs('.app')?.classList.add('loaded');
 
         /* =====================================
-        🔥 IF DATA STILL LOADING
+        🔥 STILL LOADING
         ===================================== */
 
         if (!window.appDataLoaded) {
+          updateLoader(15, 'Initializing Application...', 'sync');
+
           showLoader();
 
           try {
-            if (window.backgroundLoadPromise) {
-              await window.backgroundLoadPromise;
-            }
+            await window.backgroundLoadPromise;
           } catch (err) {
             console.error('❌ Background loading failed', err);
           }
+
+          updateLoader(100, 'Application Ready', 'check_circle');
+
+          await new Promise((r) => setTimeout(r, 400));
 
           hideLoader();
         }
@@ -5890,21 +6290,21 @@
 
         applyUserAccess(user);
 
-        // =====================================
-        // 🔥 WELCOME TEXT
-        // =====================================
+        /* =====================================
+        🔥 WELCOME TEXT
+        ===================================== */
 
         id('welcomeUser').textContent = `Welcome ${displayName}`;
 
-        // =====================================
-        // 🔥 APPLY USER CONTROL
-        // =====================================
+        /* =====================================
+        🔥 APPLY USER CONTROL
+        ===================================== */
 
         applyStation_UserControl(loginStation, user, user);
 
-        // =====================================
-        // 🔥 RESET MENU
-        // =====================================
+        /* =====================================
+        🔥 RESET MENU
+        ===================================== */
 
         qsa('.menu-btn').forEach((btn) => {
           removeClass(btn, 'active');
@@ -5914,9 +6314,9 @@
           hide(page);
         });
 
-        // =====================================
-        // 🔥 SHOW DASHBOARD
-        // =====================================
+        /* =====================================
+        🔥 SHOW DASHBOARD
+        ===================================== */
 
         show('DashBoard');
 
@@ -5926,22 +6326,16 @@
           addClass(dashboardBtn, 'active');
         }
 
-        // =====================================
-        // 🔥 APPLY LOGIN STATION
-        // =====================================
+        /* =====================================
+        🔥 APPLY LOGIN STATION
+        ===================================== */
 
         setTimeout(() => {
-          // 🔥 SYNC ALL STATION DROPDOWNS
           syncSelect('station', loginStation);
 
-          // 🔥 FILTERS
           filters.station = loginStation;
 
           applyFilters();
-
-          // =====================================
-          // 🔥 ZONE LOGIC
-          // =====================================
 
           const zone = getCityZone(loginStation) || {};
 
@@ -5954,10 +6348,6 @@
           } else if (daPercent >= 25) {
             percent += 1;
           }
-
-          // =====================================
-          // 🔥 APPLY ZONE VALUES
-          // =====================================
 
           ['PayBillPage', 'EmpPage'].forEach((page) => {
             if (id(`${page}_TAZone`)) {
@@ -5978,9 +6368,9 @@
           refreshPBView();
         }, 0);
 
-        // =====================================
-        // 🔥 LOCK REQUIREMENT TABLE
-        // =====================================
+        /* =====================================
+        🔥 REQUIREMENT TABLE LOCK
+        ===================================== */
 
         setTimeout(() => {
           lockRequirementTableForUser(user);
@@ -6232,6 +6622,7 @@
         });
 
         on('PayBillPage_Station', 'change', setDAPercent);
+        //id('EBpage_FY').dispatchEvent(new Event('change'));
       }
 
       function initDefaultView() {
@@ -6487,41 +6878,33 @@
       function showLoader() {
         const loader = id('globalLoader');
 
-        const app = qs('.app');
-
         if (!loader) return;
 
-        // 🔥 SHOW LOADER
         loader.style.display = 'flex';
 
         requestAnimationFrame(() => {
           loader.classList.remove('hidden');
         });
 
-        // 🔥 HIDE APP SMOOTHLY
-        app?.classList.remove('loaded');
+        // 🔥 DISABLE INTERACTION
+        document.body.classList.remove('loaded');
       }
 
-      /* =========================
+      /* =========================================
       🔥 HIDE LOADER
-      ========================= */
+      ========================================= */
 
       function hideLoader() {
         const loader = id('globalLoader');
 
-        const app = qs('.app');
-
         if (!loader) return;
 
-        // 🔥 FADE OUT LOADER
         loader.classList.add('hidden');
 
-        // 🔥 SHOW APP SMOOTHLY
         requestAnimationFrame(() => {
-          app?.classList.add('loaded');
+          document.body.classList.add('loaded');
         });
 
-        // 🔥 REMOVE AFTER ANIMATION
         setTimeout(() => {
           loader.style.display = 'none';
         }, 350);
@@ -6624,10 +7007,6 @@
       });
 
       async function loadAllData(showLoadingUI = true) {
-        // =========================================
-        // 🔥 SHOW LOADER ONLY WHEN NEEDED
-        // =========================================
-
         if (showLoadingUI) {
           showLoader();
         }
@@ -6635,37 +7014,49 @@
         let visualProgress = 0;
 
         const tasks = [
-          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB'), loadTable('city', 'CityZoneDB'), loadTable('comm', 'CommFactDB'), loadTable('it', 'ITDB')])],
           ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart')],
+
           [
-            'Loading Pay Bill Data...',
+            'Loading Pay Bill + CPC Data...',
             async () => {
-              // 🔥 WAIT PB LOAD
-              await Promise.all([loadTable('cpc', 'CPC7DB'), loadTable('pb', 'PBDB')]);
+              // 🔥 WAIT BOTH
+              await Promise.all([loadTable('pb', 'PBDB'), loadTable('cpc', 'CPC7DB')]);
+
+              console.log('✅ PB + CPC fully loaded');
+
               // 🔥 NOW SAFE
               buildEmpDBWithCalc();
+
               // 🔥 NOW SAFE
               await syncPBtoSBG();
             }
           ],
+
           ['Loading DG Log...', () => loadTable('dg', 'DGlog')],
+
           ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog')],
+
           ['Loading Electricity Log...', () => loadTable('eb', 'EBlog')],
+
           ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB')],
+
           ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB')],
 
           [
             'Rendering Budget Tables...',
             () => {
               renderBudgetfromPBData();
+
               renderFilterMainBudgetExpTable();
             }
-          ]
+          ],
+
+          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB'), loadTable('city', 'CityZoneDB'), loadTable('comm', 'CommFactDB'), loadTable('it', 'ITDB')])]
         ];
 
-        /* =========================================
+        /* =====================================
         🔥 BACKGROUND MODE
-        ========================================= */
+        ===================================== */
 
         if (!showLoadingUI) {
           await Promise.all(tasks.map(([_, task]) => Promise.resolve().then(task)));
@@ -6673,14 +7064,16 @@
           return;
         }
 
-        /* =========================================
+        /* =====================================
         🔥 LOADER MODE
-        ========================================= */
+        ===================================== */
 
         function animateProgress(target, apiName, type = 'download') {
           return new Promise((resolve) => {
             const start = visualProgress;
+
             const diff = target - start;
+
             const startTime = Date.now();
 
             const timer = setInterval(() => {
@@ -6705,9 +7098,9 @@
           });
         }
 
-        /* =========================================
+        /* =====================================
         🔥 RUN TASKS
-        ========================================= */
+        ===================================== */
 
         for (let i = 0; i < tasks.length; i++) {
           const [title, task, type = 'download'] = tasks[i];
@@ -6717,13 +7110,13 @@
           await Promise.all([animateProgress(target, title, type), Promise.resolve().then(task)]);
         }
 
-        /* =========================================
+        /* =====================================
         🔥 COMPLETE
-        ========================================= */
+        ===================================== */
 
         await animateProgress(100, 'Application Ready');
 
-        updateLoader(100, 'Application Ready');
+        updateLoader(100, 'Application Ready', 'check_circle');
 
         window.loaderCompleted = true;
 
@@ -7249,9 +7642,9 @@
       };
 
       const selectMap = {
-        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBpage_Station'],
+        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBpage_Station', 'DGPage_Station'],
         employee: ['EmpPage_Emp', 'ITPage_Emp', 'PensionPage_Emp', 'SalSlipPage_Emp', 'PayBillPage_Emp'],
-        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBpage_FY'],
+        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBpage_FY', 'DGPage_FY'],
         month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth']
       };
 
@@ -12947,21 +13340,22 @@
             ✅ SUCCESS MESSAGE
             ========================= */
 
-            let msg = `
-              <div style="font-size:14px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">✅ ${mode} Success!</div>
-            `;
+            let msg = '';
 
             /* 🔄 UPDATED */
 
             if (updatedEmployees.length) {
               //msg += `<div style=" margin-bottom:10px;font-size:13px;font-weight:700;color:#8ec5ff;">🔄 UPDATED EMPLOYEES</div>`;
-
+              msg += `
+              <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">📝 PAYBILL EDIT SUCCESS!</div>
+            `;
               msg += updatedEmployees
                 .map((e) => {
                   const changedCols = (e.changedColumns || [])
                     .map(
                       (col) => `
-                        <span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:12px;">
+                        <span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;
+                        background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:13px;">
                           🔃 ${col}
                         </span>
                       `
@@ -12990,7 +13384,10 @@
 
             if (addedEmployees.length) {
               msg += `
-                <div style="margin-top:18px;margin-bottom:12px;font-size:15px;font-weight:700;color:#ffd37d;">➕ ADDED EMPLOYEES</div>
+              <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">➕ PAYBILL ADD SUCCESS!</div>
+            `;
+              msg += `
+                <div style="margin-top:10px;margin-bottom:12px;font-size:13px;font-weight:700;color:#ffd37d;">ADDED EMPLOYEES DETAILS</div>
               `;
 
               msg += addedEmployees
@@ -12998,7 +13395,7 @@
                   (e) => `
                   <div style="padding:10px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
                     🧑‍💼 ${e.employee}
-                    <span style="opacity:.7;font-size:12px;">(${e.month})</span>
+                    <span style="opacity:.7;font-size:13px;">(${e.month})</span>
                   </div>
                 `
                 )
@@ -25163,6 +25560,106 @@
       });
 
       //=================================================== Electricity Bill Page =======================================//
+      /* =====================================
+      🔥 STATION CHANGE
+      GET LAST UPDATED RR / ID / TARIFF
+      ===================================== */
+
+      on('EBpage_Station', 'change', () => {
+        if (!ebData?.headers || !ebData?.rows) return;
+
+        const station = String(id('EBpage_Station')?.value || '').trim();
+
+        const headers = ebData.headers;
+
+        const allRows = [...ebData.rows];
+
+        /* =====================================
+        🔥 HEADER INDEXES
+        ===================================== */
+
+        const idx = {
+          station: headers.indexOf('EB Station'),
+          month: headers.indexOf('Month-Year'),
+          rr: headers.indexOf('RR No'),
+          id: headers.indexOf('ID No'),
+          tariff: headers.indexOf('Tariff')
+        };
+
+        /* =====================================
+        🔥 FILTER ONLY STATION
+        IGNORE FY / MONTH
+        ===================================== */
+
+        const stationRows = allRows.filter((r) => String(r[idx.station] || '').trim() === station);
+
+        /* =====================================
+        🔥 NO DATA
+        ===================================== */
+
+        if (!stationRows.length) {
+          id('RR').value = '';
+          id('ID').value = '';
+          id('Tariff').value = '';
+
+          filterEBTable();
+
+          return;
+        }
+
+        /* =====================================
+        🔥 SORT LATEST MONTH
+        ===================================== */
+
+        const monthMap = {
+          Jan: 0,
+          Feb: 1,
+          Mar: 2,
+          Apr: 3,
+          May: 4,
+          Jun: 5,
+          Jul: 6,
+          Aug: 7,
+          Sep: 8,
+          Oct: 9,
+          Nov: 10,
+          Dec: 11
+        };
+
+        stationRows.sort((a, b) => {
+          try {
+            const [ma, ya] = String(a[idx.month] || '').split('-');
+
+            const [mb, yb] = String(b[idx.month] || '').split('-');
+
+            const da = new Date(Number(ya), monthMap[ma] || 0);
+
+            const db = new Date(Number(yb), monthMap[mb] || 0);
+
+            return db - da;
+          } catch {
+            return 0;
+          }
+        });
+
+        /* =====================================
+        🔥 LATEST ENTRY
+        ===================================== */
+
+        const latest = stationRows[0];
+
+        id('RR').value = latest[idx.rr] || '';
+
+        id('ID').value = latest[idx.id] || '';
+
+        id('Tariff').value = latest[idx.tariff] || '';
+
+        /* =====================================
+        🔥 REFRESH TABLE
+        ===================================== */
+
+        filterEBTable();
+      });
 
       /* =========================
       🔥 LOAD EB MONTH DROPDOWN
@@ -25180,23 +25677,37 @@
 
         if (!select || !fySelect) return;
 
+        /* =====================================
+        🔥 AUTO SET PRESENT FY IF EMPTY
+        ===================================== */
+
+        if (!fySelect.value) {
+          const now = new Date();
+
+          const currentMonth = now.toLocaleString('en-US', {
+            month: 'short'
+          });
+
+          const currentYear = now.getFullYear();
+
+          fySelect.value = getFinancialYear(`${currentMonth}-${currentYear}`);
+        }
+
         const selectedFY = fySelect.value;
 
         const monthMap = new Map();
 
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        /* =========================
+        /* =====================================
         🔥 FILTER MONTHS
-        ========================= */
+        ===================================== */
 
         ebData.rows.forEach((row) => {
-          // 🔥 COLUMN A = Month-Year
           const monthStr = String(row[0] || '').trim();
 
           if (!monthStr) return;
 
-          // 🔥 FORMAT: MMM-YYYY
           const parts = monthStr.split('-');
 
           if (parts.length !== 2) return;
@@ -25209,9 +25720,9 @@
 
           if (!mm || !yyyy) return;
 
-          /* =========================
+          /* =====================================
           🔥 FY CHECK
-          ========================= */
+          ===================================== */
 
           const fy = getFinancialYear(monthStr);
 
@@ -25219,48 +25730,52 @@
             return;
           }
 
-          // 🔥 SORT KEY
+          /* =====================================
+          🔥 SORT KEY
+          ===================================== */
+
           const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
 
           monthMap.set(key, monthStr);
         });
 
-        /* =========================
+        /* =====================================
         🔥 SORT MONTHS
-        ========================= */
+        ===================================== */
 
         const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
 
-        /* =========================
+        /* =====================================
         🔥 RESET DROPDOWN
-        ========================= */
+        ===================================== */
 
         select.innerHTML = '';
 
-        // ✅ ALL MONTHS
+        /* =====================================
+        🔥 ALL MONTHS OPTION
+        ===================================== */
+
         const allOpt = document.createElement('option');
 
         allOpt.value = 'ALL';
 
         allOpt.textContent = 'All Months';
 
-        allOpt.selected = true;
-
         select.appendChild(allOpt);
 
-        /* =========================
+        /* =====================================
         ⚠️ NO DATA
-        ========================= */
+        ===================================== */
 
         if (!sortedMonths.length) {
-          console.warn('⚠ No months found for selected FY');
-
+          //console.warn('⚠ No months found for selected FY');
+          filterEBTable();
           return;
         }
 
-        /* =========================
-        🔥 ADD MONTH OPTIONS
-        ========================= */
+        /* =====================================
+        🔥 ADD MONTHS
+        ===================================== */
 
         sortedMonths.forEach((month) => {
           const opt = document.createElement('option');
@@ -25272,7 +25787,19 @@
           select.appendChild(opt);
         });
 
-        //console.log('✅ EB Months:', sortedMonths);
+        /* =====================================
+        🔥 AUTO SELECT LATEST MONTH
+        ===================================== */
+
+        const latestMonth = sortedMonths[sortedMonths.length - 1];
+
+        select.value = latestMonth;
+
+        /* =====================================
+        🔥 LOAD TABLE + DATA
+        ===================================== */
+
+        select.dispatchEvent(new Event('change'));
       }
 
       /* =========================
@@ -25303,7 +25830,7 @@
         🔥 HIDE COLUMNS BY NAME
         ========================= */
 
-        const hiddenColumnNames = ['EB Station', 'Prev KWh', 'Prev KVAh', 'Difference KWh', 'Difference KVAh', 'Interest on Deposit', 'Tax'];
+        const hiddenColumnNames = ['EB Station', 'RR No', 'Tariff', 'ID No', , 'Reference', 'Meter Constant', 'Prev KWh', 'Prev KVAh', 'Difference KWh', 'Difference KVAh', 'Interest on Deposit', 'Tax'];
 
         // 🔥 FIND COLUMN INDEXES
         const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
@@ -25448,124 +25975,736 @@
         wrapper.innerHTML = html;
       }
 
-      /* =========================
-      🔥 FILTER EVENTS
-      ========================= */
-
-      on('EBpage_Station', 'change', () => {
-        filterEBTable();
-      });
+      /* =========================================
+      🔥 FY CHANGE
+      ========================================= */
 
       on('EBpage_FY', 'change', () => {
         loadEBMonthsByFY();
 
-        filterEBTable();
+        const monthSelect = id('EBpage_Month');
+
+        const hasData = monthSelect && monthSelect.options.length > 1;
+
+        if (!hasData) {
+          clearEBInputs();
+          filterEBTable();
+          //console.log('⚠ No EB data for selected FY');
+        }
       });
 
+      /* =========================================
+      🔥 EB MONTH CHANGE
+      ========================================= */
+
       on('EBpage_Month', 'change', () => {
+        const month = id('EBpage_Month')?.value?.trim();
+
+        /* =====================================
+        🔥 ALL MONTHS → CLEAR
+        ===================================== */
+
+        if (!month || month === 'ALL' || month === 'All Months') {
+          clearEBInputs();
+          filterEBTable();
+          return;
+        }
+
+        /* =====================================
+        🔥 DATA CHECK
+        ===================================== */
+
+        if (!ebData || !ebData.headers || !ebData.rows) {
+          console.warn('❌ ebData not loaded');
+
+          return;
+        }
+
+        const headers = ebData.headers;
+        const rows = ebData.rows;
+
+        /* =====================================
+        🔥 SAFE HEADER FINDER
+        ===================================== */
+
+        const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
+
+        /* =====================================
+        🔥 HEADER INDEXES
+        ===================================== */
+
+        const idx = {
+          month: findHeader('Month-Year'),
+          EBref: findHeader('Reference'),
+          CD: findHeader('Contract Demand (KVA)'),
+          BD: findHeader('Billing Demand (KVA)'),
+          MC: findHeader('Meter Constant'),
+          RD: findHeader('Recorded Demand (KVA)'),
+          MD: findHeader('MD Meter'),
+          PF: findHeader('Power Factor'),
+          preKWh: findHeader('Prev KWh'),
+          preKVAh: findHeader('Prev KVAh'),
+          diffKWh: findHeader('Difference KWh'),
+          diffKVAh: findHeader('Difference KVAh'),
+          consKWh: findHeader('Consumption KWh'),
+          consKVAh: findHeader('Consumption KVAh'),
+          security: findHeader('Interest on Deposit'),
+          tax: findHeader('Tax'),
+          final: findHeader('Final Amount')
+        };
+
+        /* =====================================
+        🔥 FIND MONTH ROW
+        ===================================== */
+
+        const row = rows.find((r) => {
+          return (
+            String(r[idx.month] || '')
+              .trim()
+              .toLowerCase() === String(month).trim().toLowerCase()
+          );
+        });
+
+        if (!row) {
+          console.warn('❌ No row found for:', month);
+
+          clearEBInputs();
+
+          return;
+        }
+
+        /* =====================================
+        🔥 MONTH MAP
+        ===================================== */
+
+        const monthMap = {
+          Jan: '01',
+          Feb: '02',
+          Mar: '03',
+          Apr: '04',
+          May: '05',
+          Jun: '06',
+          Jul: '07',
+          Aug: '08',
+          Sep: '09',
+          Oct: '10',
+          Nov: '11',
+          Dec: '12'
+        };
+
+        /* =====================================
+        🔥 BILL MONTH
+        ===================================== */
+
+        try {
+          const [m, y] = month.split('-');
+
+          const mm = monthMap[m];
+
+          id('EBbillMonth').value = `${y}-${mm}`;
+
+          // 🔥 AUTO UPDATE PAY MONTH
+          id('EBbillMonth')?.dispatchEvent(new Event('change'));
+        } catch {
+          id('EBbillMonth').value = '';
+
+          id('EBpayMonth').value = '';
+        }
+
+        /* =====================================
+        🔥 FILTER TABLE
+        ===================================== */
+
         filterEBTable();
+        /* ============================================================
+        🔥 DISABLE FUTURE MONTHS & YEAR SELECT IN EBbillMonth INPUT
+        ============================================================= */
+
+        const ebBillMonth = id('EBbillMonth');
+
+        if (!ebBillMonth) return;
+        const today = new Date();
+        const maxMonth = `${today.getFullYear()}-${String(today.getMonth()).padStart(2, '0')}`;
+        ebBillMonth.max = maxMonth;
+      });
+
+      /* =========================================
+      🔥 BILL MONTH → PAYMENT MONTH
+      ========================================= */
+
+      on('EBbillMonth', 'change', () => {
+        const billMonth = id('EBbillMonth')?.value;
+
+        if (!billMonth) {
+          clearEBInputs();
+
+          return;
+        }
+
+        try {
+          /* =====================================
+          🔥 YYYY-MM
+          ===================================== */
+
+          const [yyyy, mm] = billMonth.split('-');
+
+          /* =====================================
+          🔥 PAYMENT MONTH
+          ===================================== */
+
+          const payDate = new Date(Number(yyyy), Number(mm) - 1, 1);
+
+          payDate.setMonth(payDate.getMonth() + 1);
+
+          id('EBpayMonth').value = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`;
+
+          /* =====================================
+          🔥 MONTH NAMES
+          ===================================== */
+
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+          /* =====================================
+          🔥 CURRENT MONTH KEY
+          ===================================== */
+
+          const currentMonthKey = `${monthNames[Number(mm) - 1]}-${yyyy}`;
+
+          /* =====================================
+          🔥 PREVIOUS MONTH KEY
+          ===================================== */
+
+          const prevDate = new Date(Number(yyyy), Number(mm) - 2, 1);
+
+          const prevMonthKey = `${monthNames[prevDate.getMonth()]}-${prevDate.getFullYear()}`;
+
+          //console.log({billMonth, currentMonthKey, prevMonthKey});
+
+          /* =====================================
+          🔥 DATA CHECK
+          ===================================== */
+
+          if (!ebData || !ebData.headers || !ebData.rows) {
+            return;
+          }
+
+          const headers = ebData.headers;
+          const rows = ebData.rows;
+
+          /* =====================================
+          🔥 SAFE HEADER FINDER
+          ===================================== */
+
+          const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
+
+          const idx = {
+            month: findHeader('Month-Year'),
+            EBref: findHeader('Reference'),
+            CD: findHeader('Contract Demand (KVA)'),
+            BD: findHeader('Billing Demand (KVA)'),
+            MC: findHeader('Meter Constant'),
+            RD: findHeader('Recorded Demand (KVA)'),
+            MD: findHeader('MD Meter'),
+            PF: findHeader('Power Factor'),
+            KWh: findHeader('KWh'),
+            KVAh: findHeader('KVAh'),
+            preKWh: findHeader('Prev KWh'),
+            preKVAh: findHeader('Prev KVAh'),
+            consKWh: findHeader('Consumption KWh'),
+            consKVAh: findHeader('Consumption KVAh'),
+            security: findHeader('Interest on Deposit'),
+            tax: findHeader('Tax'),
+            final: findHeader('Final Amount')
+          };
+
+          /* =====================================
+          🔥 FIND ROWS
+          ===================================== */
+
+          const currentRow =
+            rows.find(
+              (r) =>
+                String(r[idx.month] || '')
+                  .trim()
+                  .toLowerCase() === currentMonthKey.trim().toLowerCase()
+            ) || {};
+
+          const prevRow =
+            rows.find(
+              (r) =>
+                String(r[idx.month] || '')
+                  .trim()
+                  .toLowerCase() === prevMonthKey.trim().toLowerCase()
+            ) || {};
+
+          /* =====================================
+          🔥 CD / BD / MC
+          ===================================== */
+
+          // 🔥 CONTRACT DEMAND
+          const CD = Number(currentRow?.[idx.CD]) || Number(prevRow?.[idx.CD]) || 0;
+
+          // 🔥 MD METER
+          const MD = Number(currentRow?.[idx.MD]) || 0;
+
+          // 🔥 BILLING DEMAND
+          const BD = Number(currentRow?.[idx.BD]) || Number(prevRow?.[idx.BD]) || (CD * 0.9).toFixed(0);
+
+          // 🔥 MULTIPLICATION CONSTANT
+          const MC = Number(currentRow?.[idx.MC]) || Number(prevRow?.[idx.MC]) || 500;
+
+          //🔥 RECORDED DEMAND
+          const RD = Number(currentRow?.[idx.RD]) || MC * MD;
+
+          // 🔥 SET INPUTS
+          id('CD').value = CD;
+          id('MD').value = MD;
+          id('BD').value = BD;
+          id('MC').value = MC;
+          id('RD').value = RD;
+
+          /* =====================================
+          🔥 CURRENT MONTH VALUES
+          (IF AVAILABLE ELSE 0)
+          ===================================== */
+          id('EBref').value = currentRow?.[idx.EBref] || 'AEE/AAO/SA/PLC/F-1/';
+
+          id('PF').value = Number(currentRow?.[idx.PF]) || 0;
+
+          id('securityDeposit').value = Number(currentRow?.[idx.security]) || 0;
+
+          id('EBtax').value = Number(currentRow?.[idx.tax]) || 0;
+
+          id('EBbillAmount').value = Number(currentRow?.[idx.final]) || 0;
+
+          /* =====================================
+          🔥 PRESENT READINGS
+          ===================================== */
+
+          let presentKWh = 0;
+          let presentKVAh = 0;
+
+          /* =====================================
+          🔥 PRE READINGS
+          ===================================== */
+
+          let preKWh = 0;
+          let preKVAh = 0;
+
+          /* =====================================
+          🔥 CURRENT MONTH AVAILABLE
+          ===================================== */
+
+          if (Object.keys(currentRow).length) {
+            // 🔥 PRESENT READINGS
+            presentKWh = Number(currentRow[idx.KWh]) || 0;
+            presentKVAh = Number(currentRow[idx.KVAh]) || 0;
+            // 🔥 PRE READINGS
+            preKWh = Number(currentRow[idx.preKWh]) || 0;
+            preKVAh = Number(currentRow[idx.preKVAh]) || 0;
+          } else {
+            /* =====================================
+          🔥 NO CURRENT MONTH
+          → USE PREVIOUS MONTH PRE READINGS
+          ===================================== */
+            preKWh = Number(prevRow[idx.KWh]) || 0;
+            preKVAh = Number(prevRow[idx.KVAh]) || 0;
+            presentKWh = 0;
+            presentKVAh = 0;
+          }
+
+          /* =====================================
+          🔥 SET INPUTS
+          ===================================== */
+
+          id('preKWh').value = presentKWh;
+          id('preKVAh').value = presentKVAh;
+          id('prevKWh').value = preKWh;
+          id('prevKVAh').value = preKVAh;
+
+          /* =====================================
+          🔥 DIFFERENCE
+          ===================================== */
+
+          id('diffKWh').value = (presentKWh - preKWh).toFixed(2);
+
+          id('diffKVAh').value = (presentKVAh - preKVAh).toFixed(2);
+
+          /* =====================================
+          🔥 CONSUMPTION
+          ===================================== */
+
+          // 🔥 SHEET VALUE IF AVAILABLE
+          let consKWh = Number(currentRow?.[idx.consKWh]);
+
+          let consKVAh = Number(currentRow?.[idx.consKVAh]);
+
+          // 🔥 AUTO CALCULATE
+          if (!consKWh) {
+            consKWh = MC * (presentKWh - preKWh);
+          }
+
+          if (!consKVAh) {
+            consKVAh = MC * (presentKVAh - preKVAh);
+          }
+
+          id('consKWh').value = consKWh || 0;
+
+          id('consKVAh').value = consKVAh || 0;
+        } catch (err) {
+          console.error('❌ EB calculation failed', err);
+        }
+      });
+
+      /* =========================================
+      🔥 CLEAR EB INPUTS
+      ========================================= */
+
+      function clearEBInputs() {
+        ['EBbillMonth', 'EBpayMonth', 'EBref', 'CD', 'BD', 'MC', 'RD', 'MD', 'PF', 'preKWh', 'prevKWh', 'diffKWh', 'consKWh', 'preKVAh', 'prevKVAh', 'diffKVAh', 'consKVAh', 'securityDeposit', 'EBtax', 'EBbillAmount'].forEach((x) => {
+          const el = id(x);
+
+          if (!el) return;
+
+          el.value = '';
+        });
+
+        // 🔥 DEFAULT VALUES
+        id('prevKWh').value = '0';
+
+        id('diffKWh').value = '0';
+
+        id('prevKVAh').value = '0';
+
+        id('diffKVAh').value = '0';
+      }
+
+      /* =====================================
+      🔥 RECALCULATE EB VALUES
+      ===================================== */
+
+      function recalculateEBValues() {
+        const CD = Number(id('CD')?.value) || 0;
+
+        const MD = Number(id('MD')?.value) || 0;
+
+        const RD = Number(id('RD')?.value) || 0;
+
+        const MC = Number(id('MC')?.value) || 500;
+
+        const presentKWh = Number(id('preKWh')?.value) || 0;
+
+        const previousKWh = Number(id('prevKWh')?.value) || 0;
+
+        const presentKVAh = Number(id('preKVAh')?.value) || 0;
+
+        const previousKVAh = Number(id('prevKVAh')?.value) || 0;
+
+        /* =====================================
+        🔥 BD = 90% OF CD
+        ===================================== */
+
+        id('BD').value = CD * 0.9;
+
+        /* =====================================
+        🔥 RD = MD Meter X MC
+        ===================================== */
+
+        id('RD').value = (MD * MC).toFixed(2);
+
+        /* =====================================
+        🔥 DIFFERENCE
+        ===================================== */
+
+        const diffKWh = presentKWh - previousKWh;
+
+        const diffKVAh = presentKVAh - previousKVAh;
+
+        id('diffKWh').value = diffKWh.toFixed(2);
+
+        id('diffKVAh').value = diffKVAh.toFixed(2);
+
+        /* =====================================
+        🔥 CONSUMPTION
+        ===================================== */
+
+        id('consKWh').value = (MC * (presentKWh - previousKWh)).toFixed(1);
+
+        id('consKVAh').value = (MC * (presentKVAh - previousKVAh)).toFixed(1);
+      }
+
+      /* =====================================
+      🔥 AUTO RECALCULATE
+      ===================================== */
+
+      ['CD', 'MD', 'MC', 'preKWh', 'prevKWh', 'preKVAh', 'prevKVAh'].forEach((x) => {
+        on(x, 'input', () => {
+          recalculateEBValues();
+        });
+      });
+
+      /* =========================================
+      🔥 MESSAGE FOR REQUIRED INPUT IF 0
+      ========================================= */
+
+      function validateEBInputs() {
+        const requiredInputs = [
+          { id: 'EBbillMonth', label: 'Billing Month' },
+          { id: 'EBref', label: 'Reference Number' },
+          { id: 'CD', label: 'Contract Demand' },
+          { id: 'BD', label: 'Billing Demand' },
+          { id: 'MC', label: 'Meter Constant' },
+          { id: 'RD', label: 'Recorded Demand' },
+          { id: 'MD', label: 'MD Meter' },
+          { id: 'PF', label: 'Power Factor' },
+          { id: 'preKWh', label: 'KWh Reading' },
+          { id: 'preKVAh', label: 'KVAh Reading' },
+          { id: 'consKWh', label: 'KWh Consumption' },
+          { id: 'consKVAh', label: 'KVAh Consumption' },
+          { id: 'EBbillAmount', label: 'Final Amount' }
+        ];
+
+        const invalidFields = [];
+
+        requiredInputs.forEach((f) => {
+          const el = id(f.id);
+
+          if (!el) return;
+
+          const value = String(el.value || '').trim();
+
+          if (value === '' || value === '0' || value === '0.00') {
+            invalidFields.push(f.label);
+
+            el.style.border = '2px solid #ff6b6b';
+          } else {
+            el.style.border = '';
+          }
+        });
+
+        if (invalidFields.length) {
+          const msg = `
+            <div style="padding:16px;text-align:center;
+            ">
+
+              <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:12px;">
+                ❌ Required Fields Missing
+              </div>
+
+              <div style="font-size:13px;opacity:.9;margin-bottom:10px;">
+                Please fill valid values for:
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
+              ">
+                ${invalidFields
+                  .map(
+                    (x) => `
+                  <span style="padding:5px 10px;border-radius:12px;background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25);font-size:12px;">
+                    ${x}
+                  </span>`
+                  )
+                  .join('')}
+              </div>
+
+            </div>
+          `;
+
+          showCustomAlert(msg);
+
+          return false;
+        }
+
+        return true;
+      }
+
+      /* =========================================
+      🔥 SAVE EB DATA
+      ========================================= */
+
+      async function saveEBData() {
+        try {
+          setSyncStatus('EBlog');
+
+          const billMonth = id('EBbillMonth')?.value;
+
+          if (!validateEBInputs()) {
+            clearSyncStatus('EBlog', 'db', false);
+
+            return;
+          }
+
+          const [yyyy, mm] = billMonth.split('-');
+
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+          const monthKey = `${monthNames[Number(mm) - 1]}-${yyyy}`;
+
+          const row = {
+            'Month-Year': monthKey,
+            'RR No': id('RR')?.value || '',
+            'ID No': id('ID')?.value || '',
+            Tariff: id('Tariff')?.value || '',
+            'EB Station': id('EBpage_Station')?.value || '',
+            Reference: id('EBref')?.value || '',
+            'Contract Demand (KVA)': Number(id('CD')?.value) || 0,
+            'Billing Demand (KVA)': Number(id('BD')?.value) || 0,
+            'Meter Constant': Number(id('MC')?.value) || 500,
+            'Recorded Demand (KVA)': Number(id('RD')?.value) || 0,
+            'MD Meter': Number(id('MD')?.value) || 0,
+            'Power Factor': Number(id('PF')?.value) || 0,
+            KWh: Number(id('preKWh')?.value) || 0,
+            KVAh: Number(id('preKVAh')?.value) || 0,
+            'Prev KWh': Number(id('prevKWh')?.value) || 0,
+            'Prev KVAh': Number(id('prevKVAh')?.value) || 0,
+            'Difference KWh': Number(id('diffKWh')?.value) || 0,
+            'Difference KVAh': Number(id('diffKVAh')?.value) || 0,
+            'Consumption KWh': Number(id('consKWh')?.value) || 0,
+            'Consumption KVAh': Number(id('consKVAh')?.value) || 0,
+            'Interest on Deposit': Number(id('securityDeposit')?.value) || 0,
+            Tax: Number(id('EBtax')?.value) || 0,
+            'Final Amount': Number(id('EBbillAmount')?.value) || 0
+          };
+
+          let changedCols = [];
+
+          const headers = ebData?.headers || [];
+
+          const rows = ebData?.rows || [];
+
+          const existingRow = rows.find((r) => {
+            const monthIdx = headers.indexOf('Month-Year');
+
+            const stationIdx = headers.indexOf('EB Station');
+
+            return String(r[monthIdx] || '').trim() === monthKey && String(r[stationIdx] || '').trim() === String(id('EBpage_Station')?.value || '').trim();
+          });
+
+          if (existingRow) {
+            headers.forEach((header, i) => {
+              const oldVal = String(existingRow[i] ?? '').trim();
+
+              const newVal = String(row[header] ?? '').trim();
+
+              if (oldVal !== newVal) {
+                changedCols.push(header);
+              }
+            });
+          }
+
+          if (existingRow && !changedCols.length) {
+            clearSyncStatus('EBlog', 'db', true);
+
+            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
+
+            showCustomAlert(noChangeMsg);
+            return;
+          }
+
+          const res = await fetch('https://office-management-f425.onrender.com/eb/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: [row] })
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) {
+            throw new Error(result.message || 'Save failed');
+          }
+
+          let msg = '';
+
+          /* =====================================
+          🔄 UPDATED
+          ===================================== */
+
+          if (result.updated?.length) {
+            msg += `<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">📝 ELECTRICITY BILL DETAILS EDIT SUCCESS!</div>`;
+            const changedHTML = changedCols
+              .map(
+                (col) => `
+                <span style="
+                  display:inline-block;padding:8px;margin:4px;border-radius:12px;
+                  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:13px;">
+                  🔃 ${col}
+                </span>`
+              )
+              .join('');
+
+            msg += `
+              <div style="margin-bottom:8px;padding:6px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                <div style="font-size:14px;font-weight:700;margin-bottom:10px;">
+                  ⚡ EB Bill Updated
+                  <span style="opacity:.7;font-size:13px;margin-left:4px;">
+                    (${monthKey})
+                  </span>
+                </div>
+                <div style="margin-bottom:5px;font-size:13px;opacity:.85;">
+                  🏢 ${id('EBpage_Station')?.value || '-'}<br><br>
+                  Updated Columns :
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  ${changedHTML}</div>
+              </div>
+            `;
+          }
+
+          /* =====================================
+          ➕ ADDED
+          ===================================== */
+
+          if (result.added?.length) {
+            msg += `<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">➕ ELECTRICITY BILL DETAILS ADD SUCCESS!</div>`;
+            msg += `
+              <div style="margin-top:16px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                <div style="margin-bottom:6px;font-size:13px;">📅 Month :<b style="font-size:13px;">${monthKey}</b></div>
+                <div style="margin-bottom:6px;font-size:13px;">🏢 Station :<b style="font-size:13px;">${id('EBpage_Station')?.value || '-'}</b></div>
+                <div style="margin-bottom:6px;font-size:13px;">🔖 Reference :<b style="font-size:13px;">${id('EBref')?.value || '-'}</b></div>
+                <div style="font-size:13px;">💰 Bill Amount : <b style="font-size:13px;">${formatCurrency(Number(id('EBbillAmount')?.value) || formatCurrency(0)).toLocaleString('en-IN')} </b></div>
+              </div>
+            `;
+          }
+
+          await loadTable('eb', 'EBlog');
+
+          loadEBMonthsByFY();
+
+          filterEBTable();
+
+          clearSyncStatus('EBlog', 'db', true);
+
+          showCustomAlert(msg);
+        } catch (err) {
+          console.error('❌ EB Save Failed:', err);
+
+          clearSyncStatus('EBlog', 'db', false);
+
+          showCustomAlert(`
+            <div style="text-align:center;padding:16px;">
+              <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:10px;">
+                ❌ Failed to Save EB Data
+              </div>
+
+              <div style="opacity:.8;font-size:13px;">
+                ${err.message || 'Unknown Error'}
+              </div>
+            </div>
+          `);
+        }
+      }
+
+      /* =========================================
+      🔥 EB SAVE BUTTON
+      ========================================= */
+
+      on('EBsaveBtn', 'click', async () => {
+        await saveEBData();
       });
 
       /* =========================================================
       FULL LOGOUT RESET
     ========================================================= */
-
-      function logout() {
-        updateLoader(0, '', 'download');
-        /* =========================================
-        RESET PASSWORD FIELD
-      ========================================= */
-
-        const pwd = id('loginPasswordInput');
-
-        if (pwd) {
-          pwd.type = 'password';
-          pwd.value = '';
-        }
-
-        const eyeIcon = qs('#togglePassword i');
-
-        if (eyeIcon) {
-          eyeIcon.textContent = 'visibility_off';
-        }
-
-        /* =========================================
-        CLEAR ERRORS
-      ========================================= */
-
-        if (id('loginError')) {
-          id('loginError').innerHTML = '';
-        }
-
-        if (id('capsWarning')) {
-          id('capsWarning').classList.remove('show');
-        }
-
-        /* =========================================
-        RESET PAGE DISPLAY
-      ========================================= */
-
-        id('mainPage').style.display = 'none';
-
-        id('loginPage').style.display = 'flex';
-
-        /* =========================================
-        SCROLL TOP
-      ========================================= */
-
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-
-        // 🔥 RESET ALL EMPLOYEE DROPDOWNS
-        selectMap.employee.forEach((eid) => {
-          const el = id(eid);
-
-          if (!el) return;
-
-          el.value = '';
-
-          el.selectedIndex = -1;
-        });
-
-        // 🔥 RESET FILTER
-        filters.employee = '';
-        filters.fy = '';
-        filters.month = '';
-        clearEmpPage();
-
-        // 🔥 RESET BUDGET UNDER DROPDOWN
-        const budgetUnder = id('BudgetUnderSelect');
-
-        if (budgetUnder) {
-          budgetUnder.value = '';
-
-          budgetUnder.selectedIndex = -1;
-        }
-
-        const itWrapper = qs('.ITtableWrapper');
-        const pensionWrapper = qs('.PensionTableWrapper');
-
-        if (itWrapper) itWrapper.innerHTML = '';
-        qsa('.itPanelDiv span').forEach((s) => (s.textContent = s.id === 'PanelRegime' ? '-' : '0'));
-        id('salaryMode').checked = true;
-        id('PanelITHighlight').style.background = 'rgba(0, 196, 7)';
-
-        if (pensionWrapper) pensionWrapper.innerHTML = '';
-        qsa('.pensionPanelDiv span').forEach((s) => (s.textContent = '0'));
-        id('PensionFor').selectedIndex = 0;
-        id('VRS_Death_Date').value = '';
-        id('CommutationOpted').checked = true;
-        id('CommutationOption').value = '40%';
-        id('PensionEL').value = '300';
-        id('PensionHPL').value = '200';
-
-        qsa('#SBGPanel input').forEach((s) => (s.value = '0'));
-
-        console.clear();
-      }
-
       //id('logoutBtn')?.addEventListener('click', logout);
 
       // 🔥 LOGOUT BUTTON CLICK
