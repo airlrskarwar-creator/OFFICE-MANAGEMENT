@@ -161,26 +161,28 @@
       }
 
       /* =========================================================
-        🔥 HIDE EMPTY OPTION
-      ========================================================= */
-
-      :not(.input-box) > select option[value=''] {
-        display: none;
-      }
-
-      /* =========================================================
         🔥 PICKER ICON
       ========================================================= */
 
       :not(.input-box) > select::picker-icon {
-        transform: rotate(180deg);
         transition: transform 0.25s ease;
       }
 
       /* 🔥 ROTATE ICON */
 
       :not(.input-box) > select:open::picker-icon {
-        transform: rotate(0deg);
+        transform: rotate(180deg);
+      }
+
+      /* 🔥 WHITE PICKER ICONS FOR ALL INPUT PICKERS */
+
+      input::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 1;
+      }
+
+      input:hover::-webkit-calendar-picker-indicator {
+        filter: invert(1);
       }
 
       /* =========================================================
@@ -316,6 +318,13 @@
         font-family: 'Inter', Arial, Helvetica, sans-serif;
       }
 
+      .stationDropdown {
+        min-width: 180px !important;
+      }
+
+      .employeeDropdown {
+        min-width: 220px !important;
+      }
       /* =========================================================
         LOGIN PAGE
       ========================================================= */
@@ -2129,7 +2138,8 @@
       .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
       .budget-table,
       .budgetfromPB-table,
-      .EBtableWrapper table {
+      .EBtableWrapper table,
+      .DGlogTableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -2272,7 +2282,9 @@
       .budgetfromPB-table th,
       .budgetfromPB-table td,
       .EBtableWrapper th,
-      .EBtableWrapper td {
+      .EBtableWrapper td,
+      .DGlogTableWrapper th,
+      .DGlogTableWrapper td {
         padding: 5px 8px;
         border-bottom: 1px solid #e5e7eb;
         border-right: dotted 1px #d7dae0;
@@ -2309,7 +2321,8 @@
       .PB-Table-Wrapper thead tr th,
       .budget-table thead tr th,
       .budgetfromPB-table tr th,
-      .EBtableWrapper thead tr th {
+      .EBtableWrapper thead tr th,
+      .DGlogTableWrapper thead tr th {
         position: sticky;
         top: 0;
         z-index: 9;
@@ -4112,7 +4125,7 @@
 
       .DGpanelDiv {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: row;
         justify-content: space-between;
         gap: 10px;
         align-items: flex-start;
@@ -4124,6 +4137,8 @@
           0 4px 14px rgba(0, 0, 0, 0.06),
           inset 0 1px 0 rgba(255, 255, 255, 0.7);
         margin: 0px 4px 4px 4px;
+        overflow: hidden;
+        height: 65px;
       }
 
       /* =========================================
@@ -4157,11 +4172,11 @@
       .DGpanelDiv input,
       .DGpanelDiv select {
         min-width: 100px;
-        height: 30px;
-        font-size: 12px;
+        font-size: 11px;
         outline: none;
         transition: all 0.25s ease;
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+        height: 26px;
       }
 
       /* =========================================
@@ -4170,13 +4185,13 @@
 
       .DGgroup {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 4px;
+        flex-direction: row !important;
+        gap: 4px;
         background: #ffffff;
         border-radius: 16px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        padding: 2px;
       }
 
       /* =========================================
@@ -4184,31 +4199,29 @@
 ========================================= */
 
       .DGtitle {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         color: #0f172a;
-        padding-bottom: 6px;
-        border-bottom: 2px solid #e5e7eb;
+        padding: 6px;
+        border-right: 2px solid #e5e7eb;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        min-width: 130px;
+        display: block;
+        justify-content: space-between;
       }
 
-      /* =========================================
-   🔥 ROW LAYOUT
-========================================= */
-
-      .DGrow {
+      .DGfield {
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        flex-direction: column;
       }
 
       /* =========================================
    🔥 SMALL FIELD INPUTS
 ========================================= */
 
-      .DGrow .DGfield input {
-        width: 90px;
+      .DGfield input {
+        width: 100px;
         text-align: center;
         font-weight: 600;
       }
@@ -4220,6 +4233,8 @@
       .DGpanelDiv input[type='date'],
       .DGpanelDiv input[type='time'] {
         cursor: pointer;
+        height: 26px;
+        width: 120px;
       }
 
       /* ===============================================
@@ -4482,6 +4497,11 @@
           overflow-y: auto;
           gap: 4px;
         }
+
+        .DGpanelDiv {
+          flex-direction: column;
+          overflow-y: auto;
+        }
       }
     </style>
   </head>
@@ -4539,7 +4559,7 @@
               </span>
             </div>
           </div>
-          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999" onclick="shortcut()">⚡ Shortcut</button>
+          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: none" onclick="shortcut()">⚡ Shortcut</button>
           <!-- LOGIN BUTTON -->
           <button id="loginBtn">
             <i class="material-icons">login</i>
@@ -5402,7 +5422,7 @@
               </div>
               <div class="select-group">
                 <label for="PensionPage_Emp">Employee :</label>
-                <select id="PensionPage_Emp" class="employeeDropdown" style="min-width: 210px"></select>
+                <select id="PensionPage_Emp" class="employeeDropdown"></select>
               </div>
               <div class="Pensionaction-group">
                 <button id="PensionprintBtn">
@@ -5600,7 +5620,7 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px">
               <label class="DGpanelLabel">Duration</label>
-              <input disabled id="DGduration" type="time" />
+              <input disabled id="DGduration" />
             </div>
             <div class="DGfield">
               <label>HSD Level</label>
@@ -5608,17 +5628,20 @@
             </div>
 
             <div class="DGfield">
-              <label>Pressure</label>
+              <label>Pressure (kg/cm&sup2;)</label>
               <input id="DGpressure" />
             </div>
 
             <div class="DGfield">
-              <label>Temperature</label>
+              <label>Temperature (&deg;C)</label>
               <input id="DGtemp" />
             </div>
 
             <div class="DGfield">
-              <label>HMR</label>
+              <label>
+                HMR
+                <span id="calcHMR" style="color: red"></span>
+              </label>
               <input id="HMR" />
             </div>
           </div>
@@ -5629,22 +5652,19 @@
 
             <div class="DGgroup">
               <label class="DGtitle">Phase to Phase Voltage</label>
+              <div class="DGfield">
+                <label>Vry</label>
+                <input id="DGRY" />
+              </div>
 
-              <div class="DGrow">
-                <div class="DGfield">
-                  <label>Vry</label>
-                  <input id="DGRY" />
-                </div>
+              <div class="DGfield">
+                <label>Vyb</label>
+                <input id="DGYB" />
+              </div>
 
-                <div class="DGfield">
-                  <label>Vyb</label>
-                  <input id="DGYB" />
-                </div>
-
-                <div class="DGfield">
-                  <label>Vbr</label>
-                  <input id="DGBR" />
-                </div>
+              <div class="DGfield">
+                <label>Vbr</label>
+                <input id="DGBR" />
               </div>
             </div>
 
@@ -5654,22 +5674,19 @@
 
             <div class="DGgroup">
               <label class="DGtitle">Phase to Neutral Voltage</label>
+              <div class="DGfield">
+                <label>Vrn</label>
+                <input id="DGVRN" />
+              </div>
 
-              <div class="DGrow">
-                <div class="DGfield">
-                  <label>Vrn</label>
-                  <input id="DGVRN" />
-                </div>
+              <div class="DGfield">
+                <label>Vyn</label>
+                <input id="DGVYN" />
+              </div>
 
-                <div class="DGfield">
-                  <label>Vyn</label>
-                  <input id="DGVYN" />
-                </div>
-
-                <div class="DGfield">
-                  <label>Vbn</label>
-                  <input id="DGVBN" />
-                </div>
+              <div class="DGfield">
+                <label>Vbn</label>
+                <input id="DGVBN" />
               </div>
             </div>
 
@@ -5680,21 +5697,19 @@
             <div class="DGgroup">
               <label class="DGtitle">Phase Current</label>
 
-              <div class="DGrow">
-                <div class="DGfield">
-                  <label>Ir</label>
-                  <input id="DGIR" />
-                </div>
+              <div class="DGfield">
+                <label>Ir</label>
+                <input id="DGIR" />
+              </div>
 
-                <div class="DGfield">
-                  <label>Iy</label>
-                  <input id="DGIY" />
-                </div>
+              <div class="DGfield">
+                <label>Iy</label>
+                <input id="DGIY" />
+              </div>
 
-                <div class="DGfield">
-                  <label>Ib</label>
-                  <input id="DGIB" />
-                </div>
+              <div class="DGfield">
+                <label>Ib</label>
+                <input id="DGIB" />
               </div>
             </div>
           </div>
@@ -5712,16 +5727,16 @@
           </div>
           <div class="Selection-bar">
             <div class="select-group">
-              <label for="EBpage_Station">Station :</label>
-              <select id="EBpage_Station" class="stationDropdown"></select>
+              <label for="EBPage_Station">Station :</label>
+              <select id="EBPage_Station" class="stationDropdown"></select>
             </div>
             <div class="select-group">
-              <label for="EBpage_FY">FY :</label>
-              <select id="EBpage_FY"></select>
+              <label for="EBPage_FY">FY :</label>
+              <select id="EBPage_FY"></select>
             </div>
             <div class="select-group">
-              <label for="EBpage_Month">Month :</label>
-              <select id="EBpage_Month"></select>
+              <label for="EBPage_Month">Month :</label>
+              <select id="EBPage_Month"></select>
             </div>
             <div class="EBaction-group">
               <button id="EBsaveBtn">
@@ -6801,6 +6816,8 @@
         initDropdowns(dutyData);
         renderFromDropdowns();
         loadEBMonthsByFY();
+        loadDGList();
+        loadDGMonthsByFY();
       }
 
       function initButtons() {
@@ -6857,7 +6874,7 @@
         });
 
         on('PayBillPage_Station', 'change', setDAPercent);
-        //id('EBpage_FY').dispatchEvent(new Event('change'));
+        //id('EBPage_FY').dispatchEvent(new Event('change'));
       }
 
       function initDefaultView() {
@@ -7877,9 +7894,9 @@
       };
 
       const selectMap = {
-        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBpage_Station', 'DGPage_Station'],
+        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBPage_Station', 'DGPage_Station'],
         employee: ['EmpPage_Emp', 'ITPage_Emp', 'PensionPage_Emp', 'SalSlipPage_Emp', 'PayBillPage_Emp'],
-        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBpage_FY', 'DGPage_FY'],
+        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBPage_FY', 'DGPage_FY'],
         month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth']
       };
 
@@ -19912,9 +19929,9 @@
         const panelITtobeRecovered = Math.min(newPendingTDS, oldPendingTDS);
 
         if (panelITtobeRecovered <= 0) {
-          id('PanelITHighlight').style.background = '#00a13d';
+          id('PanelITHighlight').style.background = '#80ff80';
         } else if (panelITtobeRecovered > 0) {
-          id('PanelITHighlight').style.background = '#ff4040';
+          id('PanelITHighlight').style.background = '#fc9f9f';
         }
 
         id('PanelGross').innerText = formatCurrency(bestGross);
@@ -25800,10 +25817,10 @@
       GET LAST UPDATED RR / ID / TARIFF
       ===================================== */
 
-      on('EBpage_Station', 'change', () => {
+      on('EBPage_Station', 'change', () => {
         if (!ebData?.headers || !ebData?.rows) return;
 
-        const station = String(id('EBpage_Station')?.value || '').trim();
+        const station = String(id('EBPage_Station')?.value || '').trim();
 
         const headers = ebData.headers;
 
@@ -25906,9 +25923,9 @@
           return;
         }
 
-        const select = id('EBpage_Month');
+        const select = id('EBPage_Month');
 
-        const fySelect = id('EBpage_FY');
+        const fySelect = id('EBPage_FY');
 
         if (!select || !fySelect) return;
 
@@ -26038,15 +26055,6 @@
       }
 
       /* =========================
-      🔥 FY CHANGE
-      ========================= */
-
-      on('EBpage_FY', 'change', () => {
-        loadEBMonthsByFY();
-        filterEBTable();
-      });
-
-      /* =========================
       🔥 FILTER EB TABLE
       ========================= */
 
@@ -26083,9 +26091,9 @@
         🔥 FILTERS
         ========================= */
 
-        const station = id('EBpage_Station')?.value || '';
+        const station = id('EBPage_Station')?.value || '';
 
-        const fy = id('EBpage_FY')?.value || '';
+        const fy = id('EBPage_FY')?.value || '';
 
         /* =========================
         🔥 GET ROWS
@@ -26211,13 +26219,13 @@
       }
 
       /* =========================================
-      🔥 FY CHANGE
+      🔥 EB FY CHANGE
       ========================================= */
 
-      on('EBpage_FY', 'change', () => {
+      on('EBPage_FY', 'change', () => {
         loadEBMonthsByFY();
 
-        const monthSelect = id('EBpage_Month');
+        const monthSelect = id('EBPage_Month');
 
         const hasData = monthSelect && monthSelect.options.length > 1;
 
@@ -26232,8 +26240,8 @@
       🔥 EB MONTH CHANGE
       ========================================= */
 
-      on('EBpage_Month', 'change', () => {
-        const month = id('EBpage_Month')?.value?.trim();
+      on('EBPage_Month', 'change', () => {
+        const month = id('EBPage_Month')?.value?.trim();
 
         /* =====================================
         🔥 ALL MONTHS → CLEAR
@@ -26780,7 +26788,7 @@
             'RR No': id('RR')?.value || '',
             'ID No': id('ID')?.value || '',
             Tariff: id('Tariff')?.value || '',
-            'EB Station': id('EBpage_Station')?.value || '',
+            'EB Station': id('EBPage_Station')?.value || '',
             Reference: id('EBref')?.value || '',
             'Contract Demand (KVA)': Number(id('CD')?.value) || 0,
             'Billing Demand (KVA)': Number(id('BD')?.value) || 0,
@@ -26812,7 +26820,7 @@
 
             const stationIdx = headers.indexOf('EB Station');
 
-            return String(r[monthIdx] || '').trim() === monthKey && String(r[stationIdx] || '').trim() === String(id('EBpage_Station')?.value || '').trim();
+            return String(r[monthIdx] || '').trim() === monthKey && String(r[stationIdx] || '').trim() === String(id('EBPage_Station')?.value || '').trim();
           });
 
           if (existingRow) {
@@ -26876,7 +26884,7 @@
                   </span>
                 </div>
                 <div style="margin-bottom:5px;font-size:13px;opacity:.85;">
-                  🏢 ${id('EBpage_Station')?.value || '-'}<br><br>
+                  🏢 ${id('EBPage_Station')?.value || '-'}<br><br>
                   Updated Columns :
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
@@ -26894,7 +26902,7 @@
             msg += `
               <div style="margin-top:16px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
                 <div style="margin-bottom:6px;font-size:13px;">📅 Month :<b style="font-size:13px;">${monthKey}</b></div>
-                <div style="margin-bottom:6px;font-size:13px;">🏢 Station :<b style="font-size:13px;">${id('EBpage_Station')?.value || '-'}</b></div>
+                <div style="margin-bottom:6px;font-size:13px;">🏢 Station :<b style="font-size:13px;">${id('EBPage_Station')?.value || '-'}</b></div>
                 <div style="margin-bottom:6px;font-size:13px;">🔖 Reference :<b style="font-size:13px;">${id('EBref')?.value || '-'}</b></div>
                 <div style="font-size:13px;">💰 Bill Amount : <b style="font-size:13px;">${formatCurrency(Number(id('EBbillAmount')?.value) || formatCurrency(0)).toLocaleString('en-IN')} </b></div>
               </div>
@@ -26935,6 +26943,620 @@
 
       on('EBsaveBtn', 'click', async () => {
         await saveEBData();
+      });
+
+      //================================================= DG LOG BOOK PAGE SCRIPT ================================= //
+      const stationDGData = {
+        'AV KARWAR': ['62.5KVA', '40KVA'],
+        'AV DHARWAD': ['100KVA', '55KVA']
+      };
+
+      /* 🔥 LOAD DG LIST */
+      function loadDGList() {
+        const station = id('DGPage_Station').value;
+        const dgSelect = id('StationDGList');
+
+        dgSelect.innerHTML = '';
+
+        const dgList = stationDGData[station] || [];
+
+        dgList.forEach((dg) => {
+          const option = document.createElement('option');
+          option.value = dg;
+          option.textContent = dg;
+          dgSelect.appendChild(option);
+        });
+        filterDGTable();
+      }
+
+      function loadDGMonthsByFY() {
+        if (!dgData || !dgData.rows) {
+          console.warn('❌ dgData not loaded');
+          return;
+        }
+
+        const select = id('DGPage_Month');
+
+        const fySelect = id('DGPage_FY');
+
+        if (!select || !fySelect) return;
+
+        /* =====================================
+        🔥 AUTO SET PRESENT FY IF EMPTY
+        ===================================== */
+
+        if (!fySelect.value) {
+          const now = new Date();
+
+          const currentMonth = now.toLocaleString('en-US', {
+            month: 'short'
+          });
+
+          const currentYear = now.getFullYear();
+
+          fySelect.value = getFinancialYear(`${currentMonth}-${currentYear}`);
+        }
+
+        const selectedFY = fySelect.value;
+
+        const monthMap = new Map();
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        /* =====================================
+        🔥 FILTER MONTHS
+        ===================================== */
+
+        dgData.rows.forEach((row) => {
+          const dateStr = String(row[0] || '').trim();
+
+          if (!dateStr) return;
+
+          /* =====================================
+          🔥 DATE FORMAT = DD-MM-YYYY
+          ===================================== */
+
+          const parts = dateStr.split('-');
+
+          if (parts.length !== 3) return;
+
+          const dd = parts[0];
+
+          const mm = parseInt(parts[1], 10);
+
+          const yyyy = parts[2];
+
+          if (!dd || !mm || !yyyy) return;
+
+          const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
+
+          /* =====================================
+          🔥 FY CHECK
+          ===================================== */
+
+          const year = parseInt(yyyy, 10);
+
+          const fy = mm >= 4 ? `${year}-${String(year + 1).slice(-2)}` : `${year - 1}-${String(year).slice(-2)}`;
+
+          if (selectedFY && fy !== selectedFY) {
+            return;
+          }
+
+          /* =====================================
+          🔥 SORT KEY
+          ===================================== */
+
+          const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
+
+          monthMap.set(key, monthStr);
+        });
+
+        /* =====================================
+        🔥 SORT MONTHS
+        ===================================== */
+
+        const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
+
+        /* =====================================
+        🔥 RESET DROPDOWN
+        ===================================== */
+
+        select.innerHTML = '';
+
+        /* =====================================
+        🔥 ALL MONTHS OPTION
+        ===================================== */
+
+        const allOpt = document.createElement('option');
+
+        allOpt.value = 'ALL';
+
+        allOpt.textContent = 'All Months';
+
+        select.appendChild(allOpt);
+
+        /* =====================================
+        ⚠️ NO DATA
+        ===================================== */
+
+        if (!sortedMonths.length) {
+          filterDGTable();
+          return;
+        }
+
+        /* =====================================
+        🔥 ADD MONTHS
+        ===================================== */
+
+        sortedMonths.forEach((month) => {
+          const opt = document.createElement('option');
+
+          opt.value = month;
+
+          opt.textContent = month;
+
+          select.appendChild(opt);
+        });
+
+        /* =====================================
+        🔥 AUTO SELECT LATEST MONTH
+        ===================================== */
+
+        const latestMonth = sortedMonths[sortedMonths.length - 1];
+
+        select.value = latestMonth;
+
+        /* =====================================
+        🔥 LOAD TABLE + DATA
+        ===================================== */
+
+        select.dispatchEvent(new Event('change'));
+      }
+
+      /* =========================
+      🔥 FILTER EB TABLE
+      ========================= */
+
+      function filterDGTable() {
+        const wrapper = qs('.DGlogTableWrapper');
+
+        if (!wrapper) return;
+
+        /* =========================
+        🔥 HEADERS
+        ========================= */
+
+        const headers = dgData?.headers || [];
+
+        /* =========================
+        🔥 HIDE COLUMNS
+        ========================= */
+
+        const hiddenColumnNames = ['Station', 'DG Name', 'Staff'];
+
+        const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
+
+        const visibleHeaders = headers.filter((_, i) => !hiddenCols.includes(i));
+
+        /* =========================
+        🔥 RESET
+        ========================= */
+
+        wrapper.innerHTML = '';
+
+        /* =========================
+        🔥 FILTER VALUES
+        ========================= */
+
+        const station = id('DGPage_Station')?.value?.trim() || '';
+
+        const selectedMonth = id('DGPage_Month')?.value?.trim() || '';
+
+        const selectedDG = id('StationDGList')?.value?.trim() || '';
+
+        const selectedFY = id('DGPage_FY')?.value?.trim() || '';
+
+        /* =========================
+        🔥 GET ROWS
+        ========================= */
+
+        const allRows = dgData?.rows || [];
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        /* =========================
+        🔥 FILTER DATA
+        ========================= */
+
+        const rows = allRows.filter((row) => {
+          /* =========================
+          🔥 DATE COLUMN
+          FORMAT = DD-MM-YYYY
+          ========================= */
+
+          const dateStr = String(row[1] || '').trim();
+
+          if (!dateStr) return false;
+
+          const parts = dateStr.split('-');
+
+          if (parts.length !== 3) return false;
+
+          const dd = parts[0];
+
+          const mm = parseInt(parts[1], 10);
+
+          const yyyy = parts[2];
+
+          if (!dd || !mm || !yyyy) return false;
+
+          /* =========================
+          🔥 MONTH FORMAT
+          Example:
+          04-03-2025 → Mar-2025
+          ========================= */
+
+          const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
+
+          /* =========================
+          🔥 FY CALCULATION
+          ========================= */
+
+          const year = parseInt(yyyy, 10);
+
+          const rowFY = mm >= 4 ? `${year}-${String(year + 1).slice(-2)}` : `${year - 1}-${String(year).slice(-2)}`;
+
+          /* =========================
+          🔥 STATION COLUMN
+          ========================= */
+
+          const rowStation = String(row[2] || '').trim();
+
+          /* =========================
+          🔥 DG COLUMN
+          ========================= */
+
+          const rowDG = String(row[3] || '').trim();
+
+          /* =========================
+          🔥 STATION FILTER
+          ========================= */
+
+          if (station && rowStation !== station) {
+            return false;
+          }
+
+          /* =========================
+          🔥 DG FILTER
+          ========================= */
+
+          if (selectedDG && rowDG !== selectedDG) {
+            return false;
+          }
+
+          /* =========================
+          🔥 FY FILTER
+          ========================= */
+
+          if (selectedFY && rowFY !== selectedFY) {
+            return false;
+          }
+
+          /* =========================
+          🔥 MONTH FILTER
+          ========================= */
+
+          if (selectedMonth && selectedMonth !== 'ALL' && monthStr !== selectedMonth) {
+            return false;
+          }
+
+          return true;
+        });
+
+        /* =========================
+        🔥 BUILD TABLE
+        ========================= */
+
+        let html = `
+          <table class="data-table">
+
+            <colgroup>
+              ${visibleHeaders
+                .map((header) => {
+                  if (String(header).trim() === 'Date') {
+                    return `<col style="width:6%">`;
+                  }
+
+                  return `<col style="width:4.1%">`;
+                })
+                .join('')}
+            </colgroup>
+
+            <thead>
+              <tr>
+        `;
+
+        /* =========================
+        🔥 HEADERS
+        ========================= */
+
+        headers.forEach((h, i) => {
+          if (hiddenCols.includes(i)) return;
+
+          html += `<th>${h}</th>`;
+        });
+
+        html += `
+              </tr>
+            </thead>
+
+            <tbody>
+        `;
+
+        /* =========================
+        🚫 NO DATA
+        ========================= */
+
+        if (!rows.length) {
+          html += `
+            <tr>
+              <td colspan="${visibleHeaders.length}"
+                  style="
+                    text-align:center;
+                    padding:20px;
+                    font-weight:bold;
+                    color:#ef4444;
+                    background:#edebb7;
+                    font:size:12px;
+                  ">
+                ==============🚫 No Data Found 🚫==============
+              </td>
+            </tr>
+          `;
+        } else {
+          /* =========================
+          🔥 ROWS
+          ========================= */
+
+          rows.forEach((row) => {
+            html += `<tr>`;
+
+            row.forEach((cell, i) => {
+              if (hiddenCols.includes(i)) return;
+
+              html += `<td>${cell ?? ''}</td>`;
+            });
+
+            html += `</tr>`;
+          });
+        }
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        /* =========================
+        🔥 RENDER
+        ========================= */
+
+        wrapper.innerHTML = html;
+      }
+
+      /* =========================================
+      🔥 LOAD DG ENTRY DATA
+      ========================================= */
+
+      function loadDGEntryData() {
+        if (!dgData || !dgData.rows) return;
+
+        const station = id('DGPage_Station')?.value?.trim() || '';
+
+        const selectedDG = id('StationDGList')?.value?.trim() || '';
+
+        const selectedMonth = id('DGPage_Month')?.value?.trim() || '';
+
+        if (!station || !selectedDG) return;
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        /* =========================================
+        🔥 FIND MATCHING ROW
+        ========================================= */
+
+        const row = dgData.rows.find((r) => {
+          const dateStr = String(r[0] || '').trim();
+
+          if (!dateStr) return false;
+
+          const parts = dateStr.split('-');
+
+          if (parts.length !== 3) return false;
+
+          const mm = parseInt(parts[1], 10);
+
+          const yyyy = parts[2];
+
+          const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
+
+          const rowStation = String(r[1] || '').trim();
+
+          const rowDG = String(r[2] || '').trim();
+
+          return rowStation === station && rowDG === selectedDG && (selectedMonth === 'ALL' || monthStr === selectedMonth);
+        });
+
+        /* =========================================
+        🔥 NO DATA
+        ========================================= */
+
+        if (!row) {
+          clearDGInputs();
+          return;
+        }
+
+        /* =========================================
+        🔥 DATE
+        DD-MM-YYYY → YYYY-MM-DD
+        ========================================= */
+
+        const dateParts = String(row[0]).split('-');
+
+        if (dateParts.length === 3) {
+          id('DGdate').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        }
+
+        /* =========================================
+        🔥 BASIC DATA
+        ========================================= */
+
+        id('DGstartTime').value = row[3] || '';
+
+        id('DGstopTime').value = row[4] || '';
+
+        id('DGduration').value = row[5] || '';
+
+        id('DGoperationPurpose').value = row[6] || 'Failure';
+
+        /* =========================================
+        🔥 VOLTAGE
+        ========================================= */
+
+        id('DGRY').value = row[10] || '';
+        id('DGBR').value = row[11] || '';
+        id('DGYB').value = row[12] || '';
+
+        id('DGVRN').value = row[13] || '';
+        id('DGVYN').value = row[14] || '';
+        id('DGVBN').value = row[15] || '';
+
+        /* =========================================
+        🔥 CURRENT
+        ========================================= */
+
+        id('DGIR').value = row[16] || '';
+        id('DGIY').value = row[17] || '';
+        id('DGIB').value = row[18] || '';
+
+        /* =========================================
+        🔥 OTHER VALUES
+        ========================================= */
+
+        id('DGhsdLevel').value = row[19] || '';
+
+        id('DGpressure').value = row[20] || '';
+
+        id('DGtemp').value = row[21] || '';
+
+        id('HMR').value = row[22] || '';
+      }
+
+      /* =========================================
+      🔥 CLEAR DG INPUTS
+      ========================================= */
+
+      function clearDGInputs() {
+        ['DGdate', 'DGstartTime', 'DGstopTime', 'DGduration', 'DGhsdLevel', 'DGpressure', 'DGtemp', 'HMR', 'DGRY', 'DGBR', 'DGYB', 'DGVRN', 'DGVYN', 'DGVBN', 'DGIR', 'DGIY', 'DGIB'].forEach((idName) => {
+          const el = id(idName);
+
+          if (el) el.value = '';
+        });
+
+        id('DGoperationPurpose').value = 'Failure';
+      }
+
+      /* =========================================
+      🔥 AUTO CALCULATE DURATION
+      ========================================= */
+
+      function calculateDGDuration() {
+        const start = id('DGstartTime')?.value;
+
+        const stop = id('DGstopTime')?.value;
+
+        if (!start || !stop) return;
+
+        const [sh, sm] = start.split(':').map(Number);
+
+        const [eh, em] = stop.split(':').map(Number);
+
+        let startMin = sh * 60 + sm;
+
+        let endMin = eh * 60 + em;
+
+        /* 🔥 NEXT DAY */
+
+        if (endMin < startMin) {
+          endMin += 24 * 60;
+        }
+
+        const diff = endMin - startMin;
+
+        const hrs = Math.floor(diff / 60);
+
+        const mins = diff % 60;
+
+        /* =========================================
+        🔥 DURATION FORMAT
+        ========================================= */
+
+        const duration = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+
+        id('DGduration').value = duration;
+
+        /* =========================================
+        🔥 HMR CALCULATION
+        02:30 → +3
+        02:27 → +2
+        ========================================= */
+
+        const roundedHours = mins >= 30 ? hrs + 1 : hrs;
+
+        const previousHMR = Number(id('HMR')?.value || 0);
+
+        const calculatedHMR = previousHMR + roundedHours;
+
+        const calcSpan = id('calcHMR');
+
+        if (calcSpan) {
+          calcSpan.textContent = calculatedHMR;
+        }
+      }
+
+      /* =========================================
+      🔥 EVENTS
+      ========================================= */
+
+      on('DGPage_Station', 'change', () => {
+        loadDGList();
+        loadDGMonthsByFY();
+        filterDGTable();
+      });
+
+      on('DGPage_FY', 'change', () => {
+        loadDGMonthsByFY();
+        filterDGTable();
+      });
+
+      on('StationDGList', 'change', () => {
+        loadDGMonthsByFY();
+        filterDGTable();
+        loadDGEntryData();
+      });
+
+      on('DGPage_Month', 'change', () => {
+        filterDGTable();
+        loadDGEntryData();
+      });
+
+      ['input', 'change'].forEach((eventType) => {
+        on('DGstartTime', eventType, () => {
+          calculateDGDuration();
+        });
+
+        on('DGstopTime', eventType, () => {
+          calculateDGDuration();
+        });
       });
 
       /* =========================================================
