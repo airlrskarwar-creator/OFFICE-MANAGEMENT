@@ -1700,15 +1700,11 @@ def update_dg():
                 val = obj.get(h, "")
 
                 # =====================================
-                # 🔥 KEEP DURATION AS NUMBER
+                # 🔥 KEEP FORMULA STRING
                 # =====================================
 
                 if h in duration_cols:
-
-                    try:
-                        val = float(val)
-                    except:
-                        val = 0
+                    val = str(val)
 
                 row_data.append(val)
 
