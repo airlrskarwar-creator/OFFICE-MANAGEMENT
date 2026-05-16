@@ -4598,7 +4598,7 @@
               </span>
             </div>
           </div>
-          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: none" onclick="shortcut()">⚡ Shortcut</button>
+          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999" onclick="shortcut()">⚡ Shortcut</button>
           <!-- LOGIN BUTTON -->
           <button id="loginBtn">
             <i class="material-icons">login</i>
@@ -5665,8 +5665,16 @@
               <input disabled id="DGduration" />
             </div>
             <div class="DGfield">
-              <label>HSD Level</label>
+              <label>
+                HSD Level
+                <span id="CalcHSDLevel" style="color: red; font-weight: bold; padding-left: 2px"></span>
+              </label>
               <input id="DGhsdLevel" />
+            </div>
+
+            <div class="DGfield">
+              <label>HSD Filled</label>
+              <input id="DGhsdFill" />
             </div>
 
             <div class="DGfield">
@@ -5696,17 +5704,17 @@
               <label class="DGtitle">Phase to Phase Voltage</label>
               <div class="DGfield">
                 <label>Vry</label>
-                <input id="DGRY" />
+                <input id="DGVRY" />
               </div>
 
               <div class="DGfield">
                 <label>Vyb</label>
-                <input id="DGYB" />
+                <input id="DGVYB" />
               </div>
 
               <div class="DGfield">
                 <label>Vbr</label>
-                <input id="DGBR" />
+                <input id="DGVBR" />
               </div>
             </div>
 
@@ -26988,9 +26996,22 @@
       });
 
       //================================================= DG LOG BOOK PAGE SCRIPT ================================= //
+      /* =========================================
+      🔥 DG MAP FOR EACH STATION
+      ========================================= */
       const stationDGData = {
         'AV KARWAR': ['62.5KVA', '40KVA'],
         'AV DHARWAD': ['100KVA', '55KVA']
+      };
+
+      /* =========================================
+      🔥 DG HSD CONSUMPTION MAP
+      ========================================= */
+
+      const DG_HSD_MAP = {
+        'AV KARWAR': { '62.5KVA': 7, '40KVA': 10 },
+
+        'AV DHARWAD': { '70KVA': 8, '50KVA': 11 }
       };
 
       /* 🔥 LOAD DG LIST */
@@ -27446,6 +27467,7 @@
 
             id('calcHMR').textContent = '';
             id('DGstopTimeError').textContent = '';
+            id('CalcHSDLevel').textContent = '';
 
             /* =========================================
             🔥 ADD ACTIVE
@@ -27487,9 +27509,9 @@
             🔥 VOLTAGE
             ========================================= */
 
-            id('DGRY').value = row[11] || '';
-            id('DGBR').value = row[12] || '';
-            id('DGYB').value = row[13] || '';
+            id('DGVRY').value = row[11] || '';
+            id('DGVBR').value = row[12] || '';
+            id('DGVYB').value = row[13] || '';
 
             id('DGVRN').value = row[14] || '';
             id('DGVYN').value = row[15] || '';
@@ -27509,11 +27531,13 @@
 
             id('DGhsdLevel').value = row[20] || '';
 
-            id('DGpressure').value = row[21] || '';
+            id('DGhsdFill').value = row[21] || '';
 
-            id('DGtemp').value = row[22] || '';
+            id('DGpressure').value = row[22] || '';
 
-            id('HMR').value = row[23] || '';
+            id('DGtemp').value = row[23] || '';
+
+            id('HMR').value = row[24] || '';
           });
         });
       }
@@ -27523,13 +27547,16 @@
       ========================================= */
 
       function clearDGInputs() {
-        ['DGdate', 'DGstartTime', 'DGstopTime', 'DGduration', 'DGhsdLevel', 'DGpressure', 'DGtemp', 'HMR', 'DGRY', 'DGBR', 'DGYB', 'DGVRN', 'DGVYN', 'DGVBN', 'DGIR', 'DGIY', 'DGIB'].forEach((idName) => {
+        ['DGstartTime', 'DGstopTime', 'DGduration', 'DGhsdFill', 'DGhsdLevel', 'DGpressure', 'DGtemp', 'HMR', 'DGVRY', 'DGVBR', 'DGVYB', 'DGVRN', 'DGVYN', 'DGVBN', 'DGIR', 'DGIY', 'DGIB'].forEach((idName) => {
           const el = id(idName);
 
           if (el) el.value = '';
         });
 
         id('DGoperationPurpose').value = 'Failure';
+        id('calcHMR').textContent = '';
+        id('DGstopTimeError').textContent = '';
+        id('CalcHSDLevel').textContent = '';
 
         /* =========================================
         🔥 REMOVE ACTIVE ROW
@@ -27561,11 +27588,12 @@
 
         /* =========================================
         🔥 INVALID TIME
-        STOP < START
         ========================================= */
 
         if (endMin < startMin) {
           id('DGduration').value = '00:00';
+
+          id('HMR').value = '';
 
           const calcSpan = id('calcHMR');
 
@@ -27575,38 +27603,44 @@
 
           return;
         }
+
+        /* =========================================
+        🔥 DURATION
+        ========================================= */
+
         const diff = endMin - startMin;
 
         const hrs = Math.floor(diff / 60);
 
         const mins = diff % 60;
 
-        /* =========================================
-        🔥 DURATION FORMAT
-        ========================================= */
-
         const duration = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
 
         id('DGduration').value = duration;
 
         /* =========================================
-        🔥 HMR ROUNDING
-        02:30 → +3
-        02:27 → +2
+        🔥 ROUND HOURS
         ========================================= */
 
         const roundedHours = mins >= 30 ? hrs + 1 : hrs;
 
         /* =========================================
-        🔥 GET ACTIVE ROW
+        🔥 ACTIVE ROW
         ========================================= */
 
         const activeRow = document.querySelector('.DGactiveRow');
 
         let previousHMR = 0;
+        let previousHSD = 0;
+
+        const station = id('DGPage_Station')?.value?.trim() || '';
+
+        const dgName = id('StationDGList')?.value?.trim() || '';
+
+        const dgConsumption = DG_HSD_MAP?.[station]?.[dgName] || 0;
 
         /* =========================================
-        🔥 IF EDITING EXISTING ROW
+        🔥 EDIT MODE
         ========================================= */
 
         if (activeRow) {
@@ -27614,51 +27648,149 @@
 
           const currentRow = dgData?.rows?.[rowIndex];
 
-          const currentSrNo = Number(currentRow?.[0] || 0);
+          if (currentRow) {
+            /* =====================================
+            🔥 CURRENT VALUES
+            ===================================== */
 
-          const sortedRows = [...(dgData?.rows || [])].sort((a, b) => Number(a[0]) - Number(b[0]));
+            const currentHMR = Number(currentRow[24] || 0);
 
-          const currentIndex = sortedRows.findIndex((row) => Number(row[0]) === currentSrNo);
-
-          /* =========================================
-          🔥 PREVIOUS ENTRY EXISTS
-          ========================================= */
-
-          if (currentIndex > 0) {
-            const previousRow = sortedRows[currentIndex - 1];
-
-            previousHMR = Number(previousRow[23] || 0);
-          } else {
-            /* =========================================
-          🔥 FIRST ENTRY
-          DERIVE PREVIOUS HMR
-          ========================================= */
-            const currentHMR = Number(currentRow?.[23] || 0);
-
-            const currentDurationStr = String(currentRow?.[6] || '00:00');
+            const currentDurationStr = String(currentRow[6] || '00:00');
 
             const [dh, dm] = currentDurationStr.split(':').map(Number);
 
-            const currentDuration = dm >= 30 ? dh + 1 : dh;
+            const oldRounded = dm >= 30 ? dh + 1 : dh;
 
-            previousHMR = currentHMR - currentDuration;
+            const basePreviousHMR = currentHMR - oldRounded;
+
+            const basePreviousHSDlevel = Number(currentRow[20] || 0);
+
+            /* =====================================
+            🔥 OLD RANGE
+            ===================================== */
+
+            const oldStart = String(currentRow[4] || '');
+
+            const oldStop = String(currentRow[5] || '');
+
+            const oldStartParts = oldStart.split(':').map(Number);
+
+            const oldStopParts = oldStop.split(':').map(Number);
+
+            const oldStartMin = oldStartParts[0] * 60 + oldStartParts[1];
+
+            const oldStopMin = oldStopParts[0] * 60 + oldStopParts[1];
+
+            /* =====================================
+            🔥 NEW RANGE
+            ===================================== */
+
+            const newStartMin = startMin;
+
+            const newStopMin = endMin;
+
+            /* =====================================
+            🔥 SAME TIMELINE
+            ===================================== */
+
+            const isSameTimeline = (newStartMin >= oldStartMin && newStartMin <= oldStopMin) || (newStopMin >= oldStartMin && newStopMin <= oldStopMin) || (newStartMin <= oldStartMin && newStopMin >= oldStopMin);
+
+            /* =====================================
+            🔥 UPDATE EXISTING
+            ===================================== */
+            if (isSameTimeline) {
+              /* ===================================
+              🔥 SAME LOGIC AS HMR
+              =================================== */
+
+              previousHMR = basePreviousHMR;
+
+              /* ===================================
+              🔥 OLD DG LEVEL
+              =================================== */
+
+              const oldDGLevel = Number(currentRow[20] || 0);
+
+              /* ===================================
+              🔥 OLD FILLED
+              =================================== */
+
+              const oldFilled = Number(currentRow[21] || 0) || 0;
+
+              /* ===================================
+              🔥 OLD DURATION
+              =================================== */
+
+              const oldDieselUsed = dgConsumption * oldRounded;
+
+              /* ===================================
+              🔥 PREVIOUS HSD
+              SAME AS HMR BASE LOGIC
+              =================================== */
+
+              previousHSD = oldDGLevel + oldDieselUsed - oldFilled;
+
+              activeRow.dataset.forceNew = 'false';
+            } else {
+              /* ===================================
+              🔥 NEW ENTRY
+              =================================== */
+
+              previousHMR = currentHMR;
+
+              previousHSD = Number(currentRow[20] || 0);
+
+              activeRow.dataset.forceNew = 'true';
+            }
           }
         } else {
           /* =========================================
         🔥 NEW ENTRY
-        GET LAST ENTRY OF SAME DATE
         ========================================= */
           const currentDate = id('DGdate')?.value;
 
           if (currentDate) {
             const formattedDate = currentDate.split('-').reverse().join('-');
 
-            const sameDateRows = (dgData?.rows || []).filter((row) => String(row[1]).trim() === formattedDate).sort((a, b) => Number(a[0]) - Number(b[0]));
+            const sortedRows = [...(dgData?.rows || [])];
 
-            if (sameDateRows.length) {
-              const lastRow = sameDateRows[sameDateRows.length - 1];
+            let previousRow = null;
 
-              previousHMR = Number(lastRow[23] || 0);
+            let latestDateTime = 0;
+
+            for (const row of sortedRows) {
+              const rowDate = String(row[1] || '');
+
+              const rowStart = String(row[4] || '');
+
+              if (!rowDate || !rowStart) continue;
+
+              const [rd, rm, ry] = rowDate.split('-').map(Number);
+
+              const rowTimeParts = rowStart.split(':').map(Number);
+
+              const rowDateTime = new Date(ry, rm - 1, rd, rowTimeParts[0], rowTimeParts[1]).getTime();
+
+              const [cd, cm, cy] = formattedDate.split('-').map(Number);
+
+              const currentTimeParts = start.split(':').map(Number);
+
+              const currentDateTime = new Date(cy, cm - 1, cd, currentTimeParts[0], currentTimeParts[1]).getTime();
+
+              /* =================================
+              🔥 PREVIOUS ENTRY
+              ================================= */
+
+              if (rowDateTime < currentDateTime && rowDateTime > latestDateTime) {
+                latestDateTime = rowDateTime;
+
+                previousRow = row;
+              }
+            }
+
+            if (previousRow) {
+              previousHMR = Number(previousRow[24] || 0);
+              previousHSD = Number(previousRow[20] || 0);
             }
           }
         }
@@ -27670,14 +27802,53 @@
         const calculatedHMR = previousHMR + roundedHours;
 
         /* =========================================
-        🔥 SHOW CALCULATED HMR
+        🔥 SHOW PREVIOUS
         ========================================= */
 
         const calcSpan = id('calcHMR');
 
         if (calcSpan) {
-          calcSpan.textContent = `(${calculatedHMR})`;
+          calcSpan.textContent = `(${previousHMR})`;
         }
+
+        const hsdSpan = id('CalcHSDLevel');
+
+        if (hsdSpan) {
+          hsdSpan.textContent = `(${previousHSD})`;
+        }
+        /* =========================================
+        🔥 SET NEW HMR
+        ========================================= */
+
+        id('HMR').value = calculatedHMR;
+        //id('DGhsdLevel').value = previousHSD;
+
+        /* =========================================
+        🔥 GET DG CONSUMPTION
+        🔥 HSD FILLED
+        ========================================= */
+
+        const hsdFilledRaw = String(id('DGhsdFill')?.value || '0').trim();
+
+        const hsdFilled = hsdFilledRaw === '-' || hsdFilledRaw === '' ? 0 : Number(hsdFilledRaw);
+
+        /* =========================================
+        🔥 DIESEL USED
+        ========================================= */
+
+        const dieselUsed = dgConsumption * roundedHours;
+
+        /* =========================================
+        🔥 FINAL HSD
+        ========================================= */
+
+        const calculatedHSD = previousHSD - dieselUsed + hsdFilled;
+
+        /* =========================================
+        🔥 ROUND & SET
+        ========================================= */
+
+        id('DGhsdLevel').value = Math.max(0, Math.round(calculatedHSD));
       }
 
       /* =========================================
@@ -27741,18 +27912,21 @@
         loadDGMonthsByFY();
         filterDGTable();
         clearDGInputs();
+        id('DGdate').value = '';
       });
 
       on('DGPage_FY', 'change', () => {
         loadDGMonthsByFY();
         filterDGTable();
         clearDGInputs();
+        id('DGdate').value = '';
       });
 
       on('StationDGList', 'change', () => {
         loadDGMonthsByFY();
         filterDGTable();
         clearDGInputs();
+        id('DGdate').value = '';
       });
 
       on('DGPage_Month', 'change', () => {
@@ -27768,6 +27942,29 @@
         on('DGstopTime', eventType, () => {
           calculateDGDuration();
           validateDGStopTime();
+        });
+
+        on('DGhsdFill', eventType, () => {
+          calculateDGDuration();
+        });
+
+        on('DGdate', eventType, () => {
+          clearDGInputs();
+          ['DGVRY', 'DGVBR', 'DGVYB'].forEach((idName) => {
+            const el = id(idName);
+            if (el) el.value = '410';
+          });
+          ['DGVRN', 'DGVBN', 'DGVYN'].forEach((idName) => {
+            const el = id(idName);
+            if (el) el.value = '230';
+          });
+          ['DGIR', 'DGIY', 'DGIB'].forEach((idName) => {
+            const el = id(idName);
+            if (el) el.value = '-';
+          });
+          id('DGpressure').value = '470';
+          id('DGtemp').value = '80';
+          calculateDGDuration();
         });
       });
 
@@ -27785,6 +27982,8 @@
 
           const dateValue = id('DGdate')?.value || '';
 
+          const purpose = id('DGoperationPurpose')?.value || '';
+
           if (!station || !dgName || !dateValue) {
             clearSyncStatus('DGlog', 'db', false);
 
@@ -27799,7 +27998,6 @@
 
           /* =====================================
           🔥 GET EXISTING ROW
-          KEY = SR NO + STATION + DATE
           ===================================== */
 
           const headers = dgData?.headers || [];
@@ -27812,7 +28010,17 @@
 
           let existingIndex = -1;
 
-          if (activeRow) {
+          /* =====================================
+          🔥 FORCE NEW ENTRY
+          ===================================== */
+
+          const forceNewEntry = activeRow?.dataset?.forceNew === 'true';
+
+          /* =====================================
+          🔥 UPDATE ONLY IF SAME TIMELINE
+          ===================================== */
+
+          if (activeRow && !forceNewEntry) {
             existingIndex = Number(activeRow.dataset.rowindex || -1);
 
             existingRow = rows[existingIndex];
@@ -27825,7 +28033,7 @@
           let srNo = '';
 
           /* =====================================
-          🔥 UPDATE
+          🔥 UPDATE EXISTING
           ===================================== */
 
           if (existingRow) {
@@ -27834,7 +28042,15 @@
             /* =====================================
           🔥 NEW ENTRY
           ===================================== */
-            srNo = rows.length + 1;
+            /* ===================================
+            🔥 INSERT AFTER LAST SR NO
+            =================================== */
+
+            const allSrNos = rows.map((r) => Number(r[0] || 0));
+
+            const maxSrNo = Math.max(0, ...allSrNos);
+
+            srNo = maxSrNo + 1;
           }
 
           /* =====================================
@@ -27844,8 +28060,16 @@
           const duration = id('DGduration')?.value || '00:00';
 
           /* =====================================
-          🔥 TIME ADD FUNCTION
+          🔥 HELPERS
           ===================================== */
+
+          function timeToMinutes(t) {
+            const [h, m] = String(t || '00:00')
+              .split(':')
+              .map(Number);
+
+            return h * 60 + m;
+          }
 
           function addTimes(t1, t2) {
             const [h1, m1] = String(t1 || '00:00')
@@ -27856,33 +28080,25 @@
               .split(':')
               .map(Number);
 
-            let totalMinutes = h1 * 60 + m1 + (h2 * 60 + m2);
+            let mins = h1 * 60 + m1 + (h2 * 60 + m2);
 
-            const hrs = Math.floor(totalMinutes / 60);
-
-            const mins = totalMinutes % 60;
-
-            return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+            return `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
           }
 
           /* =====================================
-          🔥 MONTH + DG BASED PROGRESSIVE
+          🔥 MONTH KEY
           ===================================== */
-
-          let progressiveTest = '00:00';
-
-          let progressiveFailure = '00:00';
 
           const monthKey = formattedDate.split('-').slice(1).join('-');
 
           /* =====================================
-          🔥 FILTER SAME MONTH + SAME DG
+          🔥 SAME MONTH + SAME DG
           ===================================== */
 
           const sameMonthRows = [...rows].filter((r, idx) => {
-            /* =====================================
-                🔥 SKIP CURRENT EDIT ROW
-                ===================================== */
+            /* ===============================
+              🔥 REMOVE CURRENT EDIT ROW
+              =============================== */
 
             if (existingIndex >= 0 && idx === existingIndex) {
               return false;
@@ -27898,32 +28114,118 @@
             return rowMonth === monthKey && rowDG === dgName;
           });
 
-          let previousRow = null;
-
           /* =====================================
-          🔥 GET PREVIOUS SAME DG ENTRY
+          🔥 PUSH CURRENT ROW TEMPORARILY
           ===================================== */
 
-          if (sameMonthRows.length) {
-            previousRow = sameMonthRows[sameMonthRows.length - 1];
+          const tempRow = [srNo, formattedDate, station, dgName, id('DGstartTime')?.value || '', id('DGstopTime')?.value || '', duration, purpose];
 
-            progressiveTest = previousRow[8] || '00:00';
+          sameMonthRows.push(tempRow);
 
-            progressiveFailure = previousRow[9] || '00:00';
-          }
           /* =====================================
-          🔥 PURPOSE CALCULATION
+          🔥 SORT ALL ROWS
           ===================================== */
 
-          const purpose = id('DGoperationPurpose')?.value || 'Failure';
+          sameMonthRows.sort((a, b) => {
+            const [ad, am, ay] = String(a[1] || '')
+              .split('-')
+              .map(Number);
 
-          if (purpose === 'Test') {
-            progressiveTest = addTimes(progressiveTest, duration);
-          } else {
-            progressiveFailure = addTimes(progressiveFailure, duration);
+            const [bd, bm, by] = String(b[1] || '')
+              .split('-')
+              .map(Number);
+
+            const aDate = new Date(ay, am - 1, ad);
+
+            const bDate = new Date(by, bm - 1, bd);
+
+            /* ===============================
+            🔥 DATE SORT
+            =============================== */
+
+            if (aDate.getTime() !== bDate.getTime()) {
+              return aDate - bDate;
+            }
+
+            /* ===============================
+            🔥 TIME SORT
+            =============================== */
+
+            return timeToMinutes(a[4]) - timeToMinutes(b[4]);
+          });
+
+          /* =====================================
+          🔥 RESET PROGRESSIVE
+          ===================================== */
+
+          let progressiveTestRunning = '00:00';
+
+          let progressiveFailureRunning = '00:00';
+
+          /* =====================================
+          🔥 RECALCULATE ALL ROWS
+          ===================================== */
+
+          sameMonthRows.forEach((r) => {
+            const rowPurpose = String(r[7] || '')
+              .trim()
+              .toLowerCase();
+
+            const rowDuration = String(r[6] || '00:00');
+
+            /* ===============================
+            🔥 TEST
+            =============================== */
+
+            if (rowPurpose === 'test') {
+              progressiveTestRunning = addTimes(progressiveTestRunning, rowDuration);
+            } else {
+              /* ===============================
+              🔥 FAILURE
+              =============================== */
+
+              progressiveFailureRunning = addTimes(progressiveFailureRunning, rowDuration);
+            }
+
+            /* ===============================
+            🔥 STORE TEMP VALUES
+            =============================== */
+
+            r.__progTest = progressiveTestRunning;
+
+            r.__progFailure = progressiveFailureRunning;
+
+            r.__totalProg = addTimes(progressiveTestRunning, progressiveFailureRunning);
+          });
+
+          /* =====================================
+          🔥 GET CURRENT TEMP ROW
+          ===================================== */
+
+          const currentTempRow = sameMonthRows.find((r) => Number(r[0]) === Number(srNo));
+
+          /* =====================================
+          🔥 FORMAT FOR SHEET
+          ===================================== */
+
+          function formatDuration(timeStr) {
+            const [h, m] = String(timeStr || '00:00')
+              .split(':')
+              .map(Number);
+
+            return `=${h}/24+${m}/1440`;
           }
 
-          const total = addTimes(progressiveTest, progressiveFailure);
+          /* =====================================
+          🔥 FINAL VALUES
+          ===================================== */
+
+          const progressiveTestValue = formatDuration(currentTempRow?.__progTest || '00:00');
+
+          const progressiveFailureValue = formatDuration(currentTempRow?.__progFailure || '00:00');
+
+          const totalProgressiveValue = formatDuration(currentTempRow?.__totalProg || '00:00');
+          const totduration = formatDuration(duration);
 
           /* =====================================
           🔥 ROW DATA
@@ -27936,21 +28238,22 @@
             'DG Name': dgName,
             From: id('DGstartTime')?.value || '',
             To: id('DGstopTime')?.value || '',
-            'Total Duration': duration,
+            'Total Duration': totduration,
             Purpose: purpose,
-            'Progressive Test': progressiveTest,
-            'Progressive Failure': progressiveFailure,
-            Total: total,
-            'V(R-Y)': id('DGRY')?.value || '',
-            'V(Y-B)': id('DGBR')?.value || '',
-            'V(B-R)': id('DGYB')?.value || '',
-            'V(R-N)': id('DGVRN')?.value || '',
-            'V(Y-N)': id('DGVYN')?.value || '',
-            'V(B-N)': id('DGVBN')?.value || '',
-            IR: id('DGIR')?.value || '-',
-            IY: id('DGIY')?.value || '-',
-            IB: id('DGIB')?.value || '-',
+            'Progressive Test': progressiveTestValue,
+            'Progressive Failure': progressiveFailureValue,
+            'Total Progressive': totalProgressiveValue,
+            'V(R-Y) volts': id('DGVRY')?.value || '',
+            'V(Y-B) volts': id('DGVBR')?.value || '',
+            'V(B-R) volts': id('DGVYB')?.value || '',
+            'V(R-N) volts': id('DGVRN')?.value || '',
+            'V(Y-N) volts': id('DGVYN')?.value || '',
+            'V(B-N) volts': id('DGVBN')?.value || '',
+            'I(R) amps': id('DGIR')?.value || '-',
+            'I(Y) amps': id('DGIY')?.value || '-',
+            'I(B) amps': id('DGIB')?.value || '-',
             'Diesel Level': id('DGhsdLevel')?.value || '',
+            'Diesel Filled': id('DGhsdFill')?.value || '-',
             Pressure: id('DGpressure')?.value || '',
             Temperature: id('DGtemp')?.value || '',
             HMR: id('HMR')?.value || '',
@@ -28116,6 +28419,7 @@
           filterDGTable();
 
           clearDGInputs();
+          id('DGdate').value = '';
 
           clearSyncStatus('DGlog', 'db', true);
 
