@@ -1609,6 +1609,15 @@ def update_dg():
             }), 400
 
         headers = all_values[0]
+        # =========================================
+        # 🔥 DURATION COLUMNS
+        # =========================================
+
+        duration_cols = {
+            "Progressive Test",
+            "Progressive Failure",
+            "Total Progressive"
+        }
         data_rows = all_values[1:]
 
         # =========================================
@@ -1680,7 +1689,28 @@ def update_dg():
             if date_idx >= 0:
                 key += "|" + clean(obj.get("Date"))
 
-            row_data = [obj.get(h, "") for h in headers]
+            # =========================================
+            # 🔥 BUILD ROW DATA
+            # =========================================
+
+            row_data = []
+
+            for h in headers:
+
+                val = obj.get(h, "")
+
+                # =====================================
+                # 🔥 KEEP DURATION AS NUMBER
+                # =====================================
+
+                if h in duration_cols:
+
+                    try:
+                        val = float(val)
+                    except:
+                        val = 0
+
+                row_data.append(val)
 
             # =====================================
             # 🔥 UPDATE EXISTING
@@ -1767,7 +1797,7 @@ def update_dg():
 
             dg_sheet.batch_update(
                 updates,
-                value_input_option="USER_ENTERED"
+                value_input_option="RAW"
             )
 
             print("✅ UPDATED:", len(updates))
@@ -1780,7 +1810,7 @@ def update_dg():
 
             dg_sheet.append_rows(
                 new_rows,
-                value_input_option="USER_ENTERED"
+                value_input_option="RAW"
             )
 
             print("✅ ADDED:", len(new_rows))
