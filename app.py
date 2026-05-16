@@ -1797,7 +1797,7 @@ def update_dg():
 
             dg_sheet.batch_update(
                 updates,
-                value_input_option="RAW"
+                value_input_option="USER_ENTERED"
             )
 
             print("✅ UPDATED:", len(updates))
@@ -1810,7 +1810,7 @@ def update_dg():
 
             dg_sheet.append_rows(
                 new_rows,
-                value_input_option="RAW"
+                value_input_option="USER_ENTERED"
             )
 
             print("✅ ADDED:", len(new_rows))
