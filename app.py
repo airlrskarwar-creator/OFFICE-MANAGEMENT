@@ -1614,6 +1614,7 @@ def update_dg():
         # =========================================
 
         duration_cols = {
+            "Total Duration"
             "Progressive Test",
             "Progressive Failure",
             "Total Progressive"
