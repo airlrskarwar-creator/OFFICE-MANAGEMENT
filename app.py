@@ -1574,6 +1574,252 @@ def update_eb():
         }), 500
 
 
+# =========================================
+# 🔥 UPDATE DG DATA
+# =========================================
+
+@app.route("/dg/update", methods=["POST"])
+def update_dg():
+
+    try:
+
+        req_data = request.get_json()
+
+        rows = req_data.get("data", [])
+
+        print("🔥 DG UPDATE HIT")
+        print("🔥 ROW COUNT:", len(rows))
+
+        if not rows:
+            return jsonify({
+                "status": "error",
+                "message": "No data received"
+            }), 400
+
+        # =========================================
+        # 🔥 READ SHEET
+        # =========================================
+
+        all_values = dg_sheet.get_all_values()
+
+        if not all_values:
+            return jsonify({
+                "status": "error",
+                "message": "Sheet empty"
+            }), 400
+
+        headers = all_values[0]
+        data_rows = all_values[1:]
+
+        # =========================================
+        # 🔥 COLUMN INDEXES
+        # =========================================
+
+        sr_idx = headers.index("Sr No") if "Sr No" in headers else -1
+        station_idx = headers.index("Station") if "Station" in headers else -1
+        date_idx = headers.index("Date") if "Date" in headers else -1
+
+        # =========================================
+        # 🔥 CLEAN FUNCTION
+        # =========================================
+
+        def clean(val):
+            return str(val or "").strip().lower()
+
+        # =========================================
+        # 🔥 BUILD EXISTING ROW MAP
+        # KEY = SR NO + STATION + DATE
+        # =========================================
+
+        row_map = {}
+
+        for i, row in enumerate(data_rows, start=2):
+
+            key = ""
+
+            if sr_idx >= 0:
+                key += clean(row[sr_idx] if sr_idx < len(row) else "")
+
+            if station_idx >= 0:
+                key += "|" + clean(row[station_idx] if station_idx < len(row) else "")
+
+            if date_idx >= 0:
+                key += "|" + clean(row[date_idx] if date_idx < len(row) else "")
+
+            row_map[key] = {
+                "row_num": i,
+                "row_data": row
+            }
+
+        print("🔥 EXISTING ROWS:", len(row_map))
+
+        # =========================================
+        # 🔥 TRACKERS
+        # =========================================
+
+        updates = []
+        new_rows = []
+        updated_rows = []
+        added_rows = []
+        skipped_rows = []
+
+        # =========================================
+        # 🔥 PROCESS ROWS
+        # =========================================
+
+        for obj in rows:
+
+            key = ""
+
+            if sr_idx >= 0:
+                key += clean(obj.get("Sr No"))
+
+            if station_idx >= 0:
+                key += "|" + clean(obj.get("Station"))
+
+            if date_idx >= 0:
+                key += "|" + clean(obj.get("Date"))
+
+            row_data = [obj.get(h, "") for h in headers]
+
+            # =====================================
+            # 🔥 UPDATE EXISTING
+            # =====================================
+
+            if key in row_map:
+
+                existing = row_map[key]
+
+                row_num = existing["row_num"]
+
+                existing_row = existing["row_data"]
+
+                existing_clean = [clean(x) for x in existing_row]
+                new_clean = [clean(x) for x in row_data]
+
+                # =================================
+                # ⏭ NO CHANGE
+                # =================================
+
+                if existing_clean == new_clean:
+
+                    skipped_rows.append({
+                        "srNo": obj.get("Sr No", ""),
+                        "date": obj.get("Date", ""),
+                        "station": obj.get("Station", "")
+                    })
+
+                    print("⏭ SKIPPED:", key)
+
+                    continue
+
+                # =================================
+                # 🔥 CHANGED COLUMNS
+                # =================================
+
+                changed_columns = []
+
+                for idx, header in enumerate(headers):
+
+                    old_val = clean(existing_row[idx]) if idx < len(existing_row) else ""
+                    new_val = clean(row_data[idx])
+
+                    if old_val != new_val:
+                        changed_columns.append(header)
+
+                # =================================
+                # 🔥 UPDATE
+                # =================================
+
+                updates.append({
+                    "range": f"A{row_num}",
+                    "values": [row_data]
+                })
+
+                updated_rows.append({
+                    "srNo": obj.get("Sr No", ""),
+                    "date": obj.get("Date", ""),
+                    "station": obj.get("Station", ""),
+                    "dgName": obj.get("DG Name", ""),
+                    "changedColumns": changed_columns
+                })
+
+            # =====================================
+            # ➕ NEW ROW
+            # =====================================
+
+            else:
+
+                new_rows.append(row_data)
+
+                added_rows.append({
+                    "srNo": obj.get("Sr No", ""),
+                    "date": obj.get("Date", ""),
+                    "station": obj.get("Station", ""),
+                    "dgName": obj.get("DG Name", "")
+                })
+
+        # =========================================
+        # 🔥 APPLY UPDATES
+        # =========================================
+
+        if updates:
+
+            dg_sheet.batch_update(
+                updates,
+                value_input_option="USER_ENTERED"
+            )
+
+            print("✅ UPDATED:", len(updates))
+
+        # =========================================
+        # ➕ APPEND NEW ROWS
+        # =========================================
+
+        if new_rows:
+
+            dg_sheet.append_rows(
+                new_rows,
+                value_input_option="USER_ENTERED"
+            )
+
+            print("✅ ADDED:", len(new_rows))
+
+        # =========================================
+        # ℹ️ NO CHANGES
+        # =========================================
+
+        if not updates and not new_rows:
+
+            return jsonify({
+                "status": "nochange",
+                "message": "No changes detected",
+                "updated": [],
+                "added": [],
+                "skipped": skipped_rows
+            })
+
+        # =========================================
+        # ✅ SUCCESS
+        # =========================================
+
+        return jsonify({
+            "status": "success",
+            "updated": updated_rows,
+            "added": added_rows,
+            "skipped": skipped_rows
+        })
+
+    except Exception as e:
+
+        print("❌ DG UPDATE ERROR:", str(e))
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 @app.route("/health")
 def health():
     return "OK", 200
