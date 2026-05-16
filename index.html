@@ -2133,6 +2133,10 @@
         max-height: calc(100vh - 200px);
       }
 
+      .DGlogTableWrapper {
+        height: calc(100vh - 240px);
+      }
+
       /* ================= TABLE ================= */
       .PB-Table-WrapperGO table:not(#PB_GOITCalc),
       .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
@@ -4120,8 +4124,8 @@
       }
 
       /* =========================================
-   🔥 MAIN PANEL
-========================================= */
+        🔥 MAIN PANEL
+      ========================================= */
 
       .DGpanelDiv {
         display: flex;
@@ -4142,8 +4146,8 @@
       }
 
       /* =========================================
-   🔥 LABELS
-========================================= */
+        🔥 LABELS
+      ========================================= */
 
       .DGpanelLabel,
       .DGfield label,
@@ -4155,8 +4159,8 @@
       }
 
       /* =========================================
-   🔥 INPUT CONTAINERS
-========================================= */
+        🔥 INPUT CONTAINERS
+      ========================================= */
 
       .DGfield,
       .DGpanelDiv > div {
@@ -4166,8 +4170,8 @@
       }
 
       /* =========================================
-   🔥 INPUTS + SELECTS
-========================================= */
+        🔥 INPUTS + SELECTS
+      ========================================= */
 
       .DGpanelDiv input,
       .DGpanelDiv select {
@@ -4180,8 +4184,8 @@
       }
 
       /* =========================================
-   🔥 GROUP SECTION
-========================================= */
+        🔥 GROUP SECTION
+      ========================================= */
 
       .DGgroup {
         display: flex;
@@ -4195,8 +4199,8 @@
       }
 
       /* =========================================
-   🔥 SECTION TITLE
-========================================= */
+        🔥 SECTION TITLE
+      ========================================= */
 
       .DGtitle {
         font-size: 11px;
@@ -4217,8 +4221,8 @@
       }
 
       /* =========================================
-   🔥 SMALL FIELD INPUTS
-========================================= */
+        🔥 SMALL FIELD INPUTS
+      ========================================= */
 
       .DGfield input {
         width: 100px;
@@ -4227,14 +4231,49 @@
       }
 
       /* =========================================
-   🔥 DATE + TIME INPUT STYLE
-========================================= */
+        🔥 DATE + TIME INPUT STYLE
+      ========================================= */
 
       .DGpanelDiv input[type='date'],
       .DGpanelDiv input[type='time'] {
         cursor: pointer;
         height: 26px;
         width: 120px;
+      }
+
+      /* =========================================
+      🔥 DG TABLE ROW
+      ========================================= */
+
+      .DGdataRow {
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      /* =========================================
+      🔥 DG ROW HOVER EFFECT
+      (ONLY NON-ACTIVE ROWS)
+      ========================================= */
+
+      .DGdataRow:not(.DGactiveRow):hover td {
+        background: #eff6ff !important;
+        color: #012ca1 !important;
+        transform: scale(1.01);
+      }
+
+      /* =========================================
+      🔥 DG ACTIVE ROW
+      ========================================= */
+
+      .DGactiveRow td {
+        background: linear-gradient(180deg, #eff6ff, #dbeafe) !important;
+        color: #1e3a8a !important;
+        transform: scale(1.01);
+        font-weight: bold;
+        box-shadow:
+          inset 0 0 0 1px #60a5fa,
+          0 4px 12px rgba(59, 130, 246, 0.22);
+        transition: all 0.2s ease;
       }
 
       /* ===============================================
@@ -5572,6 +5611,10 @@
               <select id="DGPage_Station" class="stationDropdown"></select>
             </div>
             <div class="select-group">
+              <label for="StationDGList">Select DG</label>
+              <select id="StationDGList"></select>
+            </div>
+            <div class="select-group">
               <label for="DGPage_FY">FY :</label>
               <select id="DGPage_FY"></select>
             </div>
@@ -5600,10 +5643,6 @@
               <input id="DGdate" type="date" />
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px">
-              <label class="DGpanelLabel">Select DG</label>
-              <select id="StationDGList"></select>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 2px">
               <label class="DGpanelLabel">Purpose</label>
               <select id="DGoperationPurpose">
                 <option value="Failure" selected>Failure</option>
@@ -5614,8 +5653,11 @@
               <label class="DGpanelLabel">Start Time</label>
               <input id="DGstartTime" type="time" />
             </div>
-            <div style="display: flex; flex-direction: column; gap: 2px">
-              <label class="DGpanelLabel">Stop Time</label>
+            <div style="display: flex; flex-direction: column; gap: 2px; width: 150px">
+              <label class="DGpanelLabel">
+                Stop Time
+                <span id="DGstopTimeError" style="color: red; font-weight: bold; padding-left: 2px"></span>
+              </label>
               <input id="DGstopTime" type="time" />
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px">
@@ -5640,7 +5682,7 @@
             <div class="DGfield">
               <label>
                 HMR
-                <span id="calcHMR" style="color: red"></span>
+                <span id="calcHMR" style="color: red; font-weight: bold; padding-left: 2px"></span>
               </label>
               <input id="HMR" />
             </div>
@@ -27008,7 +27050,7 @@
         ===================================== */
 
         dgData.rows.forEach((row) => {
-          const dateStr = String(row[0] || '').trim();
+          const dateStr = String(row[1] || '').trim();
 
           if (!dateStr) return;
 
@@ -27132,7 +27174,7 @@
         🔥 HIDE COLUMNS
         ========================= */
 
-        const hiddenColumnNames = ['Station', 'DG Name', 'Staff'];
+        const hiddenColumnNames = ['Sr No', 'Station', 'DG Name', 'Staff'];
 
         const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
 
@@ -27263,11 +27305,13 @@
             <colgroup>
               ${visibleHeaders
                 .map((header) => {
-                  if (String(header).trim() === 'Date') {
+                  if (String(header).trim() === 'Sr No') {
+                    return `<col style="width:3%">`;
+                  } else if (String(header).trim() === 'Date') {
                     return `<col style="width:6%">`;
                   }
 
-                  return `<col style="width:4.1%">`;
+                  return `<col style="width:4%">`;
                 })
                 .join('')}
             </colgroup>
@@ -27288,9 +27332,8 @@
 
         html += `
               </tr>
-            </thead>
-
-            <tbody>
+                </thead>
+                   <tbody>
         `;
 
         /* =========================
@@ -27300,155 +27343,179 @@
         if (!rows.length) {
           html += `
             <tr>
-              <td colspan="${visibleHeaders.length}"
-                  style="
-                    text-align:center;
-                    padding:20px;
-                    font-weight:bold;
-                    color:#ef4444;
-                    background:#edebb7;
-                    font:size:12px;
-                  ">
+              <td colspan="${visibleHeaders.length}" style="text-align:center;padding:20px;font-weight:bold;color:#ef4444;background:#edebb7;font:size:12px;">
                 ==============🚫 No Data Found 🚫==============
               </td>
             </tr>
           `;
         } else {
           /* =========================
-          🔥 ROWS
+          🔥 GROUP ROWS BY MONTH
           ========================= */
 
+          const groupedRows = {};
+
           rows.forEach((row) => {
-            html += `<tr>`;
+            const dateStr = String(row[1] || '').trim();
 
-            row.forEach((cell, i) => {
-              if (hiddenCols.includes(i)) return;
+            const parts = dateStr.split('-');
 
-              html += `<td>${cell ?? ''}</td>`;
+            const mm = parseInt(parts[1], 10);
+
+            const yyyy = parts[2];
+
+            const monthKey = `${monthNames[mm - 1]}-${yyyy}`;
+
+            if (!groupedRows[monthKey]) {
+              groupedRows[monthKey] = [];
+            }
+
+            groupedRows[monthKey].push(row);
+          });
+
+          /* =========================
+          🔥 SORT MONTHS
+          ========================= */
+
+          const sortedMonths = Object.keys(groupedRows).sort((a, b) => {
+            const [ma, ya] = a.split('-');
+            const [mb, yb] = b.split('-');
+
+            const da = new Date(`${ma} 1, ${ya}`);
+            const db = new Date(`${mb} 1, ${yb}`);
+
+            return da - db;
+          });
+
+          /* =========================
+          🔥 RENDER MONTH GROUPS
+          ========================= */
+
+          sortedMonths.forEach((month) => {
+            /* =========================
+            🔥 MONTH TITLE ROW
+            ========================= */
+
+            html += `
+              <tr>
+                <td colspan="${visibleHeaders.length}" style=" text-align:center;font-weight:bold;padding:5px;font-size:12px;border-bottom:double black">
+                  DG Log book for the Month of ${month}
+                </td>
+              </tr>
+            `;
+
+            /* =========================
+            🔥 MONTH DATA ROWS
+            ========================= */
+
+            groupedRows[month].forEach((row) => {
+              html += `<tr class="DGdataRow" data-rowindex="${allRows.indexOf(row)}" style="cursor:pointer">`;
+
+              row.forEach((cell, i) => {
+                if (hiddenCols.includes(i)) return;
+
+                html += `<td>${cell ?? ''}</td>`;
+              });
+
+              html += `</tr>`;
             });
-
-            html += `</tr>`;
           });
         }
 
-        html += `
-            </tbody>
-          </table>
-        `;
+        html += `</tbody></table>`;
 
         /* =========================
         🔥 RENDER
         ========================= */
 
         wrapper.innerHTML = html;
-      }
-
-      /* =========================================
-      🔥 LOAD DG ENTRY DATA
-      ========================================= */
-
-      function loadDGEntryData() {
-        if (!dgData || !dgData.rows) return;
-
-        const station = id('DGPage_Station')?.value?.trim() || '';
-
-        const selectedDG = id('StationDGList')?.value?.trim() || '';
-
-        const selectedMonth = id('DGPage_Month')?.value?.trim() || '';
-
-        if (!station || !selectedDG) return;
-
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         /* =========================================
-        🔥 FIND MATCHING ROW
+        🔥 ROW CLICK LOAD DATA
         ========================================= */
 
-        const row = dgData.rows.find((r) => {
-          const dateStr = String(r[0] || '').trim();
+        wrapper.querySelectorAll('.DGdataRow').forEach((tr) => {
+          tr.addEventListener('click', () => {
+            /* =========================================
+            🔥 REMOVE OLD ACTIVE
+            ========================================= */
 
-          if (!dateStr) return false;
+            wrapper.querySelectorAll('.DGdataRow').forEach((r) => {
+              r.classList.remove('DGactiveRow');
+            });
 
-          const parts = dateStr.split('-');
+            id('calcHMR').textContent = '';
+            id('DGstopTimeError').textContent = '';
 
-          if (parts.length !== 3) return false;
+            /* =========================================
+            🔥 ADD ACTIVE
+            ========================================= */
 
-          const mm = parseInt(parts[1], 10);
+            tr.classList.add('DGactiveRow');
 
-          const yyyy = parts[2];
+            const rowIndex = Number(tr.dataset.rowindex);
+            const row = dgData.rows[rowIndex];
 
-          const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
+            if (!row) return;
 
-          const rowStation = String(r[1] || '').trim();
+            /* =========================================
+            🔥 DATE
+            DD-MM-YYYY → YYYY-MM-DD
+            ========================================= */
 
-          const rowDG = String(r[2] || '').trim();
+            const dateParts = String(row[1] || '').split('-');
 
-          return rowStation === station && rowDG === selectedDG && (selectedMonth === 'ALL' || monthStr === selectedMonth);
+            if (dateParts.length === 3) {
+              id('DGdate').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            }
+
+            /* =========================================
+            🔥 BASIC DATA
+            ========================================= */
+
+            id('StationDGList').value = row[3] || '';
+
+            id('DGstartTime').value = row[4] || '';
+
+            id('DGstopTime').value = row[5] || '';
+
+            id('DGduration').value = row[6] || '';
+
+            id('DGoperationPurpose').value = row[7] || 'Failure';
+
+            /* =========================================
+            🔥 VOLTAGE
+            ========================================= */
+
+            id('DGRY').value = row[11] || '';
+            id('DGBR').value = row[12] || '';
+            id('DGYB').value = row[13] || '';
+
+            id('DGVRN').value = row[14] || '';
+            id('DGVYN').value = row[15] || '';
+            id('DGVBN').value = row[16] || '';
+
+            /* =========================================
+            🔥 CURRENT
+            ========================================= */
+
+            id('DGIR').value = row[17] || '';
+            id('DGIY').value = row[18] || '';
+            id('DGIB').value = row[19] || '';
+
+            /* =========================================
+            🔥 OTHER VALUES
+            ========================================= */
+
+            id('DGhsdLevel').value = row[20] || '';
+
+            id('DGpressure').value = row[21] || '';
+
+            id('DGtemp').value = row[22] || '';
+
+            id('HMR').value = row[23] || '';
+          });
         });
-
-        /* =========================================
-        🔥 NO DATA
-        ========================================= */
-
-        if (!row) {
-          clearDGInputs();
-          return;
-        }
-
-        /* =========================================
-        🔥 DATE
-        DD-MM-YYYY → YYYY-MM-DD
-        ========================================= */
-
-        const dateParts = String(row[0]).split('-');
-
-        if (dateParts.length === 3) {
-          id('DGdate').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-        }
-
-        /* =========================================
-        🔥 BASIC DATA
-        ========================================= */
-
-        id('DGstartTime').value = row[3] || '';
-
-        id('DGstopTime').value = row[4] || '';
-
-        id('DGduration').value = row[5] || '';
-
-        id('DGoperationPurpose').value = row[6] || 'Failure';
-
-        /* =========================================
-        🔥 VOLTAGE
-        ========================================= */
-
-        id('DGRY').value = row[10] || '';
-        id('DGBR').value = row[11] || '';
-        id('DGYB').value = row[12] || '';
-
-        id('DGVRN').value = row[13] || '';
-        id('DGVYN').value = row[14] || '';
-        id('DGVBN').value = row[15] || '';
-
-        /* =========================================
-        🔥 CURRENT
-        ========================================= */
-
-        id('DGIR').value = row[16] || '';
-        id('DGIY').value = row[17] || '';
-        id('DGIB').value = row[18] || '';
-
-        /* =========================================
-        🔥 OTHER VALUES
-        ========================================= */
-
-        id('DGhsdLevel').value = row[19] || '';
-
-        id('DGpressure').value = row[20] || '';
-
-        id('DGtemp').value = row[21] || '';
-
-        id('HMR').value = row[22] || '';
       }
 
       /* =========================================
@@ -27463,6 +27530,14 @@
         });
 
         id('DGoperationPurpose').value = 'Failure';
+
+        /* =========================================
+        🔥 REMOVE ACTIVE ROW
+        ========================================= */
+
+        qsa('.DGdataRow').forEach((r) => {
+          r.classList.remove('DGactiveRow');
+        });
       }
 
       /* =========================================
@@ -27484,12 +27559,22 @@
 
         let endMin = eh * 60 + em;
 
-        /* 🔥 NEXT DAY */
+        /* =========================================
+        🔥 INVALID TIME
+        STOP < START
+        ========================================= */
 
         if (endMin < startMin) {
-          endMin += 24 * 60;
-        }
+          id('DGduration').value = '00:00';
 
+          const calcSpan = id('calcHMR');
+
+          if (calcSpan) {
+            calcSpan.textContent = '';
+          }
+
+          return;
+        }
         const diff = endMin - startMin;
 
         const hrs = Math.floor(diff / 60);
@@ -27505,24 +27590,148 @@
         id('DGduration').value = duration;
 
         /* =========================================
-        🔥 HMR CALCULATION
+        🔥 HMR ROUNDING
         02:30 → +3
         02:27 → +2
         ========================================= */
 
         const roundedHours = mins >= 30 ? hrs + 1 : hrs;
 
-        const previousHMR = Number(id('HMR')?.value || 0);
+        /* =========================================
+        🔥 GET ACTIVE ROW
+        ========================================= */
+
+        const activeRow = document.querySelector('.DGactiveRow');
+
+        let previousHMR = 0;
+
+        /* =========================================
+        🔥 IF EDITING EXISTING ROW
+        ========================================= */
+
+        if (activeRow) {
+          const rowIndex = Number(activeRow.dataset.rowindex || -1);
+
+          const currentRow = dgData?.rows?.[rowIndex];
+
+          const currentSrNo = Number(currentRow?.[0] || 0);
+
+          const sortedRows = [...(dgData?.rows || [])].sort((a, b) => Number(a[0]) - Number(b[0]));
+
+          const currentIndex = sortedRows.findIndex((row) => Number(row[0]) === currentSrNo);
+
+          /* =========================================
+          🔥 PREVIOUS ENTRY EXISTS
+          ========================================= */
+
+          if (currentIndex > 0) {
+            const previousRow = sortedRows[currentIndex - 1];
+
+            previousHMR = Number(previousRow[23] || 0);
+          } else {
+            /* =========================================
+          🔥 FIRST ENTRY
+          DERIVE PREVIOUS HMR
+          ========================================= */
+            const currentHMR = Number(currentRow?.[23] || 0);
+
+            const currentDurationStr = String(currentRow?.[6] || '00:00');
+
+            const [dh, dm] = currentDurationStr.split(':').map(Number);
+
+            const currentDuration = dm >= 30 ? dh + 1 : dh;
+
+            previousHMR = currentHMR - currentDuration;
+          }
+        } else {
+          /* =========================================
+        🔥 NEW ENTRY
+        GET LAST ENTRY OF SAME DATE
+        ========================================= */
+          const currentDate = id('DGdate')?.value;
+
+          if (currentDate) {
+            const formattedDate = currentDate.split('-').reverse().join('-');
+
+            const sameDateRows = (dgData?.rows || []).filter((row) => String(row[1]).trim() === formattedDate).sort((a, b) => Number(a[0]) - Number(b[0]));
+
+            if (sameDateRows.length) {
+              const lastRow = sameDateRows[sameDateRows.length - 1];
+
+              previousHMR = Number(lastRow[23] || 0);
+            }
+          }
+        }
+
+        /* =========================================
+        🔥 FINAL HMR
+        ========================================= */
 
         const calculatedHMR = previousHMR + roundedHours;
+
+        /* =========================================
+        🔥 SHOW CALCULATED HMR
+        ========================================= */
 
         const calcSpan = id('calcHMR');
 
         if (calcSpan) {
-          calcSpan.textContent = calculatedHMR;
+          calcSpan.textContent = `(${calculatedHMR})`;
         }
       }
 
+      /* =========================================
+      🔥 UPDATE STOP TIME LIMIT
+      🔥 VALIDATE STOP TIME
+      ========================================= */
+      function validateDGStopTime() {
+        const startInput = id('DGstartTime');
+
+        const stopInput = id('DGstopTime');
+
+        const errorSpan = id('DGstopTimeError');
+
+        if (!startInput || !stopInput || !errorSpan) return;
+
+        const start = startInput.value;
+
+        const stop = stopInput.value;
+
+        /* =========================================
+        🔥 SET MIN
+        ========================================= */
+
+        stopInput.min = start || '';
+
+        /* =========================================
+        🔥 RESET ERROR
+        ========================================= */
+
+        errorSpan.textContent = '';
+
+        if (!start || !stop) return;
+
+        /* =========================================
+        🔥 CONVERT TO MINUTES
+        ========================================= */
+
+        const [sh, sm] = start.split(':').map(Number);
+
+        const [eh, em] = stop.split(':').map(Number);
+
+        const startMinutes = sh * 60 + sm;
+
+        const stopMinutes = eh * 60 + em;
+
+        /* =========================================
+        🔥 INVALID STOP TIME
+        ========================================= */
+
+        if (stopMinutes < startMinutes) {
+          errorSpan.textContent = '(!< Start Time)';
+          stopInput.value = startInput.value;
+        }
+      }
       /* =========================================
       🔥 EVENTS
       ========================================= */
@@ -27531,32 +27740,413 @@
         loadDGList();
         loadDGMonthsByFY();
         filterDGTable();
+        clearDGInputs();
       });
 
       on('DGPage_FY', 'change', () => {
         loadDGMonthsByFY();
         filterDGTable();
+        clearDGInputs();
       });
 
       on('StationDGList', 'change', () => {
         loadDGMonthsByFY();
         filterDGTable();
-        loadDGEntryData();
+        clearDGInputs();
       });
 
       on('DGPage_Month', 'change', () => {
         filterDGTable();
-        loadDGEntryData();
       });
 
       ['input', 'change'].forEach((eventType) => {
         on('DGstartTime', eventType, () => {
           calculateDGDuration();
+          validateDGStopTime();
         });
 
         on('DGstopTime', eventType, () => {
           calculateDGDuration();
+          validateDGStopTime();
         });
+      });
+
+      async function saveDGData() {
+        try {
+          setSyncStatus('DGlog');
+
+          /* =====================================
+          🔥 VALIDATION
+          ===================================== */
+
+          const station = id('DGPage_Station')?.value || '';
+
+          const dgName = id('StationDGList')?.value || '';
+
+          const dateValue = id('DGdate')?.value || '';
+
+          if (!station || !dgName || !dateValue) {
+            clearSyncStatus('DGlog', 'db', false);
+
+            return;
+          }
+
+          /* =====================================
+          🔥 DATE FORMAT
+          ===================================== */
+
+          const formattedDate = dateValue.split('-').reverse().join('-');
+
+          /* =====================================
+          🔥 GET EXISTING ROW
+          KEY = SR NO + STATION + DATE
+          ===================================== */
+
+          const headers = dgData?.headers || [];
+
+          const rows = dgData?.rows || [];
+
+          const activeRow = document.querySelector('.DGactiveRow');
+
+          let existingRow = null;
+
+          let existingIndex = -1;
+
+          if (activeRow) {
+            existingIndex = Number(activeRow.dataset.rowindex || -1);
+
+            existingRow = rows[existingIndex];
+          }
+
+          /* =====================================
+          🔥 SR NO
+          ===================================== */
+
+          let srNo = '';
+
+          /* =====================================
+          🔥 UPDATE
+          ===================================== */
+
+          if (existingRow) {
+            srNo = existingRow[0];
+          } else {
+            /* =====================================
+          🔥 NEW ENTRY
+          ===================================== */
+            srNo = rows.length + 1;
+          }
+
+          /* =====================================
+          🔥 DURATION
+          ===================================== */
+
+          const duration = id('DGduration')?.value || '00:00';
+
+          /* =====================================
+          🔥 TIME ADD FUNCTION
+          ===================================== */
+
+          function addTimes(t1, t2) {
+            const [h1, m1] = String(t1 || '00:00')
+              .split(':')
+              .map(Number);
+
+            const [h2, m2] = String(t2 || '00:00')
+              .split(':')
+              .map(Number);
+
+            let totalMinutes = h1 * 60 + m1 + (h2 * 60 + m2);
+
+            const hrs = Math.floor(totalMinutes / 60);
+
+            const mins = totalMinutes % 60;
+
+            return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+          }
+
+          /* =====================================
+          🔥 MONTH + DG BASED PROGRESSIVE
+          ===================================== */
+
+          let progressiveTest = '00:00';
+
+          let progressiveFailure = '00:00';
+
+          const monthKey = formattedDate.split('-').slice(1).join('-');
+
+          /* =====================================
+          🔥 FILTER SAME MONTH + SAME DG
+          ===================================== */
+
+          const sameMonthRows = [...rows].filter((r, idx) => {
+            /* =====================================
+                🔥 SKIP CURRENT EDIT ROW
+                ===================================== */
+
+            if (existingIndex >= 0 && idx === existingIndex) {
+              return false;
+            }
+
+            const rowMonth = String(r[1] || '')
+              .split('-')
+              .slice(1)
+              .join('-');
+
+            const rowDG = String(r[3] || '').trim();
+
+            return rowMonth === monthKey && rowDG === dgName;
+          });
+
+          let previousRow = null;
+
+          /* =====================================
+          🔥 GET PREVIOUS SAME DG ENTRY
+          ===================================== */
+
+          if (sameMonthRows.length) {
+            previousRow = sameMonthRows[sameMonthRows.length - 1];
+
+            progressiveTest = previousRow[8] || '00:00';
+
+            progressiveFailure = previousRow[9] || '00:00';
+          }
+          /* =====================================
+          🔥 PURPOSE CALCULATION
+          ===================================== */
+
+          const purpose = id('DGoperationPurpose')?.value || 'Failure';
+
+          if (purpose === 'Test') {
+            progressiveTest = addTimes(progressiveTest, duration);
+          } else {
+            progressiveFailure = addTimes(progressiveFailure, duration);
+          }
+
+          const total = addTimes(progressiveTest, progressiveFailure);
+
+          /* =====================================
+          🔥 ROW DATA
+          ===================================== */
+
+          const row = {
+            'Sr No': srNo,
+            Date: formattedDate,
+            Station: station,
+            'DG Name': dgName,
+            From: id('DGstartTime')?.value || '',
+            To: id('DGstopTime')?.value || '',
+            'Total Duration': duration,
+            Purpose: purpose,
+            'Progressive Test': progressiveTest,
+            'Progressive Failure': progressiveFailure,
+            Total: total,
+            'V(R-Y)': id('DGRY')?.value || '',
+            'V(Y-B)': id('DGBR')?.value || '',
+            'V(B-R)': id('DGYB')?.value || '',
+            'V(R-N)': id('DGVRN')?.value || '',
+            'V(Y-N)': id('DGVYN')?.value || '',
+            'V(B-N)': id('DGVBN')?.value || '',
+            IR: id('DGIR')?.value || '-',
+            IY: id('DGIY')?.value || '-',
+            IB: id('DGIB')?.value || '-',
+            'Diesel Level': id('DGhsdLevel')?.value || '',
+            Pressure: id('DGpressure')?.value || '',
+            Temperature: id('DGtemp')?.value || '',
+            HMR: id('HMR')?.value || '',
+            Staff: currentUser || ''
+          };
+
+          /* =====================================
+          🔥 CHANGED COLUMNS
+          ===================================== */
+
+          let changedCols = [];
+
+          if (existingRow) {
+            headers.forEach((header, i) => {
+              if (header === 'Sr No') return;
+
+              const oldVal = String(existingRow[i] ?? '').trim();
+
+              const newVal = String(row[header] ?? '').trim();
+
+              if (oldVal !== newVal) {
+                changedCols.push(header);
+              }
+            });
+          }
+
+          /* =====================================
+          🔥 NO CHANGES
+          ===================================== */
+
+          if (existingRow && !changedCols.length) {
+            clearSyncStatus('DGlog', 'db', true);
+
+            showCustomAlert(`
+              <div style="text-align:center;padding:18px;">
+                <div style="font-size:14px;font-weight:700;color:#ffe082;margin-bottom:10px;">
+                  ℹ️ No Changes Detected
+                </div>
+
+                <div style="opacity:.8;font-size:13px;">
+                  DG Log data is already up to date.
+                </div>
+              </div>
+            `);
+
+            return;
+          }
+
+          /* =====================================
+          🔥 API SAVE
+          ===================================== */
+
+          const res = await fetch('https://office-management-f425.onrender.com/dg/update', {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+              data: [row]
+            })
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) {
+            throw new Error(result.message || 'Save failed');
+          }
+
+          let msg = '';
+
+          /* =====================================
+          🔥 UPDATED
+          ===================================== */
+
+          if (result.updated?.length) {
+            const changedHTML = changedCols
+              .map(
+                (col) => `
+                <span style="
+                  display:inline-block;
+                  padding:8px;
+                  margin:4px;
+                  border-radius:12px;
+                  background:rgba(255,255,255,0.08);
+                  border:1px solid rgba(255,255,255,0.06);
+                  font-size:13px;">
+                  🔃 ${col}
+                </span>
+              `
+              )
+              .join('');
+
+            msg += `
+              <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">
+                📝 DG LOG UPDATE SUCCESS!
+              </div>
+
+              <div style="margin-bottom:8px;padding:10px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+
+                <div style="font-size:14px;font-weight:700;margin-bottom:10px;">
+                  ⚡ DG Entry Updated
+                </div>
+
+                <div style="margin-bottom:5px;font-size:13px;opacity:.85;">
+                  🏢 ${station}<br><br>
+                  📅 ${formattedDate}<br><br>
+
+                  Updated Columns :
+                </div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  ${changedHTML}
+                </div>
+              </div>
+            `;
+          }
+
+          /* =====================================
+          🔥 ADDED
+          ===================================== */
+
+          if (result.added?.length) {
+            msg += `
+              <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">
+                ➕ DG LOG ADD SUCCESS!
+              </div>
+
+              <div style="padding:12px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+
+                <div style="margin-bottom:6px;font-size:13px;">
+                  📅 Date :
+                  <b>${formattedDate}</b>
+                </div>
+
+                <div style="margin-bottom:6px;font-size:13px;">
+                  🏢 Station :
+                  <b>${station}</b>
+                </div>
+
+                <div style="margin-bottom:6px;font-size:13px;">
+                  ⚡ DG :
+                  <b>${dgName}</b>
+                </div>
+
+                <div style="font-size:13px;">
+                  ⏱ Duration :
+                  <b>${duration}</b>
+                </div>
+              </div>
+            `;
+          }
+
+          /* =====================================
+          🔥 REFRESH
+          ===================================== */
+
+          await loadTable('dg', 'DGlog');
+
+          loadDGMonthsByFY();
+
+          filterDGTable();
+
+          clearDGInputs();
+
+          clearSyncStatus('DGlog', 'db', true);
+
+          showCustomAlert(msg);
+        } catch (err) {
+          console.error('❌ DG Save Failed:', err);
+
+          clearSyncStatus('DGlog', 'db', false);
+
+          showCustomAlert(`
+            <div style="text-align:center;padding:16px;">
+
+              <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:10px;">
+                ❌ Failed to Save DG Data
+              </div>
+
+              <div style="opacity:.8;font-size:13px;">
+                ${err.message || 'Unknown Error'}
+              </div>
+
+            </div>
+          `);
+        }
+      }
+
+      /* =========================================
+      🔥 EB SAVE BUTTON
+      ========================================= */
+
+      on('DGsaveBtn', 'click', async () => {
+        await saveDGData();
       });
 
       /* =========================================================
