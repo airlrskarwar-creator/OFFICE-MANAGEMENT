@@ -1609,57 +1609,57 @@ def update_dg():
             }), 400
 
         headers = all_values[0]
+
+        data_rows = all_values[1:]
+
         # =========================================
         # 🔥 DURATION COLUMNS
         # =========================================
 
         duration_cols = {
-            "Total Duration"
+            "Total Duration",
             "Progressive Test",
             "Progressive Failure",
             "Total Progressive"
         }
-        data_rows = all_values[1:]
 
         # =========================================
         # 🔥 COLUMN INDEXES
         # =========================================
 
-        sr_idx = headers.index("Sr No") if "Sr No" in headers else -1
-        station_idx = headers.index("Station") if "Station" in headers else -1
-        date_idx = headers.index("Date") if "Date" in headers else -1
+        entry_idx = headers.index("Entry ID") \
+            if "Entry ID" in headers else -1
 
         # =========================================
-        # 🔥 CLEAN FUNCTION
+        # 🔥 CLEAN
         # =========================================
 
         def clean(val):
             return str(val or "").strip().lower()
 
         # =========================================
-        # 🔥 BUILD EXISTING ROW MAP
-        # KEY = SR NO + STATION + DATE
+        # 🔥 BUILD ROW MAP
+        # KEY = ENTRY ID
         # =========================================
 
         row_map = {}
 
         for i, row in enumerate(data_rows, start=2):
 
-            key = ""
+            if entry_idx < 0:
+                continue
 
-            if sr_idx >= 0:
-                key += clean(row[sr_idx] if sr_idx < len(row) else "")
+            entry_id = clean(
+                row[entry_idx]
+                if entry_idx < len(row)
+                else ""
+            )
 
-            if station_idx >= 0:
-                key += "|" + clean(row[station_idx] if station_idx < len(row) else "")
-
-            if date_idx >= 0:
-                key += "|" + clean(row[date_idx] if date_idx < len(row) else "")
-
-            row_map[key] = {
-                "row_num": i,
-                "row_data": row
-            }
+            if entry_id:
+                row_map[entry_id] = {
+                    "row_num": i,
+                    "row_data": row
+                }
 
         print("🔥 EXISTING ROWS:", len(row_map))
 
@@ -1668,9 +1668,13 @@ def update_dg():
         # =========================================
 
         updates = []
+
         new_rows = []
+
         updated_rows = []
+
         added_rows = []
+
         skipped_rows = []
 
         # =========================================
@@ -1679,20 +1683,11 @@ def update_dg():
 
         for obj in rows:
 
-            key = ""
+            entry_id = clean(obj.get("Entry ID"))
 
-            if sr_idx >= 0:
-                key += clean(obj.get("Sr No"))
-
-            if station_idx >= 0:
-                key += "|" + clean(obj.get("Station"))
-
-            if date_idx >= 0:
-                key += "|" + clean(obj.get("Date"))
-
-            # =========================================
+            # =====================================
             # 🔥 BUILD ROW DATA
-            # =========================================
+            # =====================================
 
             row_data = []
 
@@ -1700,11 +1695,11 @@ def update_dg():
 
                 val = obj.get(h, "")
 
-                # =====================================
-                # 🔥 KEEP FORMULA STRING
-                # =====================================
+                # =================================
+                # 🔥 KEEP FORMULAS
+                # =================================
 
-                if h in duration_cols:
+                if h in duration_cols or h == "Sr No":
                     val = str(val)
 
                 row_data.append(val)
@@ -1713,16 +1708,23 @@ def update_dg():
             # 🔥 UPDATE EXISTING
             # =====================================
 
-            if key in row_map:
+            if entry_id in row_map:
 
-                existing = row_map[key]
+                existing = row_map[entry_id]
 
                 row_num = existing["row_num"]
 
                 existing_row = existing["row_data"]
 
-                existing_clean = [clean(x) for x in existing_row]
-                new_clean = [clean(x) for x in row_data]
+                existing_clean = [
+                    clean(x)
+                    for x in existing_row
+                ]
+
+                new_clean = [
+                    clean(x)
+                    for x in row_data
+                ]
 
                 # =================================
                 # ⏭ NO CHANGE
@@ -1731,12 +1733,12 @@ def update_dg():
                 if existing_clean == new_clean:
 
                     skipped_rows.append({
-                        "srNo": obj.get("Sr No", ""),
+                        "entryId": entry_id,
                         "date": obj.get("Date", ""),
                         "station": obj.get("Station", "")
                     })
 
-                    print("⏭ SKIPPED:", key)
+                    print("⏭ SKIPPED:", entry_id)
 
                     continue
 
@@ -1748,7 +1750,10 @@ def update_dg():
 
                 for idx, header in enumerate(headers):
 
-                    old_val = clean(existing_row[idx]) if idx < len(existing_row) else ""
+                    old_val = clean(
+                        existing_row[idx]
+                    ) if idx < len(existing_row) else ""
+
                     new_val = clean(row_data[idx])
 
                     if old_val != new_val:
@@ -1764,7 +1769,7 @@ def update_dg():
                 })
 
                 updated_rows.append({
-                    "srNo": obj.get("Sr No", ""),
+                    "entryId": entry_id,
                     "date": obj.get("Date", ""),
                     "station": obj.get("Station", ""),
                     "dgName": obj.get("DG Name", ""),
@@ -1780,7 +1785,7 @@ def update_dg():
                 new_rows.append(row_data)
 
                 added_rows.append({
-                    "srNo": obj.get("Sr No", ""),
+                    "entryId": entry_id,
                     "date": obj.get("Date", ""),
                     "station": obj.get("Station", ""),
                     "dgName": obj.get("DG Name", "")
