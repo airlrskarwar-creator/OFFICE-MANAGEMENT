@@ -2235,6 +2235,88 @@ def update_eb():
             print("✅ ADDED:", len(new_rows))
 
         # =========================================
+        # 🔥 SORT MONTHWISE ONLY
+        # =========================================
+
+        try:
+
+            latest_data = eb_sheet.get_all_values()
+
+            if latest_data and len(latest_data) > 1:
+
+                headers = latest_data[0]
+
+                body = latest_data[1:]
+
+                # =====================================
+                # 🔥 MONTH PARSER
+                # =====================================
+
+                def parse_month(val):
+
+                    try:
+
+                        return datetime.strptime(
+                            str(val).strip(),
+                            "%b-%Y"
+                        )
+
+                    except:
+
+                        return datetime.min
+
+                # =====================================
+                # 🔥 ORIGINAL ORDER
+                # =====================================
+
+                original_body = body.copy()
+
+                # =====================================
+                # 🔥 SORTED COPY
+                # =====================================
+
+                sorted_body = sorted(
+
+                    body,
+
+                    key=lambda r:
+
+                        parse_month(
+                            r[month_idx]
+                            if month_idx >= 0 and month_idx < len(r)
+                            else ""
+                        )
+                )
+
+                # =====================================
+                # ℹ️ ALREADY SORTED
+                # =====================================
+
+                if original_body != sorted_body:
+
+                    eb_sheet.update(
+                        [headers] + sorted_body,
+                        value_input_option="USER_ENTERED"
+                    )
+
+                    print(
+                        "✅ EB DATABASE SORTED"
+                    )
+
+                else:
+
+                    print(
+                        "ℹ️ EB already sorted"
+                    )
+
+        except Exception as sort_err:
+
+            print(
+                "❌ EB SORT ERROR:",
+                str(sort_err)
+            )
+
+        # =========================================
         # ℹ️ NO CHANGES
         # =========================================
 
