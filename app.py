@@ -1263,6 +1263,16 @@ def update_sbgexp():
                             "Expenditure Amount (₹ in 000)",
                             ""
                         ),
+
+                        "monthlyCumulative": row_obj.get(
+                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
+                            ""
+                        ),
+
+                        "cumulative": row_obj.get(
+                            "Cumulative Sum of Expenditure (₹ in 000)",
+                            ""
+                        ),
                         "changedColumns":
                             changed_columns
                     })
@@ -1306,6 +1316,16 @@ def update_sbgexp():
                         ),
                         "amount": row_obj.get(
                             "Expenditure Amount (₹ in 000)",
+                            ""
+                        ),
+
+                        "monthlyCumulative": row_obj.get(
+                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
+                            ""
+                        ),
+
+                        "cumulative": row_obj.get(
+                            "Cumulative Sum of Expenditure (₹ in 000)",
                             ""
                         )
                     })
@@ -1445,6 +1465,16 @@ def update_sbgexp():
                             ""
                         ),
 
+                        "monthlyCumulative": row_obj.get(
+                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
+                            ""
+                        ),
+
+                        "cumulative": row_obj.get(
+                            "Cumulative Sum of Expenditure (₹ in 000)",
+                            ""
+                        ),
+
                         "changedColumns":
                             changed_columns
                     })
@@ -1510,6 +1540,16 @@ def update_sbgexp():
 
                     "amount": row_obj.get(
                         "Expenditure Amount (₹ in 000)",
+                        ""
+                    ),
+
+                    "monthlyCumulative": row_obj.get(
+                        "Monthly Cumulative Sum of Expenditure (₹ in 000)",
+                        ""
+                    ),
+
+                    "cumulative": row_obj.get(
+                        "Cumulative Sum of Expenditure (₹ in 000)",
                         ""
                     )
                 })
