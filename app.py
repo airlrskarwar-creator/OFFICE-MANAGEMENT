@@ -1570,6 +1570,7 @@ def update_sbgexp():
                 "addedRows": []
             })
 
+
         # =====================================================
         # 🔥 APPLY UPDATES
         # =====================================================
@@ -1600,6 +1601,111 @@ def update_sbgexp():
                     new_rows
                 )
             )
+
+        # =====================================================
+        # 🔥 SORT MONTHWISE + DATEWISE
+        # =====================================================
+
+        try:
+
+            sbg_progress["percent"] = 96
+            sbg_progress["message"] = (
+                "Organizing SBG Database..."
+            )
+
+            latest_data = safe_sheet_call(
+                lambda: sbgexp_sheet.get_all_values()
+            )
+
+            if latest_data and len(latest_data) > 1:
+
+                headers = latest_data[0]
+
+                body = latest_data[1:]
+
+                # =====================================================
+                # 🔥 DATE PARSER
+                # =====================================================
+
+                def parse_date(val):
+
+                    try:
+
+                        return datetime.strptime(
+                            str(val).strip(),
+                            "%d-%m-%Y"
+                        )
+
+                    except:
+
+                        return datetime.min
+
+                # =====================================================
+                # 🔥 ORIGINAL ORDER
+                # =====================================================
+
+                original_body = body.copy()
+
+                # =====================================================
+                # 🔥 SORTED COPY
+                # =====================================================
+
+                sorted_body = sorted(
+
+                    body,
+
+                    key=lambda r: (
+
+                        # 🔥 DATE
+                        parse_date(
+                            r[0]
+                            if len(r) > 0 else ""
+                        ),
+
+                        # 🔥 STATION
+                        normalize(
+                            r[1]
+                            if len(r) > 1 else ""
+                        ),
+
+                        # 🔥 BUDGET
+                        normalize(
+                            r[3]
+                            if len(r) > 3 else ""
+                        )
+                    )
+                )
+
+                # =====================================================
+                # ℹ️ ALREADY SORTED
+                # =====================================================
+
+                if original_body != sorted_body:
+
+                    safe_sheet_call(
+                        lambda: sbgexp_sheet.update(
+                            [headers] + sorted_body,
+                            value_input_option="USER_ENTERED"
+                        )
+                    )
+
+                    print(
+                        "✅ SBG DATABASE SORTED"
+                    )
+
+                else:
+
+                    print(
+                        "ℹ️ SBG already sorted"
+                    )
+
+        except Exception as sort_err:
+
+            print(
+                "❌ SBG SORT ERROR:",
+                str(sort_err)
+            )
+
 
         # =====================================================
         # ⚠️ CONFLICT
