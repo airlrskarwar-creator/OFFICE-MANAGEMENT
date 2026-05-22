@@ -977,6 +977,10 @@ def sbg_progress_stream():
 # 🔥 SBG UPDATE
 # =========================
 
+# =========================
+# 🔥 SBG UPDATE
+# =========================
+
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
 
@@ -987,7 +991,7 @@ def update_sbgexp():
         global sbg_progress
 
         # =========================
-        # 🔥 START PROGRESS
+        # 🔥 START
         # =========================
 
         sbg_progress["percent"] = 1
@@ -1027,7 +1031,7 @@ def update_sbgexp():
         rows = data[1:]
 
         # =========================
-        # 🔍 COLUMN INDEXES
+        # 🔍 LAST UPDATED
         # =========================
 
         last_updated_idx = (
@@ -1036,15 +1040,7 @@ def update_sbgexp():
         )
 
         # =========================
-        # 🔧 CLEAN
-        # =========================
-
-        def clean(val):
-
-            return str(val or "").strip().lower()
-
-        # =========================
-        # 🔥 NORMALIZE
+        # 🔧 NORMALIZE
         # =========================
 
         def normalize(val):
@@ -1117,9 +1113,9 @@ def update_sbgexp():
 
             row_num = row_obj.get("_RowIndex")
 
-            # =========================
-            # 🔄 EXISTING ROW
-            # =========================
+            # =====================================================
+            # 🔄 EDIT MODE → UPDATE SAME ROW USING _RowIndex
+            # =====================================================
 
             if mode == "edit" and row_num:
 
@@ -1127,15 +1123,17 @@ def update_sbgexp():
 
                     row_num = int(row_num)
 
+                    # 🔥 EXISTING SHEET ROW
                     existing_row = rows[row_num - 2]
 
                     while len(existing_row) < len(headers):
                         existing_row.append("")
 
+                    # 🔥 COPY EXISTING
                     merged_row = existing_row.copy()
 
                     # =========================
-                    # 🔥 CONFLICT CHECK
+                    # ⚠️ CONFLICT CHECK
                     # =========================
 
                     if last_updated_idx >= 0:
@@ -1157,17 +1155,18 @@ def update_sbgexp():
                             and client_timestamp != sheet_timestamp
                         ):
 
-                            conflicts.append(
-                                row_obj.get(
+                            conflicts.append({
+                                "row": row_num,
+                                "station": row_obj.get(
                                     "Station",
-                                    "Unknown"
+                                    ""
                                 )
-                            )
+                            })
 
                             continue
 
                     # =========================
-                    # 🔥 MERGE
+                    # 🔥 MERGE NEW VALUES
                     # =========================
 
                     for col_idx, header in enumerate(headers):
@@ -1180,8 +1179,10 @@ def update_sbgexp():
                             )
 
                     # =========================
-                    # 🔥 ROW CHANGED
+                    # 🔥 CHANGE DETECTION
                     # =========================
+
+                    changed_columns = []
 
                     row_changed = False
 
@@ -1190,19 +1191,16 @@ def update_sbgexp():
                         "_lastUpdated"
                     }
 
-                    changed_columns = []
-
                     for i, header in enumerate(headers):
 
                         if header in ignore_compare:
                             continue
 
-                        old_val = ""
-
-                        if i < len(existing_row):
-                            old_val = normalize(
-                                existing_row[i]
-                            )
+                        old_val = normalize(
+                            existing_row[i]
+                            if i < len(existing_row)
+                            else ""
+                        )
 
                         new_val = normalize(
                             merged_row[i]
@@ -1215,14 +1213,14 @@ def update_sbgexp():
                             row_changed = True
 
                     # =========================
-                    # ℹ️ NO CHANGE
+                    # ⏭ SKIP NO CHANGE
                     # =========================
 
                     if not row_changed:
                         continue
 
                     # =========================
-                    # 🔥 TIMESTAMP
+                    # 🔥 UPDATE TIMESTAMP
                     # =========================
 
                     if last_updated_idx >= 0:
@@ -1232,61 +1230,47 @@ def update_sbgexp():
                         )
 
                     # =========================
-                    # 🔥 TRACK UPDATE
+                    # 🔥 TRACK UPDATED ROW
                     # =========================
 
                     updated_rows.append({
+
                         "date": row_obj.get(
                             "Date",
                             ""
                         ),
+
                         "station": row_obj.get(
                             "Station",
                             ""
                         ),
+
                         "budget": row_obj.get(
                             "SBG Expenditure Under",
                             ""
                         ),
+
                         "amount": row_obj.get(
                             "Expenditure Amount (₹ in 000)",
                             ""
                         ),
+
                         "changedColumns":
                             changed_columns
                     })
 
                     # =========================
-                    # 🔥 UPDATE FULL ROW
+                    # 🔥 UPDATE SAME ROW
                     # =========================
 
-                    row_changed_data = []
-
-                    for col_idx, val in enumerate(
-                        merged_row,
-                        start=1
-                    ):
-
-                        header = headers[col_idx - 1]
-
-                        if header in [
-                            "Last Updated",
-                            "_lastUpdated"
-                        ]:
-
-                            row_changed_data.append(val)
-
-                            continue
-
-                        row_changed_data.append(val)
-
                     update_cells.append({
-                        "range": (
+
+                        "range":
                             f"A{row_num}:"
                             f"{gspread.utils.rowcol_to_a1(row_num, len(headers))[:-len(str(row_num))]}"
-                            f"{row_num}"
-                        ),
-                        "values": [row_changed_data]
+                            f"{row_num}",
+
+                        "values": [merged_row]
                     })
 
                 except Exception as inner_err:
@@ -1296,9 +1280,9 @@ def update_sbgexp():
                         str(inner_err)
                     )
 
-            # =========================
-            # ➕ NEW ROW
-            # =========================
+            # =====================================================
+            # ➕ ADD MODE
+            # =====================================================
 
             else:
 
@@ -1321,18 +1305,22 @@ def update_sbgexp():
                 new_rows.append(new_row)
 
                 added_rows.append({
+
                     "date": row_obj.get(
                         "Date",
                         ""
                     ),
+
                     "station": row_obj.get(
                         "Station",
                         ""
                     ),
+
                     "budget": row_obj.get(
                         "SBG Expenditure Under",
                         ""
                     ),
+
                     "amount": row_obj.get(
                         "Expenditure Amount (₹ in 000)",
                         ""
@@ -1356,7 +1344,7 @@ def update_sbgexp():
             })
 
         # =========================
-        # 🔥 APPLY UPDATES
+        # 🔥 APPLY UPDATE
         # =========================
 
         sbg_progress["percent"] = 85
@@ -1372,7 +1360,7 @@ def update_sbgexp():
             )
 
         # =========================
-        # ➕ APPEND ROWS
+        # ➕ APPEND NEW
         # =========================
 
         sbg_progress["percent"] = 92
@@ -1412,9 +1400,12 @@ def update_sbgexp():
         sbg_progress["message"] = "Completed"
 
         return jsonify({
+
             "status": "success",
+
             "updatedRows":
                 updated_rows,
+
             "addedRows":
                 added_rows
         })
