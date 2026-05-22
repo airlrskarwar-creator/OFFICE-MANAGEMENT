@@ -38,6 +38,11 @@ pb_progress = {
     "message": "Idle"
 }
 
+sbg_progress = {
+    "percent": 0,
+    "message": "Idle"
+}
+
 # =========================================================
 # 🔥 SAFE GOOGLE SHEET RETRY
 # =========================================================
@@ -923,145 +928,511 @@ def update_pb():
         }), 500
 
 
+@app.route('/sbg/progress')
+def sbg_progress_stream():
+
+    def generate():
+
+        last_sent = None
+
+        while True:
+
+            try:
+
+                current = json.dumps({
+                    **sbg_progress,
+                    "ts": time.time()
+                })
+
+                if current != last_sent:
+
+                    yield f"data: {current}\n\n"
+
+                    last_sent = current
+
+                yield ": keepalive\n\n"
+
+                time.sleep(0.5)
+
+            except GeneratorExit:
+                print("🔌 SBG SSE disconnected")
+                break
+
+            except Exception as e:
+                print("❌ SBG SSE ERROR:", str(e))
+                break
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
+
+# =========================
+# 🔥 SBG UPDATE
+# =========================
+
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
+
     try:
-        import re
+
         from datetime import datetime
 
+        global sbg_progress
+
+        # =========================
+        # 🔥 START PROGRESS
+        # =========================
+
+        sbg_progress["percent"] = 1
+        sbg_progress["message"] = "Starting..."
+
         req_data = request.get_json()
+
         edit_rows = req_data.get("data", [])
 
+        mode = req_data.get("mode", "add")
+
+        print("🔥 SBG UPDATE HIT")
+        print("🔥 ROW COUNT:", len(edit_rows))
+
         if not edit_rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+
+            sbg_progress["percent"] = 100
+            sbg_progress["message"] = "No Data"
+
+            return jsonify({
+                "status": "error",
+                "message": "No data received"
+            }), 400
 
         # =========================
-        # 🔧 HELPERS
+        # 📥 READ SHEET
         # =========================
+
+        sbg_progress["percent"] = 5
+        sbg_progress["message"] = "Reading SBG Database..."
+
+        data = safe_sheet_call(
+            lambda: sbgexp_sheet.get_all_values()
+        )
+
+        headers = data[0]
+        rows = data[1:]
+
+        # =========================
+        # 🔍 COLUMN INDEXES
+        # =========================
+
+        last_updated_idx = (
+            headers.index("Last Updated")
+            if "Last Updated" in headers else -1
+        )
+
+        # =========================
+        # 🔧 CLEAN
+        # =========================
+
         def clean(val):
-            return str(val).strip().lower()
 
-        def normalize_date(val):
+            return str(val or "").strip().lower()
+
+        # =========================
+        # 🔥 NORMALIZE
+        # =========================
+
+        def normalize(val):
+
+            if val is None:
+                return ""
+
+            val = (
+                str(val)
+                .replace("₹", "")
+                .replace(",", "")
+                .replace("\r", "")
+                .replace("\n", " ")
+                .strip()
+                .lower()
+            )
+
+            if val in ["true", "yes", "checked", "1"]:
+                return "true"
+
+            if val in ["false", "no", "0", "unchecked"]:
+                return "false"
+
+            if val in ["--", "-"]:
+                return ""
+
             try:
-                return datetime.strptime(val.strip(), "%d-%m-%Y").strftime("%Y-%m-%d")
+                return f"{float(val):.3f}"
             except:
-                return ""
-
-        def clean_details(val):
-            if not val:
-                return ""
-            val = str(val).lower()
-            val = re.sub(r"\(.*?\)", "", val)  # remove dynamic part
-            return re.sub(r"\s+", " ", val).strip()
-
-        def make_key(row):
-            return f"{normalize_date(row.get('Date',''))}|{clean(row.get('Station',''))}|{clean(row.get('SBG Expenditure Under',''))}|{clean_details(row.get('Expenditure Details',''))}"
+                return val
 
         # =========================
-        # 🔥 CLEAN INPUT (CRITICAL)
+        # 🔥 TRACKERS
         # =========================
-        cleaned = []
 
-        for row in edit_rows:
-            if not isinstance(row, dict):
-                continue
-
-            date = str(row.get("Date", "")).strip()
-            station = str(row.get("Station", "")).strip()
-            budget = str(row.get("SBG Expenditure Under", "")).strip()
-
-            # ❌ remove header-like rows
-            if date.lower() == "date":
-                continue
-
-            # ❌ remove blank rows
-            if not date or not station or not budget:
-                continue
-
-            # ❌ invalid date
-            if not normalize_date(date):
-                continue
-
-            cleaned.append(row)
-
-        if not cleaned:
-            return jsonify({"status": "success", "rows_written": 0})
-
-        # =========================
-        # 📥 READ EXISTING (KEEP HEADER SAFE)
-        # =========================
-        data = sbgexp_sheet.get_all_values()
-
-        if not data:
-            return jsonify({"status": "error", "message": "Header missing in sheet"})
-
-        headers = data[0]   # row 1 untouched
-        existing_rows = data[1:]
-
-        # =========================
-        # 🔥 BUILD EXISTING KEY MAP
-        # =========================
-        row_map = {}
-
-        for i, r in enumerate(existing_rows):
-            existing_row = {
-                "Date": r[0],
-                "Station": r[1],
-                "SBG Expenditure Under": r[3],
-                "Expenditure Details": r[4],
-            }
-            key = make_key(existing_row)
-            row_map[key] = i + 2  # actual sheet row
-
-        # =========================
-        # 🔄 UPSERT LOGIC
-        # =========================
         update_cells = []
+
         new_rows = []
-        seen = set()
 
-        for row in cleaned:
+        updated_rows = []
 
-            key = make_key(row)
+        added_rows = []
 
-            if key in seen:
-                continue
-            seen.add(key)
+        conflicts = []
 
-            values = [row.get(h, "") for h in headers]
+        # =========================
+        # 🔥 PROGRESS
+        # =========================
 
-            # 🔁 UPDATE EXISTING
-            if key in row_map:
-                row_num = row_map[key]
+        total_rows = len(edit_rows)
+        processed = 0
 
-                for col_idx, val in enumerate(values):
-                    update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx + 1),
-                        "values": [[val]]
+        # =========================
+        # 🔄 PROCESS ROWS
+        # =========================
+
+        for row_obj in edit_rows:
+
+            processed += 1
+
+            progress = int(
+                10 + ((processed / total_rows) * 70)
+            )
+
+            sbg_progress["percent"] = progress
+
+            sbg_progress["message"] = (
+                f"Saving {processed}/{total_rows} rows"
+            )
+
+            row_num = row_obj.get("_RowIndex")
+
+            # =========================
+            # 🔄 EXISTING ROW
+            # =========================
+
+            if mode == "edit" and row_num:
+
+                try:
+
+                    row_num = int(row_num)
+
+                    existing_row = rows[row_num - 2]
+
+                    while len(existing_row) < len(headers):
+                        existing_row.append("")
+
+                    merged_row = existing_row.copy()
+
+                    # =========================
+                    # 🔥 CONFLICT CHECK
+                    # =========================
+
+                    if last_updated_idx >= 0:
+
+                        sheet_timestamp = (
+                            existing_row[last_updated_idx]
+                            if last_updated_idx < len(existing_row)
+                            else ""
+                        )
+
+                        client_timestamp = row_obj.get(
+                            "_lastUpdated",
+                            ""
+                        )
+
+                        if (
+                            client_timestamp
+                            and sheet_timestamp
+                            and client_timestamp != sheet_timestamp
+                        ):
+
+                            conflicts.append(
+                                row_obj.get(
+                                    "Station",
+                                    "Unknown"
+                                )
+                            )
+
+                            continue
+
+                    # =========================
+                    # 🔥 MERGE
+                    # =========================
+
+                    for col_idx, header in enumerate(headers):
+
+                        if header in row_obj:
+
+                            merged_row[col_idx] = row_obj.get(
+                                header,
+                                ""
+                            )
+
+                    # =========================
+                    # 🔥 ROW CHANGED
+                    # =========================
+
+                    row_changed = False
+
+                    ignore_compare = {
+                        "Last Updated",
+                        "_lastUpdated"
+                    }
+
+                    changed_columns = []
+
+                    for i, header in enumerate(headers):
+
+                        if header in ignore_compare:
+                            continue
+
+                        old_val = ""
+
+                        if i < len(existing_row):
+                            old_val = normalize(
+                                existing_row[i]
+                            )
+
+                        new_val = normalize(
+                            merged_row[i]
+                        )
+
+                        if old_val != new_val:
+
+                            changed_columns.append(header)
+
+                            row_changed = True
+
+                    # =========================
+                    # ℹ️ NO CHANGE
+                    # =========================
+
+                    if not row_changed:
+                        continue
+
+                    # =========================
+                    # 🔥 TIMESTAMP
+                    # =========================
+
+                    if last_updated_idx >= 0:
+
+                        merged_row[last_updated_idx] = (
+                            datetime.now().isoformat()
+                        )
+
+                    # =========================
+                    # 🔥 TRACK UPDATE
+                    # =========================
+
+                    updated_rows.append({
+                        "date": row_obj.get(
+                            "Date",
+                            ""
+                        ),
+                        "station": row_obj.get(
+                            "Station",
+                            ""
+                        ),
+                        "budget": row_obj.get(
+                            "SBG Expenditure Under",
+                            ""
+                        ),
+                        "amount": row_obj.get(
+                            "Expenditure Amount (₹ in 000)",
+                            ""
+                        ),
+                        "changedColumns":
+                            changed_columns
                     })
 
-            # ➕ ADD NEW
+                    # =========================
+                    # 🔥 UPDATE FULL ROW
+                    # =========================
+
+                    row_changed_data = []
+
+                    for col_idx, val in enumerate(
+                        merged_row,
+                        start=1
+                    ):
+
+                        header = headers[col_idx - 1]
+
+                        if header in [
+                            "Last Updated",
+                            "_lastUpdated"
+                        ]:
+
+                            row_changed_data.append(val)
+
+                            continue
+
+                        row_changed_data.append(val)
+
+                    update_cells.append({
+                        "range": (
+                            f"A{row_num}:"
+                            f"{gspread.utils.rowcol_to_a1(row_num, len(headers))[:-len(str(row_num))]}"
+                            f"{row_num}"
+                        ),
+                        "values": [row_changed_data]
+                    })
+
+                except Exception as inner_err:
+
+                    print(
+                        "❌ ROW UPDATE ERROR:",
+                        str(inner_err)
+                    )
+
+            # =========================
+            # ➕ NEW ROW
+            # =========================
+
             else:
-                new_rows.append(values)
+
+                new_row = []
+
+                for header in headers:
+
+                    if header == "Last Updated":
+
+                        new_row.append(
+                            datetime.now().isoformat()
+                        )
+
+                    else:
+
+                        new_row.append(
+                            row_obj.get(header, "")
+                        )
+
+                new_rows.append(new_row)
+
+                added_rows.append({
+                    "date": row_obj.get(
+                        "Date",
+                        ""
+                    ),
+                    "station": row_obj.get(
+                        "Station",
+                        ""
+                    ),
+                    "budget": row_obj.get(
+                        "SBG Expenditure Under",
+                        ""
+                    ),
+                    "amount": row_obj.get(
+                        "Expenditure Amount (₹ in 000)",
+                        ""
+                    )
+                })
 
         # =========================
-        # 🔥 APPLY CHANGES
+        # ℹ️ NO CHANGES
         # =========================
+
+        if not update_cells and not new_rows:
+
+            sbg_progress["percent"] = 100
+            sbg_progress["message"] = "No Changes"
+
+            return jsonify({
+                "status": "nochange",
+                "message": "No changes detected",
+                "updatedRows": [],
+                "addedRows": []
+            })
+
+        # =========================
+        # 🔥 APPLY UPDATES
+        # =========================
+
+        sbg_progress["percent"] = 85
+        sbg_progress["message"] = "Updating SBG Database..."
+
         if update_cells:
-            sbgexp_sheet.batch_update(update_cells)
+
+            safe_sheet_call(
+                lambda: sbgexp_sheet.batch_update(
+                    update_cells,
+                    value_input_option="USER_ENTERED"
+                )
+            )
+
+        # =========================
+        # ➕ APPEND ROWS
+        # =========================
+
+        sbg_progress["percent"] = 92
+        sbg_progress["message"] = "Appending New Rows..."
 
         if new_rows:
-            sbgexp_sheet.append_rows(new_rows)
+
+            safe_sheet_call(
+                lambda: sbgexp_sheet.append_rows(
+                    new_rows
+                )
+            )
+
+        # =========================
+        # ⚠️ CONFLICT
+        # =========================
+
+        if conflicts:
+
+            sbg_progress["percent"] = 100
+            sbg_progress["message"] = "Conflict Found"
+
+            return jsonify({
+                "status": "conflict",
+                "message": (
+                    "Some rows modified "
+                    "by another user"
+                ),
+                "rows": conflicts
+            })
+
+        # =========================
+        # ✅ COMPLETE
+        # =========================
+
+        sbg_progress["percent"] = 100
+        sbg_progress["message"] = "Completed"
 
         return jsonify({
             "status": "success",
-            "updated": len(update_cells),
-            "added": len(new_rows)
+            "updatedRows":
+                updated_rows,
+            "addedRows":
+                added_rows
         })
 
     except Exception as e:
-        print("❌ ERROR:", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
+
+        sbg_progress["percent"] = 100
+        sbg_progress["message"] = "Error"
+
+        print(
+            "❌ SBG UPDATE ERROR:",
+            str(e)
+        )
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 @app.route("/sbg/bulk-update", methods=["POST"])
