@@ -1303,6 +1303,32 @@
         scrollbar-width: thin;
       }
 
+      /* ======================================
+      🔥 REPORT OPTIONS BODY
+      ====================================== */
+
+      .reportOptionsBody {
+        padding: 10px 12px;
+        white-space: normal;
+        line-height: 1.3;
+        font-size: 13px;
+        max-height: 50vh;
+        display: block;
+        text-align: left;
+        word-break: break-word;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+
+      .reportOptionsBody::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+
       .custom-alert-body .material-icons {
         vertical-align: middle;
       }
@@ -1320,6 +1346,18 @@
         padding: 10px 24px;
         border-radius: 12px;
         cursor: pointer;
+      }
+
+      .reportTypeBtn {
+        border: solid 1px silver;
+        background: #6f768d;
+        color: yellow !important;
+        font-weight: 700;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        width: 100%;
       }
 
       /* =============APP LAYOUT=========== */
@@ -2150,7 +2188,7 @@
       .PB-Table-WrapperNPS,
       .BudgetTableWrapper,
       .BudgetTablefromPBWrapper,
-      .EBtableWrapper {
+      .BudgetReportTableWrapper .EBtableWrapper {
         flex: 1;
         /* 🔥 equal height */
         min-height: 0;
@@ -2172,6 +2210,13 @@
         max-height: calc(100vh - 200px);
       }
 
+      .budgetReportBtn {
+        border: none;
+        outline: none;
+        width: 30px;
+        cursor: pointer;
+      }
+
       .DGlogTableWrapper {
         height: calc(100vh - 250px);
         overflow-y: auto;
@@ -2183,7 +2228,8 @@
       .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
       .budget-table,
       .budgetfromPB-table,
-      .EBtableWrapper table {
+      .EBtableWrapper table,
+      .BudgetReportTableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -2191,6 +2237,15 @@
         background: #ffffff;
         border-radius: 10px;
         height: max-content;
+      }
+
+      .SBGmonthWiseDetails tbody td {
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        line-height: normal !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       #PB_GOITCalc,
@@ -2342,6 +2397,32 @@
       #PB_NPSITCalc td {
         height: 22px;
         min-width: 90px;
+      }
+
+      .BudgetReportTableWrapper table td {
+        min-height: 22px !important;
+        padding: 4px;
+        line-height: 1 !important;
+        font-size: 12px !important;
+      }
+
+      /* ======================================
+      🔥 CERTIFICATE TEXT
+      ====================================== */
+
+      .sbgCertificateText {
+        padding-left: 25px !important;
+        text-indent: -15px !important;
+        padding-right: 5px !important;
+        text-align: justify !important;
+        font-size: 12px !important;
+        line-height: 18px !important;
+        vertical-align: top !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        padding-top: 3px !important;
+        padding-bottom: 3px !important;
       }
 
       #PB_GOEditTbl td *,
@@ -3801,7 +3882,7 @@
       }
 
       .lieu-input {
-        width: 100px;
+        width: 110px;
         font-size: 11px;
         border-radius: 0;
         text-align: center;
@@ -3847,6 +3928,7 @@
         padding: 2px;
         background: white;
         border: 1px solid black;
+        min-width: 110px !important;
       }
 
       #dutyChartTable table thead tr:first-child th {
@@ -4829,7 +4911,6 @@
       }
     </style>
   </head>
-
   <body>
     <!-- 🔥 LOGIN MODAL -->
     <div id="loginPage">
@@ -4889,7 +4970,6 @@
             <i class="material-icons">login</i>
             <p>Login</p>
           </button>
-
           <!-- ERROR -->
           <div id="loginError"></div>
           <!-- CAPS WARNING -->
@@ -4909,23 +4989,17 @@
         <p>, Technician, Akashvani Karwar</p>
       </div>
     </div>
-
     <!-- 🔥 LOGOUT CONFIRM MODAL -->
     <div id="logoutConfirm" class="custom-alert hidden">
       <div class="custom-alert-box" style="max-width: 420px">
         <div class="custom-alert-header">🚪 Logout Confirmation</div>
-
         <div class="custom-alert-body" style="text-align: center; padding: 30px 20px">
           <div style="font-size: 60px; margin-bottom: 14px">🔐</div>
-
           <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px">Do you want to Logout?</div>
-
           <div style="opacity: 0.7; font-size: 13px">Your current session will be closed.</div>
         </div>
-
         <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 0 20px 20px">
           <button id="logoutNoBtn" style="border: none; background: #374151; color: #fff; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600">No</button>
-
           <button id="logoutYesBtn" style="border: none; background: #ef4444; color: #fff; padding: 10px 22px; border-radius: 12px; cursor: pointer; font-weight: 700">Yes</button>
         </div>
       </div>
@@ -5892,6 +5966,163 @@
           <div style="display: flex">
             <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none"></div>
             <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
+            <div class="BudgetReportTableWrapper" id="BudgetReportTableWrapper" style="display: none">
+              <table id="ContingentBillReport" style="border-collapse: collapse; width: 100%">
+                <colgroup>
+                  <col style="width: 15%" />
+                  <col style="width: 5%" />
+                  <col style="width: 65%" />
+                  <col style="width: 15%" />
+                </colgroup>
+                <tr>
+                  <td colspan="2" style="border: solid 1px black" id="sbgBillMainHeader">
+                    Form T.R. - 30 (Large)
+                    <br />
+                    (See Treasury Rule-306)
+                  </td>
+                  <td style="text-align: center">
+                    <b><h3 style="width: 100%; font-size: 13px; font-weight: bold">FULLY VOUCHED CONTINGENT BILL</h3></b>
+                  </td>
+                  <td style="text-align: right">CENTRAL</td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="border: solid 1px black; text-align: center; vertical-align: top" id="sbgBillHeader">
+                    ALL INDIA RADIO
+                    <br />
+                    <span id="sbgStation"></span>
+                  </td>
+                  <td style="border: solid 1px black; min-height: 40px">
+                    <label style="margin: 0; padding: 0; font-weight: 100">
+                      Detailed Bill of contingent charges for the month of
+                      <span id="headerMonth"></span>
+                    </label>
+                    <br />
+                    <p style="margin: 0px; margin-top: 5px; padding: 0; font-weight: bold">
+                      <b>
+                        Head of Account :
+                        <span id="headAccountSBGName"></span>
+                      </b>
+                    </p>
+                  </td>
+                  <td style="border: solid 1px black; text-align: center; vertical-align: top"><b>Voucher No.</b></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding: 0">
+                    <table style="border-collapse: collapse; width: 100%" id="SBGmonthWiseDetails">
+                      <colgroup>
+                        <col style="width: 15%" />
+                        <col style="width: 5%" />
+                        <col style="width: 65%" />
+                        <col style="width: 15%" />
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <th style="border: solid 1px black; text-align: center" id="sbgBillSubHeader">
+                            Number of
+                            <br />
+                            Sub-Voucher
+                          </th>
+                          <th colspan="2" style="border: solid 1px black; text-align: center">Description of Charge</th>
+                          <th style="border: solid 1px black; text-align: center">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText1">1. I certify that the expenditure included in this bill could not, with due regard to the interest of the public service be avoided. I certify that to the best of my knowledge and belief, the payments entered in this bill have been duly made to the parties entitled to receive them with the exception noted below, which exceed the balance of the payment advance and will be paid on receipt of the money drawn on this bill. Vouchers for all sums of Rs.1000/- and above in amounts are attached to this bill, save those noted below, which will be forwarded as soon as the amounts have been paid. I have, as far as possible, obtained vouchers for other sums and am responsible that they have been destroyed or so defected or mutilated that they cannot be used again. All work bills are annexed.</td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText2">2. Certified that all the Articles detailed in the vouchers attached to the bill and in those retained in my office have been accounted for in the stock register.</td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText3">3. Certified that the purchases billed have been received in good order, that their quantities are correct and their quality good and according to specifications, that the rates paid are not in excess of the accepted that the market rates and that suitable notes of payment have been recorded against the indents and invoices concerned to prevent double payments.</td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText4">4. Certified that - (a) the expenditure on conveyance hire included in this bill was actually incurred, was un-avoidable and is within the scheduled scale of charges for the conveyance used and (b) the Government servant concerned is not entitled to draw travelling allowance under the ordinary rules for the journey he is not granted any compensatory leave and does not and will not receive any special remuneration for the performance of the duty which necessitated the journey.</td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                </tr>
+                <tr>
+                  <td colspan="2">Received payments.</td>
+                  <td style="text-align: right">Appropriation for the current year Rs.</td>
+                  <td style="border: solid 1px black">
+                    <b><span id="SBG_Sanctioned"></span></b>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2"></td>
+                  <td style="text-align: right">Expenditure including this Bill Rs.</td>
+                  <td style="border: solid 1px black">
+                    <b><span id="Monthly_Expenditure"></span></b>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2"></td>
+                  <td style="text-align: right">Amount of work Bill Annexed Rs.</td>
+                  <td style="border: solid 1px black">
+                    <b><span id="Present_Expenditure"></span></b>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">D.D.O.</td>
+                  <td style="text-align: right">Balance Available Rs.</td>
+                  <td style="border: solid 1px black">
+                    <b><span id="Available_SBG"></span></b>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="text-align: center">
+                    <span id="Present_Expenditure2" style="font-weight: bold"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 50px; vertical-align: bottom; text-align: center" id="sbgDesignationSign">DA</td>
+                  <td colspan="2" style="height: 50px; vertical-align: bottom; text-align: center">Accountant</td>
+                  <td style="height: 50px; vertical-align: bottom; text-align: center">D.D.O./A.O.</td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="text-align: center">Space of pre-audit enforcement in respect of Bills submitted for pre-audit. For use in AG's Office</td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="height: 10px; border-top: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="2">Head of Account</td>
+                  <td style="text-align: right">Admitted for Rs.</td>
+                  <td style="border: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="2"></td>
+                  <td style="text-align: right">Objected to Rs.</td>
+                  <td style="border: solid 1px black"></td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="border-bottom: solid 1px black"></td>
+                  <td colspan="2" style="font-weight: bold; border-bottom: solid 1px black">Reason of objection :</td>
+                </tr>
+              </table>
+            </div>
           </div>
         </div>
         <div class="SectionPage" id="DGlogPage" style="display: none">
@@ -5964,22 +6195,18 @@
               </label>
               <input id="DGhsdLevel" />
             </div>
-
             <div class="DGfield">
               <label>HSD Filled</label>
               <input id="DGhsdFill" />
             </div>
-
             <div class="DGfield">
               <label>Pressure (kg/cm&sup2;)</label>
               <input id="DGpressure" />
             </div>
-
             <div class="DGfield">
               <label>Temperature (&deg;C)</label>
               <input id="DGtemp" />
             </div>
-
             <div class="DGfield">
               <label>
                 HMR
@@ -5992,71 +6219,58 @@
             <!-- ================================= -->
             <!-- 🔥 PHASE TO PHASE VOLTAGE -->
             <!-- ================================= -->
-
             <div class="DGgroup">
               <label class="DGtitle">Phase to Phase Voltage</label>
               <div class="DGfield">
                 <label>Vry</label>
                 <input id="DGVRY" />
               </div>
-
               <div class="DGfield">
                 <label>Vyb</label>
                 <input id="DGVYB" />
               </div>
-
               <div class="DGfield">
                 <label>Vbr</label>
                 <input id="DGVBR" />
               </div>
             </div>
-
             <!-- ================================= -->
             <!-- 🔥 PHASE TO NEUTRAL -->
             <!-- ================================= -->
-
             <div class="DGgroup">
               <label class="DGtitle">Phase to Neutral Voltage</label>
               <div class="DGfield">
                 <label>Vrn</label>
                 <input id="DGVRN" />
               </div>
-
               <div class="DGfield">
                 <label>Vyn</label>
                 <input id="DGVYN" />
               </div>
-
               <div class="DGfield">
                 <label>Vbn</label>
                 <input id="DGVBN" />
               </div>
             </div>
-
             <!-- ================================= -->
             <!-- 🔥 CURRENT -->
             <!-- ================================= -->
-
             <div class="DGgroup">
               <label class="DGtitle">Phase Current</label>
-
               <div class="DGfield">
                 <label>Ir</label>
                 <input id="DGIR" />
               </div>
-
               <div class="DGfield">
                 <label>Iy</label>
                 <input id="DGIY" />
               </div>
-
               <div class="DGfield">
                 <label>Ib</label>
                 <input id="DGIB" />
               </div>
             </div>
           </div>
-
           <div class="DGlogTableWrapper" id="DGlogTableWrapper" style="max-height: calc(100vh - 140px)"></div>
         </div>
         <div class="SectionPage" id="HSDlogPage" style="display: none">
@@ -6133,65 +6347,111 @@
                   <col style="width: 15%" />
                 </colgroup>
                 <thead>
-                  <tr><th colspan="5">Electricity Bill Details</th></tr>
+                  <tr>
+                    <th colspan="5">Electricity Bill Details</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>Billing for the Month</td>
-                    <td colspan="4"><input required id="EBbillMonth" type="month" /></td>
+                    <td colspan="4">
+                      <input required id="EBbillMonth" type="month" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Reference No.</td>
-                    <td colspan="4"><input required id="EBref" /></td>
+                    <td colspan="4">
+                      <input required id="EBref" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Payment Month</td>
-                    <td colspan="4"><input disabled id="EBpayMonth" type="month" /></td>
+                    <td colspan="4">
+                      <input disabled id="EBpayMonth" type="month" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Recorded Demand (KVA)</td>
-                    <td colspan="4"><input required id="RD" /></td>
+                    <td colspan="4">
+                      <input required id="RD" />
+                    </td>
                   </tr>
                   <tr>
                     <td>MD Meter</td>
-                    <td colspan="4"><input required id="MD" /></td>
+                    <td colspan="4">
+                      <input required id="MD" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Recorded PF (cosφ)</td>
-                    <td colspan="4"><input required id="PF" /></td>
+                    <td colspan="4">
+                      <input required id="PF" />
+                    </td>
                   </tr>
                   <tr>
-                    <td><label>Consumption Details</label></td>
-                    <td><label>Present Reading</label></td>
-                    <td><label>Prev Reading</label></td>
-                    <td><label>Difference Reading</label></td>
-                    <td><label>Consumption</label></td>
+                    <td>
+                      <label>Consumption Details</label>
+                    </td>
+                    <td>
+                      <label>Present Reading</label>
+                    </td>
+                    <td>
+                      <label>Prev Reading</label>
+                    </td>
+                    <td>
+                      <label>Difference Reading</label>
+                    </td>
+                    <td>
+                      <label>Consumption</label>
+                    </td>
                   </tr>
                   <tr>
                     <td>KWh Consumption</td>
-                    <td><input required id="preKWh" /></td>
-                    <td><input disabled id="prevKWh" value="0" /></td>
-                    <td><input disabled id="diffKWh" value="0" /></td>
-                    <td><input required id="consKWh" value="0" /></td>
+                    <td>
+                      <input required id="preKWh" />
+                    </td>
+                    <td>
+                      <input disabled id="prevKWh" value="0" />
+                    </td>
+                    <td>
+                      <input disabled id="diffKWh" value="0" />
+                    </td>
+                    <td>
+                      <input required id="consKWh" value="0" />
+                    </td>
                   </tr>
                   <tr>
                     <td>KVAh Consumption</td>
-                    <td><input required id="preKVAh" /></td>
-                    <td><input disabled id="prevKVAh" value="0" /></td>
-                    <td><input disabled id="diffKVAh" value="0" /></td>
-                    <td><input required id="consKVAh" value="0" /></td>
+                    <td>
+                      <input required id="preKVAh" />
+                    </td>
+                    <td>
+                      <input disabled id="prevKVAh" value="0" />
+                    </td>
+                    <td>
+                      <input disabled id="diffKVAh" value="0" />
+                    </td>
+                    <td>
+                      <input required id="consKVAh" value="0" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Interest on Security Deposit</td>
-                    <td colspan="4"><input id="securityDeposit" /></td>
+                    <td colspan="4">
+                      <input id="securityDeposit" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Tax</td>
-                    <td colspan="4"><input id="EBtax" /></td>
+                    <td colspan="4">
+                      <input id="EBtax" />
+                    </td>
                   </tr>
                   <tr>
                     <td>Final Amount</td>
-                    <td colspan="4"><input required id="EBbillAmount" /></td>
+                    <td colspan="4">
+                      <input required id="EBbillAmount" />
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -7670,7 +7930,7 @@
               // 🔥 WAIT BOTH
               await Promise.all([loadTable('pb', 'PBDB'), loadTable('cpc', 'CPC7DB')]);
 
-              console.log('✅ PB + CPC fully loaded');
+              //console.log('✅ PB + CPC fully loaded');
 
               // 🔥 NOW SAFE
               buildEmpDBWithCalc();
@@ -13263,28 +13523,7 @@
         /* =========================
        🔹 TOTAL DEDUCTION
       ========================= */
-        const deduction =
-          getNum(tr, 'Net IT') +
-          getNum(tr, 'GPF') +
-          getNum(tr, 'NPSC') +
-          getNum(tr, 'NPSE ded') +
-          getNum(tr, 'DAA on NPSE ded') +
-          getNum(tr, 'DAA on NPSC') +
-          getNum(tr, 'CGEIS') +
-          getNum(tr, 'LIC') +
-          getNum(tr, 'L Fee') +
-          getNum(tr, 'W Ch') +
-          getNum(tr, 'C ADV') +
-          getNum(tr, 'SC ADV') +
-          getNum(tr, 'F ADV') +
-          getNum(tr, 'REC P & A') +
-          getNum(tr, 'TR CH') +
-          getNum(tr, 'AIR & TV CHE SOC') +
-          getNum(tr, 'DWR SOCIETY') +
-          getNum(tr, 'AKA CLUB') +
-          getNum(tr, 'ASSO SUB') +
-          getNum(tr, 'Prof Tax') +
-          getNum(tr, 'Recovery');
+        const deduction = getNum(tr, 'Net IT') + getNum(tr, 'GPF') + getNum(tr, 'NPSC') + getNum(tr, 'NPSE ded') + getNum(tr, 'DAA on NPSE ded') + getNum(tr, 'DAA on NPSC') + getNum(tr, 'CGEIS') + getNum(tr, 'LIC') + getNum(tr, 'L Fee') + getNum(tr, 'W Ch') + getNum(tr, 'C ADV') + getNum(tr, 'SC ADV') + getNum(tr, 'F ADV') + getNum(tr, 'REC P & A') + getNum(tr, 'TR CH') + getNum(tr, 'AIR & TV CHE SOC') + getNum(tr, 'DWR SOCIETY') + getNum(tr, 'AKA CLUB') + getNum(tr, 'ASSO SUB') + getNum(tr, 'Prof Tax') + getNum(tr, 'Recovery');
 
         setValue(getCellInput(tr, 'Total Deduction'), deduction);
 
@@ -13786,7 +14025,11 @@
         /* =====================================
         🔥 CONFIRM
         ===================================== */
+        const noBtn = id('logoutNoBtn');
 
+        if (noBtn) {
+          noBtn.style.display = 'block';
+        }
         showConfirmBox({
           title: 'Discard Changes',
 
@@ -16386,79 +16629,133 @@
 
       function buildPBBudgetRows() {
         const data = buildBudgetSummaryWithStation();
+
         const result = [];
 
         const stationMap = {};
 
+        // ======================================
+        // 🔥 GROUP STATIONWISE
+        // ======================================
+
         data.forEach((d) => {
-          if (!stationMap[d.station]) stationMap[d.station] = [];
+          if (!stationMap[d.station]) {
+            stationMap[d.station] = [];
+          }
+
           stationMap[d.station].push(d);
         });
+
+        // ======================================
+        // 🔥 PROCESS EACH STATION
+        // ======================================
 
         Object.keys(stationMap).forEach((station) => {
           const records = stationMap[station];
 
-          // 🔥 SORT BY DATE
+          // ======================================
+          // 🔥 SORT DATEWISE
+          // ======================================
+
           records.sort((a, b) => {
             const [d1, m1, y1] = a.date.split('-');
+
             const [d2, m2, y2] = b.date.split('-');
+
             return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`);
           });
 
-          const cumulativeMap = {};
+          // ======================================
+          // 🔥 RUNNING TOTALS
+          // ======================================
+
+          let yearlyRunningTotal = 0;
+
+          const monthlyRunningTotals = {};
+
+          // ======================================
+          // 🔥 EMP BREAKUP FORMAT
+          // ======================================
 
           function formatEmpBreakup(arr) {
             if (!arr || !arr.length) return '';
+
             return arr.map((e) => `${e.name}: ${formatCurrency(e.value)}`).join(', ');
           }
 
+          // ======================================
+          // 🔥 PROCESS EACH MONTH RECORD
+          // ======================================
+
           records.forEach((d) => {
             const [mon, yr] = d.monthStr.split('-');
+
             const fy = getFYFromDateStr(convertMonthToDate(d.monthStr));
 
-            // =========================
-            // 🔥 BUILD ROW OBJECTS
-            // =========================
+            // ======================================
+            // 🔥 BUILD ROWS
+            // ======================================
 
             const rows = [
               {
                 label: `Salary for GO Employee-${mon}-${yr}`,
+
                 value: d.go,
+
                 budget: 'SALARY ( Non-IRLA )( Regular ) - For Govt Employees'
               },
+
               {
                 label: `Salary for PB Employee-${mon}-${yr}`,
+
                 value: d.nps,
+
                 budget: 'SALARY - For PB Employees Recruited After 05.10.2007'
               },
+
               {
                 label: `NPS Contribution-${mon}-${yr}`,
+
                 value: d.npsIncome,
+
                 budget: 'CPF Contribution / NPS - For PB Employees'
               },
+
               {
                 label: `Medical Reimbursement for GO Employee-${mon}-${yr}`,
+
                 details: formatEmpBreakup(d.goMedDetails),
+
                 value: d.goMed,
+
                 budget: 'Medical Treatment - For Govt Employees'
               },
+
               {
                 label: `Medical Reimbursement for PB Employee-${mon}-${yr}`,
+
                 details: formatEmpBreakup(d.npsMedDetails),
+
                 value: d.npsMed,
+
                 budget: 'Medical Treatment - For PB Employees'
               },
+
               {
                 label: `EL (Leave) Encashment-${mon}-${yr}`,
+
                 details: formatEmpBreakup(d.elDetails),
+
                 value: d.el,
+
                 budget: 'Leave Encashment - For PB Employees'
               }
             ];
 
-            // =========================
-            // 🔥 REMOVE DUPLICATES (IMPORTANT)
-            // =========================
+            // ======================================
+            // 🔥 REMOVE DUPLICATES
+            // ======================================
+
             const uniqueMap = new Map();
 
             rows.forEach((r) => {
@@ -16471,14 +16768,19 @@
 
             const finalRows = Array.from(uniqueMap.values());
 
-            // =========================
-            // 🔥 BUILD RESULT (USE finalRows)
-            // =========================
+            // ======================================
+            // 🔥 BUILD RESULT
+            // ======================================
+
             finalRows.forEach((r) => {
-              // 🔥 skip zero rows
+              // ❌ SKIP ZERO
               if (!r.value || Number(r.value) === 0) return;
 
               let type = '';
+
+              // ======================================
+              // 🔥 TYPE
+              // ======================================
 
               if (r.budget.includes('SALARY ( Non-IRLA )( Regular ) - For Govt Employees')) {
                 type = 'SAL-GO';
@@ -16496,19 +16798,51 @@
                 type = 'NPS/LEAVE_ENCASH';
               }
 
-              const key = fy + '|' + r.budget + '|' + station;
+              // ======================================
+              // 🔥 MONTH KEY
+              // ======================================
 
-              if (!cumulativeMap[key]) cumulativeMap[key] = 0;
-              cumulativeMap[key] += r.value;
+              const monthlyKey = fy + '|' + mon + '|' + yr + '|' + station;
+
+              // ======================================
+              // 🔥 MONTHLY TOTAL
+              // ======================================
+
+              if (!monthlyRunningTotals[monthlyKey]) {
+                monthlyRunningTotals[monthlyKey] = 0;
+              }
+
+              monthlyRunningTotals[monthlyKey] += Number(r.value || 0);
+
+              // ======================================
+              // 🔥 FY TOTAL
+              // ======================================
+
+              yearlyRunningTotal += Number(r.value || 0);
+
+              // ======================================
+              // 🔥 PUSH RESULT
+              // ======================================
 
               result.push([
                 d.date,
+
                 station,
-                buildBillDetails(station, fy, type, mon), // ✅ FIXED
+
+                buildBillDetails(station, fy, type, mon),
+
                 r.budget,
+
                 r.label + (r.details ? `\n(${r.details})` : ''),
+
+                // 🔥 AMOUNT
                 formatCurrency(r.value),
-                formatCurrency(cumulativeMap[key])
+
+                // 🔥 MONTHLY CUMULATIVE
+                formatCurrency(monthlyRunningTotals[monthlyKey]),
+
+                // 🔥 FY CUMULATIVE
+                formatCurrency(yearlyRunningTotal)
               ]);
             });
           });
@@ -16542,6 +16876,7 @@
               <th>SBG Expenditure Under</th>
               <th>Expenditure Details</th>
               <th>Expenditure Amount</th>
+              <th>Monthly Cumulative Sum of Expenditure</th>
               <th>Cumulative Sum of Expenditure</th>
             </tr>
           </thead>
@@ -16563,6 +16898,7 @@
             </td>
             <td>${r[5]}</td>
             <td>${r[6]}</td>
+            <td>${r[7]}</td>
           `;
 
           tbody.appendChild(tr);
@@ -16621,60 +16957,98 @@
           'SBG Expenditure Under': r[3],
           'Expenditure Details': r[4],
           'Expenditure Amount (₹ in 000)': Number(CurrencytoNum(r[5]) / 1000),
-          'Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[6]) / 1000)
+          'Monthly Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[6]) / 1000),
+          'Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[7]) / 1000)
         };
       }
 
-      async function updateSBGSheet(rows, mode = 'replace') {
+      // =====================================================
+      // 🔥 UPDATE SBG SHEET
+      // =====================================================
+
+      async function updateSBGSheet(rows, mode = 'sync') {
         // 🔥 START → yellow sync
         setSyncStatus('sbgexpDatabase');
 
         try {
           if (!rows || !rows.length) {
             console.warn('⚠ No rows to send');
+
             return;
           }
 
           // =========================
           // 🔥 STRICT CLEANING
           // =========================
+
           const formattedRows = rows
-            .filter((r) => Array.isArray(r) && r.length === 7 && r[0] && r[1] && r[3] && r[4])
+
+            .filter((r) => Array.isArray(r) && r.length === 8 && r[0] && r[1] && r[3] && r[4])
+
             .map((r) => ({
               Date: r[0],
+
               Station: String(r[1]).trim(),
+
               'Bill / Invoice Details': String(r[2] || '').trim(),
+
               'SBG Expenditure Under': String(r[3]).trim(),
+
               'Expenditure Details': String(r[4]).trim(),
+
               'Expenditure Amount (₹ in 000)': Number(CurrencytoNum(r[5]) / 1000),
-              'Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[6]) / 1000)
+
+              'Monthly Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[6]) / 1000),
+
+              'Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[7]) / 1000)
             }));
 
+          // =========================
+          // ❌ EMPTY
+          // =========================
+
           if (!formattedRows.length) {
-            console.warn('⚠ All rows filtered out (invalid)');
+            console.warn('⚠ All rows filtered out');
+
             return;
           }
 
+          // =========================
+          // 🔥 API
+          // =========================
+
           const res = await fetch('https://office-management-f425.onrender.com/sbgexp/update', {
             method: 'POST',
+
             headers: {
               'Content-Type': 'application/json'
             },
+
             body: JSON.stringify({
               data: formattedRows,
-              mode: 'replace'
+
+              // 🔥 IMPORTANT
+              mode
             })
           });
+
+          // =========================
+          // ❌ FAIL
+          // =========================
 
           if (!res.ok) {
             throw new Error('SBGExp update failed');
           }
+
+          const result = await res.json();
+
+          //console.log('✅ SBGExp Sync:', result);
         } catch (err) {
           console.error('❌ SBGExp Update Failed:', err);
+
           clearSyncStatus('sbgexpDatabase', 'db', false);
-          // ❌ No red state as per your requirement
         } finally {
-          // 🔥 END → green
+          // 🔥 SUCCESS → green
           clearSyncStatus('sbgexpDatabase', 'db', true);
         }
       }
@@ -16800,6 +17174,10 @@
         //console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
       }
 
+      // =====================================================
+      // 🔥 SYNC PB → SBG
+      // =====================================================
+
       let isSyncRunning = false;
 
       async function syncPBtoSBG() {
@@ -16808,7 +17186,7 @@
 
         // 🔥 WAIT FOR PB DATA
         if (!pbData || !pbData.headers || !pbData.rows || !pbData.rows.length) {
-          console.warn('⏳ PB data not ready for SBG sync');
+          console.warn('⏳ PB data not ready');
 
           return;
         }
@@ -16816,16 +17194,35 @@
         isSyncRunning = true;
 
         try {
+          // =========================
+          // 🔥 BUILD PB ROWS
+          // =========================
+
           const pbRows = buildPBBudgetRows();
 
-          // 🔥 NO VALID ROWS
+          // =========================
+          // ❌ EMPTY
+          // =========================
+
           if (!pbRows || !pbRows.length) {
-            console.warn('⚠ No PB budget rows generated');
+            console.warn('⚠ No PB rows generated');
 
             return;
           }
 
-          await updateSBGSheet(pbRows, 'replace');
+          // =========================
+          // 🔥 IMPORTANT
+          // =========================
+
+          // ✅ sync mode:
+          // update existing
+          // add only new rows
+
+          await updateSBGSheet(pbRows, 'sync');
+
+          // =========================
+          // 🔥 RELOAD
+          // =========================
 
           await reloadSBGExpData();
 
@@ -16835,7 +17232,7 @@
 
           await onLoadCalculateAndUpdateSBGFromExp();
 
-          console.log('✅ SBG Budget Sync Success');
+          console.log('📡 Paybill to SBG Expenditure Sync Success');
         } catch (err) {
           console.error('❌ SBG Sync Failed:', err);
         } finally {
@@ -16971,21 +17368,24 @@
         const month = id('BudgetPage_Month')?.value || 'ALL';
 
         // =========================
-        // 🔥 CREATE TABLE FIRST (ALWAYS)
+        // 🔥 CREATE TABLE FIRST
         // =========================
         const table = document.createElement('table');
         table.className = 'budget-table';
 
         table.innerHTML = `
           <colgroup>
+            <col style="width: 7%;">
+            <col style="width: 7%;">
+            <col style="width: 13%;">
+            <col style="width: 16%;">
+            <col style="width: 25%;">
             <col style="width: 8%;">
             <col style="width: 8%;">
-            <col style="width: 14%;">
-            <col style="width: 18%;">
-            <col style="width: 32%;">
-            <col style="width: 10%;">
-            <col style="width: 10%;">
+            <col style="width: 8%;">
+            <col style="width: 8%;">
           </colgroup>
+
           <thead>
             <tr>
               <th>Date</th>
@@ -16994,7 +17394,9 @@
               <th>SBG Expenditure Under</th>
               <th>Expenditure Details</th>
               <th>Expenditure Amount</th>
+              <th>Monthly Cumulative Sum of Expenditure</th>
               <th>Cumulative Sum of Expenditure</th>
+              <th>Report</th>
             </tr>
           </thead>
         `;
@@ -17011,13 +17413,15 @@
           const tr = document.createElement('tr');
           const td = document.createElement('td');
 
-          td.colSpan = 7;
+          td.colSpan = 9;
+
           td.style.textAlign = 'center';
           td.style.background = '#edebb7';
           td.style.color = 'red';
           td.style.fontWeight = 'bold';
           td.style.fontSize = '12px';
           td.style.padding = '20px';
+
           td.textContent = '==============🚫Please select Station, Budget & Financial Year🚫==============';
 
           tr.appendChild(td);
@@ -17025,10 +17429,13 @@
 
           table.appendChild(tbody);
           container.appendChild(table);
+
           return;
         }
 
+        // =========================
         // 🔥 FETCH DATA
+        // =========================
         const data = filterSBGexpData();
 
         // =========================
@@ -17040,7 +17447,8 @@
           const tr = document.createElement('tr');
           const td = document.createElement('td');
 
-          td.colSpan = 7;
+          td.colSpan = 9;
+
           td.style.textAlign = 'center';
           td.style.background = '#edebb7';
           td.style.color = 'red';
@@ -17058,7 +17466,7 @@
           // =========================
           toggleSBGButtons('pbData');
 
-          data.forEach((obj) => {
+          data.forEach((obj, index) => {
             const tr = document.createElement('tr');
             tr.dataset.rowIndex = obj.rowIndex;
 
@@ -17067,13 +17475,28 @@
             row.forEach((cell, i) => {
               const td = document.createElement('td');
 
-              if (i === 5 || i === 6) {
+              // ======================================
+              // 💰 AMOUNT + CUMULATIVES
+              // ======================================
+
+              if (i === 5 || i === 6 || i === 7) {
                 const num = Number(cell);
+
                 td.textContent = isNaN(num) ? '' : formatCurrency(num * 1000);
+
                 td.style.textAlign = 'right';
 
+                // 🔥 MONTHLY CUM
                 if (i === 6) {
+                  td.classList.add('monthcum');
+
+                  td.dataset.value = num * 1000;
+                }
+
+                // 🔥 FY CUM
+                if (i === 7) {
                   td.classList.add('cum');
+
                   td.dataset.value = num * 1000;
                 }
               } else {
@@ -17083,12 +17506,1194 @@
               tr.appendChild(td);
             });
 
+            // =========================
+            // 🔥 REPORT COLUMN
+            // =========================
+            const reportTd = document.createElement('td');
+
+            reportTd.style.textAlign = 'center';
+            reportTd.style.whiteSpace = 'nowrap';
+
+            reportTd.innerHTML = `
+            <button
+              class="budgetReportBtn pdfBtn"
+              onclick="openSBGReportOptions(${index}, 'pdf')"
+            >
+
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/337/337946.png"
+                style="
+                  width:16px;
+                  height:16px;
+                  object-fit:contain;
+                "
+              />
+            </button>
+
+            <button
+              class="budgetReportBtn excelBtn"
+              onclick="openSBGReportOptions(${index}, 'excel')"
+            >
+
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/732/732220.png"
+                style="
+                  width:16px;
+                  height:16px;
+                  object-fit:contain;
+                "
+              />
+            </button>
+
+          `;
+
+            tr.appendChild(reportTd);
+
             tbody.appendChild(tr);
           });
         }
-
         table.appendChild(tbody);
         container.appendChild(table);
+      }
+
+      // =====================================================
+      // 🔥 SBG REPORT OPTIONS
+      // =====================================================
+
+      function openSBGReportOptions(rowIndex, type = 'print') {
+        showConfirmBox({
+          title: 'Contingent Bill Report Options',
+
+          icon: '📑',
+
+          message: 'Report Type',
+
+          subMessage: `
+
+            <div
+              style="
+                display:flex;
+                flex-direction:column;
+                gap:8px;
+                overflow:hidden;
+              "
+            >
+
+              <button
+                class="reportTypeBtn"
+                data-mode="entry"
+              >
+                📄 This Entry Only
+              </button>
+
+              <button
+                class="reportTypeBtn"
+                data-mode="date"
+              >
+                📅 For This Date
+              </button>
+
+              <button
+                class="reportTypeBtn"
+                data-mode="month"
+              >
+                🗓️ For This Month
+              </button>
+
+              <button
+                class="reportTypeBtn"
+                data-mode="fy"
+              >
+                📚 For This FY
+              </button>
+
+            </div>
+          `,
+
+          yesText: 'Close',
+
+          noText: '',
+
+          yesColor: '#2563eb',
+
+          onYes: () => {
+            closeConfirmBox?.();
+          },
+
+          onNo: () => {}
+        });
+
+        // ======================================
+        // 🔥 BUTTON EVENTS
+        // ======================================
+
+        setTimeout(() => {
+          qsa('.reportTypeBtn').forEach((btn) => {
+            btn.onclick = () => {
+              const mode = btn.dataset.mode;
+
+              closeConfirmBox?.();
+
+              loadSBGReportData(rowIndex, mode);
+
+              // ======================================
+              // 🔥 WAIT FOR DOM UPDATE
+              // ======================================
+
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  if (type === 'pdf') {
+                    openPrintWindow(buildPrintSBGContingentHTML());
+                  } else {
+                    excelSBGContingentReport();
+                  }
+                }, 150);
+              });
+            };
+          });
+
+          // ======================================
+          // 🔥 HIDE UNUSED BUTTON
+          // ======================================
+
+          const noBtn = id('logoutNoBtn');
+
+          if (noBtn) {
+            noBtn.style.display = 'none';
+          }
+        }, 50);
+      }
+
+      // =====================================================
+      // 🔥 LOAD SBG REPORT DATA
+      // =====================================================
+
+      function loadSBGReportData(rowIndex, mode = 'entry') {
+        // ======================================
+        // 🔥 STORE MODE
+        // ======================================
+
+        window.currentSBGReportMode = mode;
+
+        const tbody = qs('#budgetPBBody');
+
+        if (!tbody) return;
+
+        const rows = [...tbody.children];
+
+        const selectedRow = rows[rowIndex];
+
+        if (!selectedRow) return;
+
+        // ======================================
+        // 🔥 DATE HELPERS
+        // ======================================
+
+        const getDateParts = (str) => {
+          const [dd, mm, yyyy] = str.split('-');
+
+          return {
+            dd,
+            mm,
+            yyyy
+          };
+        };
+
+        // ======================================
+        // 🔥 SELECTED VALUES
+        // ======================================
+
+        const selectedDate = selectedRow.children[0]?.textContent?.trim() || '';
+        window.currentSBGSelectedDate = selectedDate;
+
+        const { mm: selectedMonth, yyyy: selectedYear } = getDateParts(selectedDate);
+
+        // ======================================
+        // 🔥 FILTERED ROWS
+        // ======================================
+
+        let detailRows = [];
+
+        let cumulativeRows = [];
+
+        // ======================================
+        // 🔥 ENTRY
+        // ======================================
+
+        if (mode === 'entry') {
+          detailRows = [selectedRow];
+
+          cumulativeRows = rows.slice(0, rowIndex + 1);
+        }
+
+        // ======================================
+        // 🔥 DATE
+        // ======================================
+        else if (mode === 'date') {
+          detailRows = rows.filter((r) => {
+            return r.children[0]?.textContent?.trim() === selectedDate;
+          });
+
+          const lastDateIndex = rows.findLastIndex((r) => {
+            return r.children[0]?.textContent?.trim() === selectedDate;
+          });
+
+          cumulativeRows = rows.slice(0, lastDateIndex + 1);
+        }
+
+        // ======================================
+        // 🔥 MONTH
+        // ======================================
+        else if (mode === 'month') {
+          detailRows = rows.filter((r) => {
+            const dt = r.children[0]?.textContent?.trim() || '';
+
+            const { mm, yyyy } = getDateParts(dt);
+
+            return mm === selectedMonth && yyyy === selectedYear;
+          });
+
+          const lastMonthIndex = rows.findLastIndex((r) => {
+            const dt = r.children[0]?.textContent?.trim() || '';
+
+            const { mm, yyyy } = getDateParts(dt);
+
+            return mm === selectedMonth && yyyy === selectedYear;
+          });
+
+          cumulativeRows = rows.slice(0, lastMonthIndex + 1);
+        }
+
+        // ======================================
+        // 🔥 FY
+        // ======================================
+        else if (mode === 'fy') {
+          detailRows = rows;
+
+          cumulativeRows = rows;
+        }
+
+        // ======================================
+        // 🔥 TOTAL AMOUNT
+        // ======================================
+
+        let totalAmount = 0;
+
+        detailRows.forEach((r) => {
+          totalAmount += Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+        });
+
+        // ======================================
+        // 🔥 MONTHLY EXPENDITURE
+        // ======================================
+
+        let monthlyExpenditure = 0;
+
+        cumulativeRows.forEach((r) => {
+          monthlyExpenditure += Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+        });
+
+        // ======================================
+        // 🔥 SANCTIONED
+        // ======================================
+
+        const sanctioned = Number(CurrencytoNum(id('SBGsanctioned')?.value || 0));
+
+        const available = sanctioned - monthlyExpenditure;
+
+        // ======================================
+        // 🔥 SET TEXT
+        // ======================================
+
+        const setText = (idName, value) => {
+          const el = id(idName);
+
+          if (el) {
+            el.textContent = value;
+          }
+        };
+
+        setText('SBG_Sanctioned', formatCurrency(sanctioned).replace('₹', '').trim());
+
+        setText('Monthly_Expenditure', formatCurrency(monthlyExpenditure).replace('₹', '').trim());
+
+        setText('Present_Expenditure', formatCurrency(totalAmount).replace('₹', '').trim());
+
+        id('Present_Expenditure2').innerHTML = `
+
+          Pay Rs.
+
+          <b><span style="font-weight:bold">
+            ${formatCurrency(totalAmount).replace('₹', '').trim()}
+          </span>
+
+          <span
+            style="
+              font-size:10px;
+              font-weight:bold;
+            "
+          >
+            (${numberToWords(totalAmount)})
+          </span></b>
+        `;
+
+        setText('Available_SBG', formatCurrency(available).replace('₹', '').trim());
+
+        const monthName = new Date(selectedYear, Number(selectedMonth) - 1).toLocaleString('default', {
+          month: 'long'
+        });
+
+        // ======================================
+        // 🔥 HEADER MONTH
+        // ======================================
+
+        if (mode === 'fy') {
+          setText('headerMonth', id('BudgetPage_FY')?.value || '');
+        } else {
+          setText('headerMonth', `${monthName}-${selectedYear}`);
+        }
+
+        setText(
+          'headAccountSBGName',
+
+          `${id('BudgetUnderSelect')?.value}
+          (RNP)
+          ${id('BudgetPage_FY')?.value}`
+        );
+
+        setText(
+          'sbgStation',
+
+          id('BudgetPage_Station')?.value || ''
+        );
+
+        // ======================================
+        // 🔥 DETAILS TABLE
+        // ======================================
+
+        const detailsTbody = qs('#SBGmonthWiseDetails tbody');
+
+        if (!detailsTbody) return;
+
+        detailsTbody.innerHTML = '';
+
+        // ======================================
+        // 🔥 ADD DETAIL ROWS
+        // ======================================
+
+        detailRows.forEach((r, idx) => {
+          const desc = r.children[4]?.textContent?.trim() || '';
+
+          const amt = Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+
+              <td
+                  style="
+                    border:solid 1px black;
+                    text-align:center;
+                  ">
+                ${idx + 1}
+              </td>
+
+              <td colspan="2" style="
+                    border:solid 1px black;
+                  ">
+                ${desc}
+              </td>
+
+              <td style="
+                    border:solid 1px black;
+                    text-align:right;
+                    padding-right:2px;
+                  ">
+                ${formatCurrency(amt)}
+              </td>
+            `;
+
+          detailsTbody.appendChild(tr);
+        });
+
+        // ======================================
+        // 🔥 BLANK ROWS
+        // ======================================
+
+        const blankNeeded = Math.max(0, 8 - detailRows.length);
+
+        for (let i = 0; i < blankNeeded; i++) {
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+
+            <td
+                style="
+                  border:solid 1px black;
+                  height:20px;
+                ">
+            </td>
+
+            <td colspan="2" style="
+                  border:solid 1px black;
+                ">
+            </td>
+
+            <td style="
+                  border:solid 1px black;
+                ">
+            </td>
+          `;
+
+          detailsTbody.appendChild(tr);
+        }
+
+        // ======================================
+        // 🔥 TOTAL ROW
+        // ======================================
+
+        const totalRow = document.createElement('tr');
+
+        totalRow.innerHTML = `
+
+          <td colspan="3"
+              style="
+                border:solid 1px black;
+                text-align:right;
+                font-weight:bold;
+                padding-right:10px;
+              ">
+            TOTAL
+          </td>
+
+          <td style="
+                border:solid 1px black;
+                text-align:right;
+                font-weight:bold;
+                padding-right:6px;
+              ">
+            ${formatCurrency(totalAmount).replace('₹', '').trim()}
+          </td>
+        `;
+
+        detailsTbody.appendChild(totalRow);
+      }
+
+      function buildPrintSBGContingentHTML() {
+        const wrapper = qs('.BudgetReportTableWrapper');
+
+        if (!wrapper) return '';
+
+        /* =====================================================
+        🔥 GET ALL MONTH TABLES
+        ===================================================== */
+
+        const table = wrapper.querySelector('table');
+
+        if (!table) {
+          showCustomAlert('❌ No data to print');
+
+          return '';
+        }
+
+        /* =====================================================
+        🔥 CREATE PRINT DOC
+        ===================================================== */
+
+        const doc = document.implementation.createHTMLDocument('SBG Contingent Voucher Bill');
+
+        /* =====================================================
+        🔥 COPY EXISTING CSS
+        ===================================================== */
+
+        qsa("style, link[rel='stylesheet']").forEach((el) => {
+          try {
+            doc.head.appendChild(el.cloneNode(true));
+          } catch {}
+        });
+
+        /* =====================================================
+        🔥 PRINT CSS
+        ===================================================== */
+
+        const style = doc.createElement('style');
+
+        style.textContent = `
+
+          @page{
+            size:A4 portrait;
+            margin:10mm 10mm 10mm 10mm;
+            background:white;
+          }
+
+          *{
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+            box-sizing:border-box;
+            border-radius:0 !important;
+            font-family:Arial,sans-serif;
+          }
+
+          body{
+            margin:0;
+            padding:0;
+            background:white;
+            font-size:11px;
+          }
+
+          .page{
+            width:100%;
+            margin:0 auto;
+            background:white;
+            padding-right:2px;
+          }
+
+          td,th {
+            min-height: 20px !important;
+            padding: 4px;
+            line-height: 1 !important;
+          }
+        `;
+
+        doc.head.appendChild(style);
+
+        /* =====================================================
+        🔥 CONTAINER
+        ===================================================== */
+
+        const container = doc.createElement('div');
+
+        /* =====================================================
+        🔥 CLONE TABLES
+        ===================================================== */
+        const clone = table.cloneNode(true);
+
+        clone.classList.add('DGprint-table');
+
+        /* =========================================
+          🔥 REMOVE UI ELEMENTS
+          ========================================= */
+
+        clone.querySelectorAll('.no-print').forEach((el) => el.remove());
+
+        /* =========================================
+          🔥 REMOVE INLINE UI STYLES
+          ========================================= */
+
+        clone.querySelectorAll('*').forEach((el) => {
+          el.style.position = '';
+
+          el.style.top = '';
+
+          el.style.left = '';
+
+          el.style.right = '';
+
+          el.style.bottom = '';
+
+          el.style.transform = '';
+
+          el.style.translate = '';
+
+          el.style.scale = '';
+
+          el.style.overflow = '';
+
+          el.style.overflowX = '';
+
+          el.style.overflowY = '';
+
+          el.style.zIndex = '';
+
+          el.style.minWidth = '';
+
+          el.style.maxWidth = '';
+        });
+
+        container.appendChild(clone);
+
+        /* =====================================================
+        🔥 PAGE
+        ===================================================== */
+
+        const page = doc.createElement('div');
+
+        page.className = 'page';
+
+        page.appendChild(container);
+
+        doc.body.appendChild(page);
+
+        /* =====================================================
+        🔥 RETURN
+        ===================================================== */
+
+        return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+      }
+
+      async function excelSBGContingentReport() {
+        const workbook = new ExcelJS.Workbook();
+
+        const wrapper = id('BudgetReportTableWrapper');
+
+        if (!wrapper) {
+          showCustomAlert('❌ Report not found');
+
+          return;
+        }
+
+        const mainTable = wrapper.querySelector('table');
+
+        if (!mainTable) {
+          showCustomAlert('❌ Table not found');
+
+          return;
+        }
+
+        const sheet = workbook.addWorksheet('Contingent Bill');
+
+        // =========================
+        // 🔥 COMMON HELPERS
+        // =========================
+
+        function rgbToARGB(rgb) {
+          const m = rgb.match(/\d+/g);
+
+          if (!m) return null;
+
+          return 'FF' + m.map((x) => (+x).toString(16).padStart(2, '0')).join('');
+        }
+
+        function isValidColor(cs) {
+          const bg = cs.backgroundColor;
+
+          if (!bg) return false;
+
+          if (bg === 'transparent') return false;
+
+          if (bg.includes('rgba') && bg.endsWith(', 0)')) return false;
+
+          if (bg === 'rgb(0, 0, 0)') return false;
+
+          return true;
+        }
+
+        function parseValue(text) {
+          if (!text) return ' ';
+
+          const clean = text.replace(/[,₹\s]/g, '');
+
+          return !isNaN(clean) && clean !== '' ? Number(clean) : text;
+        }
+
+        // =========================
+        // 🔥 TABLE PROCESSOR
+        // =========================
+
+        function processTable(sheet, table) {
+          let currentRow = 1;
+
+          function cleanCellText(cell) {
+            const clone = cell.cloneNode(true);
+
+            // =====================================
+            // 🔥 PRESERVE <br>
+            // =====================================
+
+            clone.querySelectorAll('br').forEach((br) => {
+              br.replaceWith(document.createTextNode('___BR___'));
+            });
+
+            // =====================================
+            // 🔥 INLINE ELEMENTS
+            // =====================================
+
+            clone.querySelectorAll('span,b,strong,label').forEach((el) => {
+              const txt = el.textContent.replace(/\s+/g, ' ').trim();
+
+              el.replaceWith(document.createTextNode(txt));
+            });
+
+            // =====================================
+            // 🔥 BLOCK ELEMENTS
+            // =====================================
+
+            clone.querySelectorAll('p,div').forEach((el) => {
+              const txt = el.textContent.replace(/\s+/g, ' ').trim();
+
+              el.replaceWith(document.createTextNode(txt + ' '));
+            });
+
+            // =====================================
+            // 🔥 REMOVE EMPTY TEXT NODES
+            // =====================================
+
+            clone.normalize();
+
+            [...clone.childNodes].forEach((node) => {
+              if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) {
+                node.remove();
+              }
+            });
+
+            // =====================================
+            // 🔥 FINAL TEXT
+            // =====================================
+
+            let text = clone.textContent || '';
+
+            // =====================================
+            // 🔥 RESTORE <br>
+            // =====================================
+
+            text = text.replace(/___BR___/g, '\n');
+
+            // =====================================
+            // 🔥 CLEAN TEXT
+            // =====================================
+
+            text = text
+
+              // 🔥 preserve ONLY <br>
+              .replace(/\n/g, '___TEMP_BR___')
+
+              // 🔥 remove actual sheet line breaks
+              .replace(/[\r\n]+/g, ' ')
+
+              // 🔥 restore <br> line breaks
+              .replace(/___TEMP_BR___/g, '\n')
+
+              // 🔥 tabs -> space
+              .replace(/\t+/g, ' ')
+
+              // 🔥 multiple spaces
+              .replace(/ +/g, ' ')
+
+              // 🔥 clean around preserved breaks
+              .replace(/ *\n */g, '\n')
+
+              // 🔥 multiple preserved breaks
+              .replace(/\n{2,}/g, '\n')
+
+              // 🔥 trim
+              .trim();
+
+            return text;
+          }
+
+          // =========================
+          // 🔥 WALK TABLE
+          // =========================
+
+          function walk(table, isNested = false) {
+            const rows = table.querySelectorAll(':scope > thead > tr,' + ':scope > tbody > tr,' + ':scope > tr');
+
+            rows.forEach((tr) => {
+              const cells = tr.querySelectorAll(':scope > th, :scope > td');
+
+              if (!cells.length) return;
+
+              let colIndex = 1;
+
+              const excelRow = sheet.getRow(currentRow);
+
+              let maxHeight = 20;
+
+              cells.forEach((cell) => {
+                const nested = cell.querySelector('table');
+
+                // =====================
+                // 🔥 NESTED TABLE
+                // =====================
+
+                if (nested) {
+                  walk(nested, true);
+
+                  return;
+                }
+
+                const colSpan = cell.colSpan || 1;
+
+                const rowSpan = cell.rowSpan || 1;
+
+                const excelCell = excelRow.getCell(colIndex);
+                // =====================
+                // 🔥 SUB HEADER HEIGHT
+                // =====================
+
+                if (cell.id === 'sbgBillSubHeader') {
+                  excelRow.height = 38;
+                }
+
+                // =====================
+                // 🔥 CLEAN TEXT
+                // =====================
+
+                let text = cleanCellText(cell);
+
+                const isChildBody = cell.closest('#SBGmonthWiseDetails tbody');
+
+                if (isChildBody) {
+                  // 🔥 make single logical line
+                  // Excel will wrap automatically
+
+                  text = text
+
+                    .replace(/\n+/g, ' ')
+
+                    .replace(/\s+/g, ' ')
+
+                    .trim();
+                }
+
+                // =====================
+                // 🔥 VALUE
+                // =====================
+
+                const clean = text.replace(/[,₹]/g, '');
+
+                excelCell.value = !isNaN(clean) && clean !== '' ? Number(clean) : text;
+
+                // =====================
+                // 🔥 STYLE
+                // =====================
+
+                const cs = getComputedStyle(cell);
+
+                const isBold = cs.fontWeight === 'bold' || parseInt(cs.fontWeight) >= 600 || cell.querySelector('b,strong');
+
+                // =====================
+                // 🔥 EXACT FONT COPY
+                // =====================
+
+                const computedStyle = window.getComputedStyle(cell);
+
+                // 🔥 actual font size
+                const fontSize = parseFloat(computedStyle.fontSize) || 11;
+
+                // 🔥 actual weight
+                const fontWeight = computedStyle.fontWeight;
+
+                // 🔥 bold detection
+                const isReallyBold = fontWeight === 'bold' || parseInt(fontWeight) >= 600 || cell.querySelector('b,strong');
+
+                // 🔥 actual family
+                const fontFamily = computedStyle.fontFamily?.split(',')[0]?.replace(/["']/g, '')?.trim() || 'Calibri';
+
+                excelCell.font = {
+                  name: fontFamily,
+
+                  size: fontSize,
+
+                  bold: isReallyBold,
+
+                  italic: computedStyle.fontStyle === 'italic',
+
+                  underline: computedStyle.textDecoration?.includes('underline'),
+
+                  color: {
+                    argb: rgbToARGB(computedStyle.color) || 'FF000000'
+                  }
+                };
+
+                // =====================
+                // 🔥 EXACT ALIGNMENT COPY
+                // =====================
+
+                // 🔥 horizontal
+                let horizontal = computedStyle.textAlign || 'left';
+
+                // 🔥 convert justify
+                if (horizontal === 'justify') {
+                  horizontal = 'left';
+                }
+
+                // 🔥 vertical
+                let vertical = computedStyle.verticalAlign || 'middle';
+
+                // 🔥 convert css values
+                if (vertical === 'top') {
+                  vertical = 'top';
+                } else if (vertical === 'bottom') {
+                  vertical = 'bottom';
+                } else {
+                  vertical = 'middle';
+                }
+
+                excelCell.alignment = {
+                  horizontal,
+
+                  vertical,
+
+                  wrapText: true,
+
+                  shrinkToFit: false
+                };
+
+                // =====================
+                // 🔥 TEXT COLOR
+                // =====================
+
+                const color = rgbToARGB(cs.color);
+
+                if (color && color !== 'FF000000') {
+                  excelCell.font.color = {
+                    argb: color
+                  };
+                }
+
+                // =====================
+                // 🔥 BG COLOR
+                // =====================
+
+                if (isValidColor(cs)) {
+                  const argb = rgbToARGB(cs.backgroundColor);
+
+                  if (argb && argb !== 'FF000000') {
+                    excelCell.fill = {
+                      type: 'pattern',
+
+                      pattern: 'solid',
+
+                      fgColor: {
+                        argb
+                      }
+                    };
+                  }
+                }
+
+                // =====================
+                // 🔥 BORDER COPY
+                // =====================
+
+                function getExcelBorder(side, cs) {
+                  const width = parseFloat(cs[`border${side}Width`]);
+
+                  const style = cs[`border${side}Style`];
+
+                  const color = rgbToARGB(cs[`border${side}Color`]) || 'FF000000';
+
+                  if (style === 'none' || width <= 0) {
+                    return undefined;
+                  }
+
+                  return {
+                    style: width >= 3 ? 'thick' : width >= 2 ? 'medium' : 'thin',
+
+                    color: {
+                      argb: color
+                    }
+                  };
+                }
+
+                excelCell.border = {
+                  top: getExcelBorder('Top', cs),
+
+                  bottom: getExcelBorder('Bottom', cs),
+
+                  left: getExcelBorder('Left', cs),
+
+                  right: getExcelBorder('Right', cs)
+                };
+
+                // =====================
+                // 🔥 MERGE
+                // =====================
+
+                if (rowSpan > 1 || colSpan > 1) {
+                  try {
+                    sheet.mergeCells(
+                      currentRow,
+
+                      colIndex,
+
+                      currentRow + rowSpan - 1,
+
+                      colIndex + colSpan - 1
+                    );
+                  } catch {}
+                }
+
+                // =====================
+                // 🔥 AUTO HEIGHT
+                // =====================
+
+                const approxWidth = colSpan >= 3 ? 85 : colSpan === 2 ? 45 : 18;
+
+                const lineBreaks = text.split('\n').length;
+
+                const wrappedLines = Math.ceil(text.length / approxWidth);
+
+                const lines = Math.max(lineBreaks, wrappedLines, 1);
+
+                const height = Math.min(120, Math.max(20, lines * 15));
+
+                maxHeight = Math.max(maxHeight, height);
+
+                colIndex += colSpan;
+              });
+
+              // =====================
+              // 🔥 DEFAULT HEIGHT
+              // =====================
+
+              let finalHeight = excelRow.height || 20;
+
+              // =====================
+              // 🔥 ROW IDS
+              // =====================
+
+              const rowIds = [...cells].map((c) => c.id || '').join(' ');
+
+              // ======================================
+              // 🔥 FIXED HEIGHTS
+              // ======================================
+
+              // 🔥 MAIN TITLE
+              if (rowIds.includes('sbgBillMainHeader')) {
+                finalHeight = 36;
+              }
+
+              // 🔥 HEADER
+              else if (rowIds.includes('sbgBillHeader')) {
+                finalHeight = 40;
+              }
+
+              // 🔥 CERTIFICATE 1
+              else if (rowIds.includes('sbgCertificateText1')) {
+                finalHeight = 115;
+              }
+
+              // 🔥 CERTIFICATE 2
+              else if (rowIds.includes('sbgCertificateText2')) {
+                finalHeight = 40;
+              }
+
+              // 🔥 CERTIFICATE 3
+              else if (rowIds.includes('sbgCertificateText3')) {
+                finalHeight = 55;
+              }
+
+              // 🔥 CERTIFICATE 4
+              else if (rowIds.includes('sbgCertificateText4')) {
+                finalHeight = 70;
+              } else if (rowIds.includes('sbgDesignationSign')) {
+                finalHeight = 65;
+              }
+              // ======================================
+              // 🔥 APPLY HEIGHT
+              // ======================================
+
+              excelRow.height = finalHeight;
+
+              // ======================================
+              // 🔥 COMMIT
+              // ======================================
+
+              excelRow.commit();
+
+              currentRow++;
+            });
+          }
+
+          // ======================================
+          // 🔥 ALLOW EXCEL AUTO HEIGHT
+          // ======================================
+
+          sheet.eachRow((row) => {
+            // 🔥 keep fixed rows
+            if (row.height === 36 || row.height === 40 || row.height === 55 || row.height === 65 || row.height === 70 || row.height === 115) return;
+
+            // 🔥 let excel auto fit
+            row.height = undefined;
+          });
+
+          walk(table);
+
+          return currentRow;
+        }
+
+        // =========================
+        // 🔥 PROCESS TABLE
+        // =========================
+
+        const lastRow = processTable(sheet, mainTable);
+
+        // =========================
+        // 🔥 SETTINGS
+        // =========================
+
+        sheet.views = [
+          {
+            showGridLines: false
+          }
+        ];
+
+        sheet.columns = [{ width: 15 }, { width: 10 }, { width: 80 }, { width: 18 }];
+
+        sheet.pageSetup = {
+          paperSize: 9,
+
+          orientation: 'portrait',
+
+          fitToPage: true,
+
+          fitToWidth: 1,
+
+          fitToHeight: false,
+
+          printArea: `A1:D${lastRow}`,
+
+          margins: {
+            left: 0.3,
+
+            right: 0.3,
+
+            top: 0.5,
+
+            bottom: 0.5,
+
+            header: 0.3,
+
+            footer: 0.3
+          }
+        };
+
+        // =========================
+        // 📥 DOWNLOAD
+        // =========================
+
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        const station = id('BudgetPage_Station')?.value || '';
+
+        const budget = id('BudgetUnderSelect')?.value || '';
+
+        let reportPeriod = 'Report';
+
+        if (window.currentSBGReportMode === 'fy') {
+          reportPeriod = id('BudgetPage_FY')?.value || 'FY';
+        } else if (window.currentSBGReportMode === 'month') {
+          reportPeriod = (id('headerMonth')?.textContent || '')
+
+            .replace(/[\\/:*?"<>|]/g, '')
+
+            .trim();
+        } else {
+          reportPeriod = (window.currentSBGSelectedDate || '')
+
+            .replace(/[\\/:*?"<>|]/g, '')
+
+            .trim();
+        }
+
+        const fileName = `${station}_` + `Contingent Bill_` + `${budget}_` + `${reportPeriod}.xlsx`;
+
+        saveAs(
+          new Blob([buffer]),
+
+          fileName
+        );
       }
 
       function getFYColumnIndexes(headers, fy) {
@@ -17124,7 +18729,7 @@
           const date = row[0];
           const station = String(row[1]).trim().toLowerCase();
           const budget = String(row[3]).trim().toLowerCase();
-          const cumulative = Number(row[6] || 0);
+          const cumulative = Number(row[7] || 0);
 
           const fy = getFYFromDateStr(date);
 
@@ -17233,13 +18838,14 @@
 
           table.innerHTML = `
             <colgroup>
+              <col style="width: 8%;">
               <col style="width: 10%;">
               <col style="width: 10%;">
               <col style="width: 10%;">
-              <col style="width: 20%;">
               <col style="width: 30%;">
-              <col style="width: 10%;">
-              <col style="width: 10%;">
+              <col style="width: 8%;">
+              <col style="width: 8%;">
+              <col style="width: 8%;">
             </colgroup>
             <thead>
               <tr>
@@ -17249,6 +18855,7 @@
                 <th>SBG Expenditure Under</th>
                 <th>Expenditure Details</th>
                 <th>Expenditure Amount (₹ in 000)</th>
+                <th>Monthly Cumulative Sum of Expenditure (₹ in 000)</th>
                 <th>Cumulative Sum of Expenditure (₹ in 000)</th>
               </tr>
             </thead>
@@ -17318,6 +18925,8 @@
               <input style="width:100%;border-radius:0;height:100%" type="number" class="amt" value="0">
             </td>
 
+            <td style="width:100%;text-align:right;" class="monthcum"></td>
+
             <td style="width:100%;text-align:right;" class="cum"></td>
           `;
 
@@ -17342,7 +18951,7 @@
         // ✅ ALWAYS TAKE FIRST ROW (existing data row)
         const firstRow = rows[0];
 
-        const lastCell = firstRow.children[6]?.textContent || '0';
+        const lastCell = firstRow.children[7]?.textContent || '0';
 
         const clean = String(lastCell).replace(/[^0-9.-]/g, '');
 
@@ -17359,26 +18968,35 @@
 
       function CalculateCumulative(mode = 'add') {
         const tbody = qs('#BudgetTableWrapper tbody');
+
         if (!tbody) return;
 
         function calculate() {
           const rows = [...tbody.querySelectorAll('tr')];
 
-          // 🔥 SORT BY DATE (CRITICAL)
+          // ======================================
+          // 🔥 SORT DATEWISE
+          // ======================================
+
           rows.sort((a, b) => {
             const getDate = (r) => {
               const input = r.querySelector('input[type="date"]');
-              if (input && input.value) return input.value; // YYYY-MM-DD
-              return r.children[0]?.textContent || ''; // DD-MM-YYYY
+
+              if (input && input.value) return input.value;
+
+              return r.children[0]?.textContent || '';
             };
 
             const parse = (d) => {
               if (!d) return new Date(0);
 
               if (d.includes('-') && d.length === 10) {
-                if (d[4] === '-') return new Date(d); // YYYY-MM-DD
+                if (d[4] === '-') {
+                  return new Date(d);
+                }
 
                 const [dd, mm, yyyy] = d.split('-');
+
                 return new Date(yyyy, mm - 1, dd);
               }
 
@@ -17388,29 +19006,59 @@
             return parse(getDate(a)) - parse(getDate(b));
           });
 
-          // 🔥 FY TOTAL MAP
+          // ======================================
+          // 🔥 RUNNING TOTALS
+          // ======================================
+
           const fyTotals = {};
 
-          rows.forEach((r, i) => {
-            // 🔹 GET DATE (input OR text)
+          const monthTotals = {};
+
+          rows.forEach((r) => {
+            // ======================================
+            // 🔥 DATE
+            // ======================================
+
             let dateStr = '';
 
             const dateInput = r.querySelector('input[type="date"]');
 
             if (dateInput && dateInput.value) {
               const [y, m, d] = dateInput.value.split('-');
+
               dateStr = `${d}-${m}-${y}`;
             } else {
               dateStr = r.children[0]?.textContent || '';
             }
 
             const fy = getFYFromDateStr(dateStr);
+
             if (!fy) return;
 
-            // 🔥 INIT FY
-            if (!fyTotals[fy]) fyTotals[fy] = 0;
+            // ======================================
+            // 🔥 MONTH KEY
+            // ======================================
 
-            // 🔹 GET AMOUNT
+            const [dd, mm, yyyy] = dateStr.split('-');
+
+            const monthKey = fy + '|' + mm + '|' + yyyy;
+
+            // ======================================
+            // 🔥 INIT
+            // ======================================
+
+            if (!fyTotals[fy]) {
+              fyTotals[fy] = 0;
+            }
+
+            if (!monthTotals[monthKey]) {
+              monthTotals[monthKey] = 0;
+            }
+
+            // ======================================
+            // 🔥 AMOUNT
+            // ======================================
+
             let amt = 0;
 
             const amtInput = r.querySelector('.amt');
@@ -17419,40 +19067,48 @@
               amt = Number(amtInput.value || 0);
             } else {
               const val = r.children[5]?.textContent || '0';
+
               amt = Number(val.replace(/[^0-9.-]/g, '')) || 0;
             }
 
-            // 🔥 ADD TO FY
+            // ======================================
+            // 🔥 TOTALS
+            // ======================================
+
             fyTotals[fy] += amt;
 
-            const total = fyTotals[fy];
+            monthTotals[monthKey] += amt;
 
-            // 🔹 GET CUM CELL
-            const cumCell = r.querySelector('.cum') || r.children[6];
-            if (!cumCell) return;
+            // ======================================
+            // 🔥 MONTH CELL
+            // ======================================
 
-            // 🔥 STORE RAW VALUE (IMPORTANT FOR SAVE)
-            cumCell.dataset.value = total;
+            const monthCell = r.querySelector('.monthcum') || r.children[6];
 
-            const input = cumCell.querySelector('input');
+            if (monthCell) {
+              monthCell.dataset.value = monthTotals[monthKey];
 
-            // 🔥 UI UPDATE
-            if (total === 0) {
-              if (input) input.value = '';
-              else cumCell.textContent = '';
-            } else {
-              if (input) {
-                input.value = total.toFixed(0);
-              } else {
-                cumCell.textContent = formatCurrency(total);
-              }
+              monthCell.textContent = formatCurrency(monthTotals[monthKey]);
             }
 
-            //console.log(`Row ${i + 1} → FY: ${fy}, Amt: ${amt}, Cum: ${total}`);
+            // ======================================
+            // 🔥 FY CELL
+            // ======================================
+
+            const fyCell = r.querySelector('.cum') || r.children[7];
+
+            if (fyCell) {
+              fyCell.dataset.value = fyTotals[fy];
+
+              fyCell.textContent = formatCurrency(fyTotals[fy]);
+            }
           });
         }
 
-        // ✅ EVENT (amount + date change)
+        // ======================================
+        // 🔥 EVENTS
+        // ======================================
+
         if (!tbody._cumAttached) {
           tbody.addEventListener('input', (e) => {
             if (e.target.classList.contains('amt') || e.target.type === 'date') {
@@ -17463,7 +19119,6 @@
           tbody._cumAttached = true;
         }
 
-        // 🔥 INITIAL RUN
         calculate();
       }
 
@@ -17482,6 +19137,7 @@
 
       function convertSBGTableToEditable() {
         const tbody = qs('#BudgetTableWrapper table tbody');
+
         if (!tbody) return;
 
         const rows = tbody.querySelectorAll('tr');
@@ -17490,32 +19146,75 @@
           [...tr.children].forEach((td, colIndex) => {
             const text = td.textContent;
 
-            // ❌ Skip SBG (3) & Cumulative (6)
-            if (colIndex === 3 || colIndex === 6) return;
+            // ======================================
+            // ❌ SKIP
+            // ======================================
 
-            // 📅 Date
+            if (
+              colIndex === 3 || // Budget
+              colIndex === 6 || // Monthly Cum
+              colIndex === 7 || // FY Cum
+              colIndex === 8 // Report
+            )
+              return;
+
+            // ======================================
+            // 📅 DATE
+            // ======================================
+
             if (colIndex === 0) {
               td.style.padding = '0';
-              td.innerHTML = `<input type="date" value="${formatDateInput(text)}" style="width:100%;border-radius:0;height:100%">`;
+
+              td.innerHTML = `
+                <input
+                  type="date"
+                  value="${formatDateInput(text)}"
+                  style="
+                    width:100%;
+                    border-radius:0;
+                    height:100%
+                  "
+                >
+              `;
             }
 
-            // 🏢 Station
-            //else if (colIndex === 1) {
-            //  td.style.padding = '0';
-            //  td.innerHTML = `<input value="${text}" style="width:100%;border-radius:0;">`;
-            //}
-
-            // 🧾 Bill + Details
+            // ======================================
+            // 🧾 BILL + DETAILS
+            // ======================================
             else if (colIndex === 2 || colIndex === 4) {
               td.style.padding = '0';
-              td.innerHTML = `<textarea style="width:100%;height:100%;border-radius:0;">${text}</textarea>`;
+
+              td.innerHTML = `
+                <textarea
+                  style="
+                    width:100%;
+                    height:100%;
+                    border-radius:0;
+                  "
+                >${text}</textarea>
+              `;
             }
 
-            // 💰 Amount
+            // ======================================
+            // 💰 AMOUNT
+            // ======================================
             else if (colIndex === 5) {
               const clean = text.replace(/[^0-9.-]/g, '');
+
               td.style.padding = '0';
-              td.innerHTML = `<input type="number" class="amt" value="${clean}" style="width:100%;border-radius:0;height:100%">`;
+
+              td.innerHTML = `
+                <input
+                  type="number"
+                  class="amt"
+                  value="${clean}"
+                  style="
+                    width:100%;
+                    border-radius:0;
+                    height:100%
+                  "
+                >
+              `;
             }
           });
         });
@@ -17544,126 +19243,560 @@
         });
       });
 
-      async function saveSBGData(modeType = 'add') {
-        let data = [];
+      /* =========================================================
+      🔥 SBG PROGRESS
+      ========================================================= */
 
-        // =========================
-        // 🔥 ADD MODE (USER INPUT)
-        // =========================
-        if (modeType === 'add') {
-          const rows = qsa('#budgetPBBody tr');
+      let sbgProgressSource = null;
 
-          rows.forEach((tr) => {
-            const dateInput = tr.querySelector('input[type="date"]')?.value;
-            const station = tr.children[1]?.querySelector('input')?.value || '';
-            const bill = tr.querySelector('.bill-text')?.value || '';
-            const budget = tr.querySelector('.budget-val')?.dataset?.value || '';
-            const details = tr.querySelector('.details-text')?.value || '';
-            const amount = Number(tr.querySelector('.amt')?.value || 0);
-            const cumulative = Number(tr.querySelector('.cum')?.dataset?.value || 0);
+      function startSBGProgress() {
+        // 🔥 CLOSE OLD SSE
+        if (sbgProgressSource) {
+          sbgProgressSource.close();
+          sbgProgressSource = null;
+        }
 
-            // ❌ skip empty rows
-            //if (!dateInput || !station || !budget || amount === 0) {
-            //  return;
-            //}
+        // 🔥 CLEAR OLD INTERVAL
+        if (window.sbgFakeInterval) {
+          clearInterval(window.sbgFakeInterval);
+          window.sbgFakeInterval = null;
+        }
 
-            const missingFields = [];
+        const source = new EventSource('https://office-management-f425.onrender.com/sbg/progress');
 
-            /* =====================================
-            🔥 CHECK FIELDS
-            ===================================== */
+        sbgProgressSource = source;
 
-            if (!station) {
-              missingFields.push('  🏢 Station : Select Station');
-            }
+        /* =========================
+        🔥 FAKE PROGRESS
+        ========================= */
 
-            if (!dateInput) {
-              missingFields.push('  📅 Date : Enter Correct Date');
-            }
+        let fakeProgress = 12;
 
-            if (!budget) {
-              missingFields.push('  📈 SBG : Select Budget');
-            }
+        updateLoader(fakeProgress, getSBGProgressMessage(fakeProgress), 'sync');
 
-            if (amount === 0 || amount === '') {
-              missingFields.push('  🪙 Amount : Enter Correct Amount');
-            }
+        window.sbgFakeInterval = setInterval(() => {
+          if (fakeProgress < 85) {
+            fakeProgress += 1;
 
-            /* =====================================
-            🔥 SHOW ERROR
-            ===================================== */
+            updateLoader(fakeProgress, getSBGProgressMessage(fakeProgress), 'sync');
+          }
+        }, 400);
 
-            if (missingFields.length) {
-              clearSyncStatus('sbgexpDatabase', 'db', false);
-              clearSyncStatus('sbgDatabase', 'db', false);
-              showCustomAlert(`
-                ❌ Please fill following Inputs:<br><br>
-                ${missingFields.join('<br>')}
-              `);
+        /* =========================
+        🔥 REAL SSE
+        ========================= */
 
+        source.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            if (data.message === 'Idle') {
               return;
             }
 
-            data.push({
-              Date: formatDateBack(dateInput),
-              Station: station.trim(),
-              'Bill / Invoice Details': bill.trim(),
-              'SBG Expenditure Under': budget.trim(),
-              'Expenditure Details': details.trim(),
-              'Expenditure Amount (₹ in 000)': Number((amount / 1000).toFixed(3)),
-              'Cumulative Sum of Expenditure (₹ in 000)': Number((cumulative / 1000).toFixed(3))
-            });
+            fakeProgress = Math.max(fakeProgress, data.percent || 0);
+
+            updateLoader(fakeProgress, data.message || getSBGProgressMessage(fakeProgress), 'sync');
+
+            /* =========================
+            ✅ COMPLETE
+            ========================= */
+
+            if (data.percent >= 100) {
+              if (window.sbgFakeInterval) {
+                clearInterval(window.sbgFakeInterval);
+
+                window.sbgFakeInterval = null;
+              }
+
+              updateLoader(100, data.message || 'Completed Successfully', 'check_circle');
+
+              setTimeout(() => {
+                completeLoader();
+
+                source.close();
+
+                if (sbgProgressSource === source) {
+                  sbgProgressSource = null;
+                }
+              }, 500);
+            }
+          } catch (err) {
+            console.error('SBG SSE Parse Error:', err);
+          }
+        };
+
+        /* =========================
+        ❌ SSE ERROR
+        ========================= */
+
+        source.onerror = () => {
+          console.warn('SBG SSE Closed');
+
+          if (window.sbgFakeInterval) {
+            clearInterval(window.sbgFakeInterval);
+
+            window.sbgFakeInterval = null;
+          }
+
+          source.close();
+
+          if (sbgProgressSource === source) {
+            sbgProgressSource = null;
+          }
+        };
+      }
+
+      /* =========================================================
+      🔥 PROGRESS MESSAGE
+      ========================================================= */
+
+      function getSBGProgressMessage(progress) {
+        if (progress <= 5) return 'Connecting to Server...';
+
+        if (progress <= 15) return 'Preparing SBG Data...';
+
+        if (progress <= 25) return 'Validating Budget Records...';
+
+        if (progress <= 40) return 'Processing Expenditure Details...';
+
+        if (progress <= 55) return 'Updating SBG Database...';
+
+        if (progress <= 70) return 'Writing Changes to Backend...';
+
+        if (progress <= 85) return 'Finalizing Save Operation...';
+
+        if (progress < 100) return 'Completing Synchronization...';
+
+        return 'Completed Successfully';
+      }
+
+      /* =========================================================
+      🔥 STOP PROGRESS
+      ========================================================= */
+
+      function stopSBGProgress() {
+        if (sbgProgressSource) {
+          sbgProgressSource.close();
+
+          sbgProgressSource = null;
+        }
+
+        if (window.sbgFakeInterval) {
+          clearInterval(window.sbgFakeInterval);
+
+          window.sbgFakeInterval = null;
+        }
+
+        updateLoader(0, 'Idle', 'sync');
+
+        hideLoader();
+      }
+
+      /* =========================================================
+      🔥 SAVE SBG DATA
+      ========================================================= */
+
+      async function saveSBGData(modeType = 'add') {
+        let data = [];
+
+        const rows = qsa('#budgetPBBody tr');
+
+        /* =========================
+        🔥 NORMALIZE
+        ========================= */
+
+        const normalize = (val) => {
+          if (val == null) return '';
+
+          return String(val).replace(/₹/g, '').replace(/,/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
+
+        /* =========================
+        🔥 COLLECT ROWS
+        ========================= */
+
+        rows.forEach((tr) => {
+          const dateInput = tr.children[0]?.querySelector('input[type="date"]')?.value || tr.children[0]?.textContent?.trim() || '';
+
+          const station = tr.children[1]?.querySelector('input')?.value || tr.children[1]?.textContent?.trim() || '';
+
+          const bill = tr.children[2]?.querySelector('textarea')?.value || tr.children[2]?.textContent?.trim() || '';
+
+          const budget = tr.children[3]?.textContent?.trim() || '';
+
+          const details = tr.children[4]?.querySelector('textarea')?.value || tr.children[4]?.textContent?.trim() || '';
+
+          const amount = Number(tr.querySelector('.amt')?.value || tr.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+          const monthlyCumulative = Number(tr.children[6]?.dataset?.value || tr.children[6]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+          const cumulative = Number(tr.children[7]?.dataset?.value || tr.children[7]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+          const rowIndex = tr.dataset.rowIndex || '';
+
+          const lastUpdated = tr.dataset.lastUpdated || '';
+
+          /* =========================
+          ❌ VALIDATION
+          ========================= */
+
+          const missingFields = [];
+
+          if (!station) missingFields.push('🏢 Station');
+
+          if (!dateInput) missingFields.push('📅 Date');
+
+          if (!budget) missingFields.push('📈 Budget');
+
+          if (amount === 0) missingFields.push('🪙 Amount');
+
+          if (missingFields.length) {
+            showCustomAlert(`
+              ❌ Missing Fields:<br><br>
+              ${missingFields.join('<br>')}
+            `);
+
+            return;
+          }
+
+          /* =========================
+          🔥 CURRENT ROW
+          ========================= */
+
+          const currentRow = [formatDateBack(dateInput), station, bill, budget, details, Number((amount / 1000).toFixed(3)), Number((monthlyCumulative / 1000).toFixed(3)), Number((cumulative / 1000).toFixed(3))];
+
+          /* =========================
+          🔥 ORIGINAL ROW
+          ========================= */
+
+          let originalRow = [];
+
+          try {
+            originalRow = JSON.parse(tr.dataset.original || '[]');
+          } catch {
+            originalRow = [];
+          }
+
+          /* =========================
+          ⏭ SKIP NO CHANGE
+          ========================= */
+
+          if (modeType === 'edit') {
+            const oldNorm = JSON.stringify(originalRow.map(normalize));
+
+            const newNorm = JSON.stringify(currentRow.map(normalize));
+
+            if (oldNorm === newNorm) {
+              return;
+            }
+          }
+
+          /* =========================
+          🔥 PUSH DATA
+          ========================= */
+
+          data.push({
+            _RowIndex: rowIndex,
+
+            _lastUpdated: lastUpdated,
+
+            Date: formatDateBack(dateInput),
+
+            Station: station.trim(),
+
+            'Bill / Invoice Details': bill.trim(),
+
+            'SBG Expenditure Under': budget.trim(),
+
+            'Expenditure Details': details.trim(),
+
+            'Expenditure Amount (₹ in 000)': Number((amount / 1000).toFixed(3)),
+
+            'Monthly Cumulative Sum of Expenditure (₹ in 000)': Number((monthlyCumulative / 1000).toFixed(3)),
+
+            'Cumulative Sum of Expenditure (₹ in 000)': Number((cumulative / 1000).toFixed(3))
           });
-        }
+        });
 
-        // =========================
-        // 🔥 SYNC MODE (PB DATA)
-        // =========================
-        else {
-          const pbRows = buildPBBudgetRows();
-
-          data = pbRows.map(mapRowArrayToObject);
-        }
+        /* =========================
+        ❌ EMPTY
+        ========================= */
 
         if (!data.length) {
-          showCustomAlert('❌ No valid data');
-          return false;
+          showCustomAlert(`
+            ℹ️ No changes detected.<br><br>
+            No data was modified.
+          `);
+
+          return;
         }
 
         try {
+          setSyncStatus('sbgexpDatabase');
+
+          let loaderStarted = false;
+
+          /* =========================
+          🔥 DELAY LOADER
+          ========================= */
+
+          const loaderTimer = setTimeout(() => {
+            loaderStarted = true;
+
+            showLoader();
+
+            startSBGProgress();
+
+            updateLoader(5, 'Checking Database...', 'manage_search');
+          }, 700);
+
+          /* =========================
+          🔥 SAVE
+          ========================= */
+
           const res = await fetch('https://office-management-f425.onrender.com/sbgexp/update', {
             method: 'POST',
+
             headers: {
               'Content-Type': 'application/json'
             },
+
             body: JSON.stringify({
-              data: data,
-              mode: modeType === 'add' ? 'update' : 'replace' // 🔥 KEY FIX
+              data,
+              mode: modeType
             })
           });
 
           const result = await res.json();
 
-          if (result?.status === 'success') {
-            showCustomAlert('✅ Uploaded Successfully');
+          clearTimeout(loaderTimer);
+
+          /* =========================
+          ℹ️ NO CHANGES
+          ========================= */
+
+          if (result.status === 'nochange') {
+            clearSyncStatus('sbgexpDatabase');
+
+            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
+
+            if (loaderStarted) {
+              showCustomAlert(noChangeMsg);
+
+              setTimeout(() => {
+                stopSBGProgress();
+              }, 300);
+            } else {
+              showCustomAlert(noChangeMsg);
+            }
+            exitSBGEditMode();
+            return;
+          }
+
+          /* =========================
+          ✅ SUCCESS
+          ========================= */
+
+          if (result.status === 'success') {
+            const updatedRows = result.updatedRows || [];
+
+            const addedRows = result.addedRows || [];
+
+            let msg = '';
+
+            /* =========================
+            🔄 UPDATED
+            ========================= */
+
+            if (updatedRows.length) {
+              msg += `
+                <div style="
+                  font-size:13px;
+                  font-weight:700;
+                  color:#7dffb3;
+                  margin-bottom:18px;
+                  text-align:center;
+                ">
+                  📝 SBG EDIT SUCCESS!
+                </div>
+              `;
+
+              msg += updatedRows
+                .map((r) => {
+                  const changedCols = (r.changedColumns || [])
+                    .map(
+                      (col) => `
+                    <span style="
+                      display:inline-block;
+                      padding:2px 4px;
+                      margin:3px;
+                      border-radius:10px;
+                      background:rgba(255,255,255,0.08);
+                      border:1px solid rgba(255,255,255,0.06);
+                      font-size:13px;
+                    ">
+                      🔃 ${col}
+                    </span>
+                  `
+                    )
+                    .join('');
+
+                  return `
+                  <div style="
+                    margin-bottom:16px;
+                    padding:8px;
+                    border-radius:16px;
+                    background:rgba(255,255,255,0.05);
+                    border:1px solid rgba(255,255,255,0.08);
+                  ">
+
+                    <div style="
+                      font-size:13px;
+                      font-weight:700;
+                      margin-bottom:10px;
+                    ">
+                      📅 ${r.date}
+                    </div>
+
+                    <div>🏢 ${r.station}</div>
+
+                    <div>📈 ${r.budget}</div>
+
+                    <div>🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}</div>
+
+                    <div style="
+                      margin-top:8px;
+                      display:flex;
+                      flex-wrap:wrap;
+                      gap:4px;
+                    ">
+                      ${changedCols}
+                    </div>
+
+                  </div>
+                `;
+                })
+                .join('');
+            }
+
+            /* =========================
+            ➕ ADDED
+            ========================= */
+
+            if (addedRows.length) {
+              msg += `
+                <div style="
+                  font-size:13px;
+                  font-weight:700;
+                  color:#7dffb3;
+                  margin-bottom:18px;
+                  text-align:center;
+                ">
+                  ➕ SBG ADD SUCCESS!
+                </div>
+              `;
+
+              msg += addedRows
+                .map(
+                  (r) => `
+                <div style="
+                  padding:10px 14px;
+                  margin-bottom:10px;
+                  border-radius:14px;
+                  background:rgba(255,255,255,0.05);
+                  border:1px solid rgba(255,255,255,0.08);
+                ">
+                  📅 ${r.date}<br>
+                  🏢 ${r.station}<br>
+                  📈 ${r.budget}<br>
+                  🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}
+                </div>
+              `
+                )
+                .join('');
+            }
+
+            clearSyncStatus('sbgexpDatabase');
 
             await reloadSBGExpData();
+
             await updateBudgetDBFromSBGExp();
+
+            await loadTable('sbgexp', 'SBGexpenditureDB');
+
             await loadTable('sbg', 'BudgetDB');
 
             getBudgetFYColumns();
-            renderFilterMainBudgetExpTable();
 
-            return true;
+            if (loaderStarted) {
+              showCustomAlert(msg);
+
+              setTimeout(() => {
+                stopSBGProgress();
+              }, 300);
+            } else {
+              showCustomAlert(msg);
+            }
+
+            exitSBGEditMode();
+
+            return;
+          }
+
+          /* =========================
+          ⚠️ CONFLICT
+          ========================= */
+
+          if (result.status === 'conflict') {
+            clearSyncStatus('sbgexpDatabase', 'db', false);
+
+            const conflictMsg = '⚠️ Some rows were modified by another user.<br><br>Please reload and try again.';
+
+            if (loaderStarted) {
+              showCustomAlert(conflictMsg);
+
+              setTimeout(() => {
+                stopSBGProgress();
+              }, 300);
+            } else {
+              showCustomAlert(conflictMsg);
+            }
+
+            return;
+          }
+
+          /* =========================
+          ❌ ERROR
+          ========================= */
+
+          clearSyncStatus('sbgexpDatabase', 'db', false);
+
+          const errorMsg = '❌ Error: ' + (result.message || 'Unknown error');
+
+          if (loaderStarted) {
+            showCustomAlert(errorMsg);
+            setTimeout(() => {
+              stopSBGProgress();
+            }, 300);
           } else {
-            console.error(result);
-            showCustomAlert('❌ Save failed');
-            return false;
+            showCustomAlert(errorMsg);
           }
         } catch (err) {
           console.error(err);
-          showCustomAlert('❌ Network error');
-          return false;
+
+          clearSyncStatus('sbgexpDatabase', 'db', false);
+
+          const serverMsg = '❌ Server error';
+
+          if (loaderStarted) {
+            showCustomAlert(serverMsg);
+            setTimeout(() => {
+              stopSBGProgress();
+            }, 300);
+          } else {
+            showCustomAlert(serverMsg);
+          }
         }
       }
 
@@ -17800,6 +19933,11 @@
         /* =====================================
         🔥 CONFIRM
         ===================================== */
+        const noBtn = id('logoutNoBtn');
+
+        if (noBtn) {
+          noBtn.style.display = 'block';
+        }
 
         showConfirmBox({
           title: 'Discard Changes',
@@ -17974,6 +20112,10 @@
               /* 🔥 HIDE 4th COLUMN (Budget column) */
               .SBGprint-table th:nth-child(4),
               .SBGprint-table td:nth-child(4),
+              .SBGprint-table th:nth-child(9),
+              .SBGprint-table td:nth-child(9),
+              .SBGprint-table th:nth-child(7),
+              .SBGprint-table td:nth-child(7),
               .SBGprint-table th:nth-child(2),
               .SBGprint-table td:nth-child(2)  {
                 display: none !important;
@@ -18346,10 +20488,17 @@
           let colPointer = 1;
 
           cells.forEach((cell, colIndex) => {
-            if (colIndex === 1 || colIndex === 3) return;
+            if (colIndex === 1 || colIndex === 3 || colIndex === 6 || colIndex === 8) return;
 
             let text = cell.innerText.trim().replace(/[,₹]/g, '');
-            const value = isNaN(text) ? text : Number(text);
+
+            // 🔥 KEEP EMPTY BILL/INVOICE EMPTY
+            let value = text;
+
+            // 🔥 convert only real numbers
+            if (text !== '' && !isNaN(text)) {
+              value = Number(text);
+            }
 
             const c = excelRow.getCell(colPointer++);
             c.value = value;
@@ -26150,6 +28299,11 @@
               .page-break {
                 height: 10px;
               }
+
+              #dutyChartNote{
+              background:white !important;
+              }
+
             `;
         doc.head.appendChild(style);
 
@@ -31483,6 +33637,11 @@
       ===================================================== */
 
       id('logoutBtn')?.addEventListener('click', () => {
+        const noBtn = id('logoutNoBtn');
+
+        if (noBtn) {
+          noBtn.style.display = 'block';
+        }
         showConfirmBox({
           title: 'Logout Confirmation',
 
