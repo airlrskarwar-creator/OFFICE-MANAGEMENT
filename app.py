@@ -183,6 +183,8 @@ eb_sheet = eb_file.worksheet("EBlog")
 # 🔥 ESR LOG
 esr_sheet = esr_file.worksheet("ESR")
 
+# 🔥 TRANSMISSION LOG
+txn_sheet = txn_file.worksheet("Transmission")
 
 # =========================================================
 # REFERENCE DATABASE SHEETS
@@ -198,17 +200,6 @@ comm_sheet = ref_file.worksheet("CommFactDB")
 
 it_sheet = ref_file.worksheet("ITDB")
 
-# =========================================================
-# TRANSMISSION DATABASE SHEETS
-# =========================================================
-
-pbs_sheet = txn_file.worksheet("PBS")
-
-txn_sheet = txn_file.worksheet("Transmitter")
-
-mps_sheet = txn_file.worksheet("MPS")
-
-ch_sheet = txn_file.worksheet("RelayedChannel")
 
 # =========================
 # API ROUTES
@@ -284,21 +275,10 @@ def get_duty():
 def get_esr():
     return jsonify(sheet_to_json(esr_sheet))
 
-@app.route("/pbs", methods=["GET"])
-def get_pbs():
-    return jsonify(sheet_to_json(pbs_sheet))
-
-@app.route("/mps", methods=["GET"])
-def get_mps():
-    return jsonify(sheet_to_json(mps_sheet))
 
 @app.route("/txn", methods=["GET"])
 def get_txn():
     return jsonify(sheet_to_json(txn_sheet))
-
-@app.route("/ch", methods=["GET"])
-def get_ch():
-    return jsonify(sheet_to_json(ch_sheet))
 
 
 # =========================================================
