@@ -316,6 +316,7 @@ def update_pb():
         added_employees = []
 
         # 2. Iterate through incoming frontend data
+        # 2. Iterate through incoming frontend data
         for obj in edit_rows:
             emp_name = str(obj.get("Employee Name", "Unknown")).strip()
             sal_month = str(obj.get("Salary Month", "")).strip()
@@ -324,49 +325,32 @@ def update_pb():
             if hris_idx >= 0:
                 key += f"|{str(obj.get('HRIS', '')).strip().lower()}"
 
-            # Format incoming row to strictly match header order
             row_data = [obj.get(h, "") for h in headers]
 
             if key in row_map:
-                # --- UPDATE LOGIC ---
                 row_num = row_map[key]["row_num"]
                 existing_data = row_map[key]["data"]
-
-                # Pad existing data if the cached row is physically shorter than headers array
                 padded_existing = existing_data + [""] * (len(headers) - len(existing_data))
 
-                # Inside your update_pb function:
                 changed_cols = []
                 for col_idx, h in enumerate(headers):
-                    # Fetch values from cache and incoming object
                     old_val = str(padded_existing[col_idx]).strip().upper()
                     new_val = str(row_data[col_idx]).strip().upper()
-
-                    # If incoming is "TRUE" and sheet cache is "TRUE", it is NOT a change
                     if old_val != new_val:
                         changed_cols.append(h)
 
-                # Only update if changed_cols is NOT empty
                 if changed_cols:
                     updates.append({
                         "range": f"A{row_num}",
                         "values": [row_data]
                     })
-                    updated_employees.append({...})
-
-                # Only queue the update if there is a real difference
-                if changed_cols:
-                    updates.append({
-                        "range": f"A{row_num}",
-                        "values": [row_data]
-                    })
+                    # ✅ FIXED: Dictionary is now correctly closed
                     updated_employees.append({
                         "employee": emp_name,
                         "month": sal_month,
                         "changedColumns": changed_cols
                     })
             else:
-                # --- ADD LOGIC ---
                 new_rows.append(row_data)
                 added_employees.append({
                     "employee": emp_name,
