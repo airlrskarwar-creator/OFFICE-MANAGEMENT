@@ -316,7 +316,6 @@ def update_pb():
         added_employees = []
 
         # 2. Iterate through incoming frontend data
-        # 2. Iterate through incoming frontend data
         for obj in edit_rows:
             emp_name = str(obj.get("Employee Name", "Unknown")).strip()
             sal_month = str(obj.get("Salary Month", "")).strip()
@@ -325,37 +324,34 @@ def update_pb():
             if hris_idx >= 0:
                 key += f"|{str(obj.get('HRIS', '')).strip().lower()}"
 
-            row_data = [obj.get(h, "") for h in headers]
-
             if key in row_map:
+                # --- UPDATE EXISTING ---
                 row_num = row_map[key]["row_num"]
                 existing_data = row_map[key]["data"]
                 padded_existing = existing_data + [""] * (len(headers) - len(existing_data))
 
+                row_data = []
                 changed_cols = []
+
                 for col_idx, h in enumerate(headers):
-                    old_val = str(padded_existing[col_idx]).strip().upper()
-                    new_val = str(row_data[col_idx]).strip().upper()
-                    if old_val != new_val:
+                    # Keep existing data if obj doesn't have the key
+                    new_val = str(obj.get(h, padded_existing[col_idx])).strip()
+                    old_val = str(padded_existing[col_idx]).strip()
+
+                    row_data.append(new_val)
+                    if old_val.upper() != new_val.upper():
                         changed_cols.append(h)
 
                 if changed_cols:
-                    updates.append({
-                        "range": f"A{row_num}",
-                        "values": [row_data]
-                    })
-                    # ✅ FIXED: Dictionary is now correctly closed
-                    updated_employees.append({
-                        "employee": emp_name,
-                        "month": sal_month,
-                        "changedColumns": changed_cols
-                    })
+                    updates.append({"range": f"A{row_num}", "values": [row_data]})
+                    updated_employees.append({"employee": emp_name, "month": sal_month, "changedColumns": changed_cols})
+
             else:
+                # --- ADD NEW ROW ---
+                # Ensure all headers are accounted for in new rows
+                row_data = [str(obj.get(h, "")).strip() for h in headers]
                 new_rows.append(row_data)
-                added_employees.append({
-                    "employee": emp_name,
-                    "month": sal_month
-                })
+                added_employees.append({"employee": emp_name, "month": sal_month})
 
         # 3. Check if anything actually needs to be written to Google Sheets
         if not updates and not new_rows:
