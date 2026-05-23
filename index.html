@@ -986,7 +986,7 @@
         position: absolute;
         display: flex;
         right: 18px;
-        bottom: 5px;
+        bottom: 25px;
         z-index: 1;
         text-align: right;
         color: rgba(94, 94, 94, 0.5);
@@ -1404,8 +1404,8 @@
         /* 🔥  */
         z-index: 2000;
         /* 🔥  */
-        width: 160px;
-        min-width: 160px;
+        width: 165px;
+        min-width: 165px;
         display: flex;
         flex-direction: column;
         background: linear-gradient(180deg, #343434 0%, #000000 100%);
@@ -1428,10 +1428,11 @@
         display: flex;
         flex-direction: column;
         background: transparent;
-        height: 100vh;
+        height: 96vh;
         overflow-x: hidden;
         overflow-y: hidden;
         transition: all 0.35s ease;
+        padding: 4px;
       }
 
       .SectionPage {
@@ -1440,18 +1441,24 @@
         background: transparent;
         height: 100vh;
         overflow: hidden;
-        margin-right: 4px;
         margin-bottom: 0px;
         z-index: 1;
         transition: opacity 0.25s ease;
+        border-radius: 8px;
+        box-shadow: 0px 0px 2px 2px gray;
       }
 
       .DashBoardContainer {
         flex: 1;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 45px);
+        height: calc(100vh - 50px);
       }
+
+      /* =========================================
+      🔥 DEFAULT FOOTER
+      (LOGIN PAGE)
+      ========================================= */
 
       .dashboard-footer {
         margin-top: auto;
@@ -1462,6 +1469,36 @@
         border-top: solid 1px rgb(221, 221, 221);
         align-items: center;
         justify-content: space-between;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 99999;
+        background: transparent;
+        transition:
+          left 0.25s ease,
+          width 0.25s ease,
+          background 0.25s ease;
+      }
+
+      /* =========================================
+      🔥 AFTER LOGIN
+      ========================================= */
+
+      body.logged-in .dashboard-footer {
+        left: 165px;
+        width: calc(100% - 165px);
+        background: white;
+      }
+
+      /* =========================================
+      🔥 AFTER LOGIN + COLLAPSED
+      ========================================= */
+
+      body.logged-in.sidebar-collapsed .dashboard-footer {
+        left: 60px;
+        width: calc(100% - 60px);
+        background: white;
       }
 
       .db-wrapper {
@@ -1608,11 +1645,13 @@
         gap: 4px;
         border-bottom: 1px solid #e5e7eb;
         cursor: pointer;
+        background: white;
+        box-shadow: inset 0 -5px 3px -3px rgba(157, 157, 157, 0.6);
       }
 
       .sidebar-header:hover {
         background: #e5e7eb;
-        color: blue;
+        color: rgb(0, 0, 91);
       }
 
       .sidebar-logo {
@@ -1625,12 +1664,12 @@
       .app-title {
         font-size: 12px;
         font-weight: 600;
-        color: #18d8ff;
+        color: #000000;
         transition: opacity 0.2s ease;
       }
 
       .sidebar-header:hover .app-title {
-        color: blue;
+        color: rgb(28, 0, 122);
       }
 
       .sidebar-toggle {
@@ -1643,7 +1682,10 @@
         margin-left: auto;
       }
 
-      /* =============MENU LIST=========== */
+      /* =========================================
+      🔥 MENU LIST
+      ========================================= */
+
       .menu-list {
         flex: 1;
         overflow-y: auto;
@@ -1655,51 +1697,137 @@
         display: none;
       }
 
-      /* ========BUTTON BASE=========== */
+      /* =========================================
+      🔥 BUTTON BASE
+      ========================================= */
+
       .menu-btn,
       .logout-btn {
         position: relative;
-        z-index: 2100;
-        /* 🔥 FIX */
         display: flex;
         align-items: center;
         gap: 12px;
         width: 100%;
-        padding: 9px 8px;
+        padding: 10px;
         margin-bottom: 4px;
         border: none;
-        border-radius: 6px;
+        border-radius: 10px;
         background: transparent;
         color: #18d8ff;
         cursor: pointer;
-        transition: all 0.25s ease;
+        overflow: hidden;
+        transform: translateX(0);
+        transition:
+          transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          background 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          color 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          padding 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          border-radius 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      /* ========= END BUTTON BASE ============== */
-      /* ICON (Lucide fix) */
+      /* =========================================
+      🔥 ICON
+      ========================================= */
+
       .menu-btn i,
       .logout-btn i {
         width: 20px;
         height: 20px;
         flex-shrink: 0;
-        transition: all 0.2s ease;
+        transition:
+          transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          color 0.28s ease,
+          padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      /* Bigger icon collapsed */
-      .left-panel.collapsed .menu-btn i {
-        width: 22px;
-        height: 22px;
-      }
+      /* =========================================
+      🔥 TEXT
+      ========================================= */
 
-      /* TEXT */
       .menu-btn span,
       .logout-btn span {
         white-space: nowrap;
-        transition: opacity 0.2s ease;
-        padding-top: 4px;
+        transition:
+          opacity 0.25s ease,
+          color 0.25s ease;
       }
 
-      /* COLLAPSED TEXT */
+      /* =========================================
+      🔥 HOVER EFFECT
+      ========================================= */
+
+      .menu-btn:hover {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(219, 234, 254, 0.92));
+        color: #1d4ed8;
+        transform: translateX(4px);
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.18);
+      }
+
+      /* =========================================
+      🔥 HOVER ICON
+      ========================================= */
+
+      .menu-btn:hover i,
+      .logout-btn:hover i {
+        transform: scale(1.1);
+      }
+
+      /* =========================================
+      🔥 ACTIVE BUTTON
+      ========================================= */
+
+      .menu-btn.active {
+        transform: translateX(10px);
+        padding-left: 12px;
+        background: linear-gradient(180deg, #ffffff, #dbeafe);
+        color: #0047ff;
+        border-radius: 12px 0 0 12px;
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.28);
+        font-weight: 700;
+        z-index: 2;
+      }
+
+      /* =========================================
+      🔥 ACTIVE ICON
+      ========================================= */
+
+      .menu-btn.active i {
+        transform: scale(1.1);
+        color: #0047ff;
+        filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.35));
+      }
+
+      /* =========================================
+      🔥 ACTIVE TEXT
+      ========================================= */
+
+      .menu-btn.active span {
+        color: #0047ff;
+        text-shadow:
+          0 0 4px rgba(255, 255, 255, 0.6),
+          0 0 10px rgba(59, 130, 246, 0.22);
+      }
+
+      /* =========================================
+      🔥 ACTIVE LEFT BAR
+      ========================================= */
+
+      .menu-btn.active::before {
+        content: '';
+        position: absolute;
+        left: -2px;
+        top: 0;
+        width: 6px;
+        height: 100%;
+        background: linear-gradient(180deg, #2c25eb, #0073ff);
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.45);
+      }
+
+      /* =========================================
+      🔥 COLLAPSED TEXT
+      ========================================= */
+
       .left-panel.collapsed .menu-btn span,
       .left-panel.collapsed .logout-btn span,
       .left-panel.collapsed .app-title {
@@ -1708,79 +1836,59 @@
         overflow: hidden;
       }
 
-      /* COLLAPSED ALIGNMENT */
+      /* =========================================
+      🔥 COLLAPSED BUTTON
+      ========================================= */
+
       .left-panel.collapsed .menu-btn,
       .left-panel.collapsed .logout-btn {
         justify-content: center;
-        padding: 8px 2px;
         align-items: center;
-        gap: 0;
-        display: flex;
-        width: 100%;
       }
 
-      /* HOVER */
-      .menu-btn:hover {
-        background: #e0f2fe;
-        color: #1d4ed8;
+      /* =========================================
+      🔥 COLLAPSED ICON SIZE
+      ========================================= */
+
+      .left-panel.collapsed .menu-btn i,
+      .left-panel.collapsed .logout-btn i {
+        width: 20px;
+        height: 20px;
       }
 
-      .menu-btn:hover i {
-        transform: scale(1.03);
+      /* =========================================
+      🔥 COLLAPSED HOVER
+      ========================================= */
+
+      .left-panel.collapsed .menu-btn:hover {
+        transform: scale(1.05);
       }
 
-      .left-panel.collapsed:hover .menu-btn i {
-        transform: scale(1.03);
-      }
+      /* =========================================
+      🔥 COLLAPSED ACTIVE
+      ========================================= */
 
-      /* ACTIVE */
-      .menu-btn.active {
-        color: black;
-        border-radius: 0;
-        /*border-radius: 999px 0 0 999px;*/
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
-        margin-left: 10px;
-        font-weight: 600;
-        color: blue;
-        text-shadow:
-          0 0 4px rgba(255, 255, 255, 0.6),
-          0 0 8px rgba(59, 130, 246, 0.6),
-          0 0 12px rgba(59, 130, 246, 0.5);
-        background: white;
-      }
-
-      /* Left indicator */
-      .menu-btn.active::before {
-        content: '';
-        position: absolute;
-        left: -4px;
-        top: 0;
-        height: 100%;
-        width: 5px;
-        background: #2563eb;
-        border-radius: 8px 0 0 8px;
-      }
-
-      .menu-btn.active span {
-        color: blue;
-      }
-
-      /* COLLAPSED ACTIVE */
       .left-panel.collapsed .menu-btn.active {
-        border-radius: 0;
-        /*border-radius: 999px 0 0 999px;*/
-        padding: 6px 0px;
+        transform: scale(1.05) translateX(4px);
+        padding: 10px 0;
         justify-content: center;
-        box-shadow: 0 3px 8px rgba(59, 130, 246, 0.25);
-        color: blue;
-        text-shadow:
-          0 0 4px rgba(255, 255, 255, 0.6),
-          0 0 4px rgba(59, 130, 246, 0.6),
-          0 0 8px rgba(59, 130, 246, 0.5);
-        background: white;
+        border-radius: 12px 0 0 12px;
+        background: linear-gradient(180deg, #ffffff, #dbeafe);
+        box-shadow: 0 5px 16px rgba(59, 130, 246, 0.3);
       }
 
-      /* ================= DISABLED BUTTON ================= */
+      /* =========================================
+      🔥 COLLAPSED ACTIVE ICON
+      ========================================= */
+
+      .left-panel.collapsed .menu-btn.active i {
+        transform: scale(1.1);
+        padding-left: 5px;
+      }
+
+      /* =========================================
+      🔥 DISABLED BUTTON
+      ========================================= */
 
       .menu-btn:disabled,
       .logout-btn:disabled {
@@ -1792,7 +1900,53 @@
         box-shadow: none !important;
         text-shadow: none !important;
         filter: grayscale(100%);
-        border-radius: 6px;
+      }
+
+      /* =========================================
+      🔥 TOOLTIP
+      ========================================= */
+
+      .menu-btn::after,
+      .logout-btn::after {
+        content: attr(data-tooltip);
+        position: fixed;
+        left: 60px;
+        padding: 6px 15px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.92);
+        color: white;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 999999;
+        box-shadow: inset 0 0 2px white;
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        transform: translateY(4px);
+      }
+
+      /* =========================================
+      🔥 TOOLTIP SHOW
+      ========================================= */
+
+      .left-panel.collapsed .menu-btn:hover::after,
+      .left-panel.collapsed .logout-btn:hover::after {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* =========================================
+      🔥 LOGOUT
+      ========================================= */
+
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+      }
+
+      .logout-btn:hover {
+        background: #dc2626;
       }
 
       /* ================= DISABLED ICON ================= */
@@ -1861,15 +2015,6 @@
         margin-top: auto;
         padding: 10px;
         border-top: 1px solid #e5e7eb;
-      }
-
-      .logout-btn {
-        background: #ef4444;
-        color: #fff;
-      }
-
-      .logout-btn:hover {
-        background: #dc2626;
       }
 
       /* HEADER */
@@ -1980,7 +2125,7 @@
         overflow: auto;
         margin: 4px;
         width: 100%;
-        height: calc(100vh - 100px);
+        height: calc(100% - 105px);
         margin: 0 auto;
         display: flex;
       }
@@ -2178,7 +2323,7 @@
         margin-top: 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 150px);
+        height: calc(100% - 130px);
         /* adjust header height */
         gap: 10px;
       }
@@ -2208,7 +2353,7 @@
       }
 
       .BudgetTableWrapper {
-        max-height: calc(100vh - 200px);
+        max-height: calc(100% - 150px);
       }
 
       .budgetReportBtn {
@@ -2219,13 +2364,13 @@
       }
 
       .DGlogTableWrapper {
-        height: calc(100vh - 250px);
+        height: calc(100% - 230px);
         overflow-y: auto;
         overflow-x: hidden;
       }
 
       .EBtableWrapper {
-        height: calc(100vh - 250px);
+        height: calc(100% - 255px);
         overflow-y: auto;
         overflow-x: hidden !important;
       }
@@ -3239,7 +3384,11 @@
         font-size: 11px;
         background-color: white;
         overflow: auto;
-        height: 83vh;
+        height: calc(100% - 85px);
+        max-height: calc(100% - 85px);
+        flex: 1;
+        min-height: 0;
+        box-sizing: border-box;
       }
 
       .SalarySlipTableWrapper table {
@@ -3440,7 +3589,7 @@
         margin: 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 180px);
+        height: calc(100% - 143px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -3451,7 +3600,7 @@
         margin: 1px 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 225px);
+        height: calc(100% - 188px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -3462,7 +3611,7 @@
         margin: 4px;
         display: flex;
         flex-direction: row;
-        height: calc(100vh - 120px);
+        height: calc(100% - 80px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -3533,8 +3682,8 @@
         text-align: center;
         justify-content: center;
         border-radius: 8px;
-        width: 280px;
-        padding: 8px 4px 15px 4px !important;
+        width: 250px;
+        padding: 8px 4px 8px 4px !important;
         box-shadow: inset 0 -4px 0 0 #44d0ff;
         background: rgba(43, 82, 145, 0.2);
       }
@@ -3544,18 +3693,18 @@
         font-weight: bold;
         font-size: 12px;
         color: black;
-        padding: 10px 4px 4px 4px !important;
+        padding: 3px 2px 2px 2px !important;
       }
 
       .itPanelDiv span,
       .pensionPanelDiv span {
         font-family: 'inter', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         text-align: center;
-        font-size: 20px;
+        font-size: 14px;
         font-weight: bold;
-        line-height: 25px;
+        line-height: 20px;
         color: black;
-        padding-bottom: 5px;
+        padding-bottom: 4px;
       }
 
       .katex {
@@ -4159,28 +4308,28 @@
       #ITInfoPanel {
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        gap: 15px;
         justify-content: space-between;
-        padding: 2px 8px 4px 8px;
+        padding: 2px 4px 4px 4px;
         overflow: hidden;
+        height: 50px;
         background: linear-gradient(145deg, #ffffff, #f5f7fb);
         border: 1px solid #dfe6ee;
         border-radius: 8px;
         box-shadow:
           0 4px 14px rgba(0, 0, 0, 0.06),
           inset 0 1px 0 rgba(255, 255, 255, 0.7);
-        height: 65px;
         margin: 0px 4px 4px 4px;
       }
 
       #PensionInfoPanel {
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        gap: 15px;
         justify-content: space-between;
-        padding: 2px 8px 4px 8px;
+        padding: 2px 4px 4px 4px;
         overflow: hidden;
-        height: 65px;
+        height: 50px;
         background: linear-gradient(145deg, #ffffff, #f5f7fb);
         border: 1px solid #dfe6ee;
         border-radius: 8px;
@@ -4268,7 +4417,7 @@
       #EBinputTableDiv .EBtableWrapper {
         flex: 1;
         min-width: 0;
-        height: calc(100vh - 200px);
+        height: calc(100vh - 205px);
         border: solid 1px silver;
         overflow: auto;
       }
@@ -4684,6 +4833,11 @@
           width: 100%;
         }
 
+        .right-panel {
+          min-width: 100px !important;
+          height: 100% !important;
+        }
+
         div {
           width: 100%;
         }
@@ -4697,12 +4851,6 @@
 
         .Error_Note {
           display: none;
-        }
-
-        .SectionPage {
-          max-height: 100%;
-          min-height: 0;
-          overflow-y: auto;
         }
 
         .action-group,
@@ -4770,12 +4918,18 @@
           width: 140px;
         }
 
-        .DB-Table-Wrapper {
-          height: calc(100vh - 50%);
-        }
-
-        .SalarySlipTableWrapper {
-          width: 95%;
+        .DB-Table-Wrapper,
+        .SalarySlipTableWrapper,
+        .ITtableWrapper,
+        .PensionTableWrapper,
+        .DGlogTableWrapper,
+        .EBtableWrapper {
+          width: 100% !important;
+          min-height: 0 !important;
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: auto !important;
+          flex: 1;
         }
 
         .sbg-dashboard {
@@ -4834,11 +4988,13 @@
         .BudgetTableWrapper,
         .BudgetTablefromPBWrapper {
           flex-direction: column;
+          height: 100%;
         }
 
         .Emp-Table-Wrapper {
           display: flex;
           flex-direction: column;
+          height: 100%;
         }
 
         .input-box select::picker(select) {
@@ -5839,7 +5995,7 @@
               <span id="PanelTDS">0</span>
             </div>
             <div class="itPanelDiv" id="PanelITHighlight">
-              <label>IT to be Recovered ( - Refund / + Payable )</label>
+              <label>IT ( - Refund / + Payable )</label>
               <span id="PanelIT">0</span>
             </div>
           </div>
@@ -6667,99 +6823,99 @@
             <table id="TxNDB" style="display: none"></table>
           </div>
         </div>
-        <div class="dashboard-footer">
-          <div class="db-wrapper">
-            <div class="db-trigger">
-              <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
-              <span>Database</span>
-              <!-- 🔥 BUBBLE COUNTER -->
-              <span class="db-badge" id="dbBadge">0/0</span>
-            </div>
-            <!-- 🔥 PANEL -->
-            <div class="dashboard-footer-database">
-              <div>
-                <span class="material-symbols-outlined" id="empDatabase">database_off</span>
-                <h3>Employee Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="pbDatabase">database_off</span>
-                <h3>PayBill Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
-                <h3>Budgets Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
-                <h3>SBG Expenditure Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="dgDatabase">database_off</span>
-                <h3>DG Log Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
-                <h3>HSD Log Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="ebDatabase">database_off</span>
-                <h3>EB Log Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="esrDatabase">database_off</span>
-                <h3>ESR Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="txnDatabase">database_off</span>
-                <h3>Transmission Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
-                <h3>Duty Chart Database</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="itDatabase">data_alert</span>
-                <h3>Income Tax Reference</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
-                <h3>7th Pay Matrix Reference</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
-                <h3>Staff Quarters Reference</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
-                <h3>TA/HRA City Reference</h3>
-              </div>
-              <div>
-                <span class="material-symbols-outlined" id="commDatabase">data_alert</span>
-                <h3>Commutation Factor Reference</h3>
-              </div>
-            </div>
+      </div>
+    </div>
+    <div class="dashboard-footer">
+      <div class="db-wrapper">
+        <div class="db-trigger">
+          <span class="material-symbols-outlined" id="DatabaseIcon">database</span>
+          <span>Database</span>
+          <!-- 🔥 BUBBLE COUNTER -->
+          <span class="db-badge" id="dbBadge">0/0</span>
+        </div>
+        <!-- 🔥 PANEL -->
+        <div class="dashboard-footer-database">
+          <div>
+            <span class="material-symbols-outlined" id="empDatabase">database_off</span>
+            <h3>Employee Database</h3>
           </div>
-          <div style="display: flex; flex-direction: row; gap: 10px; font-weight: bold">
-            <span class="material-symbols-outlined" style="color: blue">account_circle</span>
-            <span id="welcomeUser" style="padding-top: 2px"></span>
+          <div>
+            <span class="material-symbols-outlined" id="pbDatabase">database_off</span>
+            <h3>PayBill Database</h3>
           </div>
-          <div style="display: flex; flex-direction: row; gap: 50px">
-            <div style="display: flex; flex-direction: row; gap: 10px">
-              <span class="material-symbols-outlined" style="color: blue">calendar_today</span>
-              <div id="todayDate" class="today-date"></div>
-            </div>
-            <div style="display: flex; flex-direction: row; gap: 10px">
-              <span class="material-symbols-outlined" style="color: blue">alarm</span>
-              <div id="digitalClock" class="digital-clock"></div>
-            </div>
+          <div>
+            <span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
+            <h3>Budgets Database</h3>
           </div>
+          <div>
+            <span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
+            <h3>SBG Expenditure Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="dgDatabase">database_off</span>
+            <h3>DG Log Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="hsdDatabase">database_off</span>
+            <h3>HSD Log Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="ebDatabase">database_off</span>
+            <h3>EB Log Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="esrDatabase">database_off</span>
+            <h3>ESR Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="txnDatabase">database_off</span>
+            <h3>Transmission Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
+            <h3>Duty Chart Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="itDatabase">data_alert</span>
+            <h3>Income Tax Reference</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="cpcDatabase">data_alert</span>
+            <h3>7th Pay Matrix Reference</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="qtrDatabase">data_alert</span>
+            <h3>Staff Quarters Reference</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="cityDatabase">data_alert</span>
+            <h3>TA/HRA City Reference</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="commDatabase">data_alert</span>
+            <h3>Commutation Factor Reference</h3>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: row; gap: 10px; font-weight: bold">
+        <span class="material-symbols-outlined" style="color: blue">account_circle</span>
+        <span id="welcomeUser" style="padding-top: 2px"></span>
+      </div>
+      <div style="display: flex; flex-direction: row; gap: 50px">
+        <div style="display: flex; flex-direction: row; gap: 10px">
+          <span class="material-symbols-outlined" style="color: blue">calendar_today</span>
+          <div id="todayDate" class="today-date"></div>
+        </div>
+        <div style="display: flex; flex-direction: row; gap: 10px">
+          <span class="material-symbols-outlined" style="color: blue">alarm</span>
+          <div id="digitalClock" class="digital-clock"></div>
         </div>
       </div>
     </div>
     <script>
       /* =========================
-            DOM SHORTCUTS
-            ========================= */
+      DOM SHORTCUTS
+      ========================= */
       const id = document.getElementById.bind(document);
       const qs = document.querySelector.bind(document);
       const qsa = document.querySelectorAll.bind(document);
@@ -6770,20 +6926,126 @@
       let isEditMode = false;
       let isPBProcessing = false;
       let idData = {};
-      let empData = {};
-      let pbData = {};
-      let cpcData = {};
-      let qtrsData = {};
-      let cityData = {};
-      let sbgExpData = { headers: [], rows: [] };
-      let sbgData = {}; // BudgetDB (SBG)
-      let itData = {};
-      let commData = {};
-      let dgData = {};
-      let hsdData = {};
-      let ebData = {};
-      let dutyData = {};
+
+      // Global app data store objects (structured uniformly)
+      let empData = { headers: [], rows: [] };
+      let pbData = { headers: [], rows: [] };
+      let cpcData = { headers: [], rows: [] };
+      let qtrsData = { headers: [], rows: [] };
+      let cityData = { headers: [], rows: [] };
+      let sbgData = { headers: [], rows: [] }; // BudgetDB (SBG)
+      let sbgExpData = { headers: [], rows: [] }; // SBG Expenditure
+      let itData = { headers: [], rows: [] };
+      let commData = { headers: [], rows: [] };
+      let dgData = { headers: [], rows: [] };
+      let hsdData = { headers: [], rows: [] };
+      let ebData = { headers: [], rows: [] };
+      let dutyData = { headers: [], rows: [] };
+      let esrData = { headers: [], rows: [] };
+      let txnData = { headers: [], rows: [] };
+
       let currentYear = '';
+
+      /* ============================================================================
+          🔥 UNIFORM API MAPPER (Maps endpoint to global object and UI status icon)
+      ============================================================================ */
+      const apiStatusMap = {
+        emp: { storage: () => empData, elId: 'empDatabase', type: 'db' },
+        pb: { storage: () => pbData, elId: 'pbDatabase', type: 'db' },
+        sbg: { storage: () => sbgData, elId: 'sbgDatabase', type: 'db' },
+        sbgexp: { storage: () => sbgExpData, elId: 'sbgexpDatabase', type: 'db' },
+        dg: { storage: () => dgData, elId: 'dgDatabase', type: 'db' },
+        hsd: { storage: () => hsdData, elId: 'hsdDatabase', type: 'db' },
+        eb: { storage: () => ebData, elId: 'ebDatabase', type: 'db' },
+        duty: { storage: () => dutyData, elId: 'dutyDatabase', type: 'db' },
+        esr: { storage: () => esrData, elId: 'esrDatabase', type: 'db' },
+        txn: { storage: () => txnData, elId: 'txnDatabase', type: 'db' },
+        it: { storage: () => itData, elId: 'itDatabase', type: 'data' },
+        cpc: { storage: () => cpcData, elId: 'cpcDatabase', type: 'data' },
+        qtrs: { storage: () => qtrsData, elId: 'qtrDatabase', type: 'data' },
+        city: { storage: () => cityData, elId: 'cityDatabase', type: 'data' },
+        comm: { storage: () => commData, elId: 'commDatabase', type: 'data' }
+      };
+
+      /* ============================================================================
+          ⚡ OPTIMIZED TABLE LOADER (Designed for cached {"headers":[], "rows":[]} data)
+      ============================================================================ */
+      async function loadTable(api, tableId, shouldRender = true) {
+        console.log('🌐 Connecting Database Route:', api);
+        const config = apiStatusMap[api];
+
+        try {
+          const res = await fetch(`https://office-management-f425.onrender.com/${api}`);
+
+          if (!res.ok) {
+            console.error(`❌ API route failed: ${api}`);
+            if (config) updateStatus(config.elId, config.type, false);
+            return;
+          }
+
+          const result = await res.json();
+
+          // Standardize data formatting assignment directly to our state trackers
+          if (config) {
+            if (result && result.headers && result.rows) {
+              // Direct match for memory-cache format
+              config.storage().headers = result.headers;
+              config.storage().rows = result.rows;
+            } else if (Array.isArray(result) && result.length > 0) {
+              // Fallback array-of-objects structure converter
+              const generatedHeaders = Object.keys(result[0]);
+              config.storage().headers = generatedHeaders;
+              config.storage().rows = result.map((obj) => generatedHeaders.map((h) => obj[h]));
+            }
+          }
+
+          // Update individual element indicators inside the system dashboard footer
+          if (config) {
+            updateStatus(config.elId, config.type, true);
+          }
+
+          if (!shouldRender) return;
+
+          const table = document.getElementById(tableId);
+          if (!table) return;
+
+          const currentData = config.storage();
+          const thead = `<thead><tr>${currentData.headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead>`;
+          const tbody = `<tbody>${currentData.rows.map((row) => `<tr>${row.map((v) => `<td>${v ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>`;
+
+          table.innerHTML = thead + tbody;
+        } catch (err) {
+          console.error(`❌ Network error loading table context (${api}):`, err);
+          if (config) updateStatus(config.elId, config.type, false);
+        }
+      }
+
+      /* ============================================================================
+          ⚡ OPTIMIZED EXPLICIT BULK SYNC DATALOADER
+      ============================================================================ */
+      async function loadData() {
+        try {
+          const apis = Object.keys(apiStatusMap);
+
+          // Request all endpoints concurrently via parallel threads
+          const responses = await Promise.all(apis.map((api) => fetch(`https://office-management-f425.onrender.com/${api}`).then((r) => r.json())));
+
+          // Loop map responses straight into corresponding storage schemas
+          apis.forEach((api, index) => {
+            const data = responses[index];
+            const config = apiStatusMap[api];
+
+            if (config && data && data.headers && data.rows) {
+              config.storage().headers = data.headers;
+              config.storage().rows = data.rows;
+              updateStatus(config.elId, config.type, true);
+            }
+          });
+          console.log('✅ Synchronous client-side runtime data-cache updated.');
+        } catch (error) {
+          console.error('❌ Failed concurrent runtime pipeline extraction:', error);
+        }
+      }
 
       /* =====================================================
       🔥 DISABLE PULL TO REFRESH
@@ -7286,6 +7548,18 @@
               ===================================== */
 
         id('mainPage').style.display = 'flex';
+
+        document.body.classList.add('logged-in');
+
+        /* =====================================
+        🔥 RESTORE SIDEBAR STATE
+        ===================================== */
+
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+          document.body.classList.add('sidebar-collapsed');
+        } else {
+          document.body.classList.remove('sidebar-collapsed');
+        }
 
         qs('.app')?.classList.add('loaded');
 
@@ -7813,107 +8087,6 @@
         updateStatus(id, type, isSuccess); // back to green
       }
 
-      const apiStatusMap = {
-        emp: ['empDatabase', 'db'],
-        pb: ['pbDatabase', 'db'],
-        sbg: ['sbgDatabase', 'db'],
-        sbgexp: ['sbgexpDatabase', 'db'],
-        dg: ['dgDatabase', 'db'],
-        hsd: ['hsdDatabase', 'db'],
-        eb: ['ebDatabase', 'db'],
-        duty: ['dutyDatabase', 'db'],
-        esr: ['esrDatabase', 'db'],
-        txn: ['txnDatabase', 'db'],
-
-        it: ['itDatabase', 'data'],
-        cpc: ['cpcDatabase', 'data'],
-        qtrs: ['qtrDatabase', 'data'],
-        city: ['cityDatabase', 'data'],
-        comm: ['commDatabase', 'data']
-      };
-
-      //============================🔥 GET DATA FROM SHEET🔥===========================//
-      async function loadTable(api, tableId, shouldRender = true) {
-        console.log('🌐 Database Online ✅ :', api);
-
-        try {
-          const res = await fetch(`https://office-management-f425.onrender.com/${api}`);
-
-          if (!res.ok) {
-            console.error('API failed:', api);
-
-            const [id, type] = apiStatusMap[api] || [];
-            if (id) updateStatus(id, type, false);
-
-            return;
-          }
-
-          let result = await res.json();
-
-          let headers, data;
-
-          if (Array.isArray(result)) {
-            if (result.length === 0) return;
-
-            headers = Object.keys(result[0]);
-            data = result.map((obj) => headers.map((h) => obj[h]));
-
-            result = { headers, rows: data };
-          } else if (result.headers && result.rows) {
-            headers = result.headers;
-            data = result.rows;
-          } else {
-            console.error('Invalid API format:', api);
-
-            const [id, type] = apiStatusMap[api] || [];
-            if (id && (api !== 'emp' || api !== 'sbg' || api !== 'sbgexp')) {
-              updateStatus(id, type, true);
-            }
-
-            return;
-          }
-
-          // 🔥 STORE DATA (same as your code)
-          if (api === 'emp') empData = result;
-          if (api === 'pb') pbData = result;
-          if (api === 'cpc') cpcData = result;
-          if (api === 'qtrs') qtrsData = result;
-          if (api === 'city') cityData = result;
-          if (api === 'sbg') sbgData = result;
-          if (api === 'sbgexp') sbgExpData = result;
-          if (api === 'it') itData = result;
-          if (api === 'comm') commData = result;
-          if (api === 'dg') dgData = result;
-          if (api === 'hsd') hsdData = result;
-          if (api === 'eb') ebData = result;
-          if (api === 'duty') dutyData = result;
-          if (api === 'esr') esrData = result;
-          if (api === 'txn') txnData = result;
-          // 🔥 ✅ SUCCESS → UPDATE ICON
-          const [id, type] = apiStatusMap[api] || [];
-          if (id && (api !== 'emp' || api !== 'sbg' || api !== 'sbgexp')) {
-            updateStatus(id, type, true);
-          }
-
-          if (!shouldRender) return;
-
-          const table = document.getElementById(tableId);
-          if (!table) return;
-
-          const thead = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead>`;
-          const tbody = `<tbody>${data.map((row) => `<tr>${row.map((v) => `<td>${v ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>`;
-
-          table.innerHTML = thead + tbody;
-        } catch (err) {
-          console.error('Error loading table:', api, err);
-
-          const [id, type] = apiStatusMap[api] || [];
-          if (id && (api !== 'emp' || api !== 'sbg' || api !== 'sbgexp')) {
-            updateStatus(id, type, false);
-          }
-        }
-      }
-
       let loaderInterval = null;
 
       function showLoader() {
@@ -8167,40 +8340,6 @@
 
           window.loaderCompleted = false;
         }
-      }
-
-      async function loadData() {
-        let empRes = await fetch('https://office-management-f425.onrender.com/emp');
-        let pbRes = await fetch('https://office-management-f425.onrender.com/pb');
-        let cpcRes = await fetch('https://office-management-f425.onrender.com/cpc');
-        let qtrsRes = await fetch('https://office-management-f425.onrender.com/qtrs');
-        let cityRes = await fetch('https://office-management-f425.onrender.com/city');
-        let sbgRes = await fetch('https://office-management-f425.onrender.com/sbg');
-        let sbgExpRes = await fetch('https://office-management-f425.onrender.com/sbgexp');
-        let dutyRes = await fetch('https://office-management-f425.onrender.com/duty');
-        let itRes = await fetch('https://office-management-f425.onrender.com/it');
-        let commRes = await fetch('https://office-management-f425.onrender.com/comm');
-        let dgRes = await fetch('https://office-management-f425.onrender.com/dg');
-        let hsdRes = await fetch('https://office-management-f425.onrender.com/hsd');
-        let ebRes = await fetch('https://office-management-f425.onrender.com/eb');
-        let esrRes = await fetch('https://office-management-f425.onrender.com/esr');
-        let txnRes = await fetch('https://office-management-f425.onrender.com/txn');
-
-        empData = await empRes.json();
-        sbgData = await sbgRes.json();
-        sbgExpData = await sbgExpRes.json();
-        pbData = await pbRes.json();
-        dutyData = await dutyRes.json();
-        cpcData = await cpcRes.json();
-        qtrsData = await qtrsRes.json();
-        cityData = await cityRes.json();
-        itData = await itRes.json();
-        commData = await commRes.json();
-        dgData = await dgRes.json();
-        hsdData = await hsdRes.json();
-        ebData = await ebRes.json();
-        esrData = await esrRes.json();
-        txnData = await txnRes.json();
       }
 
       /* =========================
@@ -8691,7 +8830,7 @@
         station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBPage_Station', 'DGPage_Station', 'HSDPage_Station'],
         employee: ['EmpPage_Emp', 'ITPage_Emp', 'PensionPage_Emp', 'SalSlipPage_Emp', 'PayBillPage_Emp'],
         fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBPage_FY', 'DGPage_FY', 'HSDPage_FY'],
-        month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth', 'HSDPage_Month', 'BudgetPage_Month', 'DGPage_Month']
+        month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth']
       };
 
       function syncSelect(group, value) {
@@ -10284,18 +10423,39 @@
 
         toggleClass(sidebar, 'collapsed');
         toggleClass(app, 'collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
 
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        /* =====================================
+        🔥 SAVE STATE
+        ===================================== */
+
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+        /* =====================================
+        🔥 FOOTER CLASS
+        ===================================== */
+
+        if (isCollapsed) {
+          document.body.classList.add('sidebar-collapsed');
+        } else {
+          document.body.classList.remove('sidebar-collapsed');
+        }
       }
 
       /* ========================LOAD SIDEBAR STATE======================== */
       function loadSidebarState() {
         const sidebar = id('sidebar');
+
         const app = qs('.app');
 
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+        if (isCollapsed) {
           addClass(sidebar, 'collapsed');
-          addClass(app, 'collapsed'); /* 🔥 FIX */
+          addClass(app, 'collapsed');
+          document.body.classList.add('sidebar-collapsed');
+        } else {
+          document.body.classList.remove('sidebar-collapsed');
         }
       }
 
