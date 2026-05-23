@@ -202,11 +202,11 @@ it_sheet = ref_file.worksheet("ITDB")
 # TRANSMISSION DATABASE SHEETS
 # =========================================================
 
-pb_sheet = txn_file.worksheet("PBS")
+pbs_sheet = txn_file.worksheet("PBS")
 
 txn_sheet = txn_file.worksheet("Transmitter")
 
-mp_sheet = txn_file.worksheet("MPS")
+mps_sheet = txn_file.worksheet("MPS")
 
 ch_sheet = txn_file.worksheet("RelayedChannel")
 
@@ -286,11 +286,11 @@ def get_esr():
 
 @app.route("/pbs", methods=["GET"])
 def get_pb():
-    return jsonify(sheet_to_json(pb_sheet))
+    return jsonify(sheet_to_json(pbs_sheet))
 
 @app.route("/mps", methods=["GET"])
 def get_mp():
-    return jsonify(sheet_to_json(mp_sheet))
+    return jsonify(sheet_to_json(mps_sheet))
 
 @app.route("/txn", methods=["GET"])
 def get_txn():
