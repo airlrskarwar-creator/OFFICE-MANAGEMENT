@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
+from flask import Response, stream_with_context
 import gspread
 import os
 import json
@@ -22,6 +23,16 @@ scope = [
 creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
+
+pb_progress = {
+    "percent": 0,
+    "message": "Idle"
+}
+
+sbg_progress = {
+    "percent": 0,
+    "message": "Idle"
+}
 
 # Open Files
 sbgexp_file = client.open_by_key("1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY")
@@ -175,6 +186,97 @@ def login():
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/pb/progress')
+def pb_progress_stream():
+
+    def generate():
+
+        last_sent = None
+
+        while True:
+
+            try:
+
+                current = json.dumps({
+                    **pb_progress,
+                    "ts": time.time()
+                })
+
+                # ✅ send only if changed
+                if current != last_sent:
+
+                    yield f"data: {current}\n\n"
+
+                    last_sent = current
+
+                # ✅ heartbeat
+                yield ": keepalive\n\n"
+
+                time.sleep(0.5)
+
+            except GeneratorExit:
+                print("🔌 SSE disconnected")
+                break
+
+            except Exception as e:
+                print("❌ SSE ERROR:", str(e))
+                break
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
+@app.route('/sbg/progress')
+def sbg_progress_stream():
+
+    def generate():
+
+        last_sent = None
+
+        while True:
+
+            try:
+
+                current = json.dumps({
+                    **sbg_progress,
+                    "ts": time.time()
+                })
+
+                if current != last_sent:
+
+                    yield f"data: {current}\n\n"
+
+                    last_sent = current
+
+                yield ": keepalive\n\n"
+
+                time.sleep(0.5)
+
+            except GeneratorExit:
+                print("🔌 SBG SSE disconnected")
+                break
+
+            except Exception as e:
+                print("❌ SBG SSE ERROR:", str(e))
+                break
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 # =========================================================
 # 🔥 OPM UPDATE ROUTINES (Direct Batching & Cache Refresh)
