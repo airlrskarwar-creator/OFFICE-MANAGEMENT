@@ -1,13 +1,6 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from datetime import datetime
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
-from flask import Response
-from flask import stream_with_context
-from requests.exceptions import SSLError
-from urllib3.exceptions import ProtocolError
-import socket
 import gspread
 import os
 import json
@@ -18,1708 +11,283 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-# Google Sheets scope
+# =========================================================
+# 💾 GOOGLE AUTH & INITIALIZATION
+# =========================================================
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
 
-# ENV credentials
 creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
-
-creds = ServiceAccountCredentials.from_json_keyfile_dict(
-    creds_dict, scope
-)
-
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 
-pb_progress = {
-    "percent": 0,
-    "message": "Idle"
-}
+# Open Files
+sbgexp_file = client.open_by_key("1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY")
+dg_file     = client.open_by_key("1-9VoQ961MHS7rJf1P5o3ItKH4jsxo4GxNN-oz4ezrn0")
+diesel_file = client.open_by_key("1a-zsw9-AdssijOlyyxxaD-XEDmuSBr9lJHYK9awuKEo")
+duty_file   = client.open_by_key("1rphBbU2_2xFeX-Htj1PpYvsZID5kKUcJ6Ho8Kg8Auao")
+eb_file     = client.open_by_key("1r9x-S1m9fAuVwB16cVH3E9-jHEIMOCtQrHH24OjopA0")
+emp_file    = client.open_by_key("1YAOtydebgF1-XTqJ5ypYDQRK06t5XU7Q5redoGmuow0")
+pb_file     = client.open_by_key("1EAQcIzUBoG5U-dkOAOaHozwtxFURbW0a4l248-RNL18")
+ref_file    = client.open_by_key("1T8mzTxvyQfVJp5eOAr8w7SZxkY7XbWNw-E4muvgZB1A")
+sbg_file    = client.open_by_key("1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE")
+txn_file    = client.open_by_key("1Li_5Zv5hEPNNXqAgizQZe20OrRDwZrgrvLXOoXVsLO4")
+esr_file    = client.open_by_key("1-ieObqiKds8GoPFI6aMIPnDljGhFcvQmI9AKGMv_vjI")
 
-sbg_progress = {
-    "percent": 0,
-    "message": "Idle"
-}
+# Worksheets
+emp_sheet    = emp_file.worksheet("EmpDB")
+pb_sheet     = pb_file.worksheet("PBDB")
+duty_sheet   = duty_file.worksheet("DutyChart")
+sbg_sheet    = sbg_file.worksheet("BudgetDB")
+sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditure")
+dg_sheet     = dg_file.worksheet("DGlog")
+hsd_sheet    = diesel_file.worksheet("HSDlog")
+eb_sheet     = eb_file.worksheet("EBlog")
+esr_sheet    = esr_file.worksheet("ESR")
+txn_sheet    = txn_file.worksheet("Transmission")
 
-# =========================================================
-# 🔥 SAFE GOOGLE SHEET RETRY
-# =========================================================
-
-def safe_sheet_call(func, retries=5, delay=2):
-
-    last_error = None
-
-    for attempt in range(retries):
-
-        try:
-            return func()
-
-        except (
-            SSLError,
-            ProtocolError,
-            ConnectionResetError,
-            socket.error,
-            requests.exceptions.RequestException
-        ) as e:
-
-            last_error = e
-
-            time.sleep(delay)
-
-    raise last_error
+cpc_sheet  = ref_file.worksheet("CPC7DB")
+city_sheet = ref_file.worksheet("CityZoneDB")
+qtrs_sheet = ref_file.worksheet("QtrsRateDB")
+comm_sheet = ref_file.worksheet("CommFactDB")
+it_sheet   = ref_file.worksheet("ITDB")
 
 # =========================================================
-# 🔐 ROLE USERS
+# ⚡ GLOBAL MEMORY CACHE (Standardized Max Column Width)
 # =========================================================
+def fetch_cache(sheet, range_name="A:ZZ"):
+    try:
+        return sheet.get(range_name)
+    except Exception:
+        return sheet.get_all_values()
+
+print("⚡ Warming up sheet caches...")
+EMP_CACHE    = fetch_cache(emp_sheet)
+SBG_CACHE    = fetch_cache(sbg_sheet)
+SBGEXP_CACHE = fetch_cache(sbgexp_sheet)
+PB_CACHE     = fetch_cache(pb_sheet)
+CPC_CACHE    = fetch_cache(cpc_sheet)
+CITY_CACHE   = fetch_cache(city_sheet)
+QTRS_CACHE   = fetch_cache(qtrs_sheet)
+COMM_CACHE   = fetch_cache(comm_sheet)
+IT_CACHE     = fetch_cache(it_sheet)
+DG_CACHE     = fetch_cache(dg_sheet)
+HSD_CACHE    = fetch_cache(hsd_sheet)
+EB_CACHE     = fetch_cache(eb_sheet)
+DUTY_CACHE   = fetch_cache(duty_sheet)
+ESR_CACHE    = fetch_cache(esr_sheet)
+TXN_CACHE    = fetch_cache(txn_sheet)
+print("✅ Caches loaded successfully.")
 
 ROLE_USERS = [
-    {
-        "user": "MASTER",
-        "password": "master@11051993"
-    },
-    {
-        "user": "ENGG",
-        "password": "engg@225344"
-    },
-    {
-        "user": "ADMIN",
-        "password": "admin@221902"
-    }
+    {"user": "MASTER", "password": "master@11051993"},
+    {"user": "ENGG", "password": "engg@225344"},
+    {"user": "ADMIN", "password": "admin@221902"}
 ]
 
-# =========================================================
-# GOOGLE SHEETS DATABASE FILES
-# =========================================================
-
-# 🔥 BUDGET EXPENDITURES
-sbgexp_file = client.open_by_key(
-    "1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY"
-)
-
-# 🔥 DG LOG BOOK
-dg_file = client.open_by_key(
-    "1-9VoQ961MHS7rJf1P5o3ItKH4jsxo4GxNN-oz4ezrn0"
-)
-
-# 🔥 DIESEL REGISTER
-diesel_file = client.open_by_key(
-    "1a-zsw9-AdssijOlyyxxaD-XEDmuSBr9lJHYK9awuKEo"
-)
-
-# 🔥 DUTY CHART
-duty_file = client.open_by_key(
-    "1rphBbU2_2xFeX-Htj1PpYvsZID5kKUcJ6Ho8Kg8Auao"
-)
-
-# 🔥 ELECTRICITY REGISTER
-eb_file = client.open_by_key(
-    "1r9x-S1m9fAuVwB16cVH3E9-jHEIMOCtQrHH24OjopA0"
-)
-
-# 🔥 EMPLOYEE DATABASE
-emp_file = client.open_by_key(
-    "1YAOtydebgF1-XTqJ5ypYDQRK06t5XU7Q5redoGmuow0"
-)
-
-# 🔥 PAY BILL
-pb_file = client.open_by_key(
-    "1EAQcIzUBoG5U-dkOAOaHozwtxFURbW0a4l248-RNL18"
-)
-
-# 🔥 REFERENCE DATABASE
-ref_file = client.open_by_key(
-    "1T8mzTxvyQfVJp5eOAr8w7SZxkY7XbWNw-E4muvgZB1A"
-)
-
-# 🔥 SBG DATABASE
-sbg_file = client.open_by_key(
-    "1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE"
-)
-
-# 🔥 TRANSMISSION DATABASE
-txn_file = client.open_by_key(
-    "1Li_5Zv5hEPNNXqAgizQZe20OrRDwZrgrvLXOoXVsLO4"
-)
-
-# 🔥 ESR DATABASE
-esr_file = client.open_by_key(
-    "1-ieObqiKds8GoPFI6aMIPnDljGhFcvQmI9AKGMv_vjI"
-)
+def cache_to_json(cache_data):
+    if not cache_data:
+        return {"headers": [], "rows": []}
+    return {"headers": cache_data[0], "rows": cache_data[1:]}
 
 # =========================================================
-# WORKSHEETS
+# 🚀 FAST READ APIs (Instant response from memory)
 # =========================================================
-
-# 🔥 EMPLOYEE
-emp_sheet = emp_file.worksheet("EmpDB")
-
-# 🔥 PAY BILL
-pb_sheet = pb_file.worksheet("PBDB")
-
-# 🔥 DUTY CHART
-duty_sheet = duty_file.worksheet("DutyChart")
-
-# 🔥 SBG
-sbg_sheet = sbg_file.worksheet("BudgetDB")
-
-# 🔥 BUDGET EXPENDITURES
-sbgexp_sheet = sbgexp_file.worksheet("SBGexpenditure")
-
-# 🔥 DG LOG
-dg_sheet = dg_file.worksheet("DGlog")
-
-# 🔥 DIESEL LOG
-hsd_sheet = diesel_file.worksheet("HSDlog")
-
-# 🔥 ELECTRICITY LOG
-eb_sheet = eb_file.worksheet("EBlog")
-
-# 🔥 ESR LOG
-esr_sheet = esr_file.worksheet("ESR")
-
-# 🔥 TRANSMISSION LOG
-txn_sheet = txn_file.worksheet("Transmission")
-
-# =========================================================
-# REFERENCE DATABASE SHEETS
-# =========================================================
-
-cpc_sheet = ref_file.worksheet("CPC7DB")
-
-city_sheet = ref_file.worksheet("CityZoneDB")
-
-qtrs_sheet = ref_file.worksheet("QtrsRateDB")
-
-comm_sheet = ref_file.worksheet("CommFactDB")
-
-it_sheet = ref_file.worksheet("ITDB")
-
-
-# =========================
-# API ROUTES
-# =========================
-
-def sheet_to_json(sheet):
-    data = sheet.get_all_values()
-
-    headers = data[0]   # first row
-    rows = data[1:]     # rest rows
-
-    return {
-        "headers": headers,
-        "rows": rows
-    }
-
 @app.route("/emp", methods=["GET"])
-def get_emp():
-    return jsonify(sheet_to_json(emp_sheet))
+def get_emp(): return jsonify(cache_to_json(EMP_CACHE))
 
 @app.route("/sbg", methods=["GET"])
-def get_sbg():
-    return jsonify(sheet_to_json(sbg_sheet))
+def get_sbg(): return jsonify(cache_to_json(SBG_CACHE))
+
+@app.route("/pb", methods=["GET"])
+def get_pb(): return jsonify(cache_to_json(PB_CACHE))
+
+@app.route("/cpc", methods=["GET"])
+def get_cpc(): return jsonify(cache_to_json(CPC_CACHE))
+
+@app.route("/city", methods=["GET"])
+def get_city(): return jsonify(cache_to_json(CITY_CACHE))
+
+@app.route("/qtrs", methods=["GET"])
+def get_qtrs(): return jsonify(cache_to_json(QTRS_CACHE))
+
+@app.route("/comm", methods=["GET"])
+def get_comm(): return jsonify(cache_to_json(COMM_CACHE))
+
+@app.route("/it", methods=["GET"])
+def get_it(): return jsonify(cache_to_json(IT_CACHE))
+
+@app.route("/dg", methods=["GET"])
+def get_dg(): return jsonify(cache_to_json(DG_CACHE))
+
+@app.route("/hsd", methods=["GET"])
+def get_hsd(): return jsonify(cache_to_json(HSD_CACHE))
+
+@app.route("/eb", methods=["GET"])
+def get_eb(): return jsonify(cache_to_json(EB_CACHE))
+
+@app.route("/duty", methods=["GET"])
+def get_duty(): return jsonify(cache_to_json(DUTY_CACHE))
+
+@app.route("/esr", methods=["GET"])
+def get_esr(): return jsonify(cache_to_json(ESR_CACHE))
+
+@app.route("/txn", methods=["GET"])
+def get_txn(): return jsonify(cache_to_json(TXN_CACHE))
+
 
 @app.route("/sbgexp", methods=["GET"])
 def get_sbgexp():
-    return jsonify(sheet_to_json(sbgexp_sheet))
-
-@app.route("/pb", methods=["GET"])
-def get_pb():
-    return jsonify(sheet_to_json(pb_sheet))
-
-@app.route("/cpc", methods=["GET"])
-def get_cpc():
-    return jsonify(sheet_to_json(cpc_sheet))
-
-@app.route("/city", methods=["GET"])
-def get_city():
-    return jsonify(sheet_to_json(city_sheet))
-
-@app.route("/qtrs", methods=["GET"])
-def get_qtrs():
-    return jsonify(sheet_to_json(qtrs_sheet))
-
-@app.route("/comm", methods=["GET"])
-def get_comm():
-    return jsonify(sheet_to_json(comm_sheet))
-
-@app.route("/it", methods=["GET"])
-def get_it():
-    return jsonify(sheet_to_json(it_sheet))
-
-@app.route("/dg", methods=["GET"])
-def get_dg():
-    return jsonify(sheet_to_json(dg_sheet))
-
-@app.route("/hsd", methods=["GET"])
-def get_hsd():
-    return jsonify(sheet_to_json(hsd_sheet))
-
-@app.route("/eb", methods=["GET"])
-def get_eb():
-    return jsonify(sheet_to_json(eb_sheet))
-
-@app.route("/duty", methods=["GET"])
-def get_duty():
-    return jsonify(sheet_to_json(duty_sheet))
-
-@app.route("/esr", methods=["GET"])
-def get_esr():
-    return jsonify(sheet_to_json(esr_sheet))
-
-
-@app.route("/txn", methods=["GET"])
-def get_txn():
-    return jsonify(sheet_to_json(txn_sheet))
-
+    global SBGEXP_CACHE
+    return jsonify(cache_to_json(SBGEXP_CACHE))
 
 # =========================================================
 # 🔐 LOGIN API
 # =========================================================
-
 @app.route("/login", methods=["POST"])
 def login():
-
     try:
-
         data = request.get_json()
+        station = (data.get("station") or "").strip()
+        user = (data.get("user") or "").strip().upper()
+        password = (data.get("password") or "").strip()
 
-        station = (
-            data.get("station") or ""
-        ).strip()
-
-        user = (
-            data.get("user") or ""
-        ).strip().upper()
-
-        password = (
-            data.get("password") or ""
-        ).strip()
-
-        # =====================================================
-        # 🔥 ROLE LOGIN
-        # =====================================================
-
-        role_user = next(
-
-            (
-                r for r in ROLE_USERS
-
-                if (
-                    r["user"].upper() == user
-                    and
-                    r["password"] == password
-                )
-            ),
-
-            None
-        )
-
+        role_user = next((r for r in ROLE_USERS if r["user"].upper() == user and r["password"] == password), None)
         if role_user:
+            return jsonify({"success": True, "user": role_user["user"], "displayName": role_user["user"], "station": station, "role": role_user["user"]})
 
-            return jsonify({
+        headers = EMP_CACHE[0]
+        emp_data = [dict(zip(headers, row)) for row in EMP_CACHE[1:]]
+        found_user = next((emp for emp in emp_data if str(emp.get("User", "")).strip().upper() == user), None)
 
-                "success": True,
-
-                "user": role_user["user"],
-
-                "displayName":
-                    role_user["user"],
-
-                "station": station,
-
-                "role":
-                    role_user["user"]
-            })
-
-        # =====================================================
-        # 🔥 NORMAL USER LOGIN
-        # =====================================================
-
-        emp_data = emp_sheet.get_all_records()
-
-        found_user = next(
-
-            (
-                emp for emp in emp_data
-
-                if (
-                    str(
-                        emp.get("User", "")
-                    ).strip().upper()
-                    ==
-                    user
-                )
-            ),
-
-            None
-        )
-
-        if not found_user:
-
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            })
-
-        stored_password = str(
-            found_user.get("Password", "")
-        ).strip()
-
-        if stored_password != password:
-
-            return jsonify({
-                "success": False,
-                "message": "Incorrect password"
-            })
+        if not found_user or str(found_user.get("Password", "")).strip() != password:
+            return jsonify({"success": False, "message": "Invalid user credentials"})
 
         return jsonify({
-
             "success": True,
-
-            "user":
-                found_user.get("User", ""),
-
-            "displayName":
-                found_user.get(
-                    "Employee Name",
-                    user
-                ),
-
-            "initial":
-                found_user.get(
-                    "Initial",
-                    ""
-                ),
-
+            "user": found_user.get("User", ""),
+            "displayName": found_user.get("Employee Name", user),
+            "initial": found_user.get("Initial", ""),
             "station": station,
-
             "role": "USER"
         })
-
     except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
-        return jsonify({
-
-            "success": False,
-
-            "message": str(e)
-
-        }), 500
-
-
-@app.route('/pb/progress')
-def pb_progress_stream():
-
-    def generate():
-
-        last_sent = None
-
-        while True:
-
-            try:
-
-                current = json.dumps({
-                    **pb_progress,
-                    "ts": time.time()
-                })
-
-                # ✅ send only if changed
-                if current != last_sent:
-
-                    yield f"data: {current}\n\n"
-
-                    last_sent = current
-
-                # ✅ heartbeat
-                yield ": keepalive\n\n"
-
-                time.sleep(0.5)
-
-            except GeneratorExit: break
-
-            except Exception as e:break
-
-    return Response(
-        stream_with_context(generate()),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
-
-# =========================
-# 🔥 PB UPDATE
-# =========================
+# =========================================================
+# 🔥 OPM UPDATE ROUTINES (Direct Batching & Cache Refresh)
+# =========================================================
 
 @app.route("/pb/update", methods=["POST"])
 def update_pb():
-
     try:
-
-        from datetime import datetime
-
-        global pb_progress
-
-        # =========================
-        # 🔥 START PROGRESS
-        # =========================
-
-        pb_progress["percent"] = 1
-        pb_progress["message"] = "Starting..."
-
+        global PB_CACHE
         req_data = request.get_json()
-
         edit_rows = req_data.get("data", [])
-
         if not edit_rows:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-            pb_progress["percent"] = 100
-            pb_progress["message"] = "No Data"
-
-            return jsonify({
-                "status": "error",
-                "message": "No data received"
-            }), 400
-
-        # =========================
-        # 📥 READ SHEET
-        # =========================
-
-        pb_progress["percent"] = 5
-        pb_progress["message"] = "Reading PB Database..."
-
-        data = safe_sheet_call(
-            lambda: pb_sheet.get_all_values()
-        )
-
-        headers = data[0]
-        rows = data[1:]
-
-        # =========================
-        # 🔍 COLUMN INDEXES
-        # =========================
-
+        headers = PB_CACHE[0]
+        body = PB_CACHE[1:]
         month_idx = headers.index("Salary Month")
-
-        hris_idx = (
-            headers.index("HRIS")
-            if "HRIS" in headers else -1
-        )
-
-        last_updated_idx = (
-            headers.index("Last Updated")
-            if "Last Updated" in headers else -1
-        )
-
-        # =========================
-        # 🔧 CLEAN
-        # =========================
-
-        def clean(val):
-            return str(val or "").strip().lower()
-
-        # =========================
-        # 🔥 NORMALIZE
-        # =========================
-
-        def normalize(val):
-
-            if val is None:
-                return ""
-
-            val = (
-                str(val)
-                .replace("₹", "")
-                .replace(",", "")
-                .replace("\r", "")
-                .replace("\n", " ")
-                .strip()
-                .lower()
-            )
-
-            if val in ["true", "yes", "checked", "1"]:
-                return "true"
-
-            if val in ["false", "no", "0", "unchecked"]:
-                return "false"
-
-            if val in ["--", "-"]:
-                return ""
-
-            try:
-                return f"{float(val):.2f}"
-            except:
-                return val
-
-        # =========================
-        # 🔑 ROW MAP
-        # =========================
-
-        pb_progress["percent"] = 10
-        pb_progress["message"] = "Preparing Row Map..."
+        hris_idx = headers.index("HRIS") if "HRIS" in headers else -1
 
         row_map = {}
+        for i, r in enumerate(body, start=2):
+            key = str(r[month_idx]).strip().lower()
+            if hris_idx >= 0 and hris_idx < len(r):
+                key += f"|{str(r[hris_idx]).strip().lower()}"
+            row_map[key] = i
 
-        for i, r in enumerate(rows):
-
-            key = f"{clean(r[month_idx])}"
-
-            if hris_idx >= 0:
-                key += f"|{clean(r[hris_idx])}"
-
-            row_map[key] = i + 2
-
-        # =========================
-        # 🔥 TRACKERS
-        # =========================
-
-        update_cells = []
+        updates = []
         new_rows = []
 
-        updated_employees = []
-        added_employees = []
-
-        conflicts = []
-
-        # =========================
-        # 🔥 PROGRESS
-        # =========================
-
-        total_rows = len(edit_rows)
-        processed = 0
-
-        # =========================
-        # 🔄 PROCESS ROWS
-        # =========================
-
-        for row_obj in edit_rows:
-
-            processed += 1
-
-            progress = int(
-                10 + ((processed / total_rows) * 70)
-            )
-
-            pb_progress["percent"] = progress
-
-            pb_progress["message"] = (
-                f"Saving {processed}/{total_rows} employees"
-            )
-
-            # =========================
-            # 🔑 BUILD KEY
-            # =========================
-
-            key = f"{clean(row_obj.get('Salary Month'))}"
-
+        for obj in edit_rows:
+            key = str(obj.get("Salary Month", "")).strip().lower()
             if hris_idx >= 0:
-                key += f"|{clean(row_obj.get('HRIS'))}"
+                key += f"|{str(obj.get('HRIS', '')).strip().lower()}"
 
-            # =========================
-            # 🔄 EXISTING ROW
-            # =========================
+            row_data = [obj.get(h, "") for h in headers]
 
             if key in row_map:
-
                 row_num = row_map[key]
-
-                existing_row = rows[row_num - 2]
-
-                while len(existing_row) < len(headers):
-                    existing_row.append("")
-
-                merged_row = existing_row.copy()
-
-                # =========================
-                # 🔥 CONFLICT CHECK
-                # =========================
-
-                if last_updated_idx >= 0:
-
-                    sheet_timestamp = (
-                        existing_row[last_updated_idx]
-                        if last_updated_idx < len(existing_row)
-                        else ""
-                    )
-
-                    client_timestamp = row_obj.get(
-                        "_lastUpdated",
-                        ""
-                    )
-
-                    if (
-                        client_timestamp
-                        and sheet_timestamp
-                        and client_timestamp != sheet_timestamp
-                    ):
-
-                        conflicts.append(
-                            row_obj.get(
-                                "Employee Name",
-                                "Unknown"
-                            )
-                        )
-
-                        continue
-
-                # =========================
-                # 🔥 MERGE
-                # =========================
-
-                for col_idx, header in enumerate(headers):
-
-                    if header in row_obj:
-
-                        val = row_obj.get(header, "")
-
-                        # 🔥 KEEP OLD DESIGNATION
-                        if (
-                            header.strip().lower()
-                            ==
-                            "designation on salary month"
-                        ):
-
-                            if not val:
-                                val = merged_row[col_idx]
-
-                        merged_row[col_idx] = val
-
-                # =========================
-                # 🔥 ROW CHANGED
-                # =========================
-
-                row_changed = False
-
-                ignore_compare = {
-                    "Last Updated",
-                    "_lastUpdated"
-                }
-
-                changed_columns = []
-
-                for i, header in enumerate(headers):
-
-                    if header in ignore_compare:
-                        continue
-
-                    old_val = ""
-
-                    if i < len(existing_row):
-                        old_val = normalize(existing_row[i])
-
-                    new_val = normalize(merged_row[i])
-
-                    if old_val != new_val:
-
-                        changed_columns.append(header)
-
-                        row_changed = True
-
-                if not row_changed:
-                    continue
-
-                # =========================
-                # 🔥 TIMESTAMP
-                # =========================
-
-                if last_updated_idx >= 0:
-
-                    merged_row[last_updated_idx] = (
-                        datetime.now().isoformat()
-                    )
-
-                # =========================
-                # 🔥 TRACK UPDATE
-                # =========================
-
-                updated_employees.append({
-                    "employee": row_obj.get(
-                        "Employee Name",
-                        ""
-                    ),
-                    "month": row_obj.get(
-                        "Salary Month",
-                        ""
-                    ),
-                    "category": row_obj.get(
-                        "Category",
-                        ""
-                    ),
-                    "changedColumns": changed_columns
+                updates.append({
+                    "range": f"A{row_num}",
+                    "values": [row_data]
                 })
-
-                # =========================
-                # 🔥 UPDATE FULL ROW
-                # =========================
-
-                row_changed_data = []
-
-                for col_idx, val in enumerate(
-                    merged_row,
-                    start=1
-                ):
-
-                    header = headers[col_idx - 1]
-
-                    if header in [
-                        "Last Updated",
-                        "_lastUpdated"
-                    ]:
-                        row_changed_data.append(val)
-                        continue
-
-                    old_val = normalize(
-                        existing_row[col_idx - 1]
-                    )
-
-                    new_val = normalize(val)
-
-                    row_changed_data.append(val)
-
-                # 🔥 UPDATE ENTIRE ROW IN ONE API CALL
-                update_cells.append({
-                    "range": (
-                        f"A{row_num}:"
-                        f"{gspread.utils.rowcol_to_a1(row_num, len(headers))[:-len(str(row_num))]}"
-                        f"{row_num}"
-                    ),
-                    "values": [row_changed_data]
-                })
-
-            # =========================
-            # ➕ NEW ROW
-            # =========================
-
             else:
+                new_rows.append(row_data)
 
-                new_row = []
-
-                for header in headers:
-
-                    if header == "Last Updated":
-
-                        new_row.append(
-                            datetime.now().isoformat()
-                        )
-
-                    else:
-
-                        new_row.append(
-                            row_obj.get(header, "")
-                        )
-
-                new_rows.append(new_row)
-
-                added_employees.append({
-                    "employee": row_obj.get(
-                        "Employee Name",
-                        ""
-                    ),
-                    "month": row_obj.get(
-                        "Salary Month",
-                        ""
-                    ),
-                    "category": row_obj.get(
-                        "Category",
-                        ""
-                    )
-                })
-        # =========================
-        # ℹ️ NO CHANGES
-        # =========================
-
-        if not update_cells and not new_rows:
-
-            pb_progress["percent"] = 100
-            pb_progress["message"] = "No Changes"
-
-            return jsonify({
-                "status": "nochange",
-                "message": "No changes detected",
-                "updatedEmployees": [],
-                "addedEmployees": []
-            })
-
-        # =========================
-        # 🔥 APPLY UPDATES
-        # =========================
-
-        pb_progress["percent"] = 85
-        pb_progress["message"] = "Updating PB Database..."
-
-        if update_cells:
-
-            safe_sheet_call(
-                lambda: pb_sheet.batch_update(
-                    update_cells,
-                    value_input_option="USER_ENTERED"
-                )
-            )
-
-        # =========================
-        # ➕ APPEND ROWS
-        # =========================
-
-        pb_progress["percent"] = 92
-        pb_progress["message"] = "Appending New Rows..."
-
+        if updates:
+            pb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
+            pb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-            safe_sheet_call(
-                lambda: pb_sheet.append_rows(new_rows)
-            )
-
-        # =========================
-        # ⚠️ CONFLICT
-        # =========================
-
-        if conflicts:
-
-            pb_progress["percent"] = 100
-            pb_progress["message"] = "Conflict Found"
-
-            return jsonify({
-                "status": "conflict",
-                "message": (
-                    "Some rows modified "
-                    "by another user"
-                ),
-                "employees": conflicts
-            })
-
-        # =========================
-        # ✅ COMPLETE
-        # =========================
-
-        pb_progress["percent"] = 100
-        pb_progress["message"] = "Completed"
-
-        return jsonify({
-            "status": "success",
-            "updatedEmployees":
-                updated_employees,
-            "addedEmployees":
-                added_employees
-        })
-
+        PB_CACHE = pb_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-        pb_progress["percent"] = 100
-        pb_progress["message"] = "Error"
-
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-
-@app.route('/sbg/progress')
-def sbg_progress_stream():
-
-    def generate():
-
-        last_sent = None
-
-        while True:
-
-            try:
-
-                current = json.dumps({
-                    **sbg_progress,
-                    "ts": time.time()
-                })
-
-                if current != last_sent:
-
-                    yield f"data: {current}\n\n"
-
-                    last_sent = current
-
-                yield ": keepalive\n\n"
-
-                time.sleep(0.5)
-
-            except GeneratorExit: break
-
-            except Exception as e: break
-
-    return Response(
-        stream_with_context(generate()),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
-
-
-# =========================
-# 🔥 SBG UPDATE
-# =========================
 
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
-
     try:
-
-        from datetime import datetime
-
-        global sbg_progress
-
-        # =====================================================
-        # 🔥 START
-        # =====================================================
-
-        sbg_progress["percent"] = 1
-        sbg_progress["message"] = "Starting..."
-
+        global SBGEXP_CACHE
         req_data = request.get_json()
-
         edit_rows = req_data.get("data", [])
-
-        mode = req_data.get("mode", "sync")
-
         if not edit_rows:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-            sbg_progress["percent"] = 100
-            sbg_progress["message"] = "No Data"
+        headers = SBGEXP_CACHE[0]
+        body = SBGEXP_CACHE[1:]
 
-            return jsonify({
-                "status": "error",
-                "message": "No data received"
-            }), 400
+        row_map = {}
+        for i, r in enumerate(body, start=2):
+            if len(r) >= 5:
+                key = f"{str(r[0]).strip().lower()}|{str(r[1]).strip().lower()}|{str(r[2]).strip().lower()}|{str(r[3]).strip().lower()}|{str(r[4]).strip().lower()}"
+                row_map[key] = i
 
-        # =====================================================
-        # 📥 READ SHEET
-        # =====================================================
-
-        sbg_progress["percent"] = 5
-        sbg_progress["message"] = "Reading SBG Database..."
-
-        data = safe_sheet_call(
-            lambda: sbgexp_sheet.get_all_values()
-        )
-
-        headers = data[0]
-        rows = data[1:]
-
-        # =====================================================
-        # 🔍 LAST UPDATED INDEX
-        # =====================================================
-
-        last_updated_idx = (
-            headers.index("Last Updated")
-            if "Last Updated" in headers else -1
-        )
-
-        # =====================================================
-        # 🔧 NORMALIZE
-        # =====================================================
-
-        def normalize(val):
-
-            if val is None:
-                return ""
-
-            val = (
-                str(val)
-                .replace("₹", "")
-                .replace(",", "")
-                .replace("\r", "")
-                .replace("\n", " ")
-                .strip()
-                .lower()
-            )
-
-            if val in ["true", "yes", "checked", "1"]:
-                return "true"
-
-            if val in ["false", "no", "0", "unchecked"]:
-                return "false"
-
-            if val in ["--", "-"]:
-                return ""
-
-            try:
-                return f"{float(val):.3f}"
-            except:
-                return val
-
-        # =====================================================
-        # 🔥 TRACKERS
-        # =====================================================
-
-        update_cells = []
-
+        updates = []
         new_rows = []
 
-        updated_rows = []
-
-        added_rows = []
-
-        conflicts = []
-
-        # =====================================================
-        # 🔥 PROGRESS
-        # =====================================================
-
-        total_rows = len(edit_rows)
-        processed = 0
-
-        # =====================================================
-        # 🔄 PROCESS ROWS
-        # =====================================================
-
-        for row_obj in edit_rows:
-
-            processed += 1
-
-            progress = int(
-                10 + ((processed / total_rows) * 70)
-            )
-
-            sbg_progress["percent"] = progress
-
-            sbg_progress["message"] = (
-                f"Saving {processed}/{total_rows} rows"
-            )
-
-            row_num = row_obj.get("_RowIndex")
-
-            # =====================================================
-            # 🔄 SYNC MODE
-            # =====================================================
-
-            if mode == "sync":
-
-                matched_row = None
-
-                for idx, existing_row in enumerate(rows):
-
-                    try:
-
-                        while len(existing_row) < len(headers):
-                            existing_row.append("")
-
-                        old_date = normalize(existing_row[0])
-                        old_station = normalize(existing_row[1])
-                        old_bill = normalize(existing_row[2])
-                        old_budget = normalize(existing_row[3])
-                        old_details = normalize(existing_row[4])
-
-                        new_date = normalize(
-                            row_obj.get("Date", "")
-                        )
-
-                        new_station = normalize(
-                            row_obj.get("Station", "")
-                        )
-
-                        new_bill = normalize(
-                            row_obj.get(
-                                "Bill / Invoice Details",
-                                ""
-                            )
-                        )
-
-                        new_budget = normalize(
-                            row_obj.get(
-                                "SBG Expenditure Under",
-                                ""
-                            )
-                        )
-
-                        new_details = normalize(
-                            row_obj.get(
-                                "Expenditure Details",
-                                ""
-                            )
-                        )
-
-                        # =====================================================
-                        # 🔥 MATCH EXISTING ROW
-                        # =====================================================
-
-                        if (
-                            old_date == new_date and
-                            old_station == new_station and
-                            old_bill == new_bill and
-                            old_budget == new_budget and
-                            old_details == new_details
-                        ):
-
-                            matched_row = idx + 2
-                            break
-
-                    except:
-                        pass
-
-                # =====================================================
-                # 🔄 UPDATE EXISTING
-                # =====================================================
-
-                if matched_row:
-
-                    existing_row = rows[matched_row - 2]
-
-                    while len(existing_row) < len(headers):
-                        existing_row.append("")
-
-                    merged_row = existing_row.copy()
-
-                    for col_idx, header in enumerate(headers):
-
-                        if header in row_obj:
-
-                            merged_row[col_idx] = row_obj.get(
-                                header,
-                                ""
-                            )
-
-                    row_changed = False
-
-                    changed_columns = []
-
-                    for i, header in enumerate(headers):
-
-                        if header == "Last Updated":
-                            continue
-
-                        old_val = normalize(
-                            existing_row[i]
-                            if i < len(existing_row)
-                            else ""
-                        )
-
-                        new_val = normalize(
-                            merged_row[i]
-                        )
-
-                        if old_val != new_val:
-
-                            row_changed = True
-
-                            changed_columns.append(header)
-
-                    # ⏭ SKIP NO CHANGE
-                    if not row_changed:
-                        continue
-
-                    # 🔥 UPDATE TIMESTAMP
-                    if last_updated_idx >= 0:
-
-                        merged_row[last_updated_idx] = (
-                            datetime.now().isoformat()
-                        )
-
-                    update_cells.append({
-
-                        "range":
-                            f"A{matched_row}:"
-                            f"{gspread.utils.rowcol_to_a1(matched_row, len(headers))[:-len(str(matched_row))]}"
-                            f"{matched_row}",
-
-                        "values": [merged_row]
-                    })
-
-                    updated_rows.append({
-                        "date": row_obj.get(
-                            "Date",
-                            ""
-                        ),
-                        "station": row_obj.get(
-                            "Station",
-                            ""
-                        ),
-                        "budget": row_obj.get(
-                            "SBG Expenditure Under",
-                            ""
-                        ),
-                        "amount": row_obj.get(
-                            "Expenditure Amount (₹ in 000)",
-                            ""
-                        ),
-
-                        "monthlyCumulative": row_obj.get(
-                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        ),
-
-                        "cumulative": row_obj.get(
-                            "Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        ),
-                        "changedColumns":
-                            changed_columns
-                    })
-
-                # =====================================================
-                # ➕ ADD NEW
-                # =====================================================
-
-                else:
-
-                    new_row = []
-
-                    for header in headers:
-
-                        if header == "Last Updated":
-
-                            new_row.append(
-                                datetime.now().isoformat()
-                            )
-
-                        else:
-
-                            new_row.append(
-                                row_obj.get(header, "")
-                            )
-
-                    new_rows.append(new_row)
-
-                    added_rows.append({
-                        "date": row_obj.get(
-                            "Date",
-                            ""
-                        ),
-                        "station": row_obj.get(
-                            "Station",
-                            ""
-                        ),
-                        "budget": row_obj.get(
-                            "SBG Expenditure Under",
-                            ""
-                        ),
-                        "amount": row_obj.get(
-                            "Expenditure Amount (₹ in 000)",
-                            ""
-                        ),
-
-                        "monthlyCumulative": row_obj.get(
-                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        ),
-
-                        "cumulative": row_obj.get(
-                            "Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        )
-                    })
-
-                continue
-
-            # =====================================================
-            # 🔄 EDIT MODE
-            # =====================================================
-
-            if mode == "edit" and row_num:
-
-                    row_num = int(row_num)
-
-                    existing_row = rows[row_num - 2]
-
-                    while len(existing_row) < len(headers):
-                        existing_row.append("")
-
-                    merged_row = existing_row.copy()
-
-                    # =====================================================
-                    # ⚠️ CONFLICT CHECK
-                    # =====================================================
-
-                    if last_updated_idx >= 0:
-
-                        sheet_timestamp = (
-                            existing_row[last_updated_idx]
-                            if last_updated_idx < len(existing_row)
-                            else ""
-                        )
-
-                        client_timestamp = row_obj.get(
-                            "_lastUpdated",
-                            ""
-                        )
-
-                        if (
-                            client_timestamp
-                            and
-                            sheet_timestamp
-                            and
-                            client_timestamp != sheet_timestamp
-                        ):
-
-                            conflicts.append({
-                                "row": row_num,
-                                "station": row_obj.get(
-                                    "Station",
-                                    ""
-                                )
-                            })
-
-                            continue
-
-                    # =====================================================
-                    # 🔥 MERGE NEW VALUES
-                    # =====================================================
-
-                    for col_idx, header in enumerate(headers):
-
-                        if header in row_obj:
-
-                            merged_row[col_idx] = row_obj.get(
-                                header,
-                                ""
-                            )
-
-                    # =====================================================
-                    # 🔥 CHANGE DETECTION
-                    # =====================================================
-
-                    changed_columns = []
-
-                    row_changed = False
-
-                    ignore_compare = {
-                        "Last Updated",
-                        "_lastUpdated"
-                    }
-
-                    for i, header in enumerate(headers):
-
-                        if header in ignore_compare:
-                            continue
-
-                        old_val = normalize(
-                            existing_row[i]
-                            if i < len(existing_row)
-                            else ""
-                        )
-
-                        new_val = normalize(
-                            merged_row[i]
-                        )
-
-                        if old_val != new_val:
-
-                            changed_columns.append(header)
-
-                            row_changed = True
-
-                    # ⏭ SKIP NO CHANGE
-                    if not row_changed:
-                        continue
-
-                    # 🔥 UPDATE TIMESTAMP
-                    if last_updated_idx >= 0:
-
-                        merged_row[last_updated_idx] = (
-                            datetime.now().isoformat()
-                        )
-
-                    # 🔥 TRACK UPDATED ROW
-                    updated_rows.append({
-
-                        "date": row_obj.get(
-                            "Date",
-                            ""
-                        ),
-
-                        "station": row_obj.get(
-                            "Station",
-                            ""
-                        ),
-
-                        "budget": row_obj.get(
-                            "SBG Expenditure Under",
-                            ""
-                        ),
-
-                        "amount": row_obj.get(
-                            "Expenditure Amount (₹ in 000)",
-                            ""
-                        ),
-
-                        "monthlyCumulative": row_obj.get(
-                            "Monthly Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        ),
-
-                        "cumulative": row_obj.get(
-                            "Cumulative Sum of Expenditure (₹ in 000)",
-                            ""
-                        ),
-
-                        "changedColumns":
-                            changed_columns
-                    })
-
-                    # 🔥 UPDATE SAME ROW
-                    update_cells.append({
-
-                        "range":
-                            f"A{row_num}:"
-                            f"{gspread.utils.rowcol_to_a1(row_num, len(headers))[:-len(str(row_num))]}"
-                            f"{row_num}",
-
-                        "values": [merged_row]
-                    })
-
-            # =====================================================
-            # ➕ ADD MODE
-            # =====================================================
-
-            else:
-
-                new_row = []
-
-                for header in headers:
-
-                    if header == "Last Updated":
-
-                        new_row.append(
-                            datetime.now().isoformat()
-                        )
-
-                    else:
-
-                        new_row.append(
-                            row_obj.get(header, "")
-                        )
-
-                new_rows.append(new_row)
-
-                added_rows.append({
-
-                    "date": row_obj.get(
-                        "Date",
-                        ""
-                    ),
-
-                    "station": row_obj.get(
-                        "Station",
-                        ""
-                    ),
-
-                    "budget": row_obj.get(
-                        "SBG Expenditure Under",
-                        ""
-                    ),
-
-                    "amount": row_obj.get(
-                        "Expenditure Amount (₹ in 000)",
-                        ""
-                    ),
-
-                    "monthlyCumulative": row_obj.get(
-                        "Monthly Cumulative Sum of Expenditure (₹ in 000)",
-                        ""
-                    ),
-
-                    "cumulative": row_obj.get(
-                        "Cumulative Sum of Expenditure (₹ in 000)",
-                        ""
-                    )
+        for obj in edit_rows:
+            key = f"{str(obj.get('Date','')).strip().lower()}|{str(obj.get('Station','')).strip().lower()}|{str(obj.get('Bill / Invoice Details','')).strip().lower()}|{str(obj.get('SBG Expenditure Under','')).strip().lower()}|{str(obj.get('Expenditure Details','')).strip().lower()}"
+            row_data = [obj.get(h, "") for h in headers]
+
+            if key in row_map:
+                row_num = row_map[key]
+                updates.append({
+                    "range": f"A{row_num}",
+                    "values": [row_data]
                 })
+            else:
+                new_rows.append(row_data)
 
-        # =====================================================
-        # ℹ️ NO CHANGES
-        # =====================================================
-
-        if not update_cells and not new_rows:
-
-            sbg_progress["percent"] = 100
-            sbg_progress["message"] = "No Changes"
-
-            return jsonify({
-                "status": "nochange",
-                "message": "No changes detected",
-                "updatedRows": [],
-                "addedRows": []
-            })
-
-
-        # =====================================================
-        # 🔥 APPLY UPDATES
-        # =====================================================
-
-        sbg_progress["percent"] = 85
-        sbg_progress["message"] = "Updating SBG Database..."
-
-        if update_cells:
-
-            safe_sheet_call(
-                lambda: sbgexp_sheet.batch_update(
-                    update_cells,
-                    value_input_option="USER_ENTERED"
-                )
-            )
-
-        # =====================================================
-        # ➕ APPEND NEW
-        # =====================================================
-
-        sbg_progress["percent"] = 92
-        sbg_progress["message"] = "Appending New Rows..."
-
+        if updates:
+            sbgexp_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
+            sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-            safe_sheet_call(
-                lambda: sbgexp_sheet.append_rows(
-                    new_rows
-                )
-            )
-
-        # =====================================================
-        # 🔥 SORT MONTHWISE + DATEWISE
-        # =====================================================
-
-            sbg_progress["percent"] = 96
-            sbg_progress["message"] = (
-                "Organizing SBG Database..."
-            )
-
-            latest_data = safe_sheet_call(
-                lambda: sbgexp_sheet.get_all_values()
-            )
-
-            if latest_data and len(latest_data) > 1:
-
-                headers = latest_data[0]
-
-                body = latest_data[1:]
-
-                # =====================================================
-                # 🔥 DATE PARSER
-                # =====================================================
-
-                def parse_date(val):
-
-                    try:
-
-                        return datetime.strptime(
-                            str(val).strip(),
-                            "%d-%m-%Y"
-                        )
-
-                    except:
-
-                        return datetime.min
-
-                # =====================================================
-                # 🔥 ORIGINAL ORDER
-                # =====================================================
-
-                original_body = body.copy()
-
-                # =====================================================
-                # 🔥 SORTED COPY
-                # =====================================================
-
-                sorted_body = sorted(
-
-                    body,
-
-                    key=lambda r: (
-
-                        # 🔥 DATE
-                        parse_date(
-                            r[0]
-                            if len(r) > 0 else ""
-                        ),
-
-                        # 🔥 STATION
-                        normalize(
-                            r[1]
-                            if len(r) > 1 else ""
-                        ),
-
-                        # 🔥 BUDGET
-                        normalize(
-                            r[3]
-                            if len(r) > 3 else ""
-                        )
-                    )
-                )
-
-                # =====================================================
-                # ℹ️ ALREADY SORTED
-                # =====================================================
-
-                if original_body != sorted_body:
-
-                    safe_sheet_call(
-                        lambda: sbgexp_sheet.update(
-                            [headers] + sorted_body,
-                            value_input_option="USER_ENTERED"
-                        )
-                    )
-
-        # =====================================================
-        # ⚠️ CONFLICT
-        # =====================================================
-
-        if conflicts:
-
-            sbg_progress["percent"] = 100
-            sbg_progress["message"] = "Conflict Found"
-
-            return jsonify({
-                "status": "conflict",
-                "message": (
-                    "Some rows modified "
-                    "by another user"
-                ),
-                "rows": conflicts
-            })
-
-        # =====================================================
-        # ✅ COMPLETE
-        # =====================================================
-
-        sbg_progress["percent"] = 100
-        sbg_progress["message"] = "Completed"
-
-        return jsonify({
-
-            "status": "success",
-
-            "updatedRows":
-                updated_rows,
-
-            "addedRows":
-                added_rows
-        })
-
+        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
-
-        sbg_progress["percent"] = 100
-        sbg_progress["message"] = "Error"
-
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/sbg/bulk-update", methods=["POST"])
 def bulk_update_sbg():
     try:
+        global SBG_CACHE
         req = request.get_json()
         rows = req.get("rows", [])
-
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 📥 Read existing sheet
-        existing_data = sbg_sheet.get_all_values()
-        total_cols = len(existing_data[0])
+        headers = SBG_CACHE[0]
+        total_cols = len(headers)
 
-        # ✅ Convert column number → Excel letter (AA, AB...)
         def col_to_letter(n):
             result = ""
             while n > 0:
@@ -1728,840 +296,187 @@ def bulk_update_sbg():
             return result
 
         end_col = col_to_letter(total_cols)
-        total_rows = len(rows)
-
-        # ✅ Ensure row length matches sheet
         rows = [r[:total_cols] for r in rows]
+        range_name = f"A3:{end_col}{len(rows) + 2}"
 
-        # ✅ Correct range (DATA starts from row 3)
-        range_name = f"A3:{end_col}{total_rows + 2}"
-
-        # 🔥 BULK UPDATE
-        sbg_sheet.batch_update([{
-            "range": range_name,
-            "values": rows
-        }])
-
-        return jsonify({
-            "status": "success",
-            "updated_rows": total_rows
-        })
-
+        sbg_sheet.batch_update([{"range": range_name, "values": rows}], value_input_option="USER_ENTERED")
+        SBG_CACHE = sbg_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-# =========================
-# 🔥 SAVE DUTY DATA
-# =========================
+
 @app.route("/duty/update", methods=["POST"])
 def update_duty():
-
     try:
+        global DUTY_CACHE
         req_data = request.get_json()
-
         rows = req_data.get("data", [])
-
-        role = (
-            req_data.get("role") or ""
-        ).upper()
-
-        # 🔥 TOGGLE MODE
-        # True  = Duty Mode
-        # False = Requirement Mode
-        duty_mode = req_data.get(
-            "dutyMode",
-            False
-        )
+        role = (req_data.get("role") or "").upper()
+        duty_mode = req_data.get("dutyMode", False)
 
         if not rows:
+            return jsonify({"status": "error", "message": "No data"}), 400
 
-            return jsonify({
-                "status": "error",
-                "message": "No data"
-            }), 400
+        headers = DUTY_CACHE[0]
+        body = DUTY_CACHE[2:]
 
-        all_values = duty_sheet.get_all_values()
-
-        headers = all_values[0]
-
-        # =====================================================
-        # 🔥 DATE → ROW MAP
-        # =====================================================
-
-        date_row_map = {}
-
-        for i, r in enumerate(
-            all_values[2:],
-            start=3
-        ):
-
-            if r and r[0].strip():
-
-                date_row_map[
-                    r[0].strip()
-                ] = i
+        date_map = {}
+        for i, r in enumerate(body, start=3):
+            if r and r[0]:
+                date_map[str(r[0]).strip()] = i
 
         updates = []
-
         new_rows = []
 
-        # =====================================================
-        # 🔥 PROCESS ROWS
-        # =====================================================
-
         for obj in rows:
-
             date = obj.get("Date")
-
             if not date:
                 continue
 
-            row_data = [None] * len(headers)
-
+            row_data = [""] * len(headers)
             for idx, h in enumerate(headers):
-
-                # =====================================================
-                # 🔥 DATE COLUMN
-                # =====================================================
-
                 if h == "Date":
-
                     row_data[idx] = date
-
                     continue
 
-                val = obj.get(h)
-
-                # =====================================================
-                # 🔥 MASTER
-                # =====================================================
-
+                val = obj.get(h, "")
                 if role == "MASTER":
+                    if (duty_mode and h.endswith("Duty")) or (not duty_mode and ("Requirement" in h or "lieu" in h)):
+                        row_data[idx] = val
+                elif role == "ENGG" and h.endswith("Duty"):
+                    row_data[idx] = val
+                elif role not in ["MASTER", "ENGG"] and ("Requirement" in h or "lieu" in h):
+                    row_data[idx] = val
 
-                    # 🔥 DUTY MODE
-                    if duty_mode:
-
-                        # ✅ SAVE ONLY DUTY COLUMNS
-                        if h.endswith("Duty"):
-
-                            row_data[idx] = (
-                                val
-                                if val is not None
-                                else ""
-                            )
-
-                    # 🔥 REQUIREMENT MODE
-                    else:
-
-                        # ✅ SAVE REQUIREMENT + LIEU
-                        if (
-                            "Requirement" in h
-                            or "lieu" in h
-                        ):
-
-                            row_data[idx] = (
-                                val
-                                if val is not None
-                                else ""
-                            )
-
-                # =====================================================
-                # 🔥 ENGG
-                # =====================================================
-
-                elif role == "ENGG":
-
-                    # ✅ ALWAYS SAVE ONLY DUTY
-                    if h.endswith("Duty"):
-
-                        row_data[idx] = (
-                            val
-                            if val is not None
-                            else ""
-                        )
-
-                # =====================================================
-                # 🔥 USERS / ADMIN
-                # =====================================================
-
-                else:
-
-                    # ✅ ALWAYS SAVE REQUIREMENT + LIEU
-                    if (
-                        "Requirement" in h
-                        or "lieu" in h
-                    ):
-
-                        row_data[idx] = (
-                            val
-                            if val is not None
-                            else ""
-                        )
-
-            # =====================================================
-            # 🔥 UPDATE EXISTING ROW
-            # =====================================================
-
-            if date in date_row_map:
-
-                row_index = date_row_map[date]
-
-                for col_idx, value in enumerate(
-                    row_data,
-                    start=1
-                ):
-
-                    # 🔥 SKIP UNTOUCHED
-                    if value is None:
-                        continue
-
-                    updates.append({
-
-                        "range":
-                        gspread.utils.rowcol_to_a1(
-                            row_index,
-                            col_idx
-                        ),
-
-                        "values": [[value]]
-                    })
-
-            # =====================================================
-            # 🔥 NEW ROW
-            # =====================================================
-
+            if date in date_map:
+                row_num = date_map[date]
+                updates.append({
+                    "range": f"A{row_num}",
+                    "values": [row_data]
+                })
             else:
-
-                new_rows.append([
-                    v if v is not None else ""
-                    for v in row_data
-                ])
-
-        # =====================================================
-        # 🔥 BATCH UPDATE
-        # =====================================================
+                new_rows.append(row_data)
 
         if updates:
-
-            duty_sheet.batch_update(
-                updates
-            )
-
-        # =====================================================
-        # 🔥 APPEND NEW ROWS
-        # =====================================================
-
+            duty_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
+            duty_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-            duty_sheet.append_rows(
-                new_rows
-            )
-
-        return jsonify({
-            "status": "success"
-        })
-
+        DUTY_CACHE = duty_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-
-# =========================================
-# 🔥 UPDATE EB DATA
-# =========================================
 
 @app.route("/eb/update", methods=["POST"])
 def update_eb():
-
     try:
-
+        global EB_CACHE
         req_data = request.get_json()
-
         rows = req_data.get("data", [])
-
         if not rows:
-            return jsonify({
-                "status": "error",
-                "message": "No data received"
-            }), 400
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # =========================================
-        # 🔥 READ SHEET
-        # =========================================
-
-        all_values = eb_sheet.get_all_values()
-
-        if not all_values:
-            return jsonify({
-                "status": "error",
-                "message": "Sheet empty"
-            }), 400
-
-        headers = all_values[0]
-        data_rows = all_values[1:]
-
-        # =========================================
-        # 🔥 COLUMN INDEXES
-        # =========================================
-
+        headers = EB_CACHE[0]
+        body = EB_CACHE[1:]
         month_idx = headers.index("Month-Year") if "Month-Year" in headers else -1
         station_idx = headers.index("EB Station") if "EB Station" in headers else -1
 
-        # =========================================
-        # 🔥 CLEAN FUNCTION
-        # =========================================
-
-        def clean(val):
-            return str(val or "").strip().lower()
-
-        # =========================================
-        # 🔥 BUILD EXISTING ROW MAP
-        # =========================================
-
         row_map = {}
-
-        for i, row in enumerate(data_rows, start=2):
-
-            key = ""
-
-            if month_idx >= 0:
-                key += clean(row[month_idx] if month_idx < len(row) else "")
-
-            if station_idx >= 0:
-                key += "|" + clean(row[station_idx] if station_idx < len(row) else "")
-
-            row_map[key] = {
-                "row_num": i,
-                "row_data": row
-            }
-
-        # =========================================
-        # 🔥 TRACKERS
-        # =========================================
+        for i, r in enumerate(body, start=2):
+            key = f"{str(r[month_idx]).strip().lower()}|{str(r[station_idx]).strip().lower()}"
+            row_map[key] = i
 
         updates = []
         new_rows = []
-        updated_rows = []
-        added_rows = []
-        skipped_rows = []
-
-        # =========================================
-        # 🔥 PROCESS ROWS
-        # =========================================
 
         for obj in rows:
-
-            key = ""
-
-            if month_idx >= 0:
-                key += clean(obj.get("Month-Year"))
-
-            if station_idx >= 0:
-                key += "|" + clean(obj.get("EB Station"))
-
+            key = f"{str(obj.get('Month-Year','')).strip().lower()}|{str(obj.get('EB Station','')).strip().lower()}"
             row_data = [obj.get(h, "") for h in headers]
 
-            # =====================================
-            # 🔥 UPDATE EXISTING
-            # =====================================
-
             if key in row_map:
-
-                existing = row_map[key]
-
-                row_num = existing["row_num"]
-
-                existing_row = existing["row_data"]
-
-                existing_clean = [clean(x) for x in existing_row]
-                new_clean = [clean(x) for x in row_data]
-
-                # =================================
-                # ⏭ NO CHANGE
-                # =================================
-
-                if existing_clean == new_clean:
-
-                    skipped_rows.append({
-                        "month": obj.get("Month-Year", ""),
-                        "station": obj.get("EB Station", "")
-                    })
-
-                    continue
-
-                # =================================
-                # 🔥 CHANGED COLUMNS
-                # =================================
-
-                changed_columns = []
-
-                for idx, header in enumerate(headers):
-
-                    old_val = clean(existing_row[idx]) if idx < len(existing_row) else ""
-                    new_val = clean(row_data[idx])
-
-                    if old_val != new_val:
-                        changed_columns.append(header)
-
-                # =================================
-                # 🔥 UPDATE
-                # =================================
-
+                row_num = row_map[key]
                 updates.append({
                     "range": f"A{row_num}",
                     "values": [row_data]
                 })
-
-                updated_rows.append({
-                    "month": obj.get("Month-Year", ""),
-                    "station": obj.get("EB Station", ""),
-                    "reference": obj.get("Reference", ""),
-                    "finalAmount": obj.get("Final Amount", 0),
-                    "changedColumns": changed_columns
-                })
-
-            # =====================================
-            # ➕ NEW ROW
-            # =====================================
-
             else:
-
                 new_rows.append(row_data)
 
-                added_rows.append({
-                    "month": obj.get("Month-Year", ""),
-                    "station": obj.get("EB Station", ""),
-                    "reference": obj.get("Reference", ""),
-                    "finalAmount": obj.get("Final Amount", 0)
-                })
-
-        # =========================================
-        # 🔥 APPLY UPDATES
-        # =========================================
-
         if updates:
-
-            eb_sheet.batch_update(
-                updates,
-                value_input_option="USER_ENTERED"
-            )
-
-        # =========================================
-        # ➕ APPEND NEW ROWS
-        # =========================================
-
+            eb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
+            eb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-            eb_sheet.append_rows(
-                new_rows,
-                value_input_option="USER_ENTERED"
-            )
-
-        # =========================================
-        # 🔥 SORT MONTHWISE ONLY
-        # =========================================
-
-            latest_data = eb_sheet.get_all_values()
-
-            if latest_data and len(latest_data) > 1:
-
-                headers = latest_data[0]
-
-                body = latest_data[1:]
-
-                # =====================================
-                # 🔥 MONTH PARSER
-                # =====================================
-
-                def parse_month(val):
-
-                    try:
-
-                        return datetime.strptime(
-                            str(val).strip(),
-                            "%b-%Y"
-                        )
-
-                    except:
-
-                        return datetime.min
-
-                # =====================================
-                # 🔥 ORIGINAL ORDER
-                # =====================================
-
-                original_body = body.copy()
-
-                # =====================================
-                # 🔥 SORTED COPY
-                # =====================================
-
-                sorted_body = sorted(
-
-                    body,
-
-                    key=lambda r:
-
-                        parse_month(
-                            r[month_idx]
-                            if month_idx >= 0 and month_idx < len(r)
-                            else ""
-                        )
-                )
-
-                # =====================================
-                # ℹ️ ALREADY SORTED
-                # =====================================
-
-                if original_body != sorted_body:
-
-                    eb_sheet.update(
-                        [headers] + sorted_body,
-                        value_input_option="USER_ENTERED"
-                    )
-
-        # =========================================
-        # ℹ️ NO CHANGES
-        # =========================================
-
-        if not updates and not new_rows:
-
-            return jsonify({
-                "status": "nochange",
-                "message": "No changes detected",
-                "updated": [],
-                "added": [],
-                "skipped": skipped_rows
-            })
-
-        # =========================================
-        # ✅ SUCCESS
-        # =========================================
-
-        return jsonify({
-            "status": "success",
-            "updated": updated_rows,
-            "added": added_rows,
-            "skipped": skipped_rows
-        })
-
+        EB_CACHE = eb_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-
-# =========================================
-# 🔥 UPDATE DG DATA
-# =========================================
 
 @app.route("/dg/update", methods=["POST"])
 def update_dg():
-
     try:
-
+        global DG_CACHE
         req_data = request.get_json()
-
         rows = req_data.get("data", [])
-
         if not rows:
-            return jsonify({
-                "status": "error",
-                "message": "No data received"
-            }), 400
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # =========================================
-        # 🔥 READ SHEET
-        # =========================================
-
-        all_values = dg_sheet.get_all_values()
-
-        if not all_values:
-            return jsonify({
-                "status": "error",
-                "message": "Sheet empty"
-            }), 400
-
-        headers = all_values[0]
-
-        data_rows = all_values[1:]
-
-        # =========================================
-        # 🔥 DURATION COLUMNS
-        # =========================================
-
-        duration_cols = {
-            "Total Duration",
-            "Progressive Test",
-            "Progressive Failure",
-            "Total Progressive"
-        }
-
-        # =========================================
-        # 🔥 COLUMN INDEXES
-        # =========================================
-
-        entry_idx = headers.index("Entry ID") \
-            if "Entry ID" in headers else -1
-
-        # =========================================
-        # 🔥 CLEAN
-        # =========================================
-
-        def clean(val):
-            return str(val or "").strip().lower()
-
-        # =========================================
-        # 🔥 BUILD ROW MAP
-        # KEY = ENTRY ID
-        # =========================================
+        headers = DG_CACHE[0]
+        body = DG_CACHE[1:]
+        entry_idx = headers.index("Entry ID") if "Entry ID" in headers else -1
 
         row_map = {}
-
-        for i, row in enumerate(data_rows, start=2):
-
-            if entry_idx < 0:
-                continue
-
-            entry_id = clean(
-                row[entry_idx]
-                if entry_idx < len(row)
-                else ""
-            )
-
-            if entry_id:
-                row_map[entry_id] = {
-                    "row_num": i,
-                    "row_data": row
-                }
-
-        # =========================================
-        # 🔥 TRACKERS
-        # =========================================
+        for i, r in enumerate(body, start=2):
+            row_map[str(r[entry_idx]).strip().lower()] = i
 
         updates = []
-
         new_rows = []
 
-        updated_rows = []
-
-        added_rows = []
-
-        skipped_rows = []
-
-        # =========================================
-        # 🔥 PROCESS ROWS
-        # =========================================
-
         for obj in rows:
-
-            entry_id = clean(obj.get("Entry ID"))
-
-            # =====================================
-            # 🔥 BUILD ROW DATA
-            # =====================================
-
-            row_data = []
-
-            for h in headers:
-
-                val = obj.get(h, "")
-
-                # =================================
-                # 🔥 KEEP FORMULAS
-                # =================================
-
-                if h in duration_cols or h == "Sr No":
-                    val = str(val)
-
-                row_data.append(val)
-
-            # =====================================
-            # 🔥 UPDATE EXISTING
-            # =====================================
+            entry_id = str(obj.get("Entry ID", "")).strip().lower()
+            row_data = [str(obj.get(h, "")) for h in headers]
 
             if entry_id in row_map:
-
-                existing = row_map[entry_id]
-
-                row_num = existing["row_num"]
-
-                existing_row = existing["row_data"]
-
-                existing_clean = [
-                    clean(x)
-                    for x in existing_row
-                ]
-
-                new_clean = [
-                    clean(x)
-                    for x in row_data
-                ]
-
-                # =================================
-                # ⏭ NO CHANGE
-                # =================================
-
-                if existing_clean == new_clean:
-
-                    skipped_rows.append({
-                        "entryId": entry_id,
-                        "date": obj.get("Date", ""),
-                        "station": obj.get("Station", "")
-                    })
-
-                    continue
-
-                # =================================
-                # 🔥 CHANGED COLUMNS
-                # =================================
-
-                changed_columns = []
-
-                for idx, header in enumerate(headers):
-
-                    old_val = clean(
-                        existing_row[idx]
-                    ) if idx < len(existing_row) else ""
-
-                    new_val = clean(row_data[idx])
-
-                    if old_val != new_val:
-                        changed_columns.append(header)
-
-                # =================================
-                # 🔥 UPDATE
-                # =================================
-
+                row_num = row_map[entry_id]
                 updates.append({
                     "range": f"A{row_num}",
                     "values": [row_data]
                 })
-
-                updated_rows.append({
-                    "entryId": entry_id,
-                    "date": obj.get("Date", ""),
-                    "station": obj.get("Station", ""),
-                    "dgName": obj.get("DG Name", ""),
-                    "changedColumns": changed_columns
-                })
-
-            # =====================================
-            # ➕ NEW ROW
-            # =====================================
-
             else:
-
                 new_rows.append(row_data)
 
-                added_rows.append({
-                    "entryId": entry_id,
-                    "date": obj.get("Date", ""),
-                    "station": obj.get("Station", ""),
-                    "dgName": obj.get("DG Name", "")
-                })
-
-        # =========================================
-        # 🔥 APPLY UPDATES
-        # =========================================
-
         if updates:
-
-            dg_sheet.batch_update(
-                updates,
-                value_input_option="USER_ENTERED"
-            )
-
-        # =========================================
-        # ➕ APPEND NEW ROWS
-        # =========================================
-
+            dg_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
+            dg_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-            dg_sheet.append_rows(
-                new_rows,
-                value_input_option="USER_ENTERED"
-            )
-
-        # =========================================
-        # ℹ️ NO CHANGES
-        # =========================================
-
-        if not updates and not new_rows:
-
-            return jsonify({
-                "status": "nochange",
-                "message": "No changes detected",
-                "updated": [],
-                "added": [],
-                "skipped": skipped_rows
-            })
-
-        # =========================================
-        # ✅ SUCCESS
-        # =========================================
-
-        return jsonify({
-            "status": "success",
-            "updated": updated_rows,
-            "added": added_rows,
-            "skipped": skipped_rows
-        })
-
+        DG_CACHE = dg_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
-
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/health")
 def health():
     return "OK", 200
 
-# =========================
-# RUN SERVER
-# =========================
-
-SELF_URL = os.environ.get(
-    "SELF_URL",
-    "https://office-management-f425.onrender.com/health"
-)
+# =========================================================
+# 🔄 SILENT BACKGROUND SELF-PING
+# =========================================================
+SELF_URL = os.environ.get("SELF_URL", "https://office-management-f425.onrender.com/health")
 
 def self_ping():
-
     while True:
-
         try:
-            requests.get(
-                SELF_URL,
-                timeout=15
-            )
-
-        except: pass
-        # 10 minutes
+            requests.get(SELF_URL, timeout=15)
+        except Exception:
+            pass
         time.sleep(600)
 
 if __name__ == "__main__":
-    port = int(
-        os.environ.get("PORT", 5000)
-    )
-
-    # 🔥 SELF PING
+    port = int(os.environ.get("PORT", 5000))
     threading.Thread(target=self_ping, daemon=True).start()
-
-    app.run(
-        host="0.0.0.0",
-        port=port,
-        threaded=True,
-        debug=False
-    )
+    app.run(host="0.0.0.0", port=port, threaded=True, debug=False)
