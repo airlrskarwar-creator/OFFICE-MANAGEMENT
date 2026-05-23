@@ -268,9 +268,6 @@ def get_eb():
 def get_duty():
     return jsonify(sheet_to_json(duty_sheet))
 
-
-
-
 @app.route("/esr", methods=["GET"])
 def get_esr():
     return jsonify(sheet_to_json(esr_sheet))
