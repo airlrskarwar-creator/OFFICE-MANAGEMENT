@@ -580,7 +580,6 @@ def update_eb():
         return jsonify({"status": "success", "updated": updated, "added": added})
 
     except Exception as e:
-        print(f"❌ EB Update Error: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -645,7 +644,61 @@ def update_dg():
         return jsonify({"status": "success", "updated": updated, "added": added})
 
     except Exception as e:
-        print(f"❌ DG Update Error: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/fetch/dg", methods=["GET"])
+def refresh_dg():
+    global DG_CACHE
+    try:
+        DG_CACHE = dg_sheet.get("A:ZZ")
+        return jsonify({"headers": DG_CACHE[0], "rows": DG_CACHE[1:]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch/eb", methods=["GET"])
+def refresh_eb():
+    global EB_CACHE
+    try:
+        EB_CACHE = eb_sheet.get("A:ZZ")
+        return jsonify({"headers": EB_CACHE[0], "rows": EB_CACHE[1:]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch/pb", methods=["GET"])
+def refresh_pb():
+    global PB_CACHE
+    try:
+        PB_CACHE = pb_sheet.get("A:ZZ")
+        return jsonify({"headers": PB_CACHE[0], "rows": PB_CACHE[1:]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch/duty", methods=["GET"])
+def refresh_duty():
+    global DUTY_CACHE
+    try:
+        DUTY_CACHE = duty_sheet.get("A:ZZ")
+        return jsonify({"headers": DUTY_CACHE[0], "rows": DUTY_CACHE[1:]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch/sbg", methods=["GET"])
+def refresh_sbg():
+    global SBG_CACHE
+    try:
+        SBG_CACHE = sbg_sheet.get("A:ZZ")
+        return jsonify({"headers": SBG_CACHE[0], "rows": SBG_CACHE[1:]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch/sbgexp", methods=["GET"])
+def refresh_sbgexp():
+    global SBGEXP_CACHE
+    try:
+        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+        return jsonify({"headers": SBGEXP_CACHE[0], "rows": SBGEXP_CACHE[1:]})
+    except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
