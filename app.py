@@ -2527,25 +2527,36 @@ def update_dg():
 @app.route("/health")
 def health():
     return "OK", 200
-    # =========================
+
+# =========================
 # RUN SERVER
 # =========================
-SELF_URL = os.environ.get("SELF_URL", "https://office-management-f425.onrender.com/health")
+
+SELF_URL = os.environ.get(
+    "SELF_URL",
+    "https://office-management-f425.onrender.com/health"
+)
 
 def self_ping():
-    while True:
-        try:
-            res = requests.get(SELF_URL)
-            print(f"[SELF-PING] {res.status_code}")
-        except Exception as e:
-            print("[SELF-PING ERROR]", e)
 
-        time.sleep(600)  # 10 minutes
+    while True:
+
+        try:
+            requests.get(
+                SELF_URL,
+                timeout=15
+            )
+
+        except: pass
+        # 10 minutes
+        time.sleep(600)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(
+        os.environ.get("PORT", 5000)
+    )
 
-    # 🔥 start self-ping thread
+    # 🔥 SELF PING
     threading.Thread(target=self_ping, daemon=True).start()
 
     app.run(
