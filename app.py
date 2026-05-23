@@ -64,10 +64,6 @@ def safe_sheet_call(func, retries=5, delay=2):
             requests.exceptions.RequestException
         ) as e:
 
-            print(f"🔁 GOOGLE API RETRY {attempt + 1}/{retries}")
-
-            print("ERROR:", str(e))
-
             last_error = e
 
             time.sleep(delay)
@@ -404,11 +400,6 @@ def login():
 
     except Exception as e:
 
-        print(
-            "❌ LOGIN ERROR:",
-            str(e)
-        )
-
         return jsonify({
 
             "success": False,
@@ -446,13 +437,9 @@ def pb_progress_stream():
 
                 time.sleep(0.5)
 
-            except GeneratorExit:
-                print("🔌 SSE disconnected")
-                break
+            except GeneratorExit: break
 
-            except Exception as e:
-                print("❌ SSE ERROR:", str(e))
-                break
+            except Exception as e:break
 
     return Response(
         stream_with_context(generate()),
@@ -487,9 +474,6 @@ def update_pb():
         req_data = request.get_json()
 
         edit_rows = req_data.get("data", [])
-
-        print("🔥 PB UPDATE HIT")
-        print("🔥 ROW COUNT:", len(edit_rows))
 
         if not edit_rows:
 
@@ -588,8 +572,6 @@ def update_pb():
                 key += f"|{clean(r[hris_idx])}"
 
             row_map[key] = i + 2
-
-        print("🔥 ROW MAP COUNT:", len(row_map))
 
         # =========================
         # 🔥 TRACKERS
@@ -929,11 +911,6 @@ def update_pb():
         pb_progress["percent"] = 100
         pb_progress["message"] = "Error"
 
-        print(
-            "❌ PB UPDATE ERROR:",
-            str(e)
-        )
-
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -966,13 +943,9 @@ def sbg_progress_stream():
 
                 time.sleep(0.5)
 
-            except GeneratorExit:
-                print("🔌 SBG SSE disconnected")
-                break
+            except GeneratorExit: break
 
-            except Exception as e:
-                print("❌ SBG SSE ERROR:", str(e))
-                break
+            except Exception as e: break
 
     return Response(
         stream_with_context(generate()),
@@ -1010,10 +983,6 @@ def update_sbgexp():
         edit_rows = req_data.get("data", [])
 
         mode = req_data.get("mode", "sync")
-
-        print("🔥 SBG UPDATE HIT")
-        print("🔥 MODE:", mode)
-        print("🔥 ROW COUNT:", len(edit_rows))
 
         if not edit_rows:
 
@@ -1350,8 +1319,6 @@ def update_sbgexp():
 
             if mode == "edit" and row_num:
 
-                try:
-
                     row_num = int(row_num)
 
                     existing_row = rows[row_num - 2]
@@ -1502,13 +1469,6 @@ def update_sbgexp():
                         "values": [merged_row]
                     })
 
-                except Exception as inner_err:
-
-                    print(
-                        "❌ ROW UPDATE ERROR:",
-                        str(inner_err)
-                    )
-
             # =====================================================
             # ➕ ADD MODE
             # =====================================================
@@ -1618,8 +1578,6 @@ def update_sbgexp():
         # 🔥 SORT MONTHWISE + DATEWISE
         # =====================================================
 
-        try:
-
             sbg_progress["percent"] = 96
             sbg_progress["message"] = (
                 "Organizing SBG Database..."
@@ -1701,24 +1659,6 @@ def update_sbgexp():
                         )
                     )
 
-                    print(
-                        "✅ SBG DATABASE SORTED"
-                    )
-
-                else:
-
-                    print(
-                        "ℹ️ SBG already sorted"
-                    )
-
-        except Exception as sort_err:
-
-            print(
-                "❌ SBG SORT ERROR:",
-                str(sort_err)
-            )
-
-
         # =====================================================
         # ⚠️ CONFLICT
         # =====================================================
@@ -1760,11 +1700,6 @@ def update_sbgexp():
         sbg_progress["percent"] = 100
         sbg_progress["message"] = "Error"
 
-        print(
-            "❌ SBG UPDATE ERROR:",
-            str(e)
-        )
-
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -1795,17 +1730,11 @@ def bulk_update_sbg():
         end_col = col_to_letter(total_cols)
         total_rows = len(rows)
 
-        print("🔥 API HIT")
-        print("🔥 Rows received:", total_rows)
-        print("🔥 Sample row:", rows[0])
-
         # ✅ Ensure row length matches sheet
         rows = [r[:total_cols] for r in rows]
 
         # ✅ Correct range (DATA starts from row 3)
         range_name = f"A3:{end_col}{total_rows + 2}"
-
-        print("📊 Updating Range:", range_name)
 
         # 🔥 BULK UPDATE
         sbg_sheet.batch_update([{
@@ -1819,7 +1748,6 @@ def bulk_update_sbg():
         })
 
     except Exception as e:
-        print("❌ ERROR:", str(e))
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -2057,9 +1985,6 @@ def update_eb():
 
         rows = req_data.get("data", [])
 
-        print("🔥 EB UPDATE HIT")
-        print("🔥 ROW COUNT:", len(rows))
-
         if not rows:
             return jsonify({
                 "status": "error",
@@ -2116,8 +2041,6 @@ def update_eb():
                 "row_data": row
             }
 
-        print("🔥 EXISTING ROWS:", len(row_map))
-
         # =========================================
         # 🔥 TRACKERS
         # =========================================
@@ -2169,8 +2092,6 @@ def update_eb():
                         "month": obj.get("Month-Year", ""),
                         "station": obj.get("EB Station", "")
                     })
-
-                    print("⏭ SKIPPED:", key)
 
                     continue
 
@@ -2231,8 +2152,6 @@ def update_eb():
                 value_input_option="USER_ENTERED"
             )
 
-            print("✅ UPDATED:", len(updates))
-
         # =========================================
         # ➕ APPEND NEW ROWS
         # =========================================
@@ -2244,13 +2163,9 @@ def update_eb():
                 value_input_option="USER_ENTERED"
             )
 
-            print("✅ ADDED:", len(new_rows))
-
         # =========================================
         # 🔥 SORT MONTHWISE ONLY
         # =========================================
-
-        try:
 
             latest_data = eb_sheet.get_all_values()
 
@@ -2311,23 +2226,6 @@ def update_eb():
                         value_input_option="USER_ENTERED"
                     )
 
-                    print(
-                        "✅ EB DATABASE SORTED"
-                    )
-
-                else:
-
-                    print(
-                        "ℹ️ EB already sorted"
-                    )
-
-        except Exception as sort_err:
-
-            print(
-                "❌ EB SORT ERROR:",
-                str(sort_err)
-            )
-
         # =========================================
         # ℹ️ NO CHANGES
         # =========================================
@@ -2355,8 +2253,6 @@ def update_eb():
 
     except Exception as e:
 
-        print("❌ EB UPDATE ERROR:", str(e))
-
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -2375,9 +2271,6 @@ def update_dg():
         req_data = request.get_json()
 
         rows = req_data.get("data", [])
-
-        print("🔥 DG UPDATE HIT")
-        print("🔥 ROW COUNT:", len(rows))
 
         if not rows:
             return jsonify({
@@ -2449,8 +2342,6 @@ def update_dg():
                     "row_num": i,
                     "row_data": row
                 }
-
-        print("🔥 EXISTING ROWS:", len(row_map))
 
         # =========================================
         # 🔥 TRACKERS
@@ -2527,8 +2418,6 @@ def update_dg():
                         "station": obj.get("Station", "")
                     })
 
-                    print("⏭ SKIPPED:", entry_id)
-
                     continue
 
                 # =================================
@@ -2591,8 +2480,6 @@ def update_dg():
                 value_input_option="USER_ENTERED"
             )
 
-            print("✅ UPDATED:", len(updates))
-
         # =========================================
         # ➕ APPEND NEW ROWS
         # =========================================
@@ -2603,8 +2490,6 @@ def update_dg():
                 new_rows,
                 value_input_option="USER_ENTERED"
             )
-
-            print("✅ ADDED:", len(new_rows))
 
         # =========================================
         # ℹ️ NO CHANGES
@@ -2632,8 +2517,6 @@ def update_dg():
         })
 
     except Exception as e:
-
-        print("❌ DG UPDATE ERROR:", str(e))
 
         return jsonify({
             "status": "error",
