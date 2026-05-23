@@ -181,7 +181,7 @@ hsd_sheet = diesel_file.worksheet("HSDlog")
 eb_sheet = eb_file.worksheet("EBlog")
 
 # 🔥 ESR LOG
-esr_sheet = eb_file.worksheet("ESR")
+esr_sheet = esr_file.worksheet("ESR")
 
 
 # =========================================================
@@ -202,13 +202,13 @@ it_sheet = ref_file.worksheet("ITDB")
 # TRANSMISSION DATABASE SHEETS
 # =========================================================
 
-pb_sheet = ref_file.worksheet("PBS")
+pb_sheet = txn_file.worksheet("PBS")
 
-txn_sheet = ref_file.worksheet("Transmitter")
+txn_sheet = txn_file.worksheet("Transmitter")
 
-mp_sheet = ref_file.worksheet("MPS")
+mp_sheet = txn_file.worksheet("MPS")
 
-ch_sheet = ref_file.worksheet("RelayedChannel")
+ch_sheet = txn_file.worksheet("RelayedChannel")
 
 # =========================
 # API ROUTES
