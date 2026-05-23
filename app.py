@@ -186,49 +186,108 @@ def update_pb():
         global PB_CACHE
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
+
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
         headers = PB_CACHE[0]
         body = PB_CACHE[1:]
+
         month_idx = headers.index("Salary Month")
         hris_idx = headers.index("HRIS") if "HRIS" in headers else -1
 
+        # 1. Build a map of existing data for quick lookups
         row_map = {}
-        for i, r in enumerate(body, start=2):
+        for i, r in enumerate(body, start=2): # start=2 because Google Sheets is 1-indexed & header is row 1
             key = str(r[month_idx]).strip().lower()
             if hris_idx >= 0 and hris_idx < len(r):
                 key += f"|{str(r[hris_idx]).strip().lower()}"
-            row_map[key] = i
+
+            # Store both the row number and the actual existing row data
+            row_map[key] = {"row_num": i, "data": r}
 
         updates = []
         new_rows = []
 
+        # Track for frontend alerts
+        updated_employees = []
+        added_employees = []
+
+        # 2. Iterate through incoming frontend data
         for obj in edit_rows:
-            key = str(obj.get("Salary Month", "")).strip().lower()
+            emp_name = str(obj.get("Employee Name", "Unknown")).strip()
+            sal_month = str(obj.get("Salary Month", "")).strip()
+
+            key = sal_month.lower()
             if hris_idx >= 0:
                 key += f"|{str(obj.get('HRIS', '')).strip().lower()}"
 
+            # Format incoming row to strictly match header order
             row_data = [obj.get(h, "") for h in headers]
 
             if key in row_map:
-                row_num = row_map[key]
-                updates.append({
-                    "range": f"A{row_num}",
-                    "values": [row_data]
-                })
-            else:
-                new_rows.append(row_data)
+                # --- UPDATE LOGIC ---
+                row_num = row_map[key]["row_num"]
+                existing_data = row_map[key]["data"]
 
+                # Pad existing data if the cached row is physically shorter than headers array
+                padded_existing = existing_data + [""] * (len(headers) - len(existing_data))
+
+                changed_cols = []
+
+                # Compare column by column
+                for col_idx, h in enumerate(headers):
+                    old_val = str(padded_existing[col_idx]).strip()
+                    new_val = str(row_data[col_idx]).strip()
+
+                    if old_val != new_val:
+                        changed_cols.append(h)
+
+                # Only queue the update if there is a real difference
+                if changed_cols:
+                    updates.append({
+                        "range": f"A{row_num}",
+                        "values": [row_data]
+                    })
+                    updated_employees.append({
+                        "employee": emp_name,
+                        "month": sal_month,
+                        "changedColumns": changed_cols
+                    })
+            else:
+                # --- ADD LOGIC ---
+                new_rows.append(row_data)
+                added_employees.append({
+                    "employee": emp_name,
+                    "month": sal_month
+                })
+
+        # 3. Check if anything actually needs to be written to Google Sheets
+        if not updates and not new_rows:
+            return jsonify({"status": "nochange"})
+
+        # 4. Commit to Database
         if updates:
             pb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
             pb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
+        # 5. Refresh Cache
         PB_CACHE = pb_sheet.get("A:ZZ")
-        return jsonify({"status": "success"})
+
+        # 6. Send detailed success payload to frontend
+        return jsonify({
+            "status": "success",
+            "updatedEmployees": updated_employees,
+            "addedEmployees": added_employees
+        })
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print("❌ PB Update Error:", str(e))
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 @app.route("/sbgexp/update", methods=["POST"])
@@ -237,41 +296,38 @@ def update_sbgexp():
         global SBGEXP_CACHE
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        if not edit_rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+        if not edit_rows: return jsonify({"status": "error", "message": "No data"}), 400
 
         headers = SBGEXP_CACHE[0]
         body = SBGEXP_CACHE[1:]
-
         row_map = {}
         for i, r in enumerate(body, start=2):
             if len(r) >= 5:
                 key = f"{str(r[0]).strip().lower()}|{str(r[1]).strip().lower()}|{str(r[2]).strip().lower()}|{str(r[3]).strip().lower()}|{str(r[4]).strip().lower()}"
-                row_map[key] = i
+                row_map[key] = {"row_num": i, "data": r}
 
-        updates = []
-        new_rows = []
+        updates, new_rows = [], []
+        updated_list, added_list = [], []
 
         for obj in edit_rows:
             key = f"{str(obj.get('Date','')).strip().lower()}|{str(obj.get('Station','')).strip().lower()}|{str(obj.get('Bill / Invoice Details','')).strip().lower()}|{str(obj.get('SBG Expenditure Under','')).strip().lower()}|{str(obj.get('Expenditure Details','')).strip().lower()}"
-            row_data = [obj.get(h, "") for h in headers]
+            row_data = [str(obj.get(h, "")) for h in headers]
 
             if key in row_map:
-                row_num = row_map[key]
-                updates.append({
-                    "range": f"A{row_num}",
-                    "values": [row_data]
-                })
+                old_row = row_map[key]["data"]
+                changed_cols = [headers[i] for i in range(len(headers)) if str(old_row[i]).strip() != str(row_data[i]).strip()]
+                if changed_cols:
+                    updates.append({"range": f"A{row_map[key]['row_num']}", "values": [row_data]})
+                    updated_list.append({"info": key, "changedColumns": changed_cols})
             else:
                 new_rows.append(row_data)
+                added_list.append({"info": key})
 
-        if updates:
-            sbgexp_sheet.batch_update(updates, value_input_option="USER_ENTERED")
-        if new_rows:
-            sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
-
+        if not updates and not new_rows: return jsonify({"status": "nochange"})
+        if updates: sbgexp_sheet.batch_update(updates, value_input_option="USER_ENTERED")
+        if new_rows: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
         SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "updated": updated_list, "added": added_list})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -374,43 +430,37 @@ def update_eb():
     try:
         global EB_CACHE
         req_data = request.get_json()
-        rows = req_data.get("data", [])
-        if not rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+        edit_rows = req_data.get("data", [])
 
         headers = EB_CACHE[0]
-        body = EB_CACHE[1:]
-        month_idx = headers.index("Month-Year") if "Month-Year" in headers else -1
-        station_idx = headers.index("EB Station") if "EB Station" in headers else -1
+        month_idx = headers.index("Month-Year")
+        station_idx = headers.index("EB Station")
 
-        row_map = {}
-        for i, r in enumerate(body, start=2):
-            key = f"{str(r[month_idx]).strip().lower()}|{str(r[station_idx]).strip().lower()}"
-            row_map[key] = i
+        row_map = {f"{str(r[month_idx]).strip().lower()}|{str(r[station_idx]).strip().lower()}": {"row_num": i, "data": r}
+                   for i, r in enumerate(EB_CACHE[1:], start=2)}
 
-        updates = []
-        new_rows = []
+        updates, new_rows = [], []
+        updated, added = [], []
 
-        for obj in rows:
+        for obj in edit_rows:
             key = f"{str(obj.get('Month-Year','')).strip().lower()}|{str(obj.get('EB Station','')).strip().lower()}"
-            row_data = [obj.get(h, "") for h in headers]
+            row_data = [str(obj.get(h, "")) for h in headers]
 
             if key in row_map:
-                row_num = row_map[key]
-                updates.append({
-                    "range": f"A{row_num}",
-                    "values": [row_data]
-                })
+                old_row = row_map[key]["data"]
+                changed = [headers[i] for i in range(len(headers)) if str(old_row[i]).strip() != str(row_data[i]).strip()]
+                if changed:
+                    updates.append({"range": f"A{row_map[key]['row_num']}", "values": [row_data]})
+                    updated.append({"month": obj.get('Month-Year'), "changedColumns": changed})
             else:
                 new_rows.append(row_data)
+                added.append({"month": obj.get('Month-Year')})
 
-        if updates:
-            eb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
-        if new_rows:
-            eb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
-
+        if not updates and not new_rows: return jsonify({"status": "nochange"})
+        if updates: eb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
+        if new_rows: eb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
         EB_CACHE = eb_sheet.get("A:ZZ")
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "updated": updated, "added": added})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -420,41 +470,35 @@ def update_dg():
     try:
         global DG_CACHE
         req_data = request.get_json()
-        rows = req_data.get("data", [])
-        if not rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+        edit_rows = req_data.get("data", [])
 
         headers = DG_CACHE[0]
-        body = DG_CACHE[1:]
-        entry_idx = headers.index("Entry ID") if "Entry ID" in headers else -1
+        entry_idx = headers.index("Entry ID")
+        row_map = {str(r[entry_idx]).strip().lower(): {"row_num": i, "data": r}
+                   for i, r in enumerate(DG_CACHE[1:], start=2)}
 
-        row_map = {}
-        for i, r in enumerate(body, start=2):
-            row_map[str(r[entry_idx]).strip().lower()] = i
+        updates, new_rows = [], []
+        updated, added = [], []
 
-        updates = []
-        new_rows = []
-
-        for obj in rows:
-            entry_id = str(obj.get("Entry ID", "")).strip().lower()
+        for obj in edit_rows:
+            eid = str(obj.get("Entry ID", "")).strip().lower()
             row_data = [str(obj.get(h, "")) for h in headers]
 
-            if entry_id in row_map:
-                row_num = row_map[entry_id]
-                updates.append({
-                    "range": f"A{row_num}",
-                    "values": [row_data]
-                })
+            if eid in row_map:
+                old_row = row_map[eid]["data"]
+                changed = [headers[i] for i in range(len(headers)) if str(old_row[i]).strip() != str(row_data[i]).strip()]
+                if changed:
+                    updates.append({"range": f"A{row_map[eid]['row_num']}", "values": [row_data]})
+                    updated.append({"date": obj.get('Date'), "changedColumns": changed})
             else:
                 new_rows.append(row_data)
+                added.append({"date": obj.get('Date')})
 
-        if updates:
-            dg_sheet.batch_update(updates, value_input_option="USER_ENTERED")
-        if new_rows:
-            dg_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
-
+        if not updates and not new_rows: return jsonify({"status": "nochange"})
+        if updates: dg_sheet.batch_update(updates, value_input_option="USER_ENTERED")
+        if new_rows: dg_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
         DG_CACHE = dg_sheet.get("A:ZZ")
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "updated": updated, "added": added})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
