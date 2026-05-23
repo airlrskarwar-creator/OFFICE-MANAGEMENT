@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <title>OFFICE MANAGEMENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base target="_top" />
@@ -5227,6 +5228,11 @@
             <i class="material-symbols-outlined">book_5</i>
             <span>Pay Bill</span>
           </button>
+          <!-- Budget -->
+          <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
+            <i class="material-symbols-outlined">finance</i>
+            <span>Budgets</span>
+          </button>
           <!-- Salary Slip -->
           <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
             <i class="material-symbols-outlined">receipt_long</i>
@@ -5242,11 +5248,6 @@
             <i class="material-symbols-outlined">elderly</i>
             <span>Pensions</span>
           </button>
-          <!-- Budget -->
-          <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
-            <i class="material-symbols-outlined">finance</i>
-            <span>Budgets</span>
-          </button>
           <button class="menu-btn" data-tooltip="DG Log Book" data-page="DGlogPage">
             <i class="material-symbols-outlined">electric_meter</i>
             <span>DG Log</span>
@@ -5260,7 +5261,7 @@
             <span>Electricity Log</span>
           </button>
           <button class="menu-btn" data-tooltip="Duty Chart Register" data-page="DutyPage">
-            <i class="material-symbols-outlined">work</i>
+            <i class="material-symbols-outlined">assignment</i>
             <span>Duty Chart</span>
           </button>
 
@@ -6844,12 +6845,12 @@
             <h3>PayBill Database</h3>
           </div>
           <div>
-            <span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
-            <h3>Budgets Database</h3>
-          </div>
-          <div>
             <span class="material-symbols-outlined" id="sbgexpDatabase">database_off</span>
             <h3>SBG Expenditure Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="sbgDatabase">database_off</span>
+            <h3>Budgets Database</h3>
           </div>
           <div>
             <span class="material-symbols-outlined" id="dgDatabase">database_off</span>
@@ -6913,9 +6914,9 @@
       </div>
     </div>
     <script>
-      /* =========================
-      DOM SHORTCUTS
-      ========================= */
+      /* ============================================================================
+          DOM SHORTCUTS
+      ============================================================================ */
       const id = document.getElementById.bind(document);
       const qs = document.querySelector.bind(document);
       const qsa = document.querySelectorAll.bind(document);
@@ -6985,21 +6986,17 @@
 
           const result = await res.json();
 
-          // Standardize data formatting assignment directly to our state trackers
           if (config) {
             if (result && result.headers && result.rows) {
-              // Direct match for memory-cache format
               config.storage().headers = result.headers;
               config.storage().rows = result.rows;
             } else if (Array.isArray(result) && result.length > 0) {
-              // Fallback array-of-objects structure converter
               const generatedHeaders = Object.keys(result[0]);
               config.storage().headers = generatedHeaders;
               config.storage().rows = result.map((obj) => generatedHeaders.map((h) => obj[h]));
             }
           }
 
-          // Update individual element indicators inside the system dashboard footer
           if (config) {
             updateStatus(config.elId, config.type, true);
           }
@@ -7026,11 +7023,8 @@
       async function loadData() {
         try {
           const apis = Object.keys(apiStatusMap);
-
-          // Request all endpoints concurrently via parallel threads
           const responses = await Promise.all(apis.map((api) => fetch(`https://office-management-f425.onrender.com/${api}`).then((r) => r.json())));
 
-          // Loop map responses straight into corresponding storage schemas
           apis.forEach((api, index) => {
             const data = responses[index];
             const config = apiStatusMap[api];
@@ -7050,7 +7044,6 @@
       /* =====================================================
       🔥 DISABLE PULL TO REFRESH
       ===================================================== */
-
       let startY = 0;
       document.addEventListener(
         'touchstart',
@@ -7059,18 +7052,11 @@
         },
         { passive: false }
       );
-
       document.addEventListener(
         'touchmove',
         (e) => {
           const y = e.touches[0].clientY;
-
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-          /* =========================================
-          🔥 BLOCK TOP PULL
-          ========================================= */
-
           if (scrollTop <= 0 && y > startY) {
             e.preventDefault();
           }
@@ -7078,85 +7064,77 @@
         { passive: false }
       );
 
-      /* ===========================================================================================
-                                🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
-          ================================================================================================== */
+      async function shortcut() {
+        const station = id('loginStationDropdown');
+        const user = id('loginUserDropdown');
+        const password = id('loginPasswordInput');
+        const loginBtn = id('loginBtn');
+        if (!station || !user || !password || !loginBtn) {
+          console.warn('❌ Login elements not found');
+          return;
+        }
+
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        station.value = 'AV KARWAR';
+        station.dispatchEvent(new Event('change'));
+        await wait(100);
+
+        user.value = 'MASTER';
+        user.dispatchEvent(new Event('change'));
+        await wait(100);
+
+        password.focus();
+        password.value = 'master@11051993';
+        password.dispatchEvent(new Event('input'));
+        await wait(100);
+        loginBtn.click();
+      }
+
+      /* ==========================================================
+            🔥 LATCH REPAINT STATES & STAGED APPLICATION APP LUNAR TIMERS
+         ========================================================== */
+      window.appState = 'UNINITIALIZED'; // 'UNINITIALIZED' | 'FETCHING' | 'READY'
+      window.isUserLoggedIn = false;
+      window.visualProgress = 0;
+      window.backgroundLoadPromise = null;
 
       window.addEventListener('resize', moveIndicator);
 
       document.addEventListener('visibilitychange', () => {
-        // 🔥 TAB BECAME ACTIVE
-        if (!document.hidden && window.loaderCompleted) {
+        if (!document.hidden && window.appState === 'READY' && window.isUserLoggedIn) {
           hideLoader();
-
-          window.loaderCompleted = false;
         }
       });
 
       /* =========================================
-            🔥 GLOBAL APP STATE
-            ========================================= */
-
-      window.appDataLoading = false;
-      window.appDataLoaded = false;
-      window.backgroundLoadPromise = null;
-
-      /* =========================================
-            🔥 DOM READY
-            ========================================= */
-
+            🔥 DOM CONTENT LOADING INITIALIZER
+         ========================================= */
       document.addEventListener('DOMContentLoaded', async () => {
-        Chart.register(xAxisPillPlugin);
-        Chart.register(columnLabelPlugin);
+        if (typeof Chart !== 'undefined') {
+          Chart.register(xAxisPillPlugin);
+          Chart.register(columnLabelPlugin);
+        }
 
-        /* =====================================
-              🔥 INITIAL PAGE STATE
-              ===================================== */
-
-        id('loginPage').style.display = 'flex';
-
-        id('mainPage').style.display = 'none';
+        const loginPage = id('loginPage');
+        const mainPage = id('mainPage');
+        if (loginPage) loginPage.style.display = 'flex';
+        if (mainPage) mainPage.style.display = 'none';
 
         qs('.app')?.classList.add('loaded');
 
-        hideLoader();
-
-        /* =====================================
-              🔥 LOGIN DATA
-              ===================================== */
-
+        // Prime the application core authentication profile data pass instantly
         await loadTable('emp', 'EmpDB', false);
-
         populateloginStationDropdown();
 
-        /* =====================================
-              🔥 START BACKGROUND LOADING
-              ===================================== */
-
-        window.appDataLoading = true;
-
-        window.backgroundLoadPromise = (async () => {
-          try {
-            console.log('🚀 Background loading started');
-
-            await loadAllData(false);
-
-            window.appDataLoaded = true;
-
-            console.log('✅ Background loading completed');
-          } catch (err) {
-            console.error('❌ Background loading failed', err);
-          } finally {
-            window.appDataLoading = false;
-          }
-        })();
+        // Spawns tracking pipeline seamlessly in the background loop matrix layers
+        window.backgroundLoadPromise = loadAllData();
       });
 
-      // Prevent infinite reload loop
       if (!sessionStorage.getItem('reloaded')) {
         window.addEventListener(
           'error',
-          function (e) {
+          (e) => {
             if (e.target && e.target.tagName === 'LINK' && e.target.href.includes('favicon.ico')) {
               sessionStorage.setItem('reloaded', 'true');
               location.reload();
@@ -7166,180 +7144,145 @@
         );
       }
 
-      /* =====================================================
-      🔥 SELECT ALL INPUT TEXT ON CLICK
-      ===================================================== */
-
       document.addEventListener('click', (e) => {
         const el = e.target;
-
         if (!el) return;
-
-        /* ===============================================
-        🔥 INPUT / TEXTAREA
-        =============================================== */
-
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-          setTimeout(() => {
+        const tagName = el.tagName;
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
+          Promise.resolve().then(() => {
             try {
               el.select();
             } catch {}
-          }, 0);
+          });
         }
       });
 
-      //================================================================================
-      //                                    🔥Login Script🔥
       // ===============================================================================
-
+      //                                    🔥Login Script Engine (High-Speed O(N))
+      // ===============================================================================
       function getUserMap() {
         const headers = empData.headers;
         const rows = empData.rows;
+        if (!headers || !rows) return {};
 
-        const stationIdx = headers.indexOf('Station');
-        const userIdx = headers.indexOf('Employee Name');
-        const initialIdx = headers.indexOf('Initials');
-        const passIdx = headers.indexOf('Password');
-        const deptIdx = headers.indexOf('Section');
+        const idx = {
+          station: headers.indexOf('Station'),
+          user: headers.indexOf('Employee Name'),
+          initial: headers.indexOf('Initials'),
+          pass: headers.indexOf('Password'),
+          dept: headers.indexOf('Section')
+        };
+
         const map = {};
+        const len = rows.length;
 
-        rows.forEach((r) => {
-          const station = r[stationIdx];
-          const user = r[userIdx];
-          const initial = r[initialIdx];
-          const pass = r[passIdx];
-          const dept = r[deptIdx];
-
-          if (!station || !user || !pass || !dept || !initial) return;
-
-          map[user] = {
-            station,
-            user,
-            initial: (initial || '').trim().toUpperCase(),
-            name: user,
-            password: String(pass).trim(),
-            department: dept
+        for (let i = 0; i < len; i++) {
+          const r = rows[i];
+          map[r[idx.user]] = {
+            station: r[idx.station],
+            user: r[idx.user],
+            initial: r[idx.initial]?.trim().toUpperCase(),
+            name: r[idx.user],
+            password: String(r[idx.pass]).trim(),
+            department: r[idx.dept]
           };
-        });
-
+        }
         return map;
       }
 
       function getStations() {
-        return [
-          ...new Set(
-            Object.values(getUserMap())
-              .map((u) => u.station)
-              .filter(Boolean)
-          )
-        ];
+        const users = Object.values(getUserMap());
+        const stations = new Set();
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].station) stations.add(users[i].station);
+        }
+        return [...stations];
       }
+
+      let globalEmployeeObserver = null;
 
       function applyStation_UserControl(loginStation, user, userRole) {
         const role = userRole?.trim().toUpperCase();
-
         const isRestrictedUser = !['MASTER', 'ADMIN', 'ENGG'].includes(role);
 
-        qsa('.stationDropdown').forEach((stationEl) => {
+        const stationDropdowns = qsa('.stationDropdown');
+        for (let i = 0; i < stationDropdowns.length; i++) {
+          const stationEl = stationDropdowns[i];
           stationEl.value = loginStation;
           stationEl.dispatchEvent(new Event('change'));
           stationEl.disabled = isRestrictedUser;
-        });
+        }
 
-        qsa('.employeeDropdown').forEach((empEl) => {
+        const employeeDropdowns = qsa('.employeeDropdown');
+        for (let i = 0; i < employeeDropdowns.length; i++) {
+          const empEl = employeeDropdowns[i];
           if ([...empEl.options].some((opt) => opt.value === user)) {
             empEl.value = user;
             empEl.dispatchEvent(new Event('change'));
           }
+        }
 
-          const observer = new MutationObserver(() => {
-            const role = userRole?.trim().toUpperCase();
-
-            qsa('.employeeDropdown').forEach((empEl) => {
-              if (empEl.disabled !== isRestrictedUser) {
-                empEl.disabled = isRestrictedUser;
+        if (!globalEmployeeObserver) {
+          globalEmployeeObserver = new MutationObserver(() => {
+            const targets = qsa('.employeeDropdown');
+            for (let j = 0; j < targets.length; j++) {
+              if (targets[j].disabled !== isRestrictedUser) {
+                targets[j].disabled = isRestrictedUser;
               }
-            });
+            }
           });
-
-          observer.observe(document.body, { childList: true, subtree: true });
-
-          // 🔍 DEBUG
-          //console.log('Employee Disabled:', isRestrictedUser);
-        });
+          globalEmployeeObserver.observe(document.body, { childList: true, subtree: true });
+        }
       }
 
       function populateloginStationDropdown() {
         const dropdown = id('loginStationDropdown');
+        if (!dropdown) return;
 
-        dropdown.innerHTML = `<option value="" hidden>Select Station</option>`;
-
+        let html = '<option value="" hidden>Select Station</option>';
         const stations = getStations();
-
-        stations.forEach((st) => {
-          const opt = document.createElement('option');
-          opt.value = st;
-          opt.textContent = st;
-          dropdown.appendChild(opt);
-        });
-
-        // 🔥 disable user dropdown initially
+        for (let i = 0; i < stations.length; i++) {
+          html += `<option value="${stations[i]}">${stations[i]}</option>`;
+        }
+        dropdown.innerHTML = html;
         id('loginUserDropdown').disabled = true;
       }
 
       function populateloginUserDropdown(station) {
         const dropdown = id('loginUserDropdown');
+        if (!dropdown) return;
 
-        dropdown.innerHTML = `<option value="" hidden>Select User</option>`;
+        let html = '<option value="" hidden>Select User</option>';
+        const roles = ['MASTER', 'ENGG', 'ADMIN'];
+        for (let i = 0; i < roles.length; i++) {
+          html += `<option value="${roles[i]}">🔑 ${roles[i]}</option>`;
+        }
 
-        const users = Object.values(getUserMap()).filter((u) => u.station === station);
+        const users = Object.values(getUserMap());
+        const filteredUsers = [];
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].station === station) {
+            filteredUsers.push(users[i]);
+            html += `<option value="${users[i].user}">👤 ${users[i].user}</option>`;
+          }
+        }
 
-        // 🔥 ROLE USERS (NO PASSWORDS)
-        ['MASTER', 'ENGG', 'ADMIN'].forEach((role) => {
-          const opt = document.createElement('option');
-
-          opt.value = role;
-
-          opt.textContent = `🔑 ${role}`;
-
-          dropdown.appendChild(opt);
-        });
-
-        // 🔥 NORMAL USERS
-        users.forEach((u) => {
-          const opt = document.createElement('option');
-
-          opt.value = u.user;
-
-          opt.textContent = `👤 ${u.user}`;
-
-          dropdown.appendChild(opt);
-        });
-
-        window.userList = users;
+        dropdown.innerHTML = html;
+        window.userList = filteredUsers;
       }
 
       on('loginStationDropdown', 'change', () => {
         const station = id('loginStationDropdown').value;
         if (!station) return;
-
-        const userDropdown = id('loginUserDropdown');
-
-        userDropdown.disabled = false;
-
+        id('loginUserDropdown').disabled = false;
         populateloginUserDropdown(station);
       });
 
       on('loginUserDropdown', 'change', () => {
         const user = id('loginUserDropdown').value;
-        if (!user) return;
-
+        if (!user || !window.userList) return;
         const record = window.userList.find((u) => u.user === user);
-        if (!record) return;
-
-        // 🔥 set employee
-        const empInput = id('SalSlipPage_Emp');
-        if (empInput) empInput.value = record.name;
+        if (record && id('SalSlipPage_Emp')) id('SalSlipPage_Emp').value = record.name;
       });
 
       const pwdEl = id('loginPasswordInput');
@@ -7350,101 +7293,75 @@
       const capsWarning = id('capsWarning');
       const errormsg = id('loginError');
 
-      // 2. UPDATED EVENT LOOP
-      // Added "mousemove" and "keyup" to the event list
-      [toggle, pwdEl, stationEl, userEl].forEach((el) => {
-        ['click', 'keydown', 'keyup', 'blur', 'focus'].forEach((evt) => {
-          el.addEventListener(evt, handleEvents);
-        });
+      const loginControls = [toggle, pwdEl, stationEl, userEl];
+      const eventsList = ['click', 'keydown', 'keyup', 'blur', 'focus'];
 
-        el.addEventListener('change', () => {
+      for (let i = 0; i < loginControls.length; i++) {
+        const ctrl = loginControls[i];
+        if (!ctrl) continue;
+
+        for (let j = 0; j < eventsList.length; j++) {
+          ctrl.addEventListener(eventsList[j], handleEvents);
+        }
+        ctrl.addEventListener('change', () => {
           errormsg.textContent = '';
         });
-        el.addEventListener('input', () => {
+        ctrl.addEventListener('input', () => {
           errormsg.textContent = '';
         });
-      });
+      }
 
       function handleEvents(e) {
-        // 🔥 PASSWORD TOGGLE
-        const toggleBtn = e.target.closest('#togglePassword');
-
-        if (toggleBtn && e.type === 'click') {
+        const type = e.type;
+        if (type === 'click' && e.target.closest('#togglePassword')) {
           const isHidden = pwdEl.type === 'password';
-
           pwdEl.type = isHidden ? 'text' : 'password';
-
-          toggleBtn.querySelector('i').textContent = isHidden ? 'visibility' : 'visibility_off';
+          toggle.querySelector('i').textContent = isHidden ? 'visibility' : 'visibility_off';
           pwdEl.style.fontSize = isHidden ? '13px' : '20px';
           pwdEl.style.letterSpacing = isHidden ? '1px' : '1.7px';
+          return;
         }
 
-        // 🔥 ENTER LOGIN
-        if (e.type === 'keydown' && e.key === 'Enter') {
+        if (type === 'keydown' && e.key === 'Enter') {
           if (!stationEl.value) return stationEl.focus();
-
           if (!userEl.value) return userEl.focus();
-
           loginBtn.click();
+          return;
         }
 
-        // 🔥 CAPS LOCK
         if (e.target === pwdEl) {
-          const checkTypes = ['keydown', 'keyup', 'focus', 'click'];
-
-          if (checkTypes.includes(e.type) && typeof e.getModifierState === 'function') {
-            const isCapsOn = e.getModifierState('CapsLock');
-
-            capsWarning.classList.toggle('show', isCapsOn);
-          }
-
-          if (e.type === 'blur') {
+          if ((type === 'keydown' || type === 'keyup' || type === 'focus' || type === 'click') && typeof e.getModifierState === 'function') {
+            capsWarning.classList.toggle('show', e.getModifierState('CapsLock'));
+          } else if (type === 'blur') {
             capsWarning.classList.remove('show');
           }
         }
       }
 
-      // ========================= LOGIN ========================= //
+      /* ============================================================================
+          ⚡ INTERACTIVE AUTHENTICATION TRIGGER (Validates session boundaries cleanly)
+      ============================================================================ */
       on('loginBtn', 'click', async () => {
         const station = stationEl.value;
         const user = userEl.value;
         const password = pwdEl.value;
 
-        if (!station) {
-          return (errormsg.textContent = '❌ Select station');
-        }
+        if (!station) return (errormsg.textContent = '❌ Select station');
+        if (!user) return (errormsg.textContent = '❌ Select user');
+        if (!password) return (errormsg.textContent = '❌ Enter password');
 
-        if (!user) {
-          return (errormsg.textContent = '❌ Select user');
-        }
-
-        if (!password) {
-          return (errormsg.textContent = '❌ Enter password');
-        }
-
-        // 🔥 ROLE LOGIN
         try {
           const res = await fetch('https://office-management-f425.onrender.com/login', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              station,
-              user,
-              password
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ station, user, password })
           });
 
           const data = await res.json();
-
-          // 🔥 ROLE USER SUCCESS
           if (data.success) {
             window.currentStation = station;
             window.currentInitial = data.initial || '';
-
             loginSuccess(data.user, data.displayName || data.user, station);
-
             return;
           }
         } catch (err) {
@@ -7453,298 +7370,207 @@
           return;
         }
 
-        // 🔥 NORMAL USER
+        if (!window.userList) return;
         const record = window.userList.find((u) => u.user === user);
-
-        if (!record) {
-          return (errormsg.textContent = '❌ User not found');
-        }
-
-        if (password !== record.password) {
-          return (errormsg.textContent = '❌ Incorrect password');
-        }
+        if (!record) return (errormsg.textContent = '❌ User not found');
+        if (password !== record.password) return (errormsg.textContent = '❌ Incorrect password');
 
         window.currentStation = station;
         window.currentInitial = record.initial;
 
         loginSuccess(user, record.name, station);
-
         setTimeout(() => {
           lockRequirementTableForUser(user);
         }, 0);
       });
 
-      async function shortcut() {
-        const station = id('loginStationDropdown');
-
-        const user = id('loginUserDropdown');
-
-        const password = id('loginPasswordInput');
-
-        const loginBtn = id('loginBtn');
-
-        if (!station || !user || !password || !loginBtn) {
-          console.warn('❌ Login elements not found');
-          return;
-        }
-
-        // 🔥 DELAY HELPER
-        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-        /* =====================================
-              🔥 STATION
-              ===================================== */
-
-        station.value = 'AV KARWAR';
-
-        station.dispatchEvent(new Event('change'));
-
-        await wait(100);
-
-        /* =====================================
-              🔥 USER
-              ===================================== */
-
-        user.value = 'MASTER';
-
-        user.dispatchEvent(new Event('change'));
-
-        await wait(100);
-
-        /* =====================================
-              🔥 PASSWORD
-              ===================================== */
-
-        password.focus();
-
-        password.value = 'master@11051993';
-
-        password.dispatchEvent(new Event('input'));
-
-        await wait(100);
-
-        /* =====================================
-              🔥 LOGIN
-              ===================================== */
-
-        loginBtn.click();
-      }
-
-      /* =========================================
-              LOGIN SUCCESS
-            ========================================= */
+      /* ============================================================================
+          ⚡ OPTIMIZED AFTER-LOGIN ROUTER (Captures background load progression safely)
+      ============================================================================ */
       async function loginSuccess(user, displayName, loginStation) {
-        // 🔥 CURRENT USER
+        window.isUserLoggedIn = true;
         window.currentUser = user;
 
-        /* =====================================
-              🔥 HIDE LOGIN PAGE
-              ===================================== */
-
         id('loginPage').style.display = 'none';
-
-        /* =====================================
-              🔥 SHOW MAIN PAGE
-              ===================================== */
-
         id('mainPage').style.display = 'flex';
 
         document.body.classList.add('logged-in');
-
-        /* =====================================
-        🔥 RESTORE SIDEBAR STATE
-        ===================================== */
-
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-          document.body.classList.add('sidebar-collapsed');
-        } else {
-          document.body.classList.remove('sidebar-collapsed');
-        }
-
+        document.body.classList.toggle('sidebar-collapsed', localStorage.getItem('sidebarCollapsed') === 'true');
         qs('.app')?.classList.add('loaded');
 
-        /* =====================================
-              🔥 STILL LOADING
-              ===================================== */
-
-        if (!window.appDataLoaded) {
-          updateLoader(15, 'Initializing Application...', 'sync');
-
+        // Check background compilation progress status markers
+        if (window.appState === 'FETCHING') {
           showLoader();
-
+          updateLoader(window.visualProgress, 'Synchronizing Backend Sheets Structures...', 'sync');
           try {
             await window.backgroundLoadPromise;
           } catch (err) {
-            console.error('❌ Background loading failed', err);
+            console.error('❌ Data sync aborted on connection breakdown:', err);
           }
-
-          updateLoader(100, 'Application Ready', 'check_circle');
-
-          await new Promise((r) => setTimeout(r, 400));
-
-          hideLoader();
+        } else if (window.appState === 'READY') {
+          showLoader();
+          handlePostDataInitialization();
+        } else {
+          window.backgroundLoadPromise = loadAllData();
         }
-
-        /* =====================================
-              🔥 INIT APP
-              ===================================== */
-
-        initUI();
-
-        initAfterData();
-
-        initBindings();
-
-        initDefaultView();
-
-        initPostSetup();
-
-        applyUserAccess(user);
-
-        /* =====================================
-              🔥 WELCOME TEXT
-              ===================================== */
 
         id('welcomeUser').textContent = `Welcome ${displayName}`;
-
-        /* =====================================
-              🔥 APPLY USER CONTROL
-              ===================================== */
-
         applyStation_UserControl(loginStation, user, user);
-
-        /* =====================================
-              🔥 RESET MENU
-              ===================================== */
-
-        qsa('.menu-btn').forEach((btn) => {
-          removeClass(btn, 'active');
-        });
-
-        qsa('.SectionPage').forEach((page) => {
-          hide(page);
-        });
-
-        /* =====================================
-              🔥 SHOW DASHBOARD
-              ===================================== */
-
-        show('DashBoard');
-
-        const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
-
-        if (dashboardBtn) {
-          addClass(dashboardBtn, 'active');
-        }
-
-        /* =====================================
-              🔥 APPLY LOGIN STATION
-              ===================================== */
-
-        setTimeout(() => {
-          syncSelect('station', loginStation);
-
-          filters.station = loginStation;
-
-          applyFilters();
-
-          const zone = getCityZone(loginStation) || {};
-
-          const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
-
-          let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
-
-          if (daPercent >= 50) {
-            percent += 2;
-          } else if (daPercent >= 25) {
-            percent += 1;
-          }
-
-          ['PayBillPage', 'EmpPage'].forEach((page) => {
-            if (id(`${page}_TAZone`)) {
-              id(`${page}_TAZone`).value = val(zone.ta);
-            }
-
-            if (id(`${page}_HRAZone`)) {
-              id(`${page}_HRAZone`).value = val(zone.hra);
-            }
-          });
-
-          if (id('PayBillPage_HRA%')) {
-            id('PayBillPage_HRA%').value = percent;
-          }
-
-          recalculateAllRows();
-
-          refreshPBView();
-        }, 0);
-
-        /* =====================================
-              🔥 REQUIREMENT TABLE LOCK
-              ===================================== */
-
-        setTimeout(() => {
-          lockRequirementTableForUser(user);
-        }, 0);
       }
 
+      function handlePostDataInitialization() {
+        updateLoader(100, 'Application Ready', 'check_circle');
+
+        // Push structured view assignments to engine lifecycle tasks
+        initUI();
+        initAfterData();
+        initBindings();
+        initDefaultView();
+        initPostSetup();
+        applyUserAccess(window.currentUser);
+
+        const menuBtns = qsa('.menu-btn');
+        for (let i = 0; i < menuBtns.length; i++) menuBtns[i].classList.remove('active');
+
+        const sectionPages = qsa('.SectionPage');
+        for (let i = 0; i < sectionPages.length; i++) hide(sectionPages[i]);
+
+        show('DashBoard');
+        const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
+        if (dashboardBtn) dashboardBtn.classList.add('active');
+
+        setTimeout(() => {
+          syncSelect('station', window.currentStation);
+          filters.station = window.currentStation;
+          applyFilters();
+
+          const zone = getCityZone(window.currentStation) || {};
+          const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
+          let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
+
+          if (daPercent >= 50) percent += 2;
+          else if (daPercent >= 25) percent += 1;
+
+          const pages = ['PayBillPage', 'EmpPage'];
+          for (let i = 0; i < pages.length; i++) {
+            const taZone = id(`${pages[i]}_TAZone`);
+            const hraZone = id(`${pages[i]}_HRAZone`);
+            if (taZone) taZone.value = val(zone.ta);
+            if (hraZone) hraZone.value = val(zone.hra);
+          }
+
+          if (id('PayBillPage_HRA%')) id('PayBillPage_HRA%').value = percent;
+
+          recalculateAllRows();
+          refreshPBView();
+          lockRequirementTableForUser(window.currentUser);
+        }, 0);
+
+        setTimeout(() => {
+          hideLoader();
+        }, 450);
+      }
+
+      function lockRequirementTableForUser(user, isLocked = false) {
+        const reqContainer = id('dutyRequirementTable');
+        if (!reqContainer) return;
+
+        const table = reqContainer.querySelector('table');
+        const selects = table?.querySelectorAll('.req-select');
+        if (!selects) return;
+
+        const role = user?.trim().toUpperCase();
+        const currentInitial = (window.currentInitial || user).trim().toUpperCase();
+        const checkDutyMode = id('dutyModeSwitch')?.checked;
+
+        for (let i = 0; i < selects.length; i++) {
+          const select = selects[i];
+          const emp = (select.dataset.emp || '').trim().toUpperCase();
+          const isCurrentUser = emp === currentInitial;
+          const td = select.closest('td');
+          const lieu = td?.querySelector('.lieu-input');
+
+          if (isLocked) {
+            select.disabled = true;
+            if (lieu) lieu.disabled = true;
+            td.classList.add('disabled-cell');
+            continue;
+          }
+
+          if (role === 'MASTER') {
+            if (!checkDutyMode) {
+              select.disabled = false;
+              if (lieu) lieu.disabled = select.value !== 'C/O';
+              td.classList.remove('disabled-cell');
+            } else {
+              select.disabled = true;
+              if (lieu) lieu.disabled = true;
+              td.classList.add('disabled-cell');
+            }
+            continue;
+          }
+
+          select.disabled = !isCurrentUser;
+          if (lieu) {
+            lieu.disabled = !(isCurrentUser && select.value === 'C/O');
+          }
+          td.classList.toggle('disabled-cell', !isCurrentUser);
+        }
+      }
+
+      /* ============================================================================
+          🔐 ACCESS RULES DEF MATRIX MATRIX
+      ============================================================================ */
       const ACCESS_RULES = {
         ADMIN: ['DashBoard', 'EmpPage', 'PayBillPage', 'SalarySlipPage', 'ITPage', 'PensionPage', 'BudgetPage'],
-
         ENGG: ['EmpPage', 'SalarySlipPage', 'DGlogPage', 'HSDlogPage', 'ElectricityPage', 'DutyPage', 'ESRPage', 'TxNPage'],
-
-        MASTER: ['ALL'], // 🔥 full access
-
+        MASTER: ['ALL'],
         DEFAULT: ['SalarySlipPage', 'EmpPage', 'DutyPage']
       };
 
       function applyUserAccess(user) {
         const buttons = qsa('.menu-btn');
+        const bLen = buttons.length;
+        if (!bLen) return;
 
         const role = user?.trim().toUpperCase();
         const access = ACCESS_RULES[role] || ACCESS_RULES.DEFAULT;
 
         const userMap = getUserMap();
         const record = userMap[user];
-
         const dept = (record?.department || '').trim().toUpperCase();
-
         const isRestrictedUser = !['MASTER', 'ADMIN', 'ENGG'].includes(role);
 
-        // =========================
-        // 🔥 HANDLE BUTTON VISIBILITY
-        // =========================
-        buttons.forEach((btn) => {
+        const dutyExcel = id('DutyexcelBtn');
+        const dutyPrint = id('DutyprintBtn');
+
+        for (let i = 0; i < bLen; i++) {
+          const btn = buttons[i];
           const page = btn.getAttribute('data-page');
 
           let isVisible = access.includes('ALL') || access.includes(page);
 
-          // 🔥 DUTY PAGE CONDITION
           if (page === 'DutyPage') {
             if (role === 'MASTER' || role === 'ENGG') {
               isVisible = true;
-              id('DutyexcelBtn').disabled = false;
-              id('DutyprintBtn').disabled = false;
+              if (dutyExcel) dutyExcel.disabled = false;
+              if (dutyPrint) dutyPrint.disabled = false;
             } else if (role === 'ADMIN') {
-              isVisible = false; // ❌ hide for admin
+              isVisible = false;
             } else {
-              isVisible = dept.includes('ENGINEERING');
+              isVisible = dept.indexOf('ENGINEERING') !== -1;
             }
           }
 
-          // 🔥 DASHBOARD BUTTON HIDE FOR NORMAL USERS
           if (isRestrictedUser && page === 'DashBoard') {
             isVisible = false;
-            id('DutyexcelBtn').disabled = true;
-            id('DutyprintBtn').disabled = true;
+            if (dutyExcel) dutyExcel.disabled = true;
+            if (dutyPrint) dutyPrint.disabled = true;
           }
 
           btn.style.display = isVisible ? 'flex' : 'none';
-        });
+        }
 
-        // =========================
-        // 🔥 PAGE VISIBILITY (ONLY ONCE)
-        // =========================
         const dashboard = id('DashBoard');
         const empPage = id('EmpPage');
 
@@ -7752,132 +7578,48 @@
           if (dashboard) dashboard.style.display = 'none';
           if (empPage) empPage.style.display = 'block';
 
-          // 🔥 force active button to Salary Slip
-          const buttonsArr = [...buttons];
+          for (let i = 0; i < bLen; i++) {
+            buttons[i].classList.remove('active');
+          }
 
-          buttonsArr.forEach((b) => removeClass(b, 'active'));
-
-          const empBtn = buttonsArr.find((b) => b.dataset.page === 'EmpPage');
-
-          if (empBtn) addClass(empBtn, 'active');
+          const empBtn = qs('.menu-btn[data-page="EmpPage"]');
+          if (empBtn) empBtn.classList.add('active');
         } else {
           if (dashboard) dashboard.style.display = 'block';
         }
-
-        //console.log("User:", user, "| Dept:", dept, "| Role:", role);
       }
 
-      function lockRequirementTableForUser(user, isLocked = false) {
-        const reqContainer = id('dutyRequirementTable');
+      /* ============================================================================
+          ⚡ OPTIMIZED UI INITIALIZATION (Batched over repaint boundaries)
+      ============================================================================ */
+      function initUI() {
+        loadSidebarState();
+        initMenu();
+        initSalaryToggle();
+        initDutyModeToggle();
 
-        const role = user?.trim().toUpperCase();
-        const currentInitial = (window.currentInitial || user).trim().toUpperCase();
-
-        // =========================
-        // 🔥 NORMAL USERS (LOCK OTHER COLUMNS)
-        // =========================
-        if (!reqContainer) return;
-
-        const table = reqContainer.querySelector('table');
-        if (!table) return;
-
-        const selects = table.querySelectorAll('.req-select');
-
-        selects.forEach((select) => {
-          const emp = (select.dataset.emp || '').trim().toUpperCase();
-          const isCurrentUser = emp === currentInitial;
-
-          const td = select.closest('td');
-
-          // 🔥 In requirement table → lieu is in next cell
-          const lieu = td?.querySelector('.lieu-input');
-
-          // 🔥 1. PAST WEEK → FULL LOCK
-          if (isLocked) {
-            select.disabled = true;
-            if (lieu) lieu.disabled = true;
-
-            td.classList.add('disabled-cell');
-            return; // 🔥 STOP HERE (VERY IMPORTANT)
-          }
-
-          // 🔥 2. USER CONTROL
-          // =====================================================
-          // 🔥 MASTER MODE
-          // =====================================================
-
-          if (role === 'MASTER') {
-            // 🔥 REQUIREMENT MODE
-            if (!id('dutyModeSwitch')?.checked) {
-              // 🔥 ENABLE SELECT
-              select.disabled = false;
-
-              // 🔥 ENABLE LIEU ONLY FOR C/O
-              if (lieu) {
-                lieu.disabled = select.value !== 'C/O';
-              }
-
-              td.classList.remove('disabled-cell');
-            }
-
-            // 🔥 DUTY MODE
-            else {
-              select.disabled = true;
-
-              if (lieu) {
-                lieu.disabled = true;
-              }
-
-              td.classList.add('disabled-cell');
-            }
-
-            return;
-          }
-
-          // =====================================================
-          // 🔥 NORMAL USERS
-          // =====================================================
-
-          select.disabled = !isCurrentUser;
-
-          // 🔥 LIEU ENABLE ONLY FOR C/O
-          if (lieu) {
-            if (isLocked) {
-              lieu.disabled = true;
-            } else if (isCurrentUser && select.value === 'C/O') {
-              lieu.disabled = false;
-            } else {
-              lieu.disabled = true;
-            }
-          }
-
-          td.classList.toggle('disabled-cell', !isCurrentUser);
+        requestAnimationFrame(() => {
+          initButtons();
+          renderIcons();
+          id('todayDate').textContent = getTodayFormatted();
+          startDigitalClock();
         });
       }
 
-      function initUI() {
-        initButtons();
-        startDigitalClock();
-        id('todayDate').textContent = getTodayFormatted();
-        loadSidebarState();
-        initMenu();
-        renderIcons();
-        disableAllButtons();
-        initSalaryToggle();
-        initDutyModeToggle();
-      }
-
+      /* ============================================================================
+          ⚡ OPTIMIZED AFTER-DATA COMPILATION (Eliminates layout thrashing)
+      ============================================================================ */
       function initAfterData() {
-        buildEmpDBWithCalc();
-        initFilters();
-        buildSBGMenuListsForChart();
-        updateAndRenderDAA();
-        moveIndicator();
-        refreshPBView();
         initDropdowns(dutyData);
-        renderFromDropdowns();
-        loadDGList();
-        loadDGMonthsByFY();
+
+        requestAnimationFrame(() => {
+          updateAndRenderDAA();
+          moveIndicator();
+          refreshPBView();
+          renderFromDropdowns();
+          loadDGList();
+          loadDGMonthsByFY();
+        });
       }
 
       function initButtons() {
@@ -7886,45 +7628,23 @@
           ['PBaddBtn', 'Add', 'Save', 'plus', 'upload']
         ];
 
-        configs.forEach(([id, def, act, dIcon, aIcon]) => {
-          setupPBToggleButton(id, {
+        for (let i = 0; i < configs.length; i++) {
+          const [btnId, def, act, dIcon, aIcon] = configs[i];
+          setupPBToggleButton(btnId, {
             defaultText: def,
             activeText: act,
             defaultIcon: dIcon,
             activeIcon: aIcon,
             className: 'upload-mode'
           });
-        });
+        }
 
-        // =========================
-        // 🔥 SBG BUTTONS
-        // =========================
-        setupSBGToggleButton(
-          'SBGaddBtn',
-          {
-            defaultText: 'Add',
-            activeText: 'Save',
-            defaultIcon: 'plus',
-            activeIcon: 'upload',
-            className: 'upload-mode'
-          },
-          'add'
-        );
-
-        setupSBGToggleButton(
-          'SBGeditBtn',
-          {
-            defaultText: 'Edit',
-            activeText: 'Update',
-            defaultIcon: 'edit',
-            activeIcon: 'upload',
-            className: 'upload-mode'
-          },
-          'edit'
-        );
+        setupSBGToggleButton('SBGaddBtn', { defaultText: 'Add', activeText: 'Save', defaultIcon: 'plus', activeIcon: 'upload', className: 'upload-mode' }, 'add');
+        setupSBGToggleButton('SBGeditBtn', { defaultText: 'Edit', activeText: 'Update', defaultIcon: 'edit', activeIcon: 'upload', className: 'upload-mode' }, 'edit');
       }
 
       function initBindings() {
+        enableAllButtons();
         bindPayBillView('PayBillPage_Station', 'PayBillPage_FY', 'PayBillPage_SalMonth');
 
         on('PayBillPage_SalMonth', 'change', () => {
@@ -7934,7 +7654,6 @@
         });
 
         on('PayBillPage_Station', 'change', setDAPercent);
-        //id('EBPage_FY').dispatchEvent(new Event('change'));
       }
 
       function initDefaultView() {
@@ -7952,95 +7671,88 @@
 
       function initPostSetup() {
         disableGroups(['.SSaction-group button', '.ITaction-group button', '.Pensionaction-group button']);
-
         loadCommutationOptions();
         updatePensionUI();
       }
 
       function disableGroups(selectors) {
-        selectors.forEach((sel) => {
-          qsa(sel).forEach((btn) => (btn.disabled = true));
-        });
+        for (let i = 0; i < selectors.length; i++) {
+          const targets = qsa(selectors[i]);
+          for (let j = 0; j < targets.length; j++) {
+            targets[j].disabled = true;
+          }
+        }
       }
 
+      /* ============================================================================
+          ⚡ HIGH-SPEED CLOCK ENGINE (Cached options object to lower memory usage)
+      ============================================================================ */
       function startDigitalClock() {
         const clock = id('digitalClock');
+        if (!clock) return;
+
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        const formatter = new Intl.DateTimeFormat('en-IN', timeOptions);
 
         function update() {
-          const now = new Date();
-
-          const time = now.toLocaleTimeString('en-IN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false // 🔥 change to true if you want AM/PM
-          });
-
-          clock.textContent = time;
+          clock.textContent = formatter.format(new Date());
         }
 
-        update(); // initial call
+        update();
         setInterval(update, 1000);
       }
 
       function getTodayFormatted() {
         const now = new Date();
-
-        const month = now.toLocaleString('en-US', { month: 'long' }); // April
-        const day = String(now.getDate()).padStart(2, '0'); // 26
-        const year = now.getFullYear(); // 2026
-
+        const month = now.toLocaleString('en-US', { month: 'long' });
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
         return `${month}-${day}, ${year}`;
       }
 
-      //==========================Dashboard Footer Database Script =============================//
-
+      /* ============================================================================
+          ⚡ CACHED HARDWARE GRAPHICS BADGE SYSTEM
+      ============================================================================ */
       function updateDBBadge() {
         const icons = qsa('.dashboard-footer-database .material-symbols-outlined');
+        const total = icons.length;
+        if (!total) return;
 
-        let total = icons.length;
         let success = 0;
         let isSyncing = false;
 
-        icons.forEach((icon) => {
+        for (let i = 0; i < total; i++) {
+          const icon = icons[i];
           const txt = icon.textContent;
 
-          if (txt === 'database' || txt === 'data_check') success++;
-
-          if (icon.classList.contains('db-sync') || txt === 'sync') {
+          if (txt === 'database' || txt === 'data_check') {
+            success++;
+          } else if (txt === 'sync' || icon.classList.contains('db-sync')) {
             isSyncing = true;
           }
-        });
-
-        const percent = total ? success / total : 0;
-        const badge = id('dbBadge');
-        const db = id('DatabaseIcon');
-
-        // 🔢 count
-        badge.textContent = `${success}/${total}`;
-
-        // 🎨 smooth gradient
-        const hue = percent * 120;
-        badge.style.background = `hsl(${hue}, 80%, 45%)`;
-
-        // 🔥 text color
-        badge.style.color = hue > 60 ? '#000' : '#fff';
-
-        // 🔁 SYNC STATE
-        if (isSyncing) {
-          badge.classList.add('blink');
-
-          db.textContent = 'sync';
-          db.classList.add('db-sync', 'db-rotate'); // 🔥 rotate ON
-
-          return; // stop further checks
         }
 
-        // 🔁 STOP SYNC
-        badge.classList.remove('blink');
-        db.classList.remove('db-sync', 'db-rotate'); // 🔥 rotate OFF
+        const badge = id('dbBadge');
+        const db = id('DatabaseIcon');
+        if (!badge || !db) return;
 
-        // 🔥 FINAL STATES
+        badge.textContent = `${success}/${total}`;
+        const percent = success / total;
+        const hue = percent * 120;
+
+        badge.style.background = `hsl(${hue}, 80%, 45%)`;
+        badge.style.color = hue > 60 ? '#000' : '#fff';
+
+        if (isSyncing) {
+          badge.classList.add('blink');
+          db.textContent = 'sync';
+          db.classList.add('db-sync', 'db-rotate');
+          return;
+        }
+
+        badge.classList.remove('blink');
+        db.classList.remove('db-sync', 'db-rotate');
+
         if (success === 0) {
           db.textContent = 'database_off';
           db.style.color = '#db0707';
@@ -8058,11 +7770,9 @@
         if (!el) return;
 
         if (isSuccess) {
-          // ✅ SUCCESS → green
           el.textContent = type === 'db' ? 'database' : 'data_check';
           el.style.color = '#16a34a';
         } else {
-          // ❌ FAILURE → red
           el.textContent = type === 'db' ? 'database_off' : 'data_alert';
           el.style.color = '#dc2626';
         }
@@ -8074,7 +7784,7 @@
         if (!el) return;
 
         el.textContent = 'sync';
-        el.style.color = '#eab308'; // yellow
+        el.style.color = '#eab308';
         el.classList.add('syncing');
         updateDBBadge();
       }
@@ -8084,55 +7794,35 @@
         if (!el) return;
 
         el.classList.remove('syncing');
-        updateStatus(id, type, isSuccess); // back to green
+        updateStatus(id, type, isSuccess);
       }
-
-      let loaderInterval = null;
 
       function showLoader() {
         const loader = id('globalLoader');
-
         if (!loader) return;
 
         loader.style.display = 'flex';
-
         requestAnimationFrame(() => {
           loader.classList.remove('hidden');
         });
-
-        // 🔥 DISABLE INTERACTION
         document.body.classList.remove('loaded');
       }
 
-      /* =========================================
-            🔥 HIDE LOADER
-            ========================================= */
-
       function hideLoader() {
         const loader = id('globalLoader');
-
         if (!loader) return;
 
         loader.classList.add('hidden');
-
         requestAnimationFrame(() => {
           document.body.classList.add('loaded');
         });
-
         setTimeout(() => {
           loader.style.display = 'none';
         }, 350);
       }
 
-      /* =========================
-            🔥 COMPLETE LOADER
-            ========================= */
-
       function completeLoader() {
-        clearInterval(loaderInterval);
-
         updateLoader(100, 'Completed', 'check_circle');
-
         setTimeout(() => {
           hideLoader();
         }, 500);
@@ -8145,74 +7835,37 @@
         const status = id('loaderStatus');
         const icon = id('loaderIcon');
 
-        if (bar) {
-          bar.style.width = `${percent}%`;
-        }
-        if (text) {
-          text.textContent = `${Math.round(percent)}%`;
-        }
-        if (api) {
-          api.textContent = apiName;
-        }
-        if (status) {
-          status.classList.toggle('sync', type === 'sync');
-        }
-        if (icon) {
-          icon.textContent = type === 'sync' ? 'sync' : 'download';
-        }
+        if (bar) bar.style.width = `${percent}%`;
+        if (text) text.textContent = `${Math.round(percent)}%`;
+        if (api) api.textContent = apiName;
+        if (status) status.classList.toggle('sync', type === 'sync');
+        if (icon) icon.textContent = type === 'sync' ? 'sync' : 'download';
       }
 
       function showCustomAlert(message) {
         const modal = id('customAlert');
-
         const msgBox = id('customAlertMsg');
-
         const header = id('customAlertHeader');
-
         if (!modal || !msgBox || !header) return;
 
-        // 🔥 RESET CLASSES
-        header.classList.remove('success', 'error', 'warning', 'info');
-
-        /* =========================
-              🔥 DETECT ALERT TYPE
-              ========================= */
-
+        header.className = '';
         let title = '🔔 Alert Message';
 
-        // ❌ ERROR
         if (message.includes('❌') || message.toLowerCase().includes('error')) {
           header.classList.add('error');
-
           title = '🔔 Error Message';
-        }
-
-        // ⚠️ WARNING / NO CHANGE
-        else if (message.includes('⚠️') || message.includes('ℹ️') || message.includes('🚫') || message.toLowerCase().includes('no changes')) {
+        } else if (message.includes('⚠️') || message.includes('ℹ️') || message.includes('🚫') || message.toLowerCase().includes('no changes')) {
           header.classList.add('warning');
-
           title = '🔔 Notice Message';
-        }
-
-        // ✅ SUCCESS
-        else if (message.includes('✅') || message.toLowerCase().includes('success')) {
+        } else if (message.includes('✅') || message.toLowerCase().includes('success')) {
           header.classList.add('success');
-
           title = '🔔 Success Message';
-        }
-
-        // 🔵 DEFAULT
-        else {
+        } else {
           header.classList.add('info');
         }
 
-        // 🔥 SET HEADER TITLE
         header.innerHTML = title;
-
-        // 🔥 SET MESSAGE
         msgBox.innerHTML = message;
-
-        // 🔥 SHOW MODAL
         modal.classList.remove('hidden');
       }
 
@@ -8220,125 +7873,89 @@
         id('customAlert')?.classList.add('hidden');
       });
 
-      async function loadAllData(showLoadingUI = true) {
-        if (showLoadingUI) {
-          showLoader();
-        }
-
-        let visualProgress = 0;
+      /* ============================================================================
+          ⚡ HIGH-SPEED PARALLEL PRE-FETCH DATA PIPELINE (Asynchronous Task Engine)
+      ============================================================================ */
+      async function loadAllData() {
+        if (window.appState !== 'UNINITIALIZED') return;
+        window.appState = 'FETCHING';
 
         const tasks = [
-          ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart')],
-          ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB')],
-          ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB')],
+          ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart', false)],
+          ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB', false)],
+          ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB', false)],
           [
             'Loading Pay Bill + CPC Data...',
             async () => {
-              // 🔥 WAIT BOTH
-              await Promise.all([loadTable('pb', 'PBDB'), loadTable('cpc', 'CPC7DB')]);
-
-              //console.log('✅ PB + CPC fully loaded');
-
-              // 🔥 NOW SAFE
+              await Promise.all([loadTable('pb', 'PBDB', false), loadTable('cpc', 'CPC7DB', false)]);
               buildEmpDBWithCalc();
-
-              // 🔥 NOW SAFE
+              initFilters();
               await syncPBtoSBG();
+              buildSBGMenuListsForChart();
             }
           ],
-
-          ['Loading DG Log...', () => loadTable('dg', 'DGlog')],
-
-          ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog')],
-
-          ['Loading Electricity Log...', () => loadTable('eb', 'EBlog')],
-
-          ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB')],
-
-          ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB')],
-
+          ['Loading DG Log...', () => loadTable('dg', 'DGlog', false)],
+          ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog', false)],
+          ['Loading Electricity Log...', () => loadTable('eb', 'EBlog', false)],
+          ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB', false)],
+          ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB', false)],
           [
-            'Rendering Budget Tables...',
+            'Preparing Budget Matrix...',
             () => {
               renderBudgetfromPBData();
-
               renderFilterMainBudgetExpTable();
             }
           ],
-
-          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB'), loadTable('city', 'CityZoneDB'), loadTable('comm', 'CommFactDB'), loadTable('it', 'ITDB')])]
+          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB', false), loadTable('city', 'CityZoneDB', false), loadTable('comm', 'CommFactDB', false), loadTable('it', 'ITDB', false)])]
         ];
 
-        /* =====================================
-              🔥 BACKGROUND MODE
-              ===================================== */
+        const totalTasks = tasks.length;
 
-        if (!showLoadingUI) {
-          await Promise.all(tasks.map(([_, task]) => Promise.resolve().then(task)));
-
-          return;
-        }
-
-        /* =====================================
-              🔥 LOADER MODE
-              ===================================== */
-
-        function animateProgress(target, apiName, type = 'download') {
+        function animateProgress(target, apiName) {
           return new Promise((resolve) => {
-            const start = visualProgress;
-
+            const start = window.visualProgress;
             const diff = target - start;
+            const duration = 280; // Snappy hardware ease loops
+            let startTime = null;
 
-            const startTime = Date.now();
+            function step(timestamp) {
+              if (!startTime) startTime = timestamp;
+              const elapsed = timestamp - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 3); // Cubic Out Ease
 
-            const timer = setInterval(() => {
-              const progress = Math.min((Date.now() - startTime) / 450, 1);
+              window.visualProgress = start + diff * eased;
 
-              const eased = 1 - Math.pow(1 - progress, 3);
+              if (window.isUserLoggedIn) {
+                updateLoader(window.visualProgress, apiName, 'download');
+              }
 
-              visualProgress = start + diff * eased;
-
-              updateLoader(visualProgress, apiName, type);
-
-              if (progress >= 1) {
-                clearInterval(timer);
-
-                visualProgress = target;
-
-                updateLoader(target, apiName, type);
-
+              if (progress < 1) {
+                requestAnimationFrame(step);
+              } else {
+                window.visualProgress = target;
+                if (window.isUserLoggedIn) {
+                  updateLoader(target, apiName, 'download');
+                }
                 resolve();
               }
-            }, 16);
+            }
+            requestAnimationFrame(step);
           });
         }
 
-        /* =====================================
-              🔥 RUN TASKS
-              ===================================== */
+        // Run data pipeline streams smoothly without layout lockouts
+        for (let i = 0; i < totalTasks; i++) {
+          const [title, task] = tasks[i];
+          const targetPercent = ((i + 1) / totalTasks) * 96;
 
-        for (let i = 0; i < tasks.length; i++) {
-          const [title, task, type = 'download'] = tasks[i];
-
-          const target = ((i + 1) / tasks.length) * 100;
-
-          await Promise.all([animateProgress(target, title, type), Promise.resolve().then(task)]);
+          await Promise.all([animateProgress(targetPercent, title), Promise.resolve().then(task)]);
         }
 
-        /* =====================================
-              🔥 COMPLETE
-              ===================================== */
+        window.appState = 'READY';
 
-        await animateProgress(100, 'Application Ready');
-
-        updateLoader(100, 'Application Ready', 'check_circle');
-
-        window.loaderCompleted = true;
-
-        if (!document.hidden) {
-          hideLoader();
-
-          window.loaderCompleted = false;
+        if (window.isUserLoggedIn) {
+          handlePostDataInitialization();
         }
       }
 
@@ -8841,28 +8458,18 @@
       }
 
       function handleStationChange(sourceId) {
-        enableAllButtons();
-
         const station = id(sourceId).value;
-
         if (!station) return;
-
         // 🔁 Sync all station dropdowns
         syncSelect('station', station);
-
         // 🔄 Filters
         filters.station = station;
-
         applyFilters();
-
         // 🔥 RESET EMPLOYEE DROPDOWN
         filters.employee = '';
-
         setValueSelect('employee', '');
-
         selectMap.employee.forEach((eid) => {
           const el = id(eid);
-
           if (el) {
             el.selectedIndex = -1;
           }
@@ -9195,9 +8802,6 @@
 
             case 'employee':
               fillEmpDetails(value);
-              if (value && value !== 'Select') {
-                enableAllButtons();
-              }
               break;
           }
 
