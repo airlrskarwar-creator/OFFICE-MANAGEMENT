@@ -142,6 +142,16 @@ sbg_file = client.open_by_key(
     "1VeQApi6T1Rd08uL-oOmulgpfo08NJqs5yL5ec-3REkE"
 )
 
+# 🔥 TRANSMISSION DATABASE
+txn_file = client.open_by_key(
+    "1Li_5Zv5hEPNNXqAgizQZe20OrRDwZrgrvLXOoXVsLO4"
+)
+
+# 🔥 ESR DATABASE
+esr_file = client.open_by_key(
+    "1-ieObqiKds8GoPFI6aMIPnDljGhFcvQmI9AKGMv_vjI"
+)
+
 # =========================================================
 # WORKSHEETS
 # =========================================================
@@ -170,6 +180,8 @@ hsd_sheet = diesel_file.worksheet("HSDlog")
 # 🔥 ELECTRICITY LOG
 eb_sheet = eb_file.worksheet("EBlog")
 
+# 🔥 ESR LOG
+esr_sheet = eb_file.worksheet("ESR")
 
 
 # =========================================================
@@ -186,6 +198,17 @@ comm_sheet = ref_file.worksheet("CommFactDB")
 
 it_sheet = ref_file.worksheet("ITDB")
 
+# =========================================================
+# TRANSMISSION DATABASE SHEETS
+# =========================================================
+
+pb_sheet = ref_file.worksheet("PBS")
+
+txn_sheet = ref_file.worksheet("Transmitter")
+
+mp_sheet = ref_file.worksheet("MPS")
+
+ch_sheet = ref_file.worksheet("RelayedChannel")
 
 # =========================
 # API ROUTES
@@ -206,56 +229,45 @@ def sheet_to_json(sheet):
 def get_emp():
     return jsonify(sheet_to_json(emp_sheet))
 
-
 @app.route("/sbg", methods=["GET"])
 def get_sbg():
     return jsonify(sheet_to_json(sbg_sheet))
-
 
 @app.route("/sbgexp", methods=["GET"])
 def get_sbgexp():
     return jsonify(sheet_to_json(sbgexp_sheet))
 
-
 @app.route("/pb", methods=["GET"])
 def get_pb():
     return jsonify(sheet_to_json(pb_sheet))
-
 
 @app.route("/cpc", methods=["GET"])
 def get_cpc():
     return jsonify(sheet_to_json(cpc_sheet))
 
-
 @app.route("/city", methods=["GET"])
 def get_city():
     return jsonify(sheet_to_json(city_sheet))
-
 
 @app.route("/qtrs", methods=["GET"])
 def get_qtrs():
     return jsonify(sheet_to_json(qtrs_sheet))
 
-
 @app.route("/comm", methods=["GET"])
 def get_comm():
     return jsonify(sheet_to_json(comm_sheet))
-
 
 @app.route("/it", methods=["GET"])
 def get_it():
     return jsonify(sheet_to_json(it_sheet))
 
-
 @app.route("/dg", methods=["GET"])
 def get_dg():
     return jsonify(sheet_to_json(dg_sheet))
 
-
 @app.route("/hsd", methods=["GET"])
 def get_hsd():
     return jsonify(sheet_to_json(hsd_sheet))
-
 
 @app.route("/eb", methods=["GET"])
 def get_eb():
@@ -264,6 +276,29 @@ def get_eb():
 @app.route("/duty", methods=["GET"])
 def get_duty():
     return jsonify(sheet_to_json(duty_sheet))
+
+
+
+
+@app.route("/esr", methods=["GET"])
+def get_esr():
+    return jsonify(sheet_to_json(esr_sheet))
+
+@app.route("/pbs", methods=["GET"])
+def get_pb():
+    return jsonify(sheet_to_json(pb_sheet))
+
+@app.route("/mps", methods=["GET"])
+def get_mp():
+    return jsonify(sheet_to_json(mp_sheet))
+
+@app.route("/txn", methods=["GET"])
+def get_txn():
+    return jsonify(sheet_to_json(txn_sheet))
+
+@app.route("/ch", methods=["GET"])
+def get_ch():
+    return jsonify(sheet_to_json(ch_sheet))
 
 
 # =========================================================
