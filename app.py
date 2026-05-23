@@ -165,26 +165,37 @@ def login():
         user = (data.get("user") or "").strip().upper()
         password = (data.get("password") or "").strip()
 
+        # 1. Verify Credentials
         role_user = next((r for r in ROLE_USERS if r["user"].upper() == user and r["password"] == password), None)
-        if role_user:
-            return jsonify({"success": True, "user": role_user["user"], "displayName": role_user["user"], "station": station, "role": role_user["user"]})
 
-        headers = EMP_CACHE[0]
-        emp_data = [dict(zip(headers, row)) for row in EMP_CACHE[1:]]
-        found_user = next((emp for emp in emp_data if str(emp.get("User", "")).strip().upper() == user), None)
+        # 2. If credentials match, trigger a GLOBAL REFRESH of all caches
+        if role_user or (found_user := next((emp for emp in [dict(zip(EMP_CACHE[0], row)) for row in EMP_CACHE[1:]] if str(emp.get("User", "")).strip().upper() == user), None)):
 
-        if not found_user or str(found_user.get("Password", "")).strip() != password:
-            return jsonify({"success": False, "message": "Invalid user credentials"})
+            # 🔥 FORCE RE-READ ALL SHEETS FROM GOOGLE
+            global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
+            PB_CACHE = pb_sheet.get("A:ZZ")
+            SBG_CACHE = sbg_sheet.get("A:ZZ")
+            SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+            DG_CACHE = dg_sheet.get("A:ZZ")
+            EB_CACHE = eb_sheet.get("A:ZZ")
+            EMP_CACHE = emp_sheet.get("A:ZZ")
 
-        return jsonify({
-            "success": True,
-            "user": found_user.get("User", ""),
-            "displayName": found_user.get("Employee Name", user),
-            "initial": found_user.get("Initial", ""),
-            "station": station,
-            "role": "USER"
-        })
+            # 3. Return user details
+            if role_user:
+                return jsonify({"success": True, "user": role_user["user"], "displayName": role_user["user"], "station": station, "role": role_user["user"]})
+
+            return jsonify({
+                "success": True,
+                "user": found_user.get("User", ""),
+                "displayName": found_user.get("Employee Name", user),
+                "station": station,
+                "role": "USER"
+            })
+
+        return jsonify({"success": False, "message": "Invalid user credentials"})
+
     except Exception as e:
+        print("❌ Login Error:", str(e))
         return jsonify({"success": False, "message": str(e)}), 500
 
 
