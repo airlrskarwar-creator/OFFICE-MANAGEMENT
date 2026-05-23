@@ -335,15 +335,24 @@ def update_pb():
                 # Pad existing data if the cached row is physically shorter than headers array
                 padded_existing = existing_data + [""] * (len(headers) - len(existing_data))
 
+                # Inside your update_pb function:
                 changed_cols = []
-
-                # Compare column by column
                 for col_idx, h in enumerate(headers):
-                    old_val = str(padded_existing[col_idx]).strip()
-                    new_val = str(row_data[col_idx]).strip()
+                    # Fetch values from cache and incoming object
+                    old_val = str(padded_existing[col_idx]).strip().upper()
+                    new_val = str(row_data[col_idx]).strip().upper()
 
+                    # If incoming is "TRUE" and sheet cache is "TRUE", it is NOT a change
                     if old_val != new_val:
                         changed_cols.append(h)
+
+                # Only update if changed_cols is NOT empty
+                if changed_cols:
+                    updates.append({
+                        "range": f"A{row_num}",
+                        "values": [row_data]
+                    })
+                    updated_employees.append({...})
 
                 # Only queue the update if there is a real difference
                 if changed_cols:
