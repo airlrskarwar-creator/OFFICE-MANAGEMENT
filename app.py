@@ -165,20 +165,20 @@ def login():
         user = (data.get("user") or "").strip().upper()
         password = (data.get("password") or "").strip()
 
+        # 🔥 FORCE RE-READ ALL SHEETS FROM GOOGLE
+        global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
+        EMP_CACHE = emp_sheet.get("A:ZZ")
+        PB_CACHE = pb_sheet.get("A:ZZ")
+        SBG_CACHE = sbg_sheet.get("A:ZZ")
+        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+        DG_CACHE = dg_sheet.get("A:ZZ")
+        EB_CACHE = eb_sheet.get("A:ZZ")
+
         # 1. Verify Credentials
         role_user = next((r for r in ROLE_USERS if r["user"].upper() == user and r["password"] == password), None)
 
         # 2. If credentials match, trigger a GLOBAL REFRESH of all caches
         if role_user or (found_user := next((emp for emp in [dict(zip(EMP_CACHE[0], row)) for row in EMP_CACHE[1:]] if str(emp.get("User", "")).strip().upper() == user), None)):
-
-            # 🔥 FORCE RE-READ ALL SHEETS FROM GOOGLE
-            global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
-            PB_CACHE = pb_sheet.get("A:ZZ")
-            SBG_CACHE = sbg_sheet.get("A:ZZ")
-            SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-            DG_CACHE = dg_sheet.get("A:ZZ")
-            EB_CACHE = eb_sheet.get("A:ZZ")
-            EMP_CACHE = emp_sheet.get("A:ZZ")
 
             # 3. Return user details
             if role_user:
