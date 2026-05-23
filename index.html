@@ -2188,7 +2188,8 @@
       .PB-Table-WrapperNPS,
       .BudgetTableWrapper,
       .BudgetTablefromPBWrapper,
-      .BudgetReportTableWrapper .EBtableWrapper {
+      .BudgetReportTableWrapper,
+      .EBtableWrapper {
         flex: 1;
         /* 🔥 equal height */
         min-height: 0;
@@ -2221,6 +2222,12 @@
         height: calc(100vh - 250px);
         overflow-y: auto;
         overflow-x: hidden;
+      }
+
+      .EBtableWrapper {
+        height: calc(100vh - 250px);
+        overflow-y: auto;
+        overflow-x: hidden !important;
       }
 
       /* ================= TABLE ================= */
@@ -4344,11 +4351,15 @@
         padding-top: 4px;
       }
 
-      .EBpanelDiv input {
+      .EBpanelDiv input,
+      .EBpanelDiv input:hover {
         width: 100%;
         text-align: center;
         font-weight: bold;
         font-size: 14px;
+        outline: none;
+        box-shadow: none;
+        color: black;
       }
 
       /* =========================================
@@ -4515,9 +4526,10 @@
       🔥 DG ROW TRANSITIONS
       ========================================= */
 
-      .DGdataRow {
-        cursor: pointer;
-        position: relative;
+      .DGdataRow,
+      .EBdataRow {
+        cursor: pointer !important;
+        position: relative !important;
         transition:
           transform 0.18s ease,
           box-shadow 0.18s ease,
@@ -4529,29 +4541,33 @@
       (ONLY NON ACTIVE)
       ========================================= */
 
-      .DGdataRow:not(.DGactiveRow):hover {
-        transform: scale(1.003);
-        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.18);
-        z-index: 5;
+      .DGdataRow:not(.DGactiveRow):hover,
+      .EBdataRow:not(.EBactiveRow):hover {
+        transform: scale(1.003) !important;
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.18) !important;
+        z-index: 5 !important;
       }
 
-      .DGdataRow:not(.DGactiveRow):hover td {
+      .DGdataRow:not(.DGactiveRow):hover td,
+      .EBdataRow:not(.EBactiveRow):hover td {
         background: #cee3ff !important;
         color: #012ca1 !important;
-        font-weight: 500;
+        font-weight: 500 !important;
       }
 
       /* =========================================
       🔥 ACTIVE ROW
       ========================================= */
 
-      .DGactiveRow {
-        transform: scale(1.004);
-        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.28);
-        z-index: 10;
+      .DGactiveRow,
+      .EBactiveRow {
+        transform: scale(1.004) !important;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.28) !important;
+        z-index: 10 !important;
       }
 
-      .DGactiveRow td {
+      .DGactiveRow td,
+      .EBactiveRow td {
         background: linear-gradient(180deg, #eff6ff, #dbeafe) !important;
         color: #1e3a8a !important;
         font-weight: bold;
@@ -4563,7 +4579,8 @@
       🔥 SMOOTH CELL TRANSITION
       ========================================= */
 
-      .DGdataRow td {
+      .DGdataRow td,
+      .EBdataRow td {
         transition:
           background 0.18s ease,
           color 0.18s ease;
@@ -5090,6 +5107,17 @@
             <i class="material-symbols-outlined">work</i>
             <span>Duty Chart</span>
           </button>
+
+          <button class="menu-btn" data-tooltip="Transmission Details" data-page="TxNPage">
+            <i class="material-symbols-outlined">cell_tower</i>
+            <span>Transmissions Log</span>
+          </button>
+
+          <button class="menu-btn" data-tooltip="Equipment Service Register" data-page="ESRPage">
+            <i class="material-symbols-outlined">settings_cinematic_blur</i>
+            <span>ESR</span>
+          </button>
+
           <!-- Database -->
           <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
             <i class="material-symbols-outlined">storage</i>
@@ -5142,6 +5170,7 @@
             <div></div>
           </div>
         </div>
+
         <div class="SectionPage" id="EmpPage" style="display: none">
           <div class="header">
             <h2>Employee Profile Details</h2>
@@ -5286,6 +5315,7 @@
             </table>
           </div>
         </div>
+
         <div class="SectionPage" id="PayBillPage" style="display: none">
           <div class="header">
             <h2>Pay Bill Generation</h2>
@@ -5514,6 +5544,7 @@
             <span id="GPF_Error" class="PB-error"></span>
           </div>
         </div>
+
         <div class="SectionPage" id="SalarySlipPage" style="display: none">
           <div class="header">
             <h2>Salary Slip</h2>
@@ -5553,6 +5584,7 @@
               </div>
             </div>
           </div>
+
           <div class="SalarySlipTableWrapper" id="SalarySlipWrapper">
             <table id="SalarySlipTable">
               <thead>
@@ -5742,6 +5774,7 @@
             </table>
           </div>
         </div>
+
         <div class="SectionPage" id="ITPage" style="display: none">
           <div class="header">
             <h2>Income Tax Calculation</h2>
@@ -5812,6 +5845,7 @@
           </div>
           <div class="ITtableWrapper"></div>
         </div>
+
         <div class="SectionPage" id="PensionPage" style="display: none">
           <div class="header">
             <h2>Pension Benifits & Calculations</h2>
@@ -5897,6 +5931,7 @@
           </div>
           <div class="PensionTableWrapper"></div>
         </div>
+
         <div class="SectionPage" id="BudgetPage" style="display: none">
           <div class="header">
             <h2>Budgets</h2>
@@ -6125,6 +6160,7 @@
             </div>
           </div>
         </div>
+
         <div class="SectionPage" id="DGlogPage" style="display: none">
           <div class="header">
             <h2>DG Log Register</h2>
@@ -6271,13 +6307,43 @@
               </div>
             </div>
           </div>
-          <div class="DGlogTableWrapper" id="DGlogTableWrapper" style="max-height: calc(100vh - 140px)"></div>
+          <div class="DGlogTableWrapper" id="DGlogTableWrapper"></div>
         </div>
+
         <div class="SectionPage" id="HSDlogPage" style="display: none">
           <div class="header">
             <h2>HSD Log Register</h2>
           </div>
+          <div class="Selection-bar">
+            <div class="select-group">
+              <label for="HSDPage_Station">Station :</label>
+              <select id="HSDPage_Station" class="stationDropdown"></select>
+            </div>
+            <div class="select-group">
+              <label for="HSDPage_FY">FY :</label>
+              <select id="HSDPage_FY"></select>
+            </div>
+            <div class="select-group">
+              <label for="HSDPage_Month">Month :</label>
+              <select id="HSDPage_Month"></select>
+            </div>
+            <div class="HSDaction-group">
+              <button id="HSDsaveBtn">
+                <i data-lucide="save"></i>
+                <span>Save</span>
+              </button>
+              <button id="HSDprintBtn">
+                <i data-lucide="printer"></i>
+                <span>Print</span>
+              </button>
+              <button id="HSDexcelBtn">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Excel</span>
+              </button>
+            </div>
+          </div>
         </div>
+
         <div class="SectionPage" id="ElectricityPage" style="display: none">
           <div class="header">
             <h2>Electricity Log Register</h2>
@@ -6290,10 +6356,6 @@
             <div class="select-group">
               <label for="EBPage_FY">FY :</label>
               <select id="EBPage_FY"></select>
-            </div>
-            <div class="select-group">
-              <label for="EBPage_Month">Month :</label>
-              <select id="EBPage_Month"></select>
             </div>
             <div class="EBaction-group">
               <button id="EBsaveBtn">
@@ -6459,6 +6521,63 @@
             <div class="EBtableWrapper"></div>
           </div>
         </div>
+
+        <div class="SectionPage" id="TxNPage" style="display: none">
+          <div class="header">
+            <h2>Transmission Log Register</h2>
+          </div>
+          <div class="Selection-bar">
+            <div class="select-group">
+              <label for="TxNPage_Station">Station :</label>
+              <select id="TxNPage_Station" class="stationDropdown"></select>
+            </div>
+            <div class="select-group">
+              <label for="TxNPage_FY">FY :</label>
+              <select id="TxNPage_FY"></select>
+            </div>
+            <div class="TxNaction-group">
+              <button id="TxNsaveBtn">
+                <i data-lucide="save"></i>
+                <span>Save</span>
+              </button>
+              <button id="TxNprintBtn">
+                <i data-lucide="printer"></i>
+                <span>Print</span>
+              </button>
+              <button id="TxNexcelBtn">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="ESRPage" style="display: none">
+          <div class="header">
+            <h2>Equipment Service Register</h2>
+          </div>
+          <div class="Selection-bar">
+            <div class="select-group">
+              <label for="ESRPage_Station">Station :</label>
+              <select id="ESRPage_Station" class="stationDropdown"></select>
+            </div>
+            <div class="ESRaction-group">
+              <button id="ESRsaveBtn">
+                <i data-lucide="save"></i>
+                <span>Save</span>
+              </button>
+              <button id="ESRprintBtn">
+                <i data-lucide="printer"></i>
+                <span>Print</span>
+              </button>
+              <button id="ESRexcelBtn">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="SectionPage" id="DutyPage" style="display: none">
           <div class="header">
             <h2>Duty Chart Register</h2>
@@ -6526,6 +6645,8 @@
             <button onclick="showSheet('HSDlog', this)">HSD Log</button>
             <button onclick="showSheet('EBlog', this)">EB Log</button>
             <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
+            <button onclick="showSheet('ESRDB', this)">ESR</button>
+            <button onclick="showSheet('TxNDB', this)">Transmission Log</button>
           </div>
           <div class="DB-Table-Wrapper">
             <table id="EmpDB"></table>
@@ -6542,6 +6663,8 @@
             <table id="HSDlog" style="display: none"></table>
             <table id="EBlog" style="display: none"></table>
             <table id="DutyChart" style="display: none"></table>
+            <table id="ESRDB" style="display: none"></table>
+            <table id="TxNDB" style="display: none"></table>
           </div>
         </div>
         <div class="dashboard-footer">
@@ -6581,6 +6704,14 @@
               <div>
                 <span class="material-symbols-outlined" id="ebDatabase">database_off</span>
                 <h3>EB Log Database</h3>
+              </div>
+              <div>
+                <span class="material-symbols-outlined" id="esrDatabase">database_off</span>
+                <h3>ESR Database</h3>
+              </div>
+              <div>
+                <span class="material-symbols-outlined" id="txnDatabase">database_off</span>
+                <h3>Transmission Database</h3>
               </div>
               <div>
                 <span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
@@ -7286,7 +7417,7 @@
       const ACCESS_RULES = {
         ADMIN: ['DashBoard', 'EmpPage', 'PayBillPage', 'SalarySlipPage', 'ITPage', 'PensionPage', 'BudgetPage'],
 
-        ENGG: ['EmpPage', 'SalarySlipPage', 'DGlogPage', 'HSDlogPage', 'ElectricityPage', 'DutyPage'],
+        ENGG: ['EmpPage', 'SalarySlipPage', 'DGlogPage', 'HSDlogPage', 'ElectricityPage', 'DutyPage', 'ESRPage', 'TxNPage'],
 
         MASTER: ['ALL'], // 🔥 full access
 
@@ -7471,7 +7602,6 @@
         refreshPBView();
         initDropdowns(dutyData);
         renderFromDropdowns();
-        loadEBMonthsByFY();
         loadDGList();
         loadDGMonthsByFY();
       }
@@ -7692,6 +7822,8 @@
         hsd: ['hsdDatabase', 'db'],
         eb: ['ebDatabase', 'db'],
         duty: ['dutyDatabase', 'db'],
+        esr: ['esrDatabase', 'db'],
+        txn: ['txnDatabase', 'db'],
 
         it: ['itDatabase', 'data'],
         cpc: ['cpcDatabase', 'data'],
@@ -7702,7 +7834,7 @@
 
       //============================🔥 GET DATA FROM SHEET🔥===========================//
       async function loadTable(api, tableId, shouldRender = true) {
-        console.log('🌐 loadTable:', api);
+        console.log('🌐 Database Online ✅ :', api);
 
         try {
           const res = await fetch(`https://office-management-f425.onrender.com/${api}`);
@@ -7755,7 +7887,8 @@
           if (api === 'hsd') hsdData = result;
           if (api === 'eb') ebData = result;
           if (api === 'duty') dutyData = result;
-
+          if (api === 'esr') esrData = result;
+          if (api === 'txn') txnData = result;
           // 🔥 ✅ SUCCESS → UPDATE ICON
           const [id, type] = apiStatusMap[api] || [];
           if (id && (api !== 'emp' || api !== 'sbg' || api !== 'sbgexp')) {
@@ -7923,7 +8056,8 @@
 
         const tasks = [
           ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart')],
-
+          ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB')],
+          ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB')],
           [
             'Loading Pay Bill + CPC Data...',
             async () => {
@@ -8049,6 +8183,8 @@
         let dgRes = await fetch('https://office-management-f425.onrender.com/dg');
         let hsdRes = await fetch('https://office-management-f425.onrender.com/hsd');
         let ebRes = await fetch('https://office-management-f425.onrender.com/eb');
+        let esrRes = await fetch('https://office-management-f425.onrender.com/esr');
+        let txnRes = await fetch('https://office-management-f425.onrender.com/txn');
 
         empData = await empRes.json();
         sbgData = await sbgRes.json();
@@ -8063,6 +8199,8 @@
         dgData = await dgRes.json();
         hsdData = await hsdRes.json();
         ebData = await ebRes.json();
+        esrData = await esrRes.json();
+        txnData = await txnRes.json();
       }
 
       /* =========================
@@ -8550,10 +8688,10 @@
       };
 
       const selectMap = {
-        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBPage_Station', 'DGPage_Station'],
+        station: ['EmpPage_Station', 'SalSlipPage_Station', 'ITPage_Station', 'PensionPage_Station', 'PayBillPage_Station', 'BudgetPage_Station', 'EBPage_Station', 'DGPage_Station', 'HSDPage_Station'],
         employee: ['EmpPage_Emp', 'ITPage_Emp', 'PensionPage_Emp', 'SalSlipPage_Emp', 'PayBillPage_Emp'],
-        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBPage_FY', 'DGPage_FY'],
-        month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth']
+        fy: ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY', 'BudgetPage_FY', 'EBPage_FY', 'DGPage_FY', 'HSDPage_FY'],
+        month: ['PayBillPage_SalMonth', 'SalSlipPage_SalMonth', 'HSDPage_Month', 'BudgetPage_Month', 'DGPage_Month']
       };
 
       function syncSelect(group, value) {
@@ -28740,37 +28878,64 @@
 
         const station = String(id('EBPage_Station')?.value || '').trim();
 
+        const fy = String(id('EBPage_FY')?.value || '').trim();
+
         const headers = ebData.headers;
 
         const allRows = [...ebData.rows];
 
         /* =====================================
-              🔥 HEADER INDEXES
-              ===================================== */
+        🔥 HEADER INDEXES
+        ===================================== */
+
+        const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
 
         const idx = {
-          station: headers.indexOf('EB Station'),
-          month: headers.indexOf('Month-Year'),
-          rr: headers.indexOf('RR No'),
-          id: headers.indexOf('ID No'),
-          tariff: headers.indexOf('Tariff')
+          station: findHeader('EB Station'),
+          month: findHeader('Month-Year'),
+          rr: findHeader('RR No'),
+          id: findHeader('ID No'),
+          tariff: findHeader('Tariff')
         };
 
         /* =====================================
-              🔥 FILTER ONLY STATION
-              IGNORE FY / MONTH
-              ===================================== */
+        🔥 FILTER STATION + FY
+        ===================================== */
 
-        const stationRows = allRows.filter((r) => String(r[idx.station] || '').trim() === station);
+        const stationRows = allRows.filter((r) => {
+          const rowStation = String(r[idx.station] || '').trim();
+
+          const monthStr = String(r[idx.month] || '').trim();
+
+          const rowFY = getFinancialYear(monthStr);
+
+          if (station && rowStation !== station) {
+            return false;
+          }
+
+          if (fy && rowFY !== fy) {
+            return false;
+          }
+
+          return true;
+        });
 
         /* =====================================
-              🔥 NO DATA
-              ===================================== */
+        🔥 NO DATA
+        ===================================== */
 
         if (!stationRows.length) {
           id('RR').value = '';
+
           id('ID').value = '';
+
           id('Tariff').value = '';
+
+          rrspanText = '';
+
+          idspanText = '';
+
+          tariffspanText = '';
 
           SyncAllPage();
 
@@ -28778,8 +28943,8 @@
         }
 
         /* =====================================
-              🔥 SORT LATEST MONTH
-              ===================================== */
+        🔥 SORT LATEST MONTH
+        ===================================== */
 
         const monthMap = {
           Jan: 0,
@@ -28813,155 +28978,32 @@
         });
 
         /* =====================================
-              🔥 LATEST ENTRY
-              ===================================== */
+        🔥 GET LATEST ROW
+        ===================================== */
 
         const latest = stationRows[0];
 
+        /* =====================================
+        🔥 AUTO LOAD RR / ID / TARIFF
+        ===================================== */
+
         id('RR').value = latest[idx.rr] || '';
-        rrspanText = latest[idx.rr] || '';
 
         id('ID').value = latest[idx.id] || '';
-        idspanText = latest[idx.id] || '';
 
         id('Tariff').value = latest[idx.tariff] || '';
+
+        rrspanText = latest[idx.rr] || '';
+
+        idspanText = latest[idx.id] || '';
+
         tariffspanText = latest[idx.tariff] || '';
 
         /* =====================================
-              🔥 REFRESH TABLE
-              ===================================== */
-
+        🔥 REFRESH TABLE
+        ===================================== */
         SyncAllPage();
       });
-
-      /* =========================
-            🔥 LOAD EB MONTH DROPDOWN
-            ========================= */
-
-      function loadEBMonthsByFY() {
-        if (!ebData || !ebData.rows) {
-          console.warn('❌ ebData not loaded');
-          return;
-        }
-
-        const select = id('EBPage_Month');
-
-        const fySelect = id('EBPage_FY');
-
-        if (!select || !fySelect) return;
-
-        /* =====================================
-              🔥 AUTO SET PRESENT FY IF EMPTY
-              ===================================== */
-
-        if (!fySelect.value) {
-          const now = new Date();
-
-          const currentMonth = now.toLocaleString('en-US', {
-            month: 'short'
-          });
-
-          const currentYear = now.getFullYear();
-
-          fySelect.value = getFinancialYear(`${currentMonth}-${currentYear}`);
-        }
-
-        const selectedFY = fySelect.value;
-
-        const monthMap = new Map();
-
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-        /* =====================================
-              🔥 FILTER MONTHS
-              ===================================== */
-
-        ebData.rows.forEach((row) => {
-          const monthStr = String(row[0] || '').trim();
-
-          if (!monthStr) return;
-
-          const parts = monthStr.split('-');
-
-          if (parts.length !== 2) return;
-
-          const mon = parts[0];
-
-          const yyyy = parts[1];
-
-          const mm = monthNames.indexOf(mon) + 1;
-
-          if (!mm || !yyyy) return;
-
-          /* =====================================
-                🔥 FY CHECK
-                ===================================== */
-
-          const fy = getFinancialYear(monthStr);
-
-          if (selectedFY && fy !== selectedFY) {
-            return;
-          }
-
-          /* =====================================
-                🔥 SORT KEY
-                ===================================== */
-
-          const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
-
-          monthMap.set(key, monthStr);
-        });
-
-        /* =====================================
-              🔥 SORT MONTHS
-              ===================================== */
-
-        const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
-
-        /* =====================================
-              🔥 RESET DROPDOWN
-              ===================================== */
-
-        select.innerHTML = '';
-
-        /* =====================================
-              ⚠️ NO DATA
-              ===================================== */
-
-        if (!sortedMonths.length) {
-          //console.warn('⚠ No months found for selected FY');
-          SyncAllPage();
-          return;
-        }
-
-        /* =====================================
-              🔥 ADD MONTHS
-              ===================================== */
-
-        sortedMonths.forEach((month) => {
-          const opt = document.createElement('option');
-
-          opt.value = month;
-
-          opt.textContent = month;
-
-          select.appendChild(opt);
-        });
-
-        /* =====================================
-              🔥 AUTO SELECT LATEST MONTH
-              ===================================== */
-
-        const latestMonth = sortedMonths[sortedMonths.length - 1];
-
-        select.value = latestMonth;
-
-        /* =====================================
-              🔥 LOAD TABLE + DATA
-              ===================================== */
-
-        select.dispatchEvent(new Event('change'));
-      }
 
       /* =========================
             🔥 FILTER EB TABLE
@@ -28972,75 +29014,113 @@
 
         if (!wrapper) return;
 
-        /* =========================
-              🔥 HEADERS
-              ========================= */
-
         const headers = ebData?.headers || [];
 
-        /* =========================
-              🔥 HIDE COLUMNS BY NAME
-              ========================= */
+        const hiddenColumnNames = ['EB Station', 'RR No', 'Tariff', 'ID No', 'Reference', 'Meter Constant', 'Prev KWh', 'Prev KVAh', 'Difference KWh', 'Difference KVAh', 'Interest on Deposit', 'Tax'];
 
-        const hiddenColumnNames = ['EB Station', 'RR No', 'Tariff', 'ID No', , 'Reference', 'Meter Constant', 'Prev KWh', 'Prev KVAh', 'Difference KWh', 'Difference KVAh', 'Interest on Deposit', 'Tax'];
-
-        // 🔥 FIND COLUMN INDEXES
         const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
 
-        // 🔥 VISIBLE HEADERS
         const visibleHeaders = headers.filter((_, i) => !hiddenCols.includes(i));
 
-        /* =========================
-              🔥 RESET
-              ========================= */
-
         wrapper.innerHTML = '';
-
-        /* =========================
-              🔥 FILTERS
-              ========================= */
 
         const station = id('EBPage_Station')?.value || '';
 
         const fy = id('EBPage_FY')?.value || '';
 
-        /* =========================
-              🔥 GET ROWS
-              ========================= */
-
         const allRows = ebData?.rows || [];
 
+        /* =====================================
+        🔥 SAFE HEADER FINDER
+        ===================================== */
+
+        const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
+
+        /* =====================================
+        🔥 HEADER INDEXES
+        ===================================== */
+
+        const idx = {
+          month: findHeader('Month-Year'),
+          station: findHeader('EB Station'),
+          rr: findHeader('RR No'),
+          tariff: findHeader('Tariff'),
+          idno: findHeader('ID No'),
+          EBref: findHeader('Reference'),
+          CD: findHeader('Contract Demand (KVA)'),
+          BD: findHeader('Billing Demand (KVA)'),
+          MC: findHeader('Meter Constant'),
+          RD: findHeader('Recorded Demand (KVA)'),
+          MD: findHeader('MD Meter'),
+          PF: findHeader('Power Factor'),
+          KWh: findHeader('KWh'),
+          KVAh: findHeader('KVAh'),
+          preKWh: findHeader('Prev KWh'),
+          preKVAh: findHeader('Prev KVAh'),
+          diffKWh: findHeader('Difference KWh'),
+          diffKVAh: findHeader('Difference KVAh'),
+          consKWh: findHeader('Consumption KWh'),
+          consKVAh: findHeader('Consumption KVAh'),
+          security: findHeader('Interest on Deposit'),
+          tax: findHeader('Tax'),
+          final: findHeader('Final Amount')
+        };
+
         /* =========================
-              🔥 FILTER DATA
-              ========================= */
+        🔥 FILTER DATA
+        ========================= */
 
         const rows = allRows.filter((row) => {
-          // 🔥 COLUMN A = Month-Year
-          const monthStr = String(row[0] || '').trim();
+          const monthStr = String(row[idx.month] || '').trim();
 
-          // 🔥 COLUMN B = Station
-          const rowStation = String(row[1] || '').trim();
+          const rowStation = String(row[idx.station] || '').trim();
 
-          // 🔥 FY
           const rowFY = getFinancialYear(monthStr);
-
-          /* =========================
-                  🔥 STATION FILTER
-                  ========================= */
 
           if (station && rowStation !== station) {
             return false;
           }
-
-          /* =========================
-                  🔥 FY FILTER
-                  ========================= */
 
           if (fy && rowFY !== fy) {
             return false;
           }
 
           return true;
+        });
+
+        /* =========================
+        🔥 SORT LATEST FIRST
+        ========================= */
+
+        const monthMap = {
+          Jan: 0,
+          Feb: 1,
+          Mar: 2,
+          Apr: 3,
+          May: 4,
+          Jun: 5,
+          Jul: 6,
+          Aug: 7,
+          Sep: 8,
+          Oct: 9,
+          Nov: 10,
+          Dec: 11
+        };
+
+        rows.sort((a, b) => {
+          try {
+            const [ma, ya] = String(a[idx.month] || '').split('-');
+
+            const [mb, yb] = String(b[idx.month] || '').split('-');
+
+            const da = new Date(Number(ya), monthMap[ma] || 0);
+
+            const db = new Date(Number(yb), monthMap[mb] || 0);
+
+            return db - da;
+          } catch {
+            return 0;
+          }
         });
 
         /* =========================
@@ -29157,8 +29237,13 @@
         } else {
           /* 🔥 ROWS */
 
-          rows.forEach((row) => {
-            html += `<tr>`;
+          rows.forEach((row, rowIndex) => {
+            html += `
+              <tr
+                class="EBdataRow"
+                data-row="${rowIndex}"
+              >
+            `;
 
             row.forEach((cell, i) => {
               if (hiddenCols.includes(i)) {
@@ -29208,164 +29293,163 @@
               ========================= */
 
         wrapper.innerHTML = html;
+
+        /* =====================================
+        🔥 ROW CLICK LOAD INPUTS
+        ===================================== */
+
+        wrapper.querySelectorAll('.EBdataRow').forEach((tr) => {
+          tr.addEventListener('click', () => {
+            /* =========================================
+                  🔥 REMOVE OLD ACTIVE
+                  ========================================= */
+
+            wrapper.querySelectorAll('.EBdataRow').forEach((r) => {
+              r.classList.remove('EBactiveRow');
+            });
+            /* =========================================
+                  🔥 ADD ACTIVE
+                  ========================================= */
+
+            tr.classList.add('EBactiveRow');
+
+            const rowIndex = Number(tr.dataset.row);
+
+            const row = rows[rowIndex];
+
+            if (!row) return;
+            /* =====================================
+            🔥 BILL MONTH
+            ===================================== */
+
+            try {
+              const monthStr = String(row[idx.month] || '');
+
+              const [m, y] = monthStr.split('-');
+
+              const monthNum = {
+                Jan: '01',
+                Feb: '02',
+                Mar: '03',
+                Apr: '04',
+                May: '05',
+                Jun: '06',
+                Jul: '07',
+                Aug: '08',
+                Sep: '09',
+                Oct: '10',
+                Nov: '11',
+                Dec: '12'
+              };
+
+              id('EBbillMonth').value = `${y}-${monthNum[m]}`;
+            } catch {
+              id('EBbillMonth').value = '';
+            }
+
+            /* =====================================
+            🔥 LOAD INPUTS
+            ===================================== */
+
+            id('EBref').value = row[idx.EBref] || '';
+
+            id('CD').value = row[idx.CD] || '';
+
+            id('BD').value = row[idx.BD] || '';
+
+            id('MC').value = row[idx.MC] || '';
+
+            id('RD').value = row[idx.RD] || '';
+
+            id('MD').value = row[idx.MD] || '';
+
+            id('PF').value = row[idx.PF] || '';
+
+            id('preKWh').value = row[idx.KWh] || '';
+
+            id('prevKWh').value = row[idx.preKWh] || '';
+
+            id('diffKWh').value = row[idx.diffKWh] || '';
+
+            id('consKWh').value = row[idx.consKWh] || '';
+
+            id('preKVAh').value = row[idx.KVAh] || '';
+
+            id('prevKVAh').value = row[idx.preKVAh] || '';
+
+            id('diffKVAh').value = row[idx.diffKVAh] || '';
+
+            id('consKVAh').value = row[idx.consKVAh] || '';
+
+            id('securityDeposit').value = row[idx.security] || '';
+
+            id('EBtax').value = row[idx.tax] || '';
+
+            id('EBbillAmount').value = formatCurrency(Number(row[idx.final]) || 0);
+
+            /* =====================================
+            🔥 PAYMENT MONTH
+            ===================================== */
+
+            const ebBillMonth = id('EBbillMonth');
+
+            if (ebBillMonth) {
+              ebBillMonth.setAttribute('data-skip-table-refresh', '1');
+
+              ebBillMonth.dispatchEvent(new Event('change'));
+            }
+          });
+        });
+
+        /* =========================================
+        🔥 OUTSIDE CLICK CLEAR
+        ========================================= */
+
+        document.addEventListener(
+          'click',
+
+          (e) => {
+            /* =====================================
+            🔥 CLICKED INSIDE EB ROW
+            ===================================== */
+
+            if (e.target.closest('.EBdataRow')) {
+              return;
+            }
+
+            /* =====================================
+            🔥 CLICKED INSIDE INPUT AREA
+            ===================================== */
+
+            if (e.target.closest('.EBPanel') || e.target.closest('.EBpanelDiv')) {
+              return;
+            }
+
+            /* =====================================
+            🔥 REMOVE ACTIVE ROW
+            ===================================== */
+
+            wrapper.querySelectorAll('.EBdataRow').forEach((r) => {
+              r.classList.remove('EBactiveRow');
+            });
+          },
+
+          { passive: true }
+        );
       }
 
       /* =========================================
-            🔥 EB FY CHANGE
-            ========================================= */
+      🔥 EB FY CHANGE
+      ========================================= */
 
       on('EBPage_FY', 'change', () => {
-        loadEBMonthsByFY();
-
-        const monthSelect = id('EBPage_Month');
-
-        const hasData = monthSelect && monthSelect.options.length > 1;
-
-        if (!hasData) {
-          clearEBInputs();
-          SyncAllPage();
-          //console.log('⚠ No EB data for selected FY');
-        }
-      });
-
-      /* =========================================
-            🔥 EB MONTH CHANGE
-            ========================================= */
-
-      on('EBPage_Month', 'change', () => {
-        const month = id('EBPage_Month')?.value?.trim();
-
-        /* =====================================
-              🔥 ALL MONTHS → CLEAR
-              ===================================== */
-
-        if (!month || month === 'ALL' || month === 'All Months') {
-          clearEBInputs();
-          SyncAllPage();
-          return;
-        }
-
-        /* =====================================
-              🔥 DATA CHECK
-              ===================================== */
-
-        if (!ebData || !ebData.headers || !ebData.rows) {
-          console.warn('❌ ebData not loaded');
-
-          return;
-        }
-
-        const headers = ebData.headers;
-        const rows = ebData.rows;
-
-        /* =====================================
-              🔥 SAFE HEADER FINDER
-              ===================================== */
-
-        const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
-
-        /* =====================================
-              🔥 HEADER INDEXES
-              ===================================== */
-
-        const idx = {
-          month: findHeader('Month-Year'),
-          EBref: findHeader('Reference'),
-          CD: findHeader('Contract Demand (KVA)'),
-          BD: findHeader('Billing Demand (KVA)'),
-          MC: findHeader('Meter Constant'),
-          RD: findHeader('Recorded Demand (KVA)'),
-          MD: findHeader('MD Meter'),
-          PF: findHeader('Power Factor'),
-          preKWh: findHeader('Prev KWh'),
-          preKVAh: findHeader('Prev KVAh'),
-          diffKWh: findHeader('Difference KWh'),
-          diffKVAh: findHeader('Difference KVAh'),
-          consKWh: findHeader('Consumption KWh'),
-          consKVAh: findHeader('Consumption KVAh'),
-          security: findHeader('Interest on Deposit'),
-          tax: findHeader('Tax'),
-          final: findHeader('Final Amount')
-        };
-
-        /* =====================================
-              🔥 FIND MONTH ROW
-              ===================================== */
-
-        const row = rows.find((r) => {
-          return (
-            String(r[idx.month] || '')
-              .trim()
-              .toLowerCase() === String(month).trim().toLowerCase()
-          );
-        });
-
-        if (!row) {
-          console.warn('❌ No row found for:', month);
-
-          clearEBInputs();
-
-          return;
-        }
-
-        /* =====================================
-              🔥 MONTH MAP
-              ===================================== */
-
-        const monthMap = {
-          Jan: '01',
-          Feb: '02',
-          Mar: '03',
-          Apr: '04',
-          May: '05',
-          Jun: '06',
-          Jul: '07',
-          Aug: '08',
-          Sep: '09',
-          Oct: '10',
-          Nov: '11',
-          Dec: '12'
-        };
-
-        /* =====================================
-              🔥 BILL MONTH
-              ===================================== */
-
-        try {
-          const [m, y] = month.split('-');
-
-          const mm = monthMap[m];
-
-          id('EBbillMonth').value = `${y}-${mm}`;
-
-          // 🔥 AUTO UPDATE PAY MONTH
-          id('EBbillMonth')?.dispatchEvent(new Event('change'));
-        } catch {
-          id('EBbillMonth').value = '';
-
-          id('EBpayMonth').value = '';
-        }
-
-        /* =====================================
-              🔥 FILTER TABLE
-              ===================================== */
-
+        clearEBInputs();
         SyncAllPage();
-        /* ============================================================
-              🔥 DISABLE FUTURE MONTHS & YEAR SELECT IN EBbillMonth INPUT
-              ============================================================= */
-
-        const ebBillMonth = id('EBbillMonth');
-
-        if (!ebBillMonth) return;
-        const today = new Date();
-        const maxMonth = `${today.getFullYear()}-${String(today.getMonth()).padStart(2, '0')}`;
-        ebBillMonth.max = maxMonth;
       });
 
       /* =========================================
-            🔥 BILL MONTH → PAYMENT MONTH
-            ========================================= */
+      🔥 BILL MONTH → PAYMENT MONTH
+      ========================================= */
 
       on('EBbillMonth', 'change', () => {
         const billMonth = id('EBbillMonth')?.value;
@@ -29378,14 +29462,14 @@
 
         try {
           /* =====================================
-                🔥 YYYY-MM
-                ===================================== */
+          🔥 YYYY-MM
+          ===================================== */
 
           const [yyyy, mm] = billMonth.split('-');
 
           /* =====================================
-                🔥 PAYMENT MONTH
-                ===================================== */
+          🔥 PAYMENT MONTH
+          ===================================== */
 
           const payDate = new Date(Number(yyyy), Number(mm) - 1, 1);
 
@@ -29394,20 +29478,20 @@
           id('EBpayMonth').value = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`;
 
           /* =====================================
-                🔥 MONTH NAMES
-                ===================================== */
+          🔥 MONTH NAMES
+          ===================================== */
 
           const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
           /* =====================================
-                🔥 CURRENT MONTH KEY
-                ===================================== */
+          🔥 CURRENT MONTH KEY
+          ===================================== */
 
           const currentMonthKey = `${monthNames[Number(mm) - 1]}-${yyyy}`;
 
           /* =====================================
-                🔥 PREVIOUS MONTH KEY
-                ===================================== */
+          🔥 PREVIOUS MONTH KEY
+          ===================================== */
 
           const prevDate = new Date(Number(yyyy), Number(mm) - 2, 1);
 
@@ -29416,8 +29500,8 @@
           //console.log({billMonth, currentMonthKey, prevMonthKey});
 
           /* =====================================
-                🔥 DATA CHECK
-                ===================================== */
+          🔥 DATA CHECK
+          ===================================== */
 
           if (!ebData || !ebData.headers || !ebData.rows) {
             return;
@@ -29427,8 +29511,8 @@
           const rows = ebData.rows;
 
           /* =====================================
-                🔥 SAFE HEADER FINDER
-                ===================================== */
+          🔥 SAFE HEADER FINDER
+          ===================================== */
 
           const findHeader = (name) => headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
 
@@ -29453,8 +29537,8 @@
           };
 
           /* =====================================
-                🔥 FIND ROWS
-                ===================================== */
+          🔥 FIND ROWS
+          ===================================== */
 
           const currentRow =
             rows.find(
@@ -29473,8 +29557,8 @@
             ) || {};
 
           /* =====================================
-                🔥 CD / BD / MC
-                ===================================== */
+          🔥 CD / BD / MC
+          ===================================== */
 
           // 🔥 CONTRACT DEMAND
           const CD = Number(currentRow?.[idx.CD]) || Number(prevRow?.[idx.CD]) || 0;
@@ -29602,6 +29686,10 @@
           if (!el) return;
 
           el.value = '';
+
+          qsa('.EBdataRow').forEach((r) => {
+            r.classList.remove('EBactiveRow');
+          });
         });
 
         // 🔥 DEFAULT VALUES
@@ -29902,8 +29990,6 @@
           }
 
           await loadTable('eb', 'EBlog');
-
-          loadEBMonthsByFY();
 
           SyncAllPage();
 
@@ -31673,7 +31759,7 @@
             🔥 CLICKED INSIDE ROW
             ===================================== */
 
-            if (e.target.closest('.DGdataRow')) {
+            if (e.target.closest('.DGdataRow') || e.target.closest('.EBdataRow')) {
               return;
             }
 
