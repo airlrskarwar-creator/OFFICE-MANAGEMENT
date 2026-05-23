@@ -285,11 +285,11 @@ def get_esr():
     return jsonify(sheet_to_json(esr_sheet))
 
 @app.route("/pbs", methods=["GET"])
-def get_pb():
+def get_pbs():
     return jsonify(sheet_to_json(pbs_sheet))
 
 @app.route("/mps", methods=["GET"])
-def get_mp():
+def get_mps():
     return jsonify(sheet_to_json(mps_sheet))
 
 @app.route("/txn", methods=["GET"])
