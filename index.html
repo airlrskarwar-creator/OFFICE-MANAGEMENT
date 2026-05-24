@@ -1642,7 +1642,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 8px 10px;
+        padding: 4px 8px;
         gap: 4px;
         border-bottom: 1px solid #e5e7eb;
         cursor: pointer;
@@ -1692,6 +1692,7 @@
         overflow-y: auto;
         padding: 6px;
         scrollbar-width: none;
+        padding-top: 15px;
       }
 
       .menu-list::-webkit-scrollbar {
@@ -2190,9 +2191,8 @@
       .DB-Table-Wrapper {
         flex: 1;
         overflow: auto;
-        margin: 4px;
-        width: 99.8%;
-        height: 83%;
+        width: 100%;
+        height: calc(100% - 90px);
       }
 
       /* ======= TABLE BASE========== */
@@ -7018,27 +7018,94 @@
       }
 
       /* ============================================================================
-          ⚡ OPTIMIZED EXPLICIT BULK SYNC DATALOADER
+          ⚡ POST-LOGIN BATCH TABLE RENDERER (Paints cached memory to DOM)
+      ============================================================================ */
+      function renderDatabaseTables(onlyDashboard = false) {
+        const dbMappings = [
+          { api: 'emp', id: 'EmpDB' },
+          { api: 'pb', id: 'PBDB' },
+          { api: 'sbg', id: 'BudgetDB' },
+          { api: 'sbgexp', id: 'SBGexpenditureDB' },
+          { api: 'dg', id: 'DGlog' },
+          { api: 'hsd', id: 'HSDlog' },
+          { api: 'eb', id: 'EBlog' },
+          { api: 'duty', id: 'DutyChart' },
+          { api: 'esr', id: 'ESRDB' },
+          { api: 'txn', id: 'TxNDB' },
+          { api: 'cpc', id: 'CPC7DB' },
+          { api: 'qtrs', id: 'QtrsRateDB' },
+          { api: 'city', id: 'CityZoneDB' },
+          { api: 'comm', id: 'CommFactDB' },
+          { api: 'it', id: 'ITDB' }
+        ];
+
+        dbMappings.forEach((mapping) => {
+          // If we are only doing immediate render, skip everything but the dashboard
+          if (onlyDashboard && mapping.id !== 'BudgetDB') return;
+
+          const table = document.getElementById(mapping.id);
+          const config = apiStatusMap[mapping.api];
+          if (!table || !config) return;
+
+          const data = config.storage();
+          if (!data.rows.length) return;
+
+          // Efficient DOM building
+          const fragment = document.createDocumentFragment();
+          const tbody = document.createElement('tbody');
+
+          data.rows.forEach((row) => {
+            const tr = document.createElement('tr');
+            row.forEach((val) => {
+              const td = document.createElement('td');
+              td.textContent = val ?? '';
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+
+          // Clear and append
+          table.querySelector('tbody')?.remove();
+          table.appendChild(tbody);
+        });
+      }
+
+      /* ============================================================================
+        ⚡ IMPROVED BATCH LOADER (Returns Promise)
       ============================================================================ */
       async function loadData() {
-        try {
-          const apis = Object.keys(apiStatusMap);
-          const responses = await Promise.all(apis.map((api) => fetch(`https://office-management-f425.onrender.com/${api}`).then((r) => r.json())));
+        const apis = Object.keys(apiStatusMap);
 
-          apis.forEach((api, index) => {
-            const data = responses[index];
-            const config = apiStatusMap[api];
+        // 🔥 FIX: Wipe local memory before fetching
+        apis.forEach((api) => {
+          const storage = apiStatusMap[api].storage();
+          storage.headers = [];
+          storage.rows = [];
+        });
 
-            if (config && data && data.headers && data.rows) {
+        const timestamp = Date.now();
+
+        const results = await Promise.allSettled(apis.map((api) => fetch(`https://office-management-f425.onrender.com/${api}?t=${timestamp}`).then((r) => r.json())));
+
+        apis.forEach((api, index) => {
+          const result = results[index];
+          const config = apiStatusMap[api];
+
+          if (result.status === 'fulfilled' && config) {
+            const data = result.value;
+            if (data && data.headers && data.rows) {
               config.storage().headers = data.headers;
               config.storage().rows = data.rows;
               updateStatus(config.elId, config.type, true);
             }
-          });
-          console.log('✅ Synchronous client-side runtime data-cache updated.');
-        } catch (error) {
-          console.error('❌ Failed concurrent runtime pipeline extraction:', error);
-        }
+          } else {
+            console.error(`❌ Sync failed for: ${api}`);
+            if (config) updateStatus(config.elId, config.type, false);
+          }
+        });
+
+        console.log('✅ Runtime cache fully hydrated.');
+        return true;
       }
 
       /* =====================================================
@@ -7339,16 +7406,22 @@
       }
 
       /* ============================================================================
-          ⚡ INTERACTIVE AUTHENTICATION TRIGGER (Validates session boundaries cleanly)
+        🔥 UNIFIED LOGIN & INITIALIZATION ENGINE
       ============================================================================ */
-      on('loginBtn', 'click', async () => {
-        const station = stationEl.value;
-        const user = userEl.value;
-        const password = pwdEl.value;
 
-        if (!station) return (errormsg.textContent = '❌ Select station');
-        if (!user) return (errormsg.textContent = '❌ Select user');
-        if (!password) return (errormsg.textContent = '❌ Enter password');
+      on('loginBtn', 'click', async () => {
+        const station = stationEl?.value?.trim();
+        const user = userEl?.value?.trim();
+        const password = pwdEl?.value?.trim();
+
+        errormsg.textContent = '';
+        if (!station) return (errormsg.textContent = '❌ Please select a station');
+        if (!user) return (errormsg.textContent = '❌ Please select a user');
+        if (!password) return (errormsg.textContent = '❌ Please enter your password');
+
+        loginBtn.disabled = true;
+        showLoader();
+        updateLoader(5, 'Authenticating...', 'login');
 
         try {
           const res = await fetch('https://office-management-f425.onrender.com/login', {
@@ -7358,117 +7431,80 @@
           });
 
           const data = await res.json();
+
           if (data.success) {
+            // 1. Enter "Transition Mode"
+
+            showLoader();
+            updateLoader(10, 'Login successful, synchronizing data...', 'lock_open');
             window.currentStation = station;
             window.currentInitial = data.initial || '';
-            loginSuccess(data.user, data.displayName || data.user, station);
-            return;
+
+            // 2. Perform Login Success Pipeline
+            await loginSuccess(data.user, data.displayName || data.user, station);
+          } else {
+            errormsg.textContent = data.message;
           }
         } catch (err) {
           console.error(err);
           errormsg.textContent = '❌ Server error';
-          return;
+          hideLoader();
+        } finally {
+          loginBtn.disabled = false;
         }
-
-        if (!window.userList) return;
-        const record = window.userList.find((u) => u.user === user);
-        if (!record) return (errormsg.textContent = '❌ User not found');
-        if (password !== record.password) return (errormsg.textContent = '❌ Incorrect password');
-
-        window.currentStation = station;
-        window.currentInitial = record.initial;
-
-        loginSuccess(user, record.name, station);
-        setTimeout(() => {
-          lockRequirementTableForUser(user);
-        }, 0);
       });
 
-      /* ============================================================================
-          ⚡ OPTIMIZED AFTER-LOGIN ROUTER (Captures background load progression safely)
-      ============================================================================ */
       async function loginSuccess(user, displayName, loginStation) {
         window.isUserLoggedIn = true;
         window.currentUser = user;
 
+        document.body.classList.add('logged-in');
+        id('welcomeUser').textContent = `Welcome ${displayName}`;
+
+        // Simply call the engine. The engine handles the loader and the transition.
+        await loadAllData();
+
+        // Final Reveal: Only reached when loadAllData and init are complete
         id('loginPage').style.display = 'none';
         id('mainPage').style.display = 'flex';
-
-        document.body.classList.add('logged-in');
-        document.body.classList.toggle('sidebar-collapsed', localStorage.getItem('sidebarCollapsed') === 'true');
-        qs('.app')?.classList.add('loaded');
-
-        // Check background compilation progress status markers
-        if (window.appState === 'FETCHING') {
-          showLoader();
-          updateLoader(window.visualProgress, 'Synchronizing Backend Sheets Structures...', 'sync');
-          try {
-            await window.backgroundLoadPromise;
-          } catch (err) {
-            console.error('❌ Data sync aborted on connection breakdown:', err);
-          }
-        } else if (window.appState === 'READY') {
-          showLoader();
-          handlePostDataInitialization();
-        } else {
-          window.backgroundLoadPromise = loadAllData();
-        }
-
-        id('welcomeUser').textContent = `Welcome ${displayName}`;
-        applyStation_UserControl(loginStation, user, user);
       }
 
-      function handlePostDataInitialization() {
-        updateLoader(100, 'Application Ready', 'check_circle');
+      async function handlePostDataInitialization() {
+        try {
+          //updateLoader(98, 'Finalizing Workspace...', 'settings');
 
-        // Push structured view assignments to engine lifecycle tasks
-        initUI();
-        initAfterData();
-        initBindings();
-        initDefaultView();
-        initPostSetup();
-        applyUserAccess(window.currentUser);
+          // 1. Background Refresh (Optional, non-blocking)
+          fetch('https://office-management-f425.onrender.com/refresh/all', { method: 'POST' }).catch((e) => console.warn('Refresh skipped'));
 
-        const menuBtns = qsa('.menu-btn');
-        for (let i = 0; i < menuBtns.length; i++) menuBtns[i].classList.remove('active');
+          // 2. Initial UI Bindings
+          initUI();
+          initAfterData();
+          initBindings();
+          initDefaultView();
+          initPostSetup();
+          applyUserAccess(window.currentUser);
 
-        const sectionPages = qsa('.SectionPage');
-        for (let i = 0; i < sectionPages.length; i++) hide(sectionPages[i]);
+          // 3. Render
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          renderDatabaseTables(true); // Only Dashboard
 
-        show('DashBoard');
-        const dashboardBtn = qs('.menu-btn[data-page="DashBoard"]');
-        if (dashboardBtn) dashboardBtn.classList.add('active');
-
-        setTimeout(() => {
+          // 4. Routing & Pipeline
+          show('DashBoard');
           syncSelect('station', window.currentStation);
           filters.station = window.currentStation;
           applyFilters();
 
-          const zone = getCityZone(window.currentStation) || {};
-          const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
-          let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
-
-          if (daPercent >= 50) percent += 2;
-          else if (daPercent >= 25) percent += 1;
-
-          const pages = ['PayBillPage', 'EmpPage'];
-          for (let i = 0; i < pages.length; i++) {
-            const taZone = id(`${pages[i]}_TAZone`);
-            const hraZone = id(`${pages[i]}_HRAZone`);
-            if (taZone) taZone.value = val(zone.ta);
-            if (hraZone) hraZone.value = val(zone.hra);
-          }
-
-          if (id('PayBillPage_HRA%')) id('PayBillPage_HRA%').value = percent;
-
           recalculateAllRows();
           refreshPBView();
           lockRequirementTableForUser(window.currentUser);
-        }, 0);
-
-        setTimeout(() => {
-          hideLoader();
-        }, 450);
+          completeLoader();
+          // 5. Background Render for remainder
+          requestIdleCallback(() => renderDatabaseTables(false));
+        } catch (err) {
+          console.error('❌ Init Error:', err);
+          showCustomAlert('❌ Initialization failed.');
+          throw err;
+        }
       }
 
       function lockRequirementTableForUser(user, isLocked = false) {
@@ -7844,28 +7880,55 @@
 
       function showCustomAlert(message) {
         const modal = id('customAlert');
+
         const msgBox = id('customAlertMsg');
+
         const header = id('customAlertHeader');
+
         if (!modal || !msgBox || !header) return;
 
-        header.className = '';
+        // 🔥 RESET CLASSES
+        header.classList.remove('success', 'error', 'warning', 'info');
+
+        /* =========================
+              🔥 DETECT ALERT TYPE
+              ========================= */
+
         let title = '🔔 Alert Message';
 
+        // ❌ ERROR
         if (message.includes('❌') || message.toLowerCase().includes('error')) {
           header.classList.add('error');
+
           title = '🔔 Error Message';
-        } else if (message.includes('⚠️') || message.includes('ℹ️') || message.includes('🚫') || message.toLowerCase().includes('no changes')) {
+        }
+
+        // ⚠️ WARNING / NO CHANGE
+        else if (message.includes('⚠️') || message.includes('ℹ️') || message.includes('🚫') || message.toLowerCase().includes('no changes')) {
           header.classList.add('warning');
+
           title = '🔔 Notice Message';
-        } else if (message.includes('✅') || message.toLowerCase().includes('success')) {
+        }
+
+        // ✅ SUCCESS
+        else if (message.includes('✅') || message.toLowerCase().includes('success')) {
           header.classList.add('success');
+
           title = '🔔 Success Message';
-        } else {
+        }
+
+        // 🔵 DEFAULT
+        else {
           header.classList.add('info');
         }
 
+        // 🔥 SET HEADER TITLE
         header.innerHTML = title;
+
+        // 🔥 SET MESSAGE
         msgBox.innerHTML = message;
+
+        // 🔥 SHOW MODAL
         modal.classList.remove('hidden');
       }
 
@@ -7915,48 +7978,34 @@
           return new Promise((resolve) => {
             const start = window.visualProgress;
             const diff = target - start;
-            const duration = 280; // Snappy hardware ease loops
+            const duration = 280;
             let startTime = null;
 
             function step(timestamp) {
               if (!startTime) startTime = timestamp;
               const elapsed = timestamp - startTime;
               const progress = Math.min(elapsed / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 3); // Cubic Out Ease
-
+              const eased = 1 - Math.pow(1 - progress, 3);
               window.visualProgress = start + diff * eased;
 
-              if (window.isUserLoggedIn) {
-                updateLoader(window.visualProgress, apiName, 'download');
-              }
-
-              if (progress < 1) {
-                requestAnimationFrame(step);
-              } else {
-                window.visualProgress = target;
-                if (window.isUserLoggedIn) {
-                  updateLoader(target, apiName, 'download');
-                }
-                resolve();
-              }
+              if (window.isUserLoggedIn) updateLoader(window.visualProgress, apiName, 'download');
+              if (progress < 1) requestAnimationFrame(step);
+              else resolve();
             }
             requestAnimationFrame(step);
           });
         }
 
-        // Run data pipeline streams smoothly without layout lockouts
         for (let i = 0; i < totalTasks; i++) {
           const [title, task] = tasks[i];
           const targetPercent = ((i + 1) / totalTasks) * 96;
-
           await Promise.all([animateProgress(targetPercent, title), Promise.resolve().then(task)]);
         }
 
         window.appState = 'READY';
 
-        if (window.isUserLoggedIn) {
-          handlePostDataInitialization();
-        }
+        // Hand off to UI builder
+        if (window.isUserLoggedIn) await handlePostDataInitialization();
       }
 
       /* =========================
@@ -8459,44 +8508,47 @@
 
       function handleStationChange(sourceId) {
         const station = id(sourceId).value;
-        if (!station) return;
-        // 🔁 Sync all station dropdowns
+        if (!station || station === filters.station) return; // 🔥 Guard against redundant execution
+
+        // 1. Sync all station dropdowns and global filters
         syncSelect('station', station);
-        // 🔄 Filters
         filters.station = station;
         applyFilters();
-        // 🔥 RESET EMPLOYEE DROPDOWN
+
+        // 2. Reset Employee Selection
         filters.employee = '';
         setValueSelect('employee', '');
         selectMap.employee.forEach((eid) => {
           const el = id(eid);
-          if (el) {
-            el.selectedIndex = -1;
-          }
+          if (el) el.selectedIndex = -1;
         });
 
-        // 🌆 Zone logic
-        const zone = getCityZone(station) || {};
-
-        const daPercent = Number(id('PayBillPage_DA%')?.value) || 0;
+        // 3. Zone Logic (Ensure elements exist before accessing .value)
+        const zone = getCityZone(station) || { ta: '', hra: '' };
+        const daInput = id('PayBillPage_DA%');
+        const daPercent = Number(daInput?.value) || 0;
 
         let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
-
         if (daPercent >= 50) percent += 2;
         else if (daPercent >= 25) percent += 1;
 
-        // Apply zone values
+        // Apply zone values safely
         ['PayBillPage', 'EmpPage'].forEach((page) => {
-          id(`${page}_TAZone`).value = val(zone.ta);
-
-          id(`${page}_HRAZone`).value = val(zone.hra);
+          const taZone = id(`${page}_TAZone`);
+          const hraZone = id(`${page}_HRAZone`);
+          if (taZone) taZone.value = zone.ta || '';
+          if (hraZone) hraZone.value = zone.hra || '';
         });
 
-        id('PayBillPage_HRA%').value = percent;
+        const hraPercentInput = id('PayBillPage_HRA%');
+        if (hraPercentInput) hraPercentInput.value = percent;
 
-        recalculateAllRows();
-
-        refreshPBView();
+        // 4. Trigger UI Updates
+        // Wrap in requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          recalculateAllRows();
+          refreshPBView();
+        });
       }
 
       selectMap.station.forEach((fid) => {
@@ -10021,46 +10073,46 @@
       }
 
       /* ============== SIDEBAR TOGGLE======================== */
-      function toggleSidebar() {
+      /* ============================================================================
+        ⚡ UNIFIED SIDEBAR SYNC (Handles both Sidebar & Body Footer)
+      ============================================================================ */
+      function syncSidebarUI(isCollapsed) {
         const sidebar = id('sidebar');
         const app = qs('.app');
 
-        toggleClass(sidebar, 'collapsed');
-        toggleClass(app, 'collapsed');
-        const isCollapsed = sidebar.classList.contains('collapsed');
+        // Apply classes to container elements
+        if (sidebar) sidebar.classList.toggle('collapsed', isCollapsed);
+        if (app) app.classList.toggle('collapsed', isCollapsed);
 
-        /* =====================================
-        🔥 SAVE STATE
-        ===================================== */
+        // Apply class to body (for your .dashboard-footer CSS rules)
+        document.body.classList.toggle('sidebar-collapsed', isCollapsed);
 
+        // Persist state
         localStorage.setItem('sidebarCollapsed', isCollapsed);
-
-        /* =====================================
-        🔥 FOOTER CLASS
-        ===================================== */
-
-        if (isCollapsed) {
-          document.body.classList.add('sidebar-collapsed');
-        } else {
-          document.body.classList.remove('sidebar-collapsed');
-        }
       }
 
-      /* ========================LOAD SIDEBAR STATE======================== */
-      function loadSidebarState() {
+      /* ============================================================================
+        ⚡ TOGGLE ACTION
+      ============================================================================ */
+      function toggleSidebar() {
         const sidebar = id('sidebar');
+        // Determine the *new* state based on current state
+        const isCollapsed = !sidebar.classList.contains('collapsed');
 
-        const app = qs('.app');
+        syncSidebarUI(isCollapsed);
+      }
 
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      /* ============================================================================
+        ⚡ LOAD STATE (Run this on page load)
+      ============================================================================ */
+      function loadSidebarState() {
+        const savedState = localStorage.getItem('sidebarCollapsed');
 
-        if (isCollapsed) {
-          addClass(sidebar, 'collapsed');
-          addClass(app, 'collapsed');
-          document.body.classList.add('sidebar-collapsed');
-        } else {
-          document.body.classList.remove('sidebar-collapsed');
-        }
+        // If savedState is null (first visit), default to true (collapsed)
+        // Otherwise, check if it equals 'true'
+        const isCollapsed = savedState === null ? true : savedState === 'true';
+
+        syncSidebarUI(isCollapsed);
       }
 
       /* ===========MENU HANDLER (USING HELPERS)====================== */
@@ -13637,165 +13689,6 @@
         setDAPercent();
       }
 
-      let pbProgressSource = null;
-
-      /* =========================
-            🔥 START BACKEND PROGRESS
-            ========================= */
-
-      function startPBProgress() {
-        // 🔥 CLOSE OLD SSE
-        if (pbProgressSource) {
-          pbProgressSource.close();
-          pbProgressSource = null;
-        }
-
-        // 🔥 CLEAR OLD INTERVAL
-        if (window.pbFakeInterval) {
-          clearInterval(window.pbFakeInterval);
-          window.pbFakeInterval = null;
-        }
-
-        const source = new EventSource('https://office-management-f425.onrender.com/pb/progress');
-
-        pbProgressSource = source;
-
-        /* =========================
-              🔥 FAKE SMOOTH PROGRESS
-              ========================= */
-
-        let fakeProgress = 12;
-
-        updateLoader(fakeProgress, getPBProgressMessage(fakeProgress), 'sync');
-
-        window.pbFakeInterval = setInterval(() => {
-          if (fakeProgress < 85) {
-            fakeProgress += 1;
-
-            updateLoader(fakeProgress, getPBProgressMessage(fakeProgress), 'sync');
-          }
-        }, 400);
-
-        /* =========================
-              🔥 REAL SSE PROGRESS
-              ========================= */
-
-        source.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-
-            //console.log('PB:', data);
-
-            // 🔥 IGNORE IDLE EVENTS
-            if (data.message === 'Idle') {
-              return;
-            }
-
-            // 🔥 SYNC REAL PROGRESS
-            fakeProgress = Math.max(fakeProgress, data.percent || 0);
-
-            updateLoader(fakeProgress, data.message || getPBProgressMessage(fakeProgress), 'sync');
-
-            /* =========================
-                  ✅ COMPLETE
-                  ========================= */
-
-            if (data.percent >= 100) {
-              // 🔥 STOP FAKE PROGRESS
-              if (window.pbFakeInterval) {
-                clearInterval(window.pbFakeInterval);
-                window.pbFakeInterval = null;
-              }
-
-              updateLoader(100, data.message || 'Completed Successfully', 'check_circle');
-
-              setTimeout(() => {
-                completeLoader();
-
-                source.close();
-
-                if (pbProgressSource === source) {
-                  pbProgressSource = null;
-                }
-              }, 500);
-            }
-          } catch (err) {
-            console.error('PB SSE Parse Error:', err);
-          }
-        };
-
-        /* =========================
-              ❌ SSE ERROR
-              ========================= */
-
-        source.onerror = (err) => {
-          console.warn('PB SSE Closed');
-
-          // 🔥 STOP FAKE LOADER
-          if (window.pbFakeInterval) {
-            clearInterval(window.pbFakeInterval);
-            window.pbFakeInterval = null;
-          }
-
-          // 🔥 CLOSE CONNECTION
-          source.close();
-
-          // 🔥 CLEAR ACTIVE SOURCE
-          if (pbProgressSource === source) {
-            pbProgressSource = null;
-          }
-
-          // ❌ NO AUTO RECONNECT
-        };
-      }
-
-      /* =========================
-            🔥 PROGRESS TEXTS
-            ========================= */
-
-      function getPBProgressMessage(progress) {
-        if (progress <= 5) return 'Connecting to Server...';
-
-        if (progress <= 15) return 'Preparing Pay Bill Data...';
-
-        if (progress <= 25) return 'Validating Employee Records...';
-
-        if (progress <= 40) return 'Processing Salary Details...';
-
-        if (progress <= 55) return 'Updating Database...';
-
-        if (progress <= 70) return 'Writing Changes to Backend...';
-
-        if (progress <= 85) return 'Finalizing Save Operation...';
-
-        if (progress < 100) return 'Completing Synchronization...';
-
-        return 'Completed Successfully';
-      }
-
-      /* =========================
-            🔥 STOP PROGRESS
-            ========================= */
-
-      function stopPBProgress() {
-        // 🔥 STOP SSE
-        if (pbProgressSource) {
-          pbProgressSource.close();
-          pbProgressSource = null;
-        }
-
-        // 🔥 STOP FAKE PROGRESS
-        if (window.pbFakeInterval) {
-          clearInterval(window.pbFakeInterval);
-          window.pbFakeInterval = null;
-        }
-
-        // 🔥 RESET LOADER
-        updateLoader(0, 'Idle', 'sync');
-
-        hideLoader();
-      }
-
       on('PBaddBtn', 'click', async () => {
         const monthEl = id('PayBillPage_SalMonth');
         const station = id('PayBillPage_Station')?.value;
@@ -14053,76 +13946,42 @@
 
       function getTableData(tableId, type, salaryMonth, station, daPercent, mode) {
         const table = id(tableId);
-
         if (!table) return [];
 
         const headers = Array.from(table.querySelectorAll('thead th')).map((th) => th.innerText.trim());
-
         const rows = table.querySelectorAll('tbody tr');
-
         let data = [];
 
         rows.forEach((tr) => {
-          if (tr.innerText.toLowerCase().includes('total')) {
-            return;
-          }
+          // Skip total rows
+          if (tr.innerText.toLowerCase().includes('total')) return;
 
           const cells = tr.querySelectorAll('td');
-
           let rowObj = {};
 
           headers.forEach((h, i) => {
             const cell = cells[i];
-
-            if (!cell) {
-              rowObj[h] = '';
-
-              return;
-            }
-
-            try {
-              rowObj[h] = getPBCellValue(cell, h);
-            } catch (err) {
-              console.warn('Cell error:', h, err);
-
-              rowObj[h] = '';
-            }
+            rowObj[h] = cell ? getPBCellValue(cell, h) : '';
           });
 
-          /* 🔥 FORCE VALUES */
-
+          // 1. Force standard fields
           rowObj['Salary Month'] = salaryMonth;
-
           rowObj['Pay Drawn Station'] = station;
-
           rowObj['DA%'] = daPercent;
-
-          /* 🔥 HRIS */
-
-          const empName = rowObj['Employee Name'];
-
-          const empStation = rowObj['Pay Drawn Station'];
-
-          rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
-
-          /* 🔥 DESIGNATION */
-
-          if (mode === 'ADD') {
-            const empHRIS = rowObj['HRIS'];
-
-            rowObj['Designation on Salary Month'] = getEmpDesignation(empName, empStation, empHRIS) || '';
-          } else {
-            rowObj['Designation on Salary Month'] = rowObj['Designation on Salary Month'] || '';
-          }
-
-          /* 🔥 CATEGORY */
-
           rowObj['Category'] = type;
 
-          /* 🔥 FORCE STRING */
+          // 2. Resolve HRIS
+          const empName = rowObj['Employee Name'];
+          const empStation = rowObj['Pay Drawn Station'];
+          rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
 
+          // 3. 🔥 EXCLUDE DESIGNATION FROM PAYLOAD
+          // By setting to undefined, JSON.stringify will skip this key entirely.
+          // The backend will then preserve the existing DB value automatically.
+          rowObj['Designation on Salary Month'] = undefined;
+
+          // 4. Clean up misc
           rowObj['Arrears Details'] = rowObj['Arrears Details'] || '';
-
           rowObj['Recovery Details'] = rowObj['Recovery Details'] || '';
 
           data.push(rowObj);
@@ -14149,262 +14008,132 @@
         if (!cell) return '';
 
         /* 🔹 TEXTAREA */
-
         if (colName === 'Arrears Details' || colName === 'Recovery Details') {
           const textarea = cell.querySelector('textarea');
-
           return textarea ? textarea.value.trim() : '';
         }
 
         /* 🔹 CHECKBOX */
-
         const checkbox = cell.querySelector("input[type='checkbox']");
-
-        if (checkbox) return checkbox.checked;
+        if (checkbox) {
+          // Force conversion to a consistent string match for the backend
+          return checkbox.checked ? 'TRUE' : 'FALSE';
+        }
 
         /* 🔹 INPUT */
-
         const input = cell.querySelector("input:not([type='checkbox'])");
-
         if (input) return cleanNumber(input.value);
 
         /* 🔹 SELECT */
-
         const select = cell.querySelector('select');
-
         if (select) return select.value || '';
-
         return cleanNumber(cell.textContent || '');
       }
 
-      /* =========================
-            🔥 SAVE PB DATA
-            ========================= */
-
+      /* ============================================================================
+          ⚡ HIGH-SPEED PAYROLL TRANSACTION COMMIT ENGINE (Finalized Production Build)
+      ============================================================================ */
       async function savePBData(mode = 'ADD') {
-        const salaryMonth = id('PayBillPage_SalMonth').value;
-        const station = id('PayBillPage_Station').value;
-        const daPercent = id('PayBillPage_DA%').value;
+        const salaryMonth = id('PayBillPage_SalMonth')?.value;
+        const station = id('PayBillPage_Station')?.value;
+        const daPercent = id('PayBillPage_DA%')?.value;
 
         if (!salaryMonth || !station) {
           showCustomAlert('❌ Month or Station missing');
           return;
         }
 
-        /* =========================
-              🔹 COLLECT DATA
-              ========================= */
-
         const goData = getTableData('PB_GOEditTbl', 'GO', salaryMonth, station, daPercent, mode);
         const npsData = getTableData('PB_NPSEditTbl', 'NPS', salaryMonth, station, daPercent, mode);
-        let data = [...goData, ...npsData];
+        const currentData = [...goData, ...npsData];
 
-        /* =========================
-              ❌ EMPTY
-              ========================= */
+        // 🔥 ROBUST CLIENT-SIDE DIFFING
+        if (window.originalPBEditData) {
+          const original = JSON.parse(window.originalPBEditData);
+          const originalFlat = [...original.go, ...original.nps];
+          const hasChanges = currentData.some((newRow, idx) => {
+            const oldRow = originalFlat[idx];
+            if (!oldRow) return true;
+            return Object.keys(newRow).some((key) => String(newRow[key]).trim() !== String(oldRow[key] || '').trim());
+          });
 
-        if (!data.length) {
-          showCustomAlert('ℹ️ No data to save');
-          return;
+          if (!hasChanges) {
+            showCustomAlert('ℹ️ No changes detected locally.');
+            return;
+          }
         }
 
         try {
           setSyncStatus('pbDatabase');
-          let loaderStarted = false;
+          showLoader();
+          updateLoader(20, 'Sending data to server...', 'cloud_upload');
 
-          /* =========================
-                🔥 DELAY LOADER
-                ========================= */
-
-          const loaderTimer = setTimeout(() => {
-            loaderStarted = true;
-            showLoader();
-            startPBProgress();
-            updateLoader(5, 'Checking Database...', 'manage_search');
-          }, 700);
-
-          /* =========================
-                🔥 SAVE
-                ========================= */
-
+          /* 🔥 EXECUTE NETWORK FETCH */
           const res = await fetch('https://office-management-f425.onrender.com/pb/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data, mode })
+            body: JSON.stringify({ data: currentData, mode })
           });
 
           const result = await res.json();
-          clearTimeout(loaderTimer);
 
-          /* =========================
-                ℹ️ NO CHANGES
-                ========================= */
-
+          /* ℹ️ NO CHANGES */
           if (result.status === 'nochange') {
-            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
-
             clearSyncStatus('pbDatabase');
             exitPBEditMode();
-            if (loaderStarted) {
-              stopPBProgress();
-              setTimeout(() => {
-                showCustomAlert(noChangeMsg);
-              }, 450);
-            } else {
-              showCustomAlert(noChangeMsg);
-            }
+            hideLoader();
+            showCustomAlert('ℹ️ No changes detected.<br><br>No data was modified.');
             return;
           }
 
-          /* =========================
-                ✅ SUCCESS
-                ========================= */
-
+          /* ✅ TRANSACTION SUCCESS */
           if (result.status === 'success') {
-            const updatedEmployees = result.updatedEmployees || [];
-            const addedEmployees = result.addedEmployees || [];
+            updateLoader(70, 'Syncing local cache...', 'sync');
 
-            /* =========================
-                  ✅ SUCCESS MESSAGE
-                  ========================= */
-
-            let msg = '';
-
-            /* 🔄 UPDATED */
-
-            if (updatedEmployees.length) {
-              //msg += `<div style=" margin-bottom:10px;font-size:13px;font-weight:700;color:#8ec5ff;">🔄 UPDATED EMPLOYEES</div>`;
-              msg += `
-                    <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">📝 PAYBILL EDIT SUCCESS!</div>
-                  `;
-              msg += updatedEmployees
-                .map((e) => {
-                  const changedCols = (e.changedColumns || [])
-                    .map(
-                      (col) => `
-                              <span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;
-                              background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                                🔃 ${col}
-                              </span>
-                            `
-                    )
-                    .join('');
-
-                  return `
-                          <div style="margin-bottom:16px;padding:8px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-
-                            <div style="font-size:13px;font-weight:700;margin-bottom:10px;">
-                              🧑‍💼 ${e.employee}
-                              <span style="opacity:.7;font-size:12px;margin-left:4px;">(${e.month})</span>
-                            </div>
-
-                            <div style="display:flex;align-items:flex-start;gap:4px;">
-                              <i class="material-icons" style="font-size:18px;color:#67b7ff;margin-top:3px;">sync</i>
-                              <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">${changedCols}</div>
-                            </div>
-                          </div>
-                        `;
-                })
-                .join('');
-            }
-
-            /* ➕ ADDED */
-
-            if (addedEmployees.length) {
-              msg += `
-                    <div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">➕ PAYBILL ADD SUCCESS!</div>
-                  `;
-              msg += `
-                      <div style="margin-top:10px;margin-bottom:12px;font-size:13px;font-weight:700;color:#ffd37d;">ADDED EMPLOYEES DETAILS</div>
-                    `;
-
-              msg += addedEmployees
-                .map(
-                  (e) => `
-                        <div style="padding:10px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                          🧑‍💼 ${e.employee}
-                          <span style="opacity:.7;font-size:13px;">(${e.month})</span>
-                        </div>
-                      `
-                )
-                .join('');
-            }
-
-            clearSyncStatus('pbDatabase');
-
-            loadTable('pb', 'PBDB')
-              .then(() => {
-                applyFilters();
-                refreshPBView();
-              })
-              .catch(console.error);
-
+            await fetch('https://office-management-f425.onrender.com/refresh/pb', { method: 'POST' });
+            await syncPBtoSBG();
+            await loadTable('pb', 'PBDB');
+            applyFilters();
+            refreshPBView();
             exitPBEditMode();
 
-            if (loaderStarted) {
-              stopPBProgress();
-              setTimeout(() => {
-                showCustomAlert(msg);
-              }, 450);
-            } else {
-              showCustomAlert(msg);
+            updateLoader(100, 'Saved successfully!', 'check_circle');
+            setTimeout(hideLoader, 1000);
+
+            // Build success HTML
+            let htmlBuffer = '';
+            const updated = result.updatedEmployees || [];
+            const added = Array.isArray(result.addedEmployees) ? result.addedEmployees : [];
+
+            if (updated.length > 0) {
+              htmlBuffer += '<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">📝 PAYBILL EDIT SUCCESS!</div>';
+              for (const e of updated) {
+                let colsHtml = (e.changedColumns || []).map((c) => `<span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;background:rgba(255,255,255,0.08);font-size:13px;">🔃 ${c}</span>`).join('');
+                htmlBuffer += `<div style="margin-bottom:16px;padding:8px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);"><div style="font-size:13px;font-weight:700;margin-bottom:10px;">🧑‍💼 ${e.employee} <span style="opacity:.7;font-size:12px;">(${e.month})</span></div><div style="display:flex;flex-wrap:wrap;gap:4px;">${colsHtml}</div></div>`;
+              }
             }
 
+            if (added.length > 0) {
+              htmlBuffer += '<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">➕ PAYBILL ADD SUCCESS!</div>';
+              for (const e of added) {
+                htmlBuffer += `<div style="padding:10px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">🧑‍💼 ${e.employee} <span style="opacity:.7;font-size:13px;">(${e.month})</span></div>`;
+              }
+            }
+
+            setTimeout(() => showCustomAlert(htmlBuffer || '✅ Data updated successfully.'), 450);
             return;
           }
 
-          /* =========================
-                ⚠️ CONFLICT
-                ========================= */
-
-          if (result.status === 'conflict') {
-            clearSyncStatus('pbDatabase', 'db', false);
-
-            const conflictMsg = '⚠️ Some rows were modified by another user.<br><br>Please reload and try again.';
-
-            if (loaderStarted) {
-              stopPBProgress();
-              setTimeout(() => {
-                showCustomAlert(conflictMsg);
-              }, 450);
-            } else {
-              showCustomAlert(conflictMsg);
-            }
-
-            return;
-          }
-
-          /* =========================
-                ❌ ERROR
-                ========================= */
-
+          /* ⚠️/❌ ERRORS */
+          hideLoader();
           clearSyncStatus('pbDatabase', 'db', false);
-
-          const errorMsg = '❌ Error: ' + (result.message || 'Unknown error');
-
-          if (loaderStarted) {
-            stopPBProgress();
-            setTimeout(() => {
-              showCustomAlert(errorMsg);
-            }, 450);
-          } else {
-            showCustomAlert(errorMsg);
-          }
+          const errorMsg = result.status === 'conflict' ? '⚠️ Some rows were modified by another user.<br><br>Please reload and try again.' : `❌ Error: ${result.message || 'Unknown error'}`;
+          showCustomAlert(errorMsg);
         } catch (err) {
           console.error(err);
-
+          hideLoader();
           clearSyncStatus('pbDatabase', 'db', false);
-
-          const serverMsg = '❌ Server error';
-
-          if (loaderStarted) {
-            stopPBProgress();
-            setTimeout(() => {
-              showCustomAlert(serverMsg);
-            }, 450);
-          } else {
-            showCustomAlert(serverMsg);
-          }
+          showCustomAlert('❌ Server error: Unable to complete save.');
         }
       }
 
@@ -16238,11 +15967,8 @@
       function convertMonthToDate(monthStr) {
         if (!monthStr || typeof monthStr !== 'string') return '';
 
-        const parts = monthStr.trim().split('-');
-        if (parts.length !== 2) return '';
-
-        const monStr = parts[0].trim().toLowerCase();
-        const year = parseInt(parts[1], 10);
+        const [monStr, yearStr] = monthStr.trim().split('-');
+        const year = parseInt(yearStr, 10);
 
         const months = {
           jan: 1,
@@ -16259,25 +15985,20 @@
           dec: 12
         };
 
-        let month = months[monStr];
+        let month = months[monStr.toLowerCase()];
+        if (!month || !year) return '';
 
-        if (!month || !year) {
-          console.error('❌ Invalid:', monthStr);
-          return '';
-        }
-
-        // ✅ ADD +1 MONTH
+        // ✅ LOGIC: Add exactly 1 month
         month += 1;
-
         let finalYear = year;
 
+        // Handle year-end wrap (December becomes January of the next year)
         if (month > 12) {
           month = 1;
           finalYear += 1;
         }
 
         const mm = String(month).padStart(2, '0');
-
         return `01-${mm}-${finalYear}`;
       }
 
@@ -16508,248 +16229,101 @@
       // 🔥 BUILD FINAL ROWS WITH CUMULATIVE
       // ======================================
 
-      function buildBillDetails(station, fy, type, mon) {
+      function buildBillDetails(station, fy, type, monStr) {
         let st = station.replace(/\s+/g, ' ').trim().toUpperCase();
-
         let parts = st.split(' ');
-        let firstPart = parts[0] || '';
-        let secondPart = parts[1] || '';
+        let stationCode = (parts[0]?.slice(0, 3) || '') + '-' + (parts[1]?.slice(0, 3) || '');
 
-        let stationCode = (firstPart.slice(0, 3) || '') + '-' + (secondPart.slice(0, 3) || '');
+        let fyText = fy.includes('-') ? `FY-${fy.split('-')[0]}-${fy.split('-')[1]}` : `FY-${fy}`;
 
-        // ✅ FIXED FY
-        let fyText = '';
-        if (fy && fy.includes('-')) {
-          const [start, end] = fy.split('-');
-          fyText = `FY-${start}-${end}`; // ✅ FIX
-        } else {
-          fyText = `FY-${fy}`;
-        }
-
-        return `${stationCode}/${fyText}/${type}/${mon}`;
+        // ✅ monStr is now 'May-2025'. The code below simply appends it.
+        return `${stationCode}/${fyText}/${type}/${monStr}`;
       }
 
       function buildPBBudgetRows() {
         const data = buildBudgetSummaryWithStation();
-
         const result = [];
-
         const stationMap = {};
 
-        // ======================================
-        // 🔥 GROUP STATIONWISE
-        // ======================================
-
         data.forEach((d) => {
-          if (!stationMap[d.station]) {
-            stationMap[d.station] = [];
-          }
-
+          if (!stationMap[d.station]) stationMap[d.station] = [];
           stationMap[d.station].push(d);
         });
 
-        // ======================================
-        // 🔥 PROCESS EACH STATION
-        // ======================================
+        // 1. Define the helper here if you want it local
+        function formatEmpBreakup(arr) {
+          if (!arr || !arr.length) return '';
+          return arr.map((e) => `${e.name}: ${formatCurrency(e.value)}`).join(', ');
+        }
 
         Object.keys(stationMap).forEach((station) => {
           const records = stationMap[station];
+          // Sort by Date
+          records.sort((a, b) => new Date(a.date.split('-').reverse().join('-')) - new Date(b.date.split('-').reverse().join('-')));
 
-          // ======================================
-          // 🔥 SORT DATEWISE
-          // ======================================
-
-          records.sort((a, b) => {
-            const [d1, m1, y1] = a.date.split('-');
-
-            const [d2, m2, y2] = b.date.split('-');
-
-            return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`);
-          });
-
-          // ======================================
-          // 🔥 RUNNING TOTALS
-          // ======================================
-
-          let yearlyRunningTotal = 0;
-
-          const monthlyRunningTotals = {};
-
-          // ======================================
-          // 🔥 EMP BREAKUP FORMAT
-          // ======================================
-
-          function formatEmpBreakup(arr) {
-            if (!arr || !arr.length) return '';
-
-            return arr.map((e) => `${e.name}: ${formatCurrency(e.value)}`).join(', ');
-          }
-
-          // ======================================
-          // 🔥 PROCESS EACH MONTH RECORD
-          // ======================================
+          // Tracks yearly and monthly totals independently for every Budget type
+          const budgetTrackers = {};
 
           records.forEach((d) => {
-            const [mon, yr] = d.monthStr.split('-');
+            const [dd, mon, yr] = d.date.split('-');
+            const isApril = mon === '04';
+            const fy = getFYFromDateStr(d.date);
 
-            const fy = getFYFromDateStr(convertMonthToDate(d.monthStr));
-
-            // ======================================
-            // 🔥 BUILD ROWS
-            // ======================================
-
+            // ... (Your 'rows' array definition stays exactly the same) ...
             const rows = [
-              {
-                label: `Salary for GO Employee-${mon}-${yr}`,
-
-                value: d.go,
-
-                budget: 'SALARY ( Non-IRLA )( Regular ) - For Govt Employees'
-              },
-
-              {
-                label: `Salary for PB Employee-${mon}-${yr}`,
-
-                value: d.nps,
-
-                budget: 'SALARY - For PB Employees Recruited After 05.10.2007'
-              },
-
-              {
-                label: `NPS Contribution-${mon}-${yr}`,
-
-                value: d.npsIncome,
-
-                budget: 'CPF Contribution / NPS - For PB Employees'
-              },
-
-              {
-                label: `Medical Reimbursement for GO Employee-${mon}-${yr}`,
-
-                details: formatEmpBreakup(d.goMedDetails),
-
-                value: d.goMed,
-
-                budget: 'Medical Treatment - For Govt Employees'
-              },
-
-              {
-                label: `Medical Reimbursement for PB Employee-${mon}-${yr}`,
-
-                details: formatEmpBreakup(d.npsMedDetails),
-
-                value: d.npsMed,
-
-                budget: 'Medical Treatment - For PB Employees'
-              },
-
-              {
-                label: `EL (Leave) Encashment-${mon}-${yr}`,
-
-                details: formatEmpBreakup(d.elDetails),
-
-                value: d.el,
-
-                budget: 'Leave Encashment - For PB Employees'
-              }
+              { label: `Salary for GO Employee-${d.monthStr}`, value: d.go, budget: 'SALARY ( Non-IRLA )( Regular ) - For Govt Employees' },
+              { label: `Salary for PB Employee-${d.monthStr}`, value: d.nps, budget: 'SALARY - For PB Employees Recruited After 05.10.2007' },
+              { label: `NPS Contribution-${d.monthStr}`, value: d.npsIncome, budget: 'CPF Contribution / NPS - For PB Employees' },
+              { label: `Medical Reimbursement for GO Employee-${d.monthStr}`, details: formatEmpBreakup(d.goMedDetails), value: d.goMed, budget: 'Medical Treatment - For Govt Employees' },
+              { label: `Medical Reimbursement for PB Employee-${d.monthStr}`, details: formatEmpBreakup(d.npsMedDetails), value: d.npsMed, budget: 'Medical Treatment - For PB Employees' },
+              { label: `EL (Leave) Encashment-${d.monthStr}`, details: formatEmpBreakup(d.elDetails), value: d.el, budget: 'Leave Encashment - For PB Employees' }
             ];
 
-            // ======================================
-            // 🔥 REMOVE DUPLICATES
-            // ======================================
-
-            const uniqueMap = new Map();
-
             rows.forEach((r) => {
-              const key = `${station}_${r.label}_${r.budget}_${mon}_${yr}`;
-
-              if (!uniqueMap.has(key)) {
-                uniqueMap.set(key, r);
-              }
-            });
-
-            const finalRows = Array.from(uniqueMap.values());
-
-            // ======================================
-            // 🔥 BUILD RESULT
-            // ======================================
-
-            finalRows.forEach((r) => {
-              // ❌ SKIP ZERO
               if (!r.value || Number(r.value) === 0) return;
 
+              // ======================================
+              // 🔥 ADD THE TYPE LOGIC HERE
+              // ======================================
               let type = '';
+              if (r.budget.includes('SALARY ( Non-IRLA )( Regular ) - For Govt Employees')) type = 'SAL-GO';
+              else if (r.budget.includes('SALARY - For PB Employees Recruited After 05.10.2007')) type = 'SAL-NPS';
+              else if (r.budget.includes('CPF Contribution / NPS - For Govt Employees')) type = 'CPF';
+              else if (r.budget.includes('CPF Contribution / NPS - For PB Employees')) type = 'NPS';
+              else if (r.budget.includes('Medical Treatment - For Govt Employees')) type = 'MED-GO';
+              else if (r.budget.includes('Medical Treatment - For PB Employees')) type = 'MED-NPS';
+              else if (r.budget.includes('Leave Encashment - For PB Employees')) type = 'NPS/LEAVE_ENCASH';
 
-              // ======================================
-              // 🔥 TYPE
-              // ======================================
+              const budgetKey = `${station}|${r.budget}`;
+              if (!budgetTrackers[budgetKey]) budgetTrackers[budgetKey] = { yearly: 0, monthly: {} };
 
-              if (r.budget.includes('SALARY ( Non-IRLA )( Regular ) - For Govt Employees')) {
-                type = 'SAL-GO';
-              } else if (r.budget.includes('SALARY - For PB Employees Recruited After 05.10.2007')) {
-                type = 'SAL-NPS';
-              } else if (r.budget.includes('CPF Contribution / NPS - For Govt Employees')) {
-                type = 'CPF';
-              } else if (r.budget.includes('CPF Contribution / NPS - For PB Employees')) {
-                type = 'NPS';
-              } else if (r.budget.includes('Medical Treatment - For Govt Employees')) {
-                type = 'MED-GO';
-              } else if (r.budget.includes('Medical Treatment - For PB Employees')) {
-                type = 'MED-NPS';
-              } else if (r.budget.includes('Leave Encashment - For PB Employees')) {
-                type = 'NPS/LEAVE_ENCASH';
+              if (isApril) budgetTrackers[budgetKey].yearly = 0;
+
+              const monthlyKey = `${fy}|${mon}|${yr}|${budgetKey}`;
+              if (isApril) {
+                budgetTrackers[budgetKey].monthly[monthlyKey] = Number(r.value || 0);
+              } else {
+                budgetTrackers[budgetKey].monthly[monthlyKey] = (budgetTrackers[budgetKey].monthly[monthlyKey] || 0) + Number(r.value || 0);
               }
 
-              // ======================================
-              // 🔥 MONTH KEY
-              // ======================================
-
-              const monthlyKey = fy + '|' + mon + '|' + yr + '|' + station;
+              budgetTrackers[budgetKey].yearly += Number(r.value || 0);
 
               // ======================================
-              // 🔥 MONTHLY TOTAL
+              // 🔥 PASS 'type' TO buildBillDetails
               // ======================================
-
-              if (!monthlyRunningTotals[monthlyKey]) {
-                monthlyRunningTotals[monthlyKey] = 0;
-              }
-
-              monthlyRunningTotals[monthlyKey] += Number(r.value || 0);
-
-              // ======================================
-              // 🔥 FY TOTAL
-              // ======================================
-
-              yearlyRunningTotal += Number(r.value || 0);
-
-              // ======================================
-              // 🔥 PUSH RESULT
-              // ======================================
-
               result.push([
                 d.date,
-
                 station,
-
-                buildBillDetails(station, fy, type, mon),
-
+                buildBillDetails(station, fy, type, d.monthStr), // Pass original string here
                 r.budget,
-
                 r.label + (r.details ? `\n(${r.details})` : ''),
-
-                // 🔥 AMOUNT
                 formatCurrency(r.value),
-
-                // 🔥 MONTHLY CUMULATIVE
-                formatCurrency(monthlyRunningTotals[monthlyKey]),
-
-                // 🔥 FY CUMULATIVE
-                formatCurrency(yearlyRunningTotal)
+                formatCurrency(budgetTrackers[budgetKey].monthly[monthlyKey]),
+                formatCurrency(budgetTrackers[budgetKey].yearly)
               ]);
             });
           });
         });
-
         return result;
       }
 
@@ -16959,107 +16533,68 @@
         const res = await fetch('https://office-management-f425.onrender.com/sbg');
         const data = await res.json();
 
-        sbgData = {
-          headers: data.headers,
-          rows: data.rows
-        };
+        sbgData = { headers: data.headers, rows: data.rows };
+
+        // Populate dropdowns only if we have data to look at
         loadBudgetDropdown();
-        //console.log("✅ SBG Loaded:", sbgData.rows.length);
+
+        // Only load months if we actually have expenditure data loaded
+        if (sbgExpData?.rows?.length) {
+          loadBudgetMonthDropdown();
+        } else {
+          console.log('ℹ️ Waiting for SBGExp data to load months...');
+        }
       }
 
-      async function onLoadCalculateAndUpdateSBGFromExp() {
-        // 🔥 START → show syncing
+      async function calculateAndPushSBGBudget() {
         setSyncStatus('sbgDatabase');
-
         try {
-          if (!sbgData?.rows?.length || !sbgExpData?.rows?.length) {
-            console.warn('❌ Data not ready');
-
-            // 🔴 error
-            updateStatus('sbgDatabase', 'db', false);
-            return;
-          }
+          if (!sbgData?.rows || !sbgExpData?.rows) throw new Error('Data not ready');
 
           const headers = sbgData.headers;
-          const rows = sbgData.rows;
+          const stationRow = sbgData.rows[0];
+          const dataRows = sbgData.rows.slice(1);
 
-          const stationRow = rows[0];
-          const dataRows = rows.slice(1);
+          // Use the getSBGUsedMap() helper defined previously
+          const usedMap = getSBGUsedMap();
 
-          // =========================
-          // 🔥 STEP 1: BUILD TOTAL MAP
-          // =========================
-          const totalMap = {};
-
-          sbgExpData.rows.forEach((r) => {
-            const date = r[0];
-            const station = String(r[1]).trim().toLowerCase();
-            const budget = String(r[3]).trim().toLowerCase();
-            const amount = Number(r[5] || 0);
-
-            if (!date || !station || !budget) return;
-
-            const fy = getFYFromDateStr(date);
-            const key = fy + '|' + budget + '|' + station;
-
-            if (!totalMap[key]) totalMap[key] = 0;
-
-            totalMap[key] += amount;
-          });
-
-          // =========================
-          // 🔥 STEP 2: UPDATE SBG DATA
-          // =========================
           dataRows.forEach((row) => {
-            const budgetName = String(row[0]).trim().toLowerCase();
-
-            headers.forEach((h) => {
+            const budgetName = String(row[0] || '')
+              .trim()
+              .toLowerCase();
+            headers.forEach((h, i) => {
               const clean = String(h).toLowerCase();
-
               if (!clean.includes('(sbg)')) return;
 
               const fy = clean.match(/\d{4}-\d{2}/)?.[0];
               if (!fy) return;
 
               const { sbgCol, usedCol, availCol } = getFYColumnIndexes(headers, fy);
+              if (sbgCol === -1 || usedCol === -1 || availCol === -1) return;
 
-              if (sbgCol === -1) return;
+              const stationName = String(stationRow[sbgCol] || '')
+                .trim()
+                .toLowerCase();
+              const key = `${fy}|${budgetName}|${stationName}`;
 
-              const stationName = String(stationRow[sbgCol]).trim().toLowerCase();
-
-              const key = fy + '|' + budgetName + '|' + stationName;
-
-              const usedVal = Number(totalMap[key] || 0);
+              const usedVal = usedMap[key] || 0;
               const sbgVal = Number(row[sbgCol] || 0);
 
-              row[usedCol] = Number(usedVal.toFixed(3));
-              row[availCol] = Number((sbgVal - usedVal).toFixed(3));
+              row[usedCol] = Number(usedVal).toFixed(3);
+              row[availCol] = Number(sbgVal - usedVal).toFixed(3);
             });
           });
 
-          // =========================
-          // 🔥 STEP 3: PUSH TO BACKEND
-          // =========================
           const res = await fetch('https://office-management-f425.onrender.com/sbg/bulk-update', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rows: dataRows })
           });
 
-          if (!res.ok) {
-            throw new Error('SBG update failed');
-          }
-
-          // 🔥 SUCCESS → green
+          if (!res.ok) throw new Error('Failed to update SBG DB');
           clearSyncStatus('sbgDatabase', 'db', true);
-
-          console.log('📡 SBG Budgets Sync Success');
         } catch (err) {
-          console.error('❌ SBG Budgets Sync Failed:', err);
-
-          // 🔴 ERROR → red
+          console.error('❌ SBG Calculation Sync Failed:', err);
           clearSyncStatus('sbgDatabase', 'db', false);
         }
       }
@@ -17082,61 +16617,37 @@
 
       let isSyncRunning = false;
 
+      // Ensure this is called inside savePBData after a successful save
       async function syncPBtoSBG() {
-        // 🔥 PREVENT MULTIPLE RUNS
         if (isSyncRunning) return;
 
-        // 🔥 WAIT FOR PB DATA
-        if (!pbData || !pbData.headers || !pbData.rows || !pbData.rows.length) {
-          console.warn('⏳ PB data not ready');
-
+        // 1. Guard against empty data
+        if (!pbData?.rows?.length) {
+          console.warn('⏳ PB data not ready for sync');
           return;
         }
 
         isSyncRunning = true;
-
         try {
-          // =========================
-          // 🔥 BUILD PB ROWS
-          // =========================
+          console.log('📡 Starting Paybill to SBG Sync...');
 
+          // 2. Process PB Data into Expenditure format
           const pbRows = buildPBBudgetRows();
+          if (!pbRows.length) throw new Error('No expenditure rows generated');
 
-          // =========================
-          // ❌ EMPTY
-          // =========================
-
-          if (!pbRows || !pbRows.length) {
-            console.warn('⚠ No PB rows generated');
-
-            return;
-          }
-
-          // =========================
-          // 🔥 IMPORTANT
-          // =========================
-
-          // ✅ sync mode:
-          // update existing
-          // add only new rows
-
+          // 3. Sync to server
           await updateSBGSheet(pbRows, 'sync');
 
-          // =========================
-          // 🔥 RELOAD
-          // =========================
-
+          // 4. Reload dependencies in sequence
           await reloadSBGExpData();
-
           await loadSBGData();
 
-          await updateBudgetDBFromSBGExp();
+          // 5. Final calculation
+          await calculateAndPushSBGBudget();
 
-          await onLoadCalculateAndUpdateSBGFromExp();
-
-          console.log('📡 Paybill to SBG Expenditure Sync Success');
+          console.log('📡 Full Sync Success');
         } catch (err) {
-          console.error('❌ SBG Sync Failed:', err);
+          console.error('❌ Sync Failed:', err);
         } finally {
           isSyncRunning = false;
         }
@@ -18626,102 +18137,21 @@
       // ✅ BUILD USED MAP (FY + Budget + Station)
       function getSBGUsedMap() {
         const map = {};
+        if (!sbgExpData || !sbgExpData.rows) return map;
 
         sbgExpData.rows.forEach((row) => {
-          const date = row[0];
+          const date = row[0]; // e.g., "01-04-2026"
           const station = String(row[1]).trim().toLowerCase();
           const budget = String(row[3]).trim().toLowerCase();
-          const cumulative = Number(row[7] || 0);
+          // Use the raw amount (index 5) - Ensure CurrencytoNum is reliable
+          const amount = Number(CurrencytoNum(row[5]) || 0);
 
           const fy = getFYFromDateStr(date);
+          const key = `${fy}|${budget}|${station}`;
 
-          const key = fy + '|' + budget + '|' + station;
-
-          // ✅ ALWAYS KEEP LATEST VALUE (overwrite)
-          map[key] = cumulative;
+          map[key] = (map[key] || 0) + amount;
         });
-
         return map;
-      }
-
-      // ✅ MAIN FUNCTION
-      async function updateBudgetDBFromSBGExp() {
-        // 🔥 START → show SBG syncing
-        setSyncStatus('sbgDatabase');
-
-        try {
-          if (!sbgData || !sbgData.headers || !sbgData.rows || !sbgExpData.rows) {
-            console.error('❌ Data not ready');
-
-            // 🔴 error state
-            updateStatus('sbgDatabase', 'db', false);
-            return;
-          }
-
-          const headers = sbgData.headers;
-          const rows = sbgData.rows;
-
-          const stationRow = rows[0];
-          const dataRows = rows.slice(1);
-
-          const usedMap = getSBGUsedMap();
-
-          dataRows.forEach((row) => {
-            const budgetName = String(row[0]).trim().toLowerCase();
-
-            headers.forEach((h) => {
-              const clean = String(h).toLowerCase();
-
-              if (!clean.includes('(sbg)')) return;
-
-              const fy = clean.match(/\d{4}-\d{2}/)?.[0];
-              if (!fy) return;
-
-              const { sbgCol, usedCol, availCol } = getFYColumnIndexes(headers, fy);
-
-              if (sbgCol === -1) return;
-
-              const stationName = String(stationRow[sbgCol]).trim().toLowerCase();
-
-              const key = fy + '|' + budgetName + '|' + stationName;
-
-              const usedVal = usedMap[key];
-              const sbgVal = Number(row[sbgCol] || 0);
-
-              if (usedVal !== undefined) {
-                row[usedCol] = Number(usedVal).toFixed(3);
-                row[availCol] = Number(sbgVal - usedVal).toFixed(3);
-              } else {
-                const existingUsed = Number(row[usedCol] || 0);
-                row[availCol] = Number(sbgVal - existingUsed).toFixed(3);
-              }
-            });
-          });
-
-          const res = await fetch('https://office-management-f425.onrender.com/sbg/bulk-update', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              rows: dataRows
-            })
-          });
-
-          if (!res.ok) {
-            throw new Error('SBG update failed');
-          }
-
-          await res.json();
-
-          // 🔥 SUCCESS → green
-          clearSyncStatus('sbgDatabase', 'db', true);
-        } catch (err) {
-          console.error('❌ SBG Sync Failed:', err);
-
-          // 🔴 ERROR → red
-          clearSyncStatus('sbgDatabase', 'db', false);
-        }
       }
 
       function ensureSBGTable() {
@@ -19145,560 +18575,140 @@
         });
       });
 
-      /* =========================================================
-      🔥 SBG PROGRESS
-      ========================================================= */
-
-      let sbgProgressSource = null;
-
-      function startSBGProgress() {
-        // 🔥 CLOSE OLD SSE
-        if (sbgProgressSource) {
-          sbgProgressSource.close();
-          sbgProgressSource = null;
-        }
-
-        // 🔥 CLEAR OLD INTERVAL
-        if (window.sbgFakeInterval) {
-          clearInterval(window.sbgFakeInterval);
-          window.sbgFakeInterval = null;
-        }
-
-        const source = new EventSource('https://office-management-f425.onrender.com/sbg/progress');
-
-        sbgProgressSource = source;
-
-        /* =========================
-        🔥 FAKE PROGRESS
-        ========================= */
-
-        let fakeProgress = 12;
-
-        updateLoader(fakeProgress, getSBGProgressMessage(fakeProgress), 'sync');
-
-        window.sbgFakeInterval = setInterval(() => {
-          if (fakeProgress < 85) {
-            fakeProgress += 1;
-
-            updateLoader(fakeProgress, getSBGProgressMessage(fakeProgress), 'sync');
-          }
-        }, 400);
-
-        /* =========================
-        🔥 REAL SSE
-        ========================= */
-
-        source.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-
-            if (data.message === 'Idle') {
-              return;
-            }
-
-            fakeProgress = Math.max(fakeProgress, data.percent || 0);
-
-            updateLoader(fakeProgress, data.message || getSBGProgressMessage(fakeProgress), 'sync');
-
-            /* =========================
-            ✅ COMPLETE
-            ========================= */
-
-            if (data.percent >= 100) {
-              if (window.sbgFakeInterval) {
-                clearInterval(window.sbgFakeInterval);
-
-                window.sbgFakeInterval = null;
-              }
-
-              updateLoader(100, data.message || 'Completed Successfully', 'check_circle');
-
-              setTimeout(() => {
-                completeLoader();
-
-                source.close();
-
-                if (sbgProgressSource === source) {
-                  sbgProgressSource = null;
-                }
-              }, 500);
-            }
-          } catch (err) {
-            console.error('SBG SSE Parse Error:', err);
-          }
-        };
-
-        /* =========================
-        ❌ SSE ERROR
-        ========================= */
-
-        source.onerror = () => {
-          console.warn('SBG SSE Closed');
-
-          if (window.sbgFakeInterval) {
-            clearInterval(window.sbgFakeInterval);
-
-            window.sbgFakeInterval = null;
-          }
-
-          source.close();
-
-          if (sbgProgressSource === source) {
-            sbgProgressSource = null;
-          }
-        };
-      }
-
-      /* =========================================================
-      🔥 PROGRESS MESSAGE
-      ========================================================= */
-
-      function getSBGProgressMessage(progress) {
-        if (progress <= 5) return 'Connecting to Server...';
-
-        if (progress <= 15) return 'Preparing SBG Data...';
-
-        if (progress <= 25) return 'Validating Budget Records...';
-
-        if (progress <= 40) return 'Processing Expenditure Details...';
-
-        if (progress <= 55) return 'Updating SBG Database...';
-
-        if (progress <= 70) return 'Writing Changes to Backend...';
-
-        if (progress <= 85) return 'Finalizing Save Operation...';
-
-        if (progress < 100) return 'Completing Synchronization...';
-
-        return 'Completed Successfully';
-      }
-
-      /* =========================================================
-      🔥 STOP PROGRESS
-      ========================================================= */
-
-      function stopSBGProgress() {
-        if (sbgProgressSource) {
-          sbgProgressSource.close();
-
-          sbgProgressSource = null;
-        }
-
-        if (window.sbgFakeInterval) {
-          clearInterval(window.sbgFakeInterval);
-
-          window.sbgFakeInterval = null;
-        }
-
-        updateLoader(0, 'Idle', 'sync');
-
-        hideLoader();
-      }
-
-      /* =========================================================
-      🔥 SAVE SBG DATA
-      ========================================================= */
-
       async function saveSBGData(modeType = 'add') {
         let data = [];
-
         const rows = qsa('#budgetPBBody tr');
-
-        /* =========================
-        🔥 NORMALIZE
-        ========================= */
 
         const normalize = (val) => {
           if (val == null) return '';
-
           return String(val).replace(/₹/g, '').replace(/,/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
         };
 
-        /* =========================
-        🔥 COLLECT ROWS
-        ========================= */
-
         rows.forEach((tr) => {
           const dateInput = tr.children[0]?.querySelector('input[type="date"]')?.value || tr.children[0]?.textContent?.trim() || '';
-
           const station = tr.children[1]?.querySelector('input')?.value || tr.children[1]?.textContent?.trim() || '';
-
           const bill = tr.children[2]?.querySelector('textarea')?.value || tr.children[2]?.textContent?.trim() || '';
-
           const budget = tr.children[3]?.textContent?.trim() || '';
-
           const details = tr.children[4]?.querySelector('textarea')?.value || tr.children[4]?.textContent?.trim() || '';
-
           const amount = Number(tr.querySelector('.amt')?.value || tr.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
-
           const monthlyCumulative = Number(tr.children[6]?.dataset?.value || tr.children[6]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
-
           const cumulative = Number(tr.children[7]?.dataset?.value || tr.children[7]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
 
-          const rowIndex = tr.dataset.rowIndex || '';
-
-          const lastUpdated = tr.dataset.lastUpdated || '';
-
-          /* =========================
-          ❌ VALIDATION
-          ========================= */
-
-          const missingFields = [];
-
-          if (!station) missingFields.push('🏢 Station');
-
-          if (!dateInput) missingFields.push('📅 Date');
-
-          if (!budget) missingFields.push('📈 Budget');
-
-          if (amount === 0) missingFields.push('🪙 Amount');
-
-          if (missingFields.length) {
-            showCustomAlert(`
-              ❌ Missing Fields:<br><br>
-              ${missingFields.join('<br>')}
-            `);
-
-            return;
-          }
-
-          /* =========================
-          🔥 CURRENT ROW
-          ========================= */
-
-          const currentRow = [formatDateBack(dateInput), station, bill, budget, details, Number((amount / 1000).toFixed(3)), Number((monthlyCumulative / 1000).toFixed(3)), Number((cumulative / 1000).toFixed(3))];
-
-          /* =========================
-          🔥 ORIGINAL ROW
-          ========================= */
-
-          let originalRow = [];
-
-          try {
-            originalRow = JSON.parse(tr.dataset.original || '[]');
-          } catch {
-            originalRow = [];
-          }
-
-          /* =========================
-          ⏭ SKIP NO CHANGE
-          ========================= */
+          if (!station || !dateInput || !budget || amount === 0) return;
 
           if (modeType === 'edit') {
-            const oldNorm = JSON.stringify(originalRow.map(normalize));
-
-            const newNorm = JSON.stringify(currentRow.map(normalize));
-
-            if (oldNorm === newNorm) {
-              return;
+            let originalRow = [];
+            try {
+              originalRow = JSON.parse(tr.dataset.original || '[]');
+            } catch {
+              originalRow = [];
             }
+            const currentRow = [formatDateBack(dateInput), station, bill, budget, details, Number((amount / 1000).toFixed(3)), Number((monthlyCumulative / 1000).toFixed(3)), Number((cumulative / 1000).toFixed(3))];
+            if (JSON.stringify(originalRow.map(normalize)) === JSON.stringify(currentRow.map(normalize))) return;
           }
 
-          /* =========================
-          🔥 PUSH DATA
-          ========================= */
-
           data.push({
-            _RowIndex: rowIndex,
-
-            _lastUpdated: lastUpdated,
-
+            _RowIndex: tr.dataset.rowIndex || '',
+            _lastUpdated: tr.dataset.lastUpdated || '',
             Date: formatDateBack(dateInput),
-
             Station: station.trim(),
-
             'Bill / Invoice Details': bill.trim(),
-
             'SBG Expenditure Under': budget.trim(),
-
             'Expenditure Details': details.trim(),
-
             'Expenditure Amount (₹ in 000)': Number((amount / 1000).toFixed(3)),
-
             'Monthly Cumulative Sum of Expenditure (₹ in 000)': Number((monthlyCumulative / 1000).toFixed(3)),
-
             'Cumulative Sum of Expenditure (₹ in 000)': Number((cumulative / 1000).toFixed(3))
           });
         });
 
-        /* =========================
-        ❌ EMPTY
-        ========================= */
-
         if (!data.length) {
-          showCustomAlert(`
-            ℹ️ No changes detected.<br><br>
-            No data was modified.
-          `);
-
+          showCustomAlert('ℹ️ No changes detected.<br><br>No data was modified.');
           return;
         }
 
         try {
           setSyncStatus('sbgexpDatabase');
-
-          let loaderStarted = false;
-
-          /* =========================
-          🔥 DELAY LOADER
-          ========================= */
-
-          const loaderTimer = setTimeout(() => {
-            loaderStarted = true;
-
-            showLoader();
-
-            startSBGProgress();
-
-            updateLoader(5, 'Checking Database...', 'manage_search');
-          }, 700);
-
-          /* =========================
-          🔥 SAVE
-          ========================= */
+          showLoader();
+          updateLoader(20, 'Saving SBG Data...', 'upload');
 
           const res = await fetch('https://office-management-f425.onrender.com/sbgexp/update', {
             method: 'POST',
-
-            headers: {
-              'Content-Type': 'application/json'
-            },
-
-            body: JSON.stringify({
-              data,
-              mode: modeType
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, mode: modeType })
           });
 
           const result = await res.json();
 
-          clearTimeout(loaderTimer);
-
-          /* =========================
-          ℹ️ NO CHANGES
-          ========================= */
-
           if (result.status === 'nochange') {
             clearSyncStatus('sbgexpDatabase');
-
-            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
-
-            if (loaderStarted) {
-              showCustomAlert(noChangeMsg);
-
-              setTimeout(() => {
-                stopSBGProgress();
-              }, 300);
-            } else {
-              showCustomAlert(noChangeMsg);
-            }
+            hideLoader();
+            showCustomAlert('ℹ️ No changes detected.<br><br>No data was modified.');
             exitSBGEditMode();
             return;
           }
 
-          /* =========================
-          ✅ SUCCESS
-          ========================= */
-
           if (result.status === 'success') {
-            const updatedRows = result.updatedRows || [];
+            updateLoader(70, 'Syncing...', 'sync');
 
+            await fetch('https://office-management-f425.onrender.com/refresh/sbgexp', { method: 'POST' });
+            await fetch('https://office-management-f425.onrender.com/refresh/sbg', { method: 'POST' });
+
+            await reloadSBGExpData();
+            await calculateAndPushSBGBudget();
+            await loadTable('sbgexp', 'SBGexpenditureDB');
+            await loadTable('sbg', 'BudgetDB');
+            getBudgetFYColumns();
+
+            /* 🔥 BUILD CUSTOM MESSAGE */
+            let msg = '';
+            const updatedRows = result.updatedRows || [];
             const addedRows = result.addedRows || [];
 
-            let msg = '';
-
-            /* =========================
-            🔄 UPDATED
-            ========================= */
-
             if (updatedRows.length) {
-              msg += `
-                <div style="
-                  font-size:13px;
-                  font-weight:700;
-                  color:#7dffb3;
-                  margin-bottom:18px;
-                  text-align:center;
-                ">
-                  📝 SBG EDIT SUCCESS!
-                </div>
-              `;
-
+              msg += '<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">📝 SBG EDIT SUCCESS!</div>';
               msg += updatedRows
-                .map((r) => {
-                  const changedCols = (r.changedColumns || [])
-                    .map(
-                      (col) => `
-                    <span style="
-                      display:inline-block;
-                      padding:2px 4px;
-                      margin:3px;
-                      border-radius:10px;
-                      background:rgba(255,255,255,0.08);
-                      border:1px solid rgba(255,255,255,0.06);
-                      font-size:13px;
-                    ">
-                      🔃 ${col}
-                    </span>
-                  `
-                    )
-                    .join('');
-
-                  return `
-                  <div style="
-                    margin-bottom:16px;
-                    padding:8px;
-                    border-radius:16px;
-                    background:rgba(255,255,255,0.05);
-                    border:1px solid rgba(255,255,255,0.08);
-                  ">
-
-                    <div style="
-                      font-size:13px;
-                      font-weight:700;
-                      margin-bottom:10px;
-                    ">
-                      📅 ${r.date}
-                    </div>
-
-                    <div>🏢 ${r.station}</div>
-
-                    <div>📈 ${r.budget}</div>
-
-                    <div>🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}</div>
-
-                    <div style="
-                      margin-top:8px;
-                      display:flex;
-                      flex-wrap:wrap;
-                      gap:4px;
-                    ">
-                      ${changedCols}
-                    </div>
-
-                  </div>
-                `;
-                })
-                .join('');
-            }
-
-            /* =========================
-            ➕ ADDED
-            ========================= */
-
-            if (addedRows.length) {
-              msg += `
-                <div style="
-                  font-size:13px;
-                  font-weight:700;
-                  color:#7dffb3;
-                  margin-bottom:18px;
-                  text-align:center;
-                ">
-                  ➕ SBG ADD SUCCESS!
-                </div>
-              `;
-
-              msg += addedRows
                 .map(
                   (r) => `
-                <div style="
-                  padding:10px 14px;
-                  margin-bottom:10px;
-                  border-radius:14px;
-                  background:rgba(255,255,255,0.05);
-                  border:1px solid rgba(255,255,255,0.08);
-                ">
-                  📅 ${r.date}<br>
-                  🏢 ${r.station}<br>
-                  📈 ${r.budget}<br>
-                  🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}
-                </div>
-              `
+                <div style="margin-bottom:16px;padding:8px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                  <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📅 ${r.date}</div>
+                  <div>🏢 ${r.station}</div><div>📈 ${r.budget}</div><div>🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}</div>
+                  <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    ${(r.changedColumns || []).map((c) => `<span style="display:inline-block;padding:2px 4px;margin:3px;border-radius:10px;background:rgba(255,255,255,0.08);font-size:13px;">🔃 ${c}</span>`).join('')}
+                  </div>
+                </div>`
                 )
                 .join('');
             }
 
-            clearSyncStatus('sbgexpDatabase');
-
-            await reloadSBGExpData();
-
-            await updateBudgetDBFromSBGExp();
-
-            await loadTable('sbgexp', 'SBGexpenditureDB');
-
-            await loadTable('sbg', 'BudgetDB');
-
-            getBudgetFYColumns();
-
-            if (loaderStarted) {
-              showCustomAlert(msg);
-
-              setTimeout(() => {
-                stopSBGProgress();
-              }, 300);
-            } else {
-              showCustomAlert(msg);
+            if (addedRows.length) {
+              msg += '<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:18px;text-align:center">➕ SBG ADD SUCCESS!</div>';
+              msg += addedRows
+                .map(
+                  (r) => `
+                <div style="padding:10px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                  📅 ${r.date}<br>🏢 ${r.station}<br>📈 ${r.budget}<br>🪙 ${formatCurrency(Number(r.amount || 0) * 1000)}
+                </div>`
+                )
+                .join('');
             }
 
+            updateLoader(100, 'Saved successfully!', 'check_circle');
             exitSBGEditMode();
-
-            return;
-          }
-
-          /* =========================
-          ⚠️ CONFLICT
-          ========================= */
-
-          if (result.status === 'conflict') {
-            clearSyncStatus('sbgexpDatabase', 'db', false);
-
-            const conflictMsg = '⚠️ Some rows were modified by another user.<br><br>Please reload and try again.';
-
-            if (loaderStarted) {
-              showCustomAlert(conflictMsg);
-
-              setTimeout(() => {
-                stopSBGProgress();
-              }, 300);
-            } else {
-              showCustomAlert(conflictMsg);
-            }
-
-            return;
-          }
-
-          /* =========================
-          ❌ ERROR
-          ========================= */
-
-          clearSyncStatus('sbgexpDatabase', 'db', false);
-
-          const errorMsg = '❌ Error: ' + (result.message || 'Unknown error');
-
-          if (loaderStarted) {
-            showCustomAlert(errorMsg);
             setTimeout(() => {
-              stopSBGProgress();
-            }, 300);
-          } else {
-            showCustomAlert(errorMsg);
+              hideLoader();
+              showCustomAlert(msg || '✅ Data updated successfully.');
+            }, 500);
+            return;
           }
+
+          hideLoader();
+          const errorMsg = result.status === 'conflict' ? '⚠️ Conflict: Row modified elsewhere.' : `❌ Error: ${result.message || 'Unknown error'}`;
+          showCustomAlert(errorMsg);
         } catch (err) {
           console.error(err);
-
+          hideLoader();
           clearSyncStatus('sbgexpDatabase', 'db', false);
-
-          const serverMsg = '❌ Server error';
-
-          if (loaderStarted) {
-            showCustomAlert(serverMsg);
-            setTimeout(() => {
-              stopSBGProgress();
-            }, 300);
-          } else {
-            showCustomAlert(serverMsg);
-          }
+          showCustomAlert('❌ Server error: Unable to complete save.');
         }
       }
 
@@ -28109,6 +27119,7 @@
           // =====================================================
 
           if (result.status === 'success') {
+            await fetch('https://office-management-f425.onrender.com/refresh/duty', { method: 'POST' });
             showCustomAlert('✅ Saved successfully');
           } else {
             showCustomAlert('❌ Save failed');
@@ -29534,97 +28545,114 @@
             🔥 MESSAGE FOR REQUIRED INPUT IF 0
             ========================================= */
 
+      /* ============================================================================
+          ⚡ OPTIMIZED EB INPUT VALIDATION (Allows 0 with Warning Confirmation)
+      ============================================================================ */
       function validateEBInputs() {
-        const requiredInputs = [
-          { id: 'EBbillMonth', label: 'Billing Month' },
-          { id: 'EBref', label: 'Reference Number' },
-          { id: 'CD', label: 'Contract Demand' },
-          { id: 'BD', label: 'Billing Demand' },
-          { id: 'MC', label: 'Meter Constant' },
-          { id: 'RD', label: 'Recorded Demand' },
-          { id: 'MD', label: 'MD Meter' },
-          { id: 'PF', label: 'Power Factor' },
-          { id: 'preKWh', label: 'KWh Reading' },
-          { id: 'preKVAh', label: 'KVAh Reading' },
-          { id: 'consKWh', label: 'KWh Consumption' },
-          { id: 'consKVAh', label: 'KVAh Consumption' },
-          { id: 'EBbillAmount', label: 'Final Amount' }
-        ];
+        return new Promise((resolve) => {
+          const requiredInputs = [
+            { id: 'EBbillMonth', label: 'Billing Month' },
+            { id: 'EBref', label: 'Reference Number' },
+            { id: 'CD', label: 'Contract Demand' },
+            { id: 'BD', label: 'Billing Demand' },
+            { id: 'MC', label: 'Meter Constant' },
+            // 🌟 Add 'allowZero' flag to fields that can accept 0 with a warning
+            { id: 'RD', label: 'Recorded Demand', allowZero: true },
+            { id: 'MD', label: 'MD Meter', allowZero: true },
+            { id: 'PF', label: 'Power Factor' },
+            { id: 'preKWh', label: 'KWh Reading' },
+            { id: 'preKVAh', label: 'KVAh Reading' },
+            { id: 'consKWh', label: 'KWh Consumption' },
+            { id: 'consKVAh', label: 'KVAh Consumption' },
+            { id: 'EBbillAmount', label: 'Final Amount' }
+          ];
 
-        const invalidFields = [];
+          const invalidFields = [];
+          const warningFields = [];
 
-        requiredInputs.forEach((f) => {
-          const el = id(f.id);
+          requiredInputs.forEach((f) => {
+            const el = id(f.id);
+            if (!el) return;
 
-          if (!el) return;
+            const value = String(el.value || '').trim();
+            const isZero = value === '0' || value === '0.00';
 
-          const value = String(el.value || '').trim();
+            // ❌ Blank or Strict Zero (Not Allowed)
+            if (value === '' || (isZero && !f.allowZero)) {
+              invalidFields.push(f.label);
+              el.style.border = '2px solid #ff6b6b';
+            }
+            // ⚠️ Soft Zero (Allowed but warned)
+            else if (isZero && f.allowZero) {
+              warningFields.push(f.label);
+              el.style.border = '2px solid #eab308'; // Warning Yellow
+            }
+            // ✅ Valid
+            else {
+              el.style.border = '';
+            }
+          });
 
-          if (value === '' || value === '0' || value === '0.00') {
-            invalidFields.push(f.label);
-
-            el.style.border = '2px solid #ff6b6b';
-          } else {
-            el.style.border = '';
+          // ❌ BLOCKING ERRORS: Stop and show standard alert
+          if (invalidFields.length) {
+            const msg = `
+              <div style="padding:16px;text-align:center;">
+                <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:12px;">
+                  ❌ Required Fields Missing
+                </div>
+                <div style="font-size:13px;opacity:.9;margin-bottom:10px;">
+                  Please fill valid values for:
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+                  ${invalidFields.map((x) => `<span style="padding:5px 10px;border-radius:12px;background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25);font-size:12px;">${x}</span>`).join('')}
+                </div>
+              </div>
+            `;
+            showCustomAlert(msg);
+            resolve(false); // Fails validation
+            return;
           }
+
+          // ⚠️ WARNINGS: Ask user for confirmation before proceeding
+          if (warningFields.length) {
+            showConfirmBox({
+              title: 'Zero Value Warning',
+              icon: '⚠️',
+              message: 'Some fields are set to 0',
+              subMessage: `Are you sure you want to save with 0 in:<br><b style="color:#eab308;font-size:13px;display:block;margin-top:5px;">${warningFields.join(' & ')}</b>?`,
+              yesText: 'Save Anyway',
+              noText: 'Cancel',
+              yesColor: '#eab308',
+              onYes: () => resolve(true), // User clicked Save Anyway
+              onNo: () => resolve(false) // User cancelled
+            });
+            return;
+          }
+
+          // ✅ All clear
+          resolve(true);
         });
-
-        if (invalidFields.length) {
-          const msg = `
-                  <div style="padding:16px;text-align:center;
-                  ">
-
-                    <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:12px;">
-                      ❌ Required Fields Missing
-                    </div>
-
-                    <div style="font-size:13px;opacity:.9;margin-bottom:10px;">
-                      Please fill valid values for:
-                    </div>
-
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
-                    ">
-                      ${invalidFields
-                        .map(
-                          (x) => `
-                        <span style="padding:5px 10px;border-radius:12px;background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25);font-size:12px;">
-                          ${x}
-                        </span>`
-                        )
-                        .join('')}
-                    </div>
-
-                  </div>
-                `;
-
-          showCustomAlert(msg);
-
-          return false;
-        }
-
-        return true;
       }
-
       /* =========================================
             🔥 SAVE EB DATA
             ========================================= */
 
+      /* ============================================================================
+          ⚡ FINALIZED EB DATA SAVE (With Harmonized UI Alerts)
+      ============================================================================ */
       async function saveEBData() {
         try {
           setSyncStatus('ebDatabase');
 
-          const billMonth = id('EBbillMonth')?.value;
-
-          if (!validateEBInputs()) {
+          // 1. Validation
+          if (!(await validateEBInputs())) {
             clearSyncStatus('ebDatabase', 'db', false);
-
             return;
           }
 
+          const billMonth = id('EBbillMonth')?.value;
           const [yyyy, mm] = billMonth.split('-');
-
           const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
           const monthKey = `${monthNames[Number(mm) - 1]}-${yyyy}`;
 
           const row = {
@@ -29653,129 +28681,70 @@
             'Final Amount': CurrencytoNum(id('EBbillAmount')?.value)
           };
 
+          // 2. Client-Side Diffing
           let changedCols = [];
-
           const headers = ebData?.headers || [];
-
           const rows = ebData?.rows || [];
-
           const existingRow = rows.find((r) => {
-            const monthIdx = headers.indexOf('Month-Year');
-
-            const stationIdx = headers.indexOf('EB Station');
-
-            return String(r[monthIdx] || '').trim() === monthKey && String(r[stationIdx] || '').trim() === String(id('EBPage_Station')?.value || '').trim();
+            return String(r[headers.indexOf('Month-Year')] || '').trim() === monthKey && String(r[headers.indexOf('EB Station')] || '').trim() === String(id('EBPage_Station')?.value || '').trim();
           });
 
           if (existingRow) {
             headers.forEach((header, i) => {
-              const oldVal = String(existingRow[i] ?? '').trim();
-
-              const newVal = String(row[header] ?? '').trim();
-
-              if (oldVal !== newVal) {
+              if (String(existingRow[i] ?? '').trim() !== String(row[header] ?? '').trim()) {
                 changedCols.push(header);
               }
             });
+            if (!changedCols.length) {
+              clearSyncStatus('ebDatabase', 'db', true);
+              showCustomAlert('ℹ️ No changes detected.<br><br>No data was modified.');
+              return;
+            }
           }
 
-          if (existingRow && !changedCols.length) {
-            clearSyncStatus('ebDatabase', 'db', true);
-
-            const noChangeMsg = 'ℹ️ No changes detected.<br><br>No data was modified.';
-
-            showCustomAlert(noChangeMsg);
-            return;
-          }
-
+          // 3. API Call
           const res = await fetch('https://office-management-f425.onrender.com/eb/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: [row] })
           });
-
           const result = await res.json();
+          if (!res.ok) throw new Error(result.message || 'Save failed');
 
-          if (!res.ok) {
-            throw new Error(result.message || 'Save failed');
-          }
-
+          // 4. Result Processing
           let msg = '';
-
-          /* =====================================
-                🔄 UPDATED
-                ===================================== */
-
           if (result.updated?.length) {
             msg += `<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">📝 ELECTRICITY BILL DETAILS EDIT SUCCESS!</div>`;
-            const changedHTML = changedCols
-              .map(
-                (col) => `
-                      <span style="
-                        display:inline-block;padding:8px;margin:4px;border-radius:12px;
-                        background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                        🔃 ${col}
-                      </span>`
-              )
-              .join('');
-
-            msg += `
-                    <div style="margin-bottom:8px;padding:6px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">
-                        ⚡ EB Bill Updated
-                        <span style="opacity:.7;font-size:13px;margin-left:4px;">
-                          (${monthKey})
-                        </span>
-                      </div>
-                      <div style="margin-bottom:5px;font-size:13px;opacity:.85;">
-                        🏢 ${id('EBPage_Station')?.value || '-'}<br><br>
-                        Updated Columns :
-                      </div>
-                      <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                        ${changedHTML}</div>
-                    </div>
-                  `;
+            msg += `<div style="margin-bottom:8px;padding:6px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">⚡ EB Bill Updated (${monthKey})</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:4px;">${changedCols.map((c) => `<span style="padding:4px 8px;border-radius:12px;background:rgba(255,255,255,0.08);font-size:12px;">🔃 ${c}</span>`).join('')}</div>
+                    </div>`;
           }
-
-          /* =====================================
-                ➕ ADDED
-                ===================================== */
 
           if (result.added?.length) {
-            msg += `<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">➕ ELECTRICITY BILL DETAILS ADD SUCCESS!</div>`;
-            msg += `
+            msg += `<div style="font-size:13px;font-weight:700;color:#7dffb3;margin-bottom:8px;text-align:center;">➕ ELECTRICITY BILL DETAILS ADD SUCCESS!</div>
                     <div style="margin-top:16px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                      <div style="margin-bottom:6px;font-size:13px;">📅 Month :<b style="font-size:13px;">${monthKey}</b></div>
-                      <div style="margin-bottom:6px;font-size:13px;">🏢 Station :<b style="font-size:13px;">${id('EBPage_Station')?.value || '-'}</b></div>
-                      <div style="margin-bottom:6px;font-size:13px;">🔖 Reference :<b style="font-size:13px;">${id('EBref')?.value || '-'}</b></div>
-                      <div style="font-size:13px;">💰 Bill Amount : <b style="font-size:13px;">${formatCurrency(Number(id('EBbillAmount')?.value) || formatCurrency(0)).toLocaleString('en-IN')} </b></div>
-                    </div>
-                  `;
+                      <div>📅 Month: <b>${monthKey}</b></div>
+                      <div>🏢 Station: <b>${id('EBPage_Station')?.value || '-'}</b></div>
+                    </div>`;
           }
 
+          // 5. Final Fallback Check
+          if (result.status === 'nochange' || msg === '') {
+            clearSyncStatus('ebDatabase', 'db', true);
+            showCustomAlert('ℹ️ No changes detected.<br><br>No data was modified.');
+            return;
+          }
+
+          await fetch('https://office-management-f425.onrender.com/refresh/eb', { method: 'POST' });
           await loadTable('eb', 'EBlog');
-
           SyncAllPage();
-
           clearSyncStatus('ebDatabase', 'db', true);
-
           showCustomAlert(msg);
         } catch (err) {
           console.error('❌ EB Save Failed:', err);
-
           clearSyncStatus('ebDatabase', 'db', false);
-
-          showCustomAlert(`
-                  <div style="text-align:center;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:10px;">
-                      ❌ Failed to Save EB Data
-                    </div>
-
-                    <div style="opacity:.8;font-size:13px;">
-                      ${err.message || 'Unknown Error'}
-                    </div>
-                  </div>
-                `);
+          showCustomAlert(`<div style="text-align:center;padding:16px;"><div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:10px;">❌ Failed to Save EB Data</div><div style="opacity:.8;font-size:13px;">${err.message || 'Unknown Error'}</div></div>`);
         }
       }
 
@@ -30546,1004 +29515,392 @@
       };
 
       /* 🔥 LOAD DG LIST */
+      /* ============================================================================
+          ⚡ HIGH-SPEED DG STATION LIST & MONTH CACHING
+      ============================================================================ */
       function loadDGList() {
-        const station = id('DGPage_Station').value;
+        const station = id('DGPage_Station')?.value || '';
         const dgSelect = id('StationDGList');
-
-        dgSelect.innerHTML = '';
+        if (!dgSelect) return;
 
         const dgList = stationDGData[station] || [];
+        let htmlBuffer = '';
 
-        dgList.forEach((dg) => {
-          const option = document.createElement('option');
-          option.value = dg;
-          option.textContent = dg;
-          dgSelect.appendChild(option);
-        });
+        // Use an 'ALL' option if this acts as a master filter, otherwise populate directly
+        htmlBuffer += `<option value="ALL">All DG</option>`;
+
+        for (let i = 0; i < dgList.length; i++) {
+          htmlBuffer += `<option value="${dgList[i]}">${dgList[i]}</option>`;
+        }
+
+        dgSelect.innerHTML = htmlBuffer;
         SyncAllPage();
       }
 
       function loadDGMonthsByFY() {
-        if (!dgData || !dgData.rows) {
+        if (!dgData || !dgData.rows || !dgData.headers) {
           console.warn('❌ dgData not loaded');
           return;
         }
 
         const select = id('DGPage_Month');
-
         const fySelect = id('DGPage_FY');
-
         if (!select || !fySelect) return;
-
-        /* =====================================
-              🔥 AUTO SET PRESENT FY IF EMPTY
-              ===================================== */
 
         if (!fySelect.value) {
           const now = new Date();
-
-          const currentMonth = now.toLocaleString('en-US', {
-            month: 'short'
-          });
-
-          const currentYear = now.getFullYear();
-
-          fySelect.value = getFinancialYear(`${currentMonth}-${currentYear}`);
+          const currentMonth = now.toLocaleString('en-US', { month: 'short' });
+          fySelect.value = getFinancialYear(`${currentMonth}-${now.getFullYear()}`);
         }
 
         const selectedFY = fySelect.value;
-
         const monthMap = new Map();
-
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        /* =====================================
-              🔥 FILTER MONTHS
-              ===================================== */
+        // Cache index to bypass loop overhead
+        const idxDate = dgData.headers.indexOf('Date');
+        if (idxDate === -1) return;
 
-        dgData.rows.forEach((row) => {
-          const dateStr = String(row[findDGheader('Date')] || '').trim();
+        const rows = dgData.rows;
+        const len = rows.length;
 
-          if (!dateStr) return;
-
-          /* =====================================
-                🔥 DATE FORMAT = DD-MM-YYYY
-                ===================================== */
+        for (let i = 0; i < len; i++) {
+          const dateStr = String(rows[i][idxDate] || '').trim();
+          if (!dateStr) continue;
 
           const parts = dateStr.split('-');
-
-          if (parts.length !== 3) return;
-
-          const dd = parts[0];
+          if (parts.length !== 3) continue;
 
           const mm = parseInt(parts[1], 10);
-
           const yyyy = parts[2];
-
-          if (!dd || !mm || !yyyy) return;
+          if (!mm || !yyyy) continue;
 
           const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
-
-          /* =====================================
-                🔥 FY CHECK
-                ===================================== */
-
           const year = parseInt(yyyy, 10);
-
           const fy = mm >= 4 ? `${year}-${String(year + 1).slice(-2)}` : `${year - 1}-${String(year).slice(-2)}`;
 
-          if (selectedFY && fy !== selectedFY) {
-            return;
-          }
-
-          /* =====================================
-                🔥 SORT KEY
-                ===================================== */
+          if (selectedFY && fy !== selectedFY) continue;
 
           const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
-
           monthMap.set(key, monthStr);
-        });
-
-        /* =====================================
-              🔥 SORT MONTHS
-              ===================================== */
+        }
 
         const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
 
-        /* =====================================
-              🔥 RESET DROPDOWN
-              ===================================== */
-
-        select.innerHTML = '';
-
-        /* =====================================
-              🔥 ALL MONTHS OPTION
-              ===================================== */
-
-        const allOpt = document.createElement('option');
-
-        allOpt.value = 'ALL';
-
-        allOpt.textContent = 'All Months';
-
-        select.appendChild(allOpt);
-
-        /* =====================================
-              ⚠️ NO DATA
-              ===================================== */
-
+        let htmlBuffer = `<option value="ALL">All Months</option>`;
         if (!sortedMonths.length) {
+          select.innerHTML = htmlBuffer;
           SyncAllPage();
           return;
         }
 
-        /* =====================================
-              🔥 ADD MONTHS
-              ===================================== */
+        for (let i = 0; i < sortedMonths.length; i++) {
+          htmlBuffer += `<option value="${sortedMonths[i]}">${sortedMonths[i]}</option>`;
+        }
 
-        sortedMonths.forEach((month) => {
-          const opt = document.createElement('option');
-
-          opt.value = month;
-
-          opt.textContent = month;
-
-          select.appendChild(opt);
-        });
-
-        /* =====================================
-              🔥 AUTO SELECT LATEST MONTH
-              ===================================== */
-
-        const latestMonth = sortedMonths[sortedMonths.length - 1];
-
-        //select.value = latestMonth;
+        select.innerHTML = htmlBuffer;
         select.value = 'ALL';
-
-        /* =====================================
-              🔥 LOAD TABLE + DATA
-              ===================================== */
-
         select.dispatchEvent(new Event('change'));
       }
 
-      /* =========================================================
-      🔥 GET FILTERED DG ROWS
-      ========================================================= */
-
+      /* ============================================================================
+          ⚡ OPTIMIZED FILTER TABLE ENGINE (O(N) Scans & Cache Blocks)
+      ============================================================================ */
       function getDGFilteredRows() {
-        /* =====================================================
-        🔥 GET FILTER VALUES
-        ===================================================== */
-
         const selectedFY = id('DGPage_FY')?.value || '';
-
         const selectedMonth = id('DGPage_Month')?.value || '';
 
-        const selectedDG = id('DGPage_DG')?.value || '';
-
+        // 🌟 CRITICAL FIX: Filtering table data directly by the DG Station List value
+        const selectedDG = id('StationDGList')?.value || '';
         const selectedPurpose = id('DGPage_Purpose')?.value || '';
 
-        /* =====================================================
-        🔥 SOURCE DATA
-        ===================================================== */
-
         const allRows = Array.isArray(dgData?.rows) ? dgData.rows : [];
+        const headers = dgData?.headers || [];
+        if (!allRows.length || !headers.length) return [];
 
-        /* =====================================================
-        🔥 FILTER
-        ===================================================== */
+        const idxDate = headers.indexOf('Date');
+        const idxDG = headers.indexOf('DG Name');
+        const idxPurpose = headers.indexOf('Purpose');
 
-        let filteredRows = allRows.filter((row) => {
-          if (!row) return false;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const filteredRows = [];
+        const len = allRows.length;
 
-          /* ===============================================
-            🔥 DATE
-            =============================================== */
+        for (let i = 0; i < len; i++) {
+          const row = allRows[i];
+          if (!row) continue;
 
-          const dateStr = String(row[findDGheader('Date')] || '').trim();
-
-          if (!dateStr) return false;
+          const dateStr = String(row[idxDate] || '').trim();
+          if (!dateStr) continue;
 
           const parts = dateStr.split('-');
-
-          if (parts.length !== 3) {
-            return false;
-          }
+          if (parts.length !== 3) continue;
 
           const mm = parseInt(parts[1], 10);
-
           const yyyy = parts[2];
-
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-          /* ===============================================
-            🔥 MONTH
-            =============================================== */
-
           const rowMonth = `${monthNames[mm - 1]}-${yyyy}`;
-
-          /* ===============================================
-            🔥 FY
-            =============================================== */
-
           const year = parseInt(yyyy, 10);
-
           const rowFY = mm >= 4 ? `${year}-${String(year + 1).slice(-2)}` : `${year - 1}-${String(year).slice(-2)}`;
 
-          /* ===============================================
-            🔥 DG
-            =============================================== */
+          const rowDG = String(row[idxDG] || '').trim();
+          const rowPurpose = String(row[idxPurpose] || '').trim();
 
-          const rowDG = String(row[findDGheader('DG Name')] || '').trim();
+          if (selectedFY && selectedFY !== 'ALL' && rowFY !== selectedFY) continue;
+          if (selectedMonth && selectedMonth !== 'ALL' && rowMonth !== selectedMonth) continue;
+          if (selectedDG && selectedDG !== 'ALL' && rowDG !== selectedDG) continue;
+          if (selectedPurpose && selectedPurpose !== 'ALL' && rowPurpose !== selectedPurpose) continue;
 
-          /* ===============================================
-            🔥 PURPOSE
-            =============================================== */
-
-          const rowPurpose = String(row[findDGheader('Purpose')] || '').trim();
-
-          /* ===============================================
-            🔥 FY FILTER
-            =============================================== */
-
-          if (selectedFY && selectedFY !== 'ALL' && rowFY !== selectedFY) {
-            return false;
-          }
-
-          /* ===============================================
-            🔥 MONTH FILTER
-            =============================================== */
-
-          if (selectedMonth && selectedMonth !== 'ALL' && rowMonth !== selectedMonth) {
-            return false;
-          }
-
-          /* ===============================================
-            🔥 DG FILTER
-            =============================================== */
-
-          if (selectedDG && selectedDG !== 'ALL' && rowDG !== selectedDG) {
-            return false;
-          }
-
-          /* ===============================================
-            🔥 PURPOSE FILTER
-            =============================================== */
-
-          if (selectedPurpose && selectedPurpose !== 'ALL' && rowPurpose !== selectedPurpose) {
-            return false;
-          }
-
-          return true;
-        });
-
-        /* =====================================================
-        🔥 SORT BY DATE
-        ===================================================== */
+          filteredRows.push(row);
+        }
 
         filteredRows.sort((a, b) => {
-          const da = String(a[findDGheader('Date')] || '').split('-');
-
-          const db = String(b[findDGheader('Date')] || '').split('-');
-
-          if (da.length !== 3 || db.length !== 3) {
-            return 0;
-          }
-
-          const dateA = new Date(da[2], da[1] - 1, da[0]);
-
-          const dateB = new Date(db[2], db[1] - 1, db[0]);
-
-          return dateA - dateB;
+          const da = String(a[idxDate] || '').split('-');
+          const db = String(b[idxDate] || '').split('-');
+          if (da.length !== 3 || db.length !== 3) return 0;
+          return new Date(da[2], da[1] - 1, da[0]) - new Date(db[2], db[1] - 1, db[0]);
         });
-
-        /* =====================================================
-        🔥 RETURN
-        ===================================================== */
 
         return filteredRows;
       }
 
-      /* =========================================================
-      🔥 BUILD DG ROW HTML
-      ========================================================= */
+      function buildDGRowHTML(row, headers, hiddenCols, rowIndex) {
+        let html = `<tr class="DGdataRow" data-rowindex="${rowIndex}">`;
 
-      function buildDGRowHTML(row) {
-        const headers = dgData?.headers || [];
-
-        const hiddenColumnNames = ['Sr No', 'Entry ID', 'Station', 'DG Name', 'Staff'];
-
-        const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
-
-        /* =====================================================
-        🔥 FIND ORIGINAL INDEX
-        ===================================================== */
-
-        const rowIndex = dgData.rows.indexOf(row);
-
-        /* =====================================================
-        🔥 ROW
-        ===================================================== */
-
-        let html = `
-          <tr
-            class="DGdataRow"
-            data-rowindex="${rowIndex}"
-          >
-        `;
-
-        headers.forEach((h, i) => {
-          if (hiddenCols.includes(i)) {
-            return;
-          }
+        for (let i = 0; i < headers.length; i++) {
+          if (hiddenCols.includes(i)) continue;
 
           const value = row[i] ?? '';
-
-          /* =====================================================
-          🔥 CELL COLORS
-          ===================================================== */
-
+          const lowerValue = String(value).toLowerCase().trim();
           let cellStyle = '';
 
-          const lowerValue = String(value).toLowerCase().trim();
-
-          /* =====================================================
-          🔥 FAILURE
-          ===================================================== */
-
           if (lowerValue.includes('failure')) {
-            cellStyle = `
-              background:#dc2626;
-              color:white;
-              font-weight:bold;
-            `;
+            cellStyle = 'background:#dc2626; color:white; font-weight:bold;';
           } else if (lowerValue.includes('test')) {
-            /* =====================================================
-          🔥 TEST
-          ===================================================== */
-            cellStyle = `
-              background:#16a34a;
-              color:white;
-              font-weight:bold;
-            `;
+            cellStyle = 'background:#16a34a; color:white; font-weight:bold;';
           }
 
-          html += `
-            <td style="${cellStyle}">
-              ${value}
-            </td>
-          `;
-        });
-
-        html += `
-          </tr>
-        `;
-
+          html += `<td style="${cellStyle}">${value}</td>`;
+        }
+        html += `</tr>`;
         return html;
       }
 
       function filterDGTable() {
         const wrapper = qs('.DGlogTableWrapper');
-
         if (!wrapper) return;
 
-        /* =====================================================
-        🔥 HEADERS
-        ===================================================== */
-
         const headers = dgData?.headers || [];
-
-        /* =====================================================
-        🔥 HIDE COLUMNS
-        ===================================================== */
-
         const hiddenColumnNames = ['Sr No', 'Entry ID', 'Station', 'DG Name', 'Staff'];
-
         const hiddenCols = headers.map((h, i) => (hiddenColumnNames.includes(String(h).trim()) ? i : -1)).filter((i) => i !== -1);
 
-        /* =====================================================
-        🔥 GET FILTERED ROWS
-        ===================================================== */
-
         const tbodyData = getDGFilteredRows();
-
-        /* =====================================================
-        🔥 FILTER VALUES
-        ===================================================== */
-
         const selectedMonth = id('DGPage_Month')?.value || '';
-
         const selectedFY = id('DGPage_FY')?.value || '';
-
         const station = id('DGPage_Station')?.value || '';
 
-        /* =====================================================
-        🔥 NO DATA
-        ===================================================== */
-
         if (!tbodyData.length) {
-          wrapper.innerHTML = `
-            <div
-                style="
-                  background:#edebb7;
-                  text-align:center;
-                  padding:20px;
-                  font-weight:700;
-                  color:#ef4444;
-                ">
-              ==============🚫 No Data Found 🚫==============
-            </div>
-          `;
-
+          wrapper.innerHTML = `<div style="background:#edebb7; text-align:center; padding:20px; font-weight:bold; color:red;">==============🚫 No Data Found 🚫==============</div>`;
           return;
         }
 
-        /* =====================================================
-        🔥 VISIBLE HEADERS
-        ===================================================== */
-
-        const visibleHeaders = [];
-
-        headers.forEach((h, i) => {
-          if (!hiddenCols.includes(i)) {
-            visibleHeaders.push(h);
-          }
-        });
-
-        /* =====================================================
-        🔥 GROUP MONTHS
-        ===================================================== */
-
+        const visibleHeaders = headers.filter((_, i) => !hiddenCols.includes(i));
         const groupedMonths = {};
+        const idxDate = headers.indexOf('Date');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        tbodyData.forEach((row) => {
-          const dateStr = String(row[findDGheader('Date')] || '').trim();
+        for (let i = 0; i < tbodyData.length; i++) {
+          const row = tbodyData[i];
+          const parts = String(row[idxDate] || '')
+            .trim()
+            .split('-');
+          if (parts.length !== 3) continue;
 
-          const parts = dateStr.split('-');
-
-          if (parts.length !== 3) {
-            return;
-          }
-
-          const mm = parseInt(parts[1], 10);
-
-          const yyyy = parts[2];
-
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-          const month = `${monthNames[mm - 1]}-${yyyy}`;
-
-          if (!groupedMonths[month]) {
-            groupedMonths[month] = [];
-          }
-
+          const month = `${monthNames[parseInt(parts[1], 10) - 1]}-${parts[2]}`;
+          if (!groupedMonths[month]) groupedMonths[month] = [];
           groupedMonths[month].push(row);
-        });
-
-        /* =====================================================
-        🔥 SORT MONTHS
-        ===================================================== */
+        }
 
         const sortedMonths = Object.keys(groupedMonths);
-
-        /* =====================================================
-        🔥 HTML
-        ===================================================== */
-
         let html = '';
 
         /* =====================================================
-        🔥 ALL MONTHS
+        🔥 HTML GENERATOR STREAM (Handles Both Modes Native)
         ===================================================== */
-
-        if (selectedMonth === 'ALL') {
-          sortedMonths.forEach((month) => {
-            const monthRows = groupedMonths[month] || [];
-
-            html += `
-
-              <div class="DGPrintMonthBlock">
-
-                <table class="data-table DGprint-table">
-                  <colgroup>
-
-                    ${headers
-                      .map((h, i) => {
-                        if (hiddenCols.includes(i)) {
-                          return '';
-                        }
-
-                        /* =========================================
-                      🔥 FIRST VISIBLE COLUMN
-                      ========================================= */
-
-                        const visibleIndex = headers.slice(0, i + 1).filter((_, idx) => !hiddenCols.includes(idx)).length - 1;
-
-                        if (visibleIndex === 0) {
-                          return `
-                          <col
-                            style="
-                              width:90px !important;
-                            "
-                          >
-                        `;
-                        }
-
-                        /* =========================================
-                      🔥 OTHER COLUMNS
-                      ========================================= */
-
-                        return `
-                        <col
-                          style="
-                            width:4.5%;
-                          "
-                        >
-                      `;
-                      })
-                      .join('')}
-
-                  </colgroup>
-
-                  <thead>
-
-                    <!-- =================================
-                    🔥 PRINT HEADER
-                    ================================== -->
-
-                    <tr class="DGPrintHeaderRow">
-
-                      <th colspan="${visibleHeaders.length}">
-
-                        <div class="DGPrintHeaderBox">
-
-                          <div class="DGPrintLogo">
-
-                            <img
-                              src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                            >
-
-                          </div>
-
-                          <div class="DGPrintTitle">
-
-                            <div>
-                              PRASAR BHARATI
-                            </div>
-
-                            <div>
-                              INDIA'S PUBLIC SERVICE BROADCASTER
-                            </div>
-
-                            <div>
-                              ALL INDIA RADIO
-                            </div>
-
-                            <div>
-                              ${station}
-                            </div>
-
-                            <div class="DGPrintFY">
-                              FY - ${selectedFY}
-                            </div>
-
-                          </div>
-
-                        </div>
-
-                      </th>
-
-                    </tr>
-                    <!-- =================================
-                    🔥 MONTH HEADER
-                    ================================== -->
-
-                    <tr class="DGMonthRepeatRow">
-
-                      <th
-                        colspan="${visibleHeaders.length}"
-                        style="
-                          text-align:center;
-                          font-weight:bold;
-                          padding:5px;
-                          font-size:12px;
-                          border-top:double black;
-                          border-bottom:double black;
-                          background:white !important;color:black !important;
-                        "
-                      >
-                        DG Log book for the Month of ${month}
-                      </th>
-
-                    </tr>
-
-                    <!-- =================================
-                    🔥 COLUMN HEADERS
-                    ================================== -->
-
-                    <tr class="DGColumnHeaderRow">
-            `;
-
-            headers.forEach((h, i) => {
-              if (hiddenCols.includes(i)) {
-                return;
-              }
-
-              html += `
-                <th>
-                  ${h}
-                </th>
-              `;
-            });
-
-            html += `
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody>
-            `;
-
-            monthRows.forEach((row) => {
-              html += buildDGRowHTML(row);
-            });
-
-            html += `
-
-                  </tbody>
-
-                </table>
-
-              </div>
-            `;
-          });
-        } else {
-          /* =====================================================
-        🔥 SINGLE MONTH
-        ===================================================== */
-          html += `
-
+        const compileTableLayout = (monthLabel, monthRows) => {
+          let tbHTML = `
             <div class="DGPrintMonthBlock">
-
               <table class="data-table DGprint-table">
-
+                <colgroup>
+                  ${headers
+                    .map((_, i) => {
+                      if (hiddenCols.includes(i)) return '';
+                      // 🌟 CRITICAL FIX: Set 1st column width to exactly 100px
+                      return `<col style="width:${i === 0 ? '90px' : '4.5%'};">`;
+                    })
+                    .join('')}
+                </colgroup>
                 <thead>
-
                   <tr class="DGPrintHeaderRow">
-
                     <th colspan="${visibleHeaders.length}">
-
-                      <table
-                        style="
-                          width:100%;
-                          border-collapse:collapse;
-                          table-layout:auto;
-                          background:white;
-                        "
-                      >
-
-                        <tr>
-
-                          <td
-                            style="
-                              width:80px;
-                              border:none;
-                              text-align:center;
-                              vertical-align:middle;
-                              padding:4px;
-                            "
-                          >
-
-                            <img
-                              src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                              style="
-                                height:55px;
-                                width:auto;
-                              "
-                            >
-
-                          </td>
-
-                          <td
-                            style="
-                              border:none;
-                              text-align:center;
-                              vertical-align:middle;
-                              font-weight:bold;
-                              line-height:1.4;
-                              padding:6px;
-                            "
-                          >
-
-                            <div style="font-size:14px;">
-                              PRASAR BHARATI
-                            </div>
-
-                            <div style="font-size:13px;">
-                              INDIA'S PUBLIC SERVICE BROADCASTER
-                            </div>
-
-                            <div style="font-size:13px;">
-                              ALL INDIA RADIO
-                            </div>
-
-                            <div style="font-size:14px;">
-                              ${station}
-                            </div>
-
-                          </td>
-
-                        </tr>
-
-                      </table>
-
+                      <div class="DGPrintHeaderBox">
+                        <div class="DGPrintLogo"><img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"></div>
+                        <div class="DGPrintTitle">
+                          <div>PRASAR BHARATI</div><div>INDIA'S PUBLIC SERVICE BROADCASTER</div>
+                          <div>ALL INDIA RADIO</div><div>${station}</div>
+                          <div class="DGPrintFY">FY - ${selectedFY}</div>
+                        </div>
+                      </div>
                     </th>
-
                   </tr>
-
-                  <tr class="DGMonthTitleRow">
-
-                    <th
-                      colspan="${visibleHeaders.length}"
-                      style="
-                        text-align:center;
-                        font-weight:bold;
-                        padding:5px;
-                        font-size:12px;
-                        border-top:double black;
-                        border-bottom:double black;
-                        background:white !important;color:black !important;
-                      "
-                    >
-                      DG Log book for the Month of ${selectedMonth}
+                  <tr class="DGMonthRepeatRow">
+                    <th colspan="${visibleHeaders.length}" style="text-align:center; font-weight:bold; padding:5px; font-size:12px; border-top:double black; border-bottom:double black; background:white !important;color:black !important;">
+                      DG Log book for the Month of ${monthLabel}
                     </th>
-
                   </tr>
-
                   <tr class="DGColumnHeaderRow">
-          `;
-
-          headers.forEach((h, i) => {
-            if (hiddenCols.includes(i)) {
-              return;
-            }
-
-            html += `
-              <th>
-                ${h}
-              </th>
-            `;
-          });
-
-          html += `
-
+                    ${headers.map((h, i) => (hiddenCols.includes(i) ? '' : `<th>${h}</th>`)).join('')}
                   </tr>
-
                 </thead>
-
                 <tbody>
           `;
 
-          tbodyData.forEach((row) => {
-            html += buildDGRowHTML(row);
-          });
+          for (let i = 0; i < monthRows.length; i++) {
+            tbHTML += buildDGRowHTML(monthRows[i], headers, hiddenCols, dgData.rows.indexOf(monthRows[i]));
+          }
+          tbHTML += `</tbody></table></div>`;
+          return tbHTML;
+        };
 
-          html += `
-
-                </tbody>
-
-              </table>
-
-            </div>
-          `;
+        if (selectedMonth === 'ALL') {
+          for (let i = 0; i < sortedMonths.length; i++) {
+            html += compileTableLayout(sortedMonths[i], groupedMonths[sortedMonths[i]]);
+          }
+        } else {
+          html += compileTableLayout(selectedMonth, tbodyData);
         }
-        /* =========================
-        🔥 RENDER
-        ========================= */
 
         wrapper.innerHTML = html;
 
-        /* =========================================
-              🔥 ROW CLICK LOAD DATA
-              ========================================= */
+        /* =====================================================
+        🔥 ROW CLICK (Pre-cached Header Offsets for O(1) reads)
+        ===================================================== */
+        const idxFrom = headers.indexOf('From');
+        const idxTo = headers.indexOf('To');
+        const idxDuration = headers.indexOf('Total Duration (hrs)');
+        const idxPurpose = headers.indexOf('Purpose');
+        const idxHMR = headers.indexOf('HMR');
+        const idxHSD = headers.indexOf('Diesel Level (ltrs)');
+        const idxHSDFill = headers.indexOf('Diesel Filled (ltrs)');
+        const idxPressure = headers.indexOf('Pressure (kg/cm²)');
+        const idxTemp = headers.indexOf('Temperature (°C)');
+        const idxDGName = headers.indexOf('DG Name');
 
-        wrapper.querySelectorAll('.DGdataRow').forEach((tr) => {
+        // Phase offsets
+        const idxVRY = headers.indexOf('V(R-Y) volts');
+        const idxVBR = headers.indexOf('V(Y-B) volts');
+        const idxVYB = headers.indexOf('V(B-R) volts');
+        const idxVRN = headers.indexOf('V(R-N) volts');
+        const idxVYN = headers.indexOf('V(Y-N) volts');
+        const idxVBN = headers.indexOf('V(B-N) volts');
+        const idxIR = headers.indexOf('I(R) amps');
+        const idxIY = headers.indexOf('I(Y) amps');
+        const idxIB = headers.indexOf('I(B) amps');
+
+        const rowsNodes = wrapper.querySelectorAll('.DGdataRow');
+        for (let i = 0; i < rowsNodes.length; i++) {
+          const tr = rowsNodes[i];
           tr.addEventListener('click', () => {
-            /* =========================================
-                  🔥 REMOVE OLD ACTIVE
-                  ========================================= */
-
-            wrapper.querySelectorAll('.DGdataRow').forEach((r) => {
-              r.classList.remove('DGactiveRow');
-            });
+            // 🔥 Quick-clear single active node
+            const activeNode = wrapper.querySelector('.DGactiveRow');
+            if (activeNode) activeNode.classList.remove('DGactiveRow');
 
             id('calcHMR').textContent = '';
             id('DGstopTimeError').textContent = '';
             id('CalcHSDLevel').textContent = '';
 
-            /* =========================================
-                  🔥 ADD ACTIVE
-                  ========================================= */
-
             tr.classList.add('DGactiveRow');
-
             const rowIndex = Number(tr.dataset.rowindex);
             const row = dgData.rows[rowIndex];
-
             if (!row) return;
 
-            /* =========================================
-                  🔥 PREVIOUS ROW VALUES
-                  ========================================= */
-
-            let previousHMR = '';
-
-            let previousHSD = '';
-
-            const currentDate = String(row[findDGheader('Date')] || '').trim();
-
-            const currentStart = String(row[findDGheader('From')] || '').trim();
-
-            const currentDG = String(row[findDGheader('DG Name')] || '').trim();
-
-            /* =========================================
-                  🔥 CURRENT DATETIME
-                  ========================================= */
+            const currentDate = String(row[idxDate] || '').trim();
+            const currentStart = String(row[idxFrom] || '').trim();
+            const currentDG = String(row[idxDGName] || '').trim();
 
             const [cd, cm, cy] = currentDate.split('-').map(Number);
-
             const [csh, csm] = currentStart.split(':').map(Number);
-
             const currentDateTime = new Date(cy, cm - 1, cd, csh, csm).getTime();
 
-            /* =========================================
-                  🔥 FIND PREVIOUS ROW
-                  ========================================= */
-
             let latestPreviousTime = 0;
+            let previousHMR = '';
+            let previousHSD = '';
 
-            (dgData?.rows || []).forEach((r) => {
-              const rowDate = String(r[findDGheader('Date')] || '').trim();
+            for (let j = 0; j < dgData.rows.length; j++) {
+              const r = dgData.rows[j];
+              const rowDate = String(r[idxDate] || '').trim();
+              const rowStart = String(r[idxFrom] || '').trim();
 
-              const rowStart = String(r[findDGheader('From')] || '').trim();
-
-              const rowDG = String(r[findDGheader('DG Name')] || '').trim();
-
-              if (!rowDate || !rowStart || rowDG !== currentDG) {
-                return;
-              }
+              if (!rowDate || !rowStart || String(r[idxDGName] || '').trim() !== currentDG) continue;
 
               const [rd, rm, ry] = rowDate.split('-').map(Number);
-
               const [rsh, rsm] = rowStart.split(':').map(Number);
-
               const rowDateTime = new Date(ry, rm - 1, rd, rsh, rsm).getTime();
-
-              /* =====================================
-                    🔥 ONLY PREVIOUS ROW
-                    ===================================== */
 
               if (rowDateTime < currentDateTime && rowDateTime > latestPreviousTime) {
                 latestPreviousTime = rowDateTime;
-
-                previousHMR = r[findDGheader('HMR')] || '';
-
-                previousHSD = r[findDGheader('Diesel Level (ltrs)')] || '';
+                previousHMR = r[idxHMR] || '';
+                previousHSD = r[idxHSD] || '';
               }
-            });
-
-            /* =========================================
-                  🔥 SHOW PREVIOUS VALUES
-                  ========================================= */
+            }
 
             const hmrSpan = id('DGhmrSPAN');
-
-            if (hmrSpan) {
-              hmrSpan.textContent = previousHMR !== '' ? `(${previousHMR})` : '';
-            }
+            if (hmrSpan) hmrSpan.textContent = previousHMR !== '' ? `(${previousHMR})` : '';
 
             const hsdSpan = id('DGhsdSPAN');
+            if (hsdSpan) hsdSpan.textContent = previousHSD !== '' ? `(${previousHSD})` : '';
 
-            if (hsdSpan) {
-              hsdSpan.textContent = previousHSD !== '' ? `(${previousHSD})` : '';
-            }
-
-            /* =========================================
-                  🔥 DATE
-                  DD-MM-YYYY → YYYY-MM-DD
-                  ========================================= */
-
-            const dateParts = String(row[findDGheader('Date')] || '').split('-');
-
+            const dateParts = currentDate.split('-');
             if (dateParts.length === 3) {
               id('DGdate').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
             }
 
-            /* =========================================
-                  🔥 BASIC DATA
-                  ========================================= */
+            id('StationDGList').value = row[idxDGName] || '';
+            id('DGstartTime').value = row[idxFrom] || '';
+            id('DGstopTime').value = row[idxTo] || '';
+            id('DGduration').value = row[idxDuration] || '';
+            id('DGoperationPurpose').value = row[idxPurpose] || 'Failure';
 
-            id('StationDGList').value = row[findDGheader('DG Name')] || '';
+            id('DGVRY').value = row[idxVRY] || '';
+            id('DGVBR').value = row[idxVBR] || '';
+            id('DGVYB').value = row[idxVYB] || '';
+            id('DGVRN').value = row[idxVRN] || '';
+            id('DGVYN').value = row[idxVYN] || '';
+            id('DGVBN').value = row[idxVBN] || '';
 
-            id('DGstartTime').value = row[findDGheader('From')] || '';
+            id('DGIR').value = row[idxIR] || '';
+            id('DGIY').value = row[idxIY] || '';
+            id('DGIB').value = row[idxIB] || '';
 
-            id('DGstopTime').value = row[findDGheader('To')] || '';
-
-            id('DGduration').value = row[findDGheader('Total Duration (hrs)')] || '';
-
-            id('DGoperationPurpose').value = row[findDGheader('Purpose')] || 'Failure';
-
-            /* =========================================
-                  🔥 VOLTAGE
-                  ========================================= */
-
-            id('DGVRY').value = row[findDGheader('V(R-Y) volts')] || '';
-            id('DGVBR').value = row[findDGheader('V(Y-B) volts')] || '';
-            id('DGVYB').value = row[findDGheader('V(B-R) volts')] || '';
-
-            id('DGVRN').value = row[findDGheader('V(R-N) volts')] || '';
-            id('DGVYN').value = row[findDGheader('V(Y-N) volts')] || '';
-            id('DGVBN').value = row[findDGheader('V(B-N) volts')] || '';
-
-            /* =========================================
-                  🔥 CURRENT
-                  ========================================= */
-
-            id('DGIR').value = row[findDGheader('I(R) amps')] || '';
-            id('DGIY').value = row[findDGheader('I(Y) amps')] || '';
-            id('DGIB').value = row[findDGheader('I(B) amps')] || '';
-
-            /* =========================================
-                  🔥 OTHER VALUES
-                  ========================================= */
-
-            id('DGhsdLevel').value = row[findDGheader('Diesel Level (ltrs)')] || '';
-
-            id('DGhsdFill').value = row[findDGheader('Diesel Filled (ltrs)')] || '';
-
-            id('DGpressure').value = row[findDGheader('Pressure (kg/cm²)')] || '';
-
-            id('DGtemp').value = row[findDGheader('Temperature (°C)')] || '';
-
-            id('HMR').value = row[findDGheader('HMR')] || '';
+            id('DGhsdLevel').value = row[idxHSD] || '';
+            id('DGhsdFill').value = row[idxHSDFill] || '';
+            id('DGpressure').value = row[idxPressure] || '';
+            id('DGtemp').value = row[idxTemp] || '';
+            id('HMR').value = row[idxHMR] || '';
           });
-        });
+        }
+
         /* =========================================
         🔥 OUTSIDE CLICK CLEAR
         ========================================= */
-
         document.addEventListener(
           'click',
-
           (e) => {
-            /* =====================================
-            🔥 CLICKED INSIDE ROW
-            ===================================== */
-
-            if (e.target.closest('.DGdataRow') || e.target.closest('.EBdataRow')) {
+            if (e.target.closest('.DGdataRow') || e.target.closest('.EBdataRow') || e.target.closest('.DGPanel') || e.target.closest('.DGpanelDiv')) {
               return;
             }
-
-            /* =====================================
-            🔥 CLICKED INSIDE INPUT AREA
-            ===================================== */
-
-            if (e.target.closest('.DGPanel') || e.target.closest('.DGpanelDiv')) {
-              return;
-            }
-
-            /* =====================================
-            🔥 REMOVE ACTIVE ROW
-            ===================================== */
-
-            wrapper.querySelectorAll('.DGdataRow').forEach((r) => {
-              r.classList.remove('DGactiveRow');
-            });
+            const activeNode = wrapper.querySelector('.DGactiveRow');
+            if (activeNode) activeNode.classList.remove('DGactiveRow');
           },
-
           { passive: true }
         );
       }
@@ -31974,6 +30331,68 @@
         });
       });
 
+      /* ============================================================================
+          ⚡ DG INPUT VALIDATION ENGINE
+      ============================================================================ */
+      function validateDGInputs() {
+        const requiredInputs = [
+          { id: 'DGPage_Station', label: 'Station' },
+          { id: 'StationDGList', label: 'DG Name' },
+          { id: 'DGdate', label: 'DG Run Date' },
+          { id: 'DGoperationPurpose', label: 'Operation Purpose' },
+          { id: 'DGstartTime', label: 'Start Time' },
+          { id: 'DGstopTime', label: 'Stop Time' },
+          { id: 'DGhsdLevel', label: 'HSD Level' },
+          { id: 'HMR', label: 'HMR Reading' }
+        ];
+
+        const invalidFields = [];
+        const len = requiredInputs.length;
+
+        for (let i = 0; i < len; i++) {
+          const f = requiredInputs[i];
+          const el = id(f.id);
+
+          if (!el) continue;
+
+          const value = String(el.value || '').trim();
+
+          // Time fields ("00:00") are allowed, but strictly blank or exact "0" limits are caught
+          if (value === '' || value === '0' || value === '0.00') {
+            invalidFields.push(f.label);
+            el.style.border = '2px solid #ff6b6b';
+          } else {
+            el.style.border = '';
+          }
+        }
+
+        if (invalidFields.length > 0) {
+          const pillsHTML = invalidFields.map((x) => `<span style="padding:5px 10px;border-radius:12px;background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25);font-size:12px;">${x}</span>`).join('');
+
+          const msg = `
+            <div style="padding:16px;text-align:center;">
+              <div style="font-size:14px;font-weight:700;color:#ff8a8a;margin-bottom:12px;">
+                ❌ Required Fields Missing
+              </div>
+              <div style="font-size:13px;opacity:.9;margin-bottom:10px;">
+                Please fill valid values for:
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+                ${pillsHTML}
+              </div>
+            </div>
+          `;
+
+          showCustomAlert(msg);
+          return false;
+        }
+
+        return true;
+      }
+
+      /* ============================================================================
+          ⚡ OPTIMIZED DG DATA SAVE (Harmonized Alert UI & Blank Catch-All)
+      ============================================================================ */
       async function saveDGData() {
         try {
           setSyncStatus('dgDatabase');
@@ -31991,130 +30410,52 @@
           const dghsd = id('DGhsdLevel')?.value || '';
           const dghmr = id('HMR')?.value || '';
 
-          /* =====================================
-          🔥 VALIDATION
-          ===================================== */
-
-          const missingFields = [];
-
-          /* =====================================
-          🔥 CHECK FIELDS
-          ===================================== */
-
-          if (!station) {
-            missingFields.push('  🏢 Station');
-          }
-
-          if (!dgName) {
-            missingFields.push('  ⚙️ DG Name');
-          }
-
-          if (!dateValue) {
-            missingFields.push('  📅 DG Run Date');
-          }
-
-          if (!purpose) {
-            missingFields.push('  ⚡ Purpose of DG Run');
-          }
-
-          if (!newStart) {
-            missingFields.push('  🕒 Start Time of DG');
-          }
-
-          if (!newStop) {
-            missingFields.push('  🕘 Stop Time of DG');
-          }
-
-          if (!dghsd) {
-            missingFields.push('  ⛽ HSD Level of DG');
-          }
-
-          if (!dghmr) {
-            missingFields.push('  ⏳ HMR of DG');
-          }
-
-          /* =====================================
-          🔥 SHOW ERROR
-          ===================================== */
-
-          if (missingFields.length) {
+          // 1. Validation
+          if (!(await validateDGInputs()) || dgName == 'ALL') {
             clearSyncStatus('dgDatabase', 'db', false);
-
-            showCustomAlert(`
-              ❌ Please fill following Inputs:<br><br>
-              ${missingFields.join('<br>')}
-            `);
-
             return;
           }
 
-          /* =====================================
-                🔥 DATE FORMAT
-                ===================================== */
+          /* ====================🔥 DATE FORMAT=============== */
 
           const formattedDate = dateValue.split('-').reverse().join('-');
 
-          /* =====================================
-          🔥 CURRENT VALUES
-          ===================================== */
+          /* ===================🔥 CURRENT VALUES============== */
 
           const duration = id('DGduration')?.value || '00:00';
 
-          /* =====================================
-                🔥 GET DATA
-                ===================================== */
+          /* ===============🔥 GET DATA================= */
 
           const headers = dgData?.headers || [];
-
           const rows = dgData?.rows || [];
-
           let existingRow = null;
-
           let existingIndex = -1;
 
-          /* =====================================
-                🔥 EXISTING ENTRY ID
-                ===================================== */
+          /* ===============🔥 EXISTING ENTRY ID========================== */
 
           let existingEntryId = '';
-
           const activeRow = document.querySelector('.DGactiveRow');
-
           if (activeRow) {
             const rowIndex = Number(activeRow.dataset.rowindex);
-
             const clickedRow = rows[rowIndex];
-
             if (clickedRow) {
               const oldDate = String(clickedRow[findDGheader('Date')] || '').trim();
-
               const oldDG = String(clickedRow[findDGheader('DG Name')] || '').trim();
-
               const oldStart = String(clickedRow[findDGheader('From')] || '').trim();
-
               const oldStop = String(clickedRow[findDGheader('To')] || '').trim();
 
-              /* =================================
-                    🔥 TIME HELPERS
-                    ================================= */
+              /* ===================🔥 TIME HELPERS=================== */
 
               const oldStartMin = timeToMinutes(oldStart);
-
               const oldStopMin = timeToMinutes(oldStop);
-
               const newStartMin = timeToMinutes(newStart);
-
               const newStopMin = timeToMinutes(newStop);
 
-              /* =================================
-                    🔥 OVERLAP CHECK
-                    ================================= */
+              /* ===================🔥 OVERLAP CHECK======================== */
 
               const isOverlap = (newStartMin >= oldStartMin && newStartMin <= oldStopMin) || (newStopMin >= oldStartMin && newStopMin <= oldStopMin) || (newStartMin <= oldStartMin && newStopMin >= oldStopMin);
 
-              /* =================================
-                    🔥 ONLY REUSE IF SAME SLOT
-                    ================================= */
+              /* =======🔥 ONLY REUSE IF SAME SLOT================== */
 
               if (oldDate === formattedDate && oldDG === dgName && isOverlap) {
                 existingEntryId = String(clickedRow[findDGheader('Entry ID')] || '').trim();
@@ -32122,15 +30463,11 @@
             }
           }
 
-          /* =====================================
-                🔥 ENTRY ID
-                ===================================== */
+          /* ===============🔥 ENTRY ID============================= */
 
           const entryId = existingEntryId || `${station}_${dgName}_${formattedDate}_${newStart}_${newStop}`;
 
-          /* =====================================
-                🔥 HELPERS
-                ===================================== */
+          /* ==================🔥 HELPERS======================== */
 
           function timeToMinutes(t) {
             const [h, m] = String(t || '00:00')
@@ -32162,9 +30499,7 @@
             return `=${h}/24+${m}/1440`;
           }
 
-          /* =====================================
-                🔥 FIND EXISTING ROW
-                ===================================== */
+          /* ==============🔥 FIND EXISTING ROW======================== */
 
           rows.forEach((r, idx) => {
             const rowEntryId = String(r[findDGheader('Entry ID')] || '').trim();
@@ -32176,9 +30511,7 @@
             }
           });
 
-          /* =====================================
-                🔥 MONTH KEY
-                ===================================== */
+          /* =================🔥 MONTH KEY====================== */
 
           const monthKey = formattedDate.split('-').slice(1).join('-');
 
@@ -32192,21 +30525,15 @@
             allRows.splice(existingIndex, 1);
           }
 
-          /* =====================================
-                🔥 TEMP ROW
-                ===================================== */
+          /* ======================🔥 TEMP ROW======================== */
 
           const tempRow = ['=ROW()-1', entryId, formattedDate, station, dgName, newStart, newStop, duration, purpose];
 
-          /* =====================================
-                🔥 ADD TEMP ROW
-                ===================================== */
+          /* =================🔥 ADD TEMP ROW==================== */
 
           allRows.push(tempRow);
 
-          /* =====================================
-                🔥 FILTER SAME MONTH + SAME DG
-                ===================================== */
+          /* =================🔥 FILTER SAME MONTH + SAME DG=================== */
 
           const sameMonthRows = allRows.filter((r) => {
             const rowMonth = String(r[findDGheader('Date')] || '')
@@ -32219,14 +30546,10 @@
             return rowMonth === monthKey && rowDG === dgName;
           });
 
-          /* =====================================
-                🔥 SORT ROWS
-                ===================================== */
+          /* ==================🔥 SORT ROWS================= */
 
           sameMonthRows.sort((a, b) => {
-            /* =====================================
-                  🔥 DATE
-                  ===================================== */
+            /* =================🔥 DATE================ */
 
             const [ad, am, ay] = String(a[findDGheader('Date')] || '')
               .split('-')
@@ -32240,85 +30563,50 @@
 
             const bDate = new Date(by, bm - 1, bd);
 
-            /* =====================================
-                  🔥 SORT DATE
-                  ===================================== */
+            /* =================🔥 SORT DATE=============== */
 
             if (aDate.getTime() !== bDate.getTime()) {
               return aDate - bDate;
             }
 
-            /* =====================================
-                  🔥 SORT TIME
-                  ===================================== */
+            /* =================🔥 SORT TIME============================== */
 
             return timeToMinutes(a[findDGheader('From')] || '00:00') - timeToMinutes(b[findDGheader('From')] || '00:00');
           });
 
-          /* =====================================
-                🔥 RESET PROGRESSIVE
-                ===================================== */
-
+          /* ===================🔥 RESET PROGRESSIVE=========================== */
           let progressiveTestRunning = '00:00';
-
           let progressiveFailureRunning = '00:00';
 
-          /* =====================================
-                🔥 RECALCULATE
-                ===================================== */
+          /* ===================🔥 RECALCULATE===================== */
 
           sameMonthRows.forEach((r) => {
-            /* =====================================
-                  🔥 PURPOSE
-                  ===================================== */
-
+            /* =================🔥 PURPOSE======================== */
             const rowPurpose = String(r[findDGheader('Purpose')] || '')
               .trim()
               .toLowerCase();
 
-            /* =====================================
-                  🔥 DURATION
-                  ===================================== */
-
+            /* ==================🔥 DURATION=============== */
             const rowDuration = String(r[findDGheader('Total Duration (hrs)')] || '00:00');
 
-            /* =====================================
-                  🔥 TEST / FAILURE
-                  ===================================== */
-
+            /* ==================🔥 TEST / FAILURE===================== */
             if (rowPurpose === 'test') {
               progressiveTestRunning = addTimes(progressiveTestRunning, rowDuration);
             } else {
               progressiveFailureRunning = addTimes(progressiveFailureRunning, rowDuration);
             }
 
-            /* =====================================
-                  🔥 STORE TEMP
-                  ===================================== */
-
+            /* ==================🔥 STORE TEMP===================== */
             r.__progTest = progressiveTestRunning;
-
             r.__progFailure = progressiveFailureRunning;
-
             r.__totalProg = addTimes(progressiveTestRunning, progressiveFailureRunning);
           });
 
-          /* =====================================
-                🔥 CURRENT ROW
-                ===================================== */
-
           const currentTempRow = sameMonthRows.find((r) => String(r[findDGheader('Entry ID')] || '').trim() === entryId);
 
-          /* =====================================
-                🔥 FINAL VALUES
-                ===================================== */
-
           const progressiveTestValue = formatDuration(currentTempRow?.__progTest || '00:00');
-
           const progressiveFailureValue = formatDuration(currentTempRow?.__progFailure || '00:00');
-
           const totalProgressiveValue = formatDuration(currentTempRow?.__totalProg || '00:00');
-
           const totalDuration = formatDuration(duration);
 
           /* =====================================
@@ -32327,100 +30615,65 @@
 
           const row = {
             'Sr No': '=ROW()-1',
-
             'Entry ID': entryId,
-
             Date: formattedDate,
-
             Station: station,
-
             'DG Name': dgName,
-
             From: newStart,
-
             To: newStop,
-
             'Total Duration (hrs)': totalDuration,
-
             Purpose: purpose,
-
             'Progressive Test (hrs)': progressiveTestValue,
-
             'Progressive Failure (hrs)': progressiveFailureValue,
-
             'Total Progressive (hrs)': totalProgressiveValue,
-
             'V(R-Y) volts': id('DGVRY')?.value || '',
-
             'V(Y-B) volts': id('DGVBR')?.value || '',
-
             'V(B-R) volts': id('DGVYB')?.value || '',
-
             'V(R-N) volts': id('DGVRN')?.value || '',
-
             'V(Y-N) volts': id('DGVYN')?.value || '',
-
             'V(B-N) volts': id('DGVBN')?.value || '',
-
             'I(R) amps': id('DGIR')?.value || '-',
-
             'I(Y) amps': id('DGIY')?.value || '-',
-
             'I(B) amps': id('DGIB')?.value || '-',
-
             'Diesel Level (ltrs)': id('DGhsdLevel')?.value || '',
-
             'Diesel Filled (ltrs)': id('DGhsdFill')?.value || '-',
-
             'Pressure (kg/cm²)': id('DGpressure')?.value || '',
-
             'Temperature (°C)': id('DGtemp')?.value || '',
-
             HMR: id('HMR')?.value || '',
-
             Staff: currentUser || ''
           };
 
-          /* =====================================
-                🔥 CHANGED COLUMNS
-                ===================================== */
-
+          // 4. Diffing (Ignoring Formula columns to prevent false positives)
+          const ignoreCols = ['Total Duration (hrs)', 'Progressive Test (hrs)', 'Progressive Failure (hrs)', 'Total Progressive (hrs)', 'Sr No'];
           let changedCols = [];
 
           if (existingRow) {
             headers.forEach((header, i) => {
-              if (header === 'Sr No') return;
+              // Skip ignored columns
+              if (ignoreCols.includes(header)) return;
 
               const oldVal = String(existingRow[i] ?? '').trim();
-
               const newVal = String(row[header] ?? '').trim();
 
               if (oldVal !== newVal) {
                 changedCols.push(header);
               }
             });
-          }
 
-          /* =====================================
-              🔥 NO CHANGES
-              ===================================== */
-
-          if (existingRow && !changedCols.length) {
-            clearSyncStatus('dgDatabase', 'db', true);
-
-            showCustomAlert(`
-              <div style="text-align:center;padding:18px;">
-                <div style="font-size:14px;font-weight:700;color:#ffe082;margin-bottom:10px;">
-                  ℹ️ No Changes Detected
+            if (!changedCols.length) {
+              clearSyncStatus('dgDatabase', 'db', true);
+              showCustomAlert(`
+                <div style="text-align:center;padding:18px;">
+                  <div style="font-size:14px;font-weight:700;color:#ffe082;margin-bottom:10px;">
+                    ℹ️ No Changes Detected
+                  </div>
+                  <div style="opacity:.8;font-size:13px;">
+                    DG Log data is already up to date.
+                  </div>
                 </div>
-
-                <div style="opacity:.8;font-size:13px;">
-                  DG Log data is already up to date.
-                </div>
-              </div>
-            `);
-
-            return;
+              `);
+              return;
+            }
           }
 
           /* =====================================
@@ -32532,25 +30785,17 @@
           /* =====================================
                 🔥 REFRESH
                 ===================================== */
-
+          await fetch('https://office-management-f425.onrender.com/refresh/dg', { method: 'POST' });
           await loadTable('dg', 'DGlog');
-
           loadDGMonthsByFY();
-
           SyncAllPage();
-
           clearDGInputs();
-
           id('DGdate').value = '';
-
           clearSyncStatus('dgDatabase', 'db', true);
-
           showCustomAlert(msg);
         } catch (err) {
           console.error('❌ DG Save Failed:', err);
-
           clearSyncStatus('dgDatabase', 'db', false);
-
           showCustomAlert(`
             <div style="text-align:center;padding:16px;">
 
@@ -33488,36 +31733,49 @@
 
       id('logoutBtn')?.addEventListener('click', () => {
         const noBtn = id('logoutNoBtn');
+        if (noBtn) noBtn.style.display = 'block';
 
-        if (noBtn) {
-          noBtn.style.display = 'block';
-        }
         showConfirmBox({
           title: 'Logout Confirmation',
-
           icon: '🔐',
-
           message: 'Do you want to Logout?',
-
           subMessage: 'Your current session will be closed.',
-
           yesText: 'Logout',
-
           noText: 'Cancel',
-
           yesColor: '#ef4444',
 
-          onYes: () => {
-            /* =========================================
-            🔥 LOGOUT LOGIC
-            ========================================= */
+          // 🔥 Mark this callback as async so you can use await if needed
+          onYes: async () => {
+            try {
+              /* =====================================
+                🔥 1. CLEAR JS DATA CACHES
+                ===================================== */
+              // Reset your global data objects
+              window.pbData = { headers: [], rows: [] };
+              window.dgData = { headers: [], rows: [] };
+              window.ebData = { headers: [], rows: [] };
+              window.sbgData = { headers: [], rows: [] };
 
-            // logout();
+              // Reset filters
+              filters = { station: '', year: '' };
 
-            location.reload();
+              /* =====================================
+                🔥 2. CLEAR BROWSER STORAGE
+                ===================================== */
+              localStorage.clear();
+              sessionStorage.clear();
 
-            // window.location.href =
-            //   'login.html';
+              /* =====================================
+                🔥 3. UI RESET & RELOAD
+                ===================================== */
+              document.body.classList.remove('logged-in');
+
+              // A hard reload is the cleanest way to clear all memory
+              window.location.reload();
+            } catch (err) {
+              console.error('Logout failed:', err);
+              window.location.reload(); // Still reload even if error occurs
+            }
           }
         });
       });
