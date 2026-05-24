@@ -6178,13 +6178,13 @@
                   <td style="text-align: right">CENTRAL</td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="2" style="border: solid 1px black; text-align: center; vertical-align: top" id="sbgBillHeader">
                     ALL INDIA RADIO
                     <br />
-                    <span id="sbgStation"></span>
+                    <span id="sbgStation" style="font-weight: bold"></span>
                   </td>
                   <td style="border: solid 1px black; min-height: 40px">
                     <label style="margin: 0; padding: 0; font-weight: 100">
@@ -6192,10 +6192,10 @@
                       <span id="headerMonth"></span>
                     </label>
                     <br />
-                    <p style="margin: 0px; margin-top: 5px; padding: 0; font-weight: bold">
+                    <p style="margin: 0px; margin-top: 5px; padding: 0">
                       <b>
                         Head of Account :
-                        <span id="headAccountSBGName"></span>
+                        <span id="headAccountSBGName" style="font-weight: bold"></span>
                       </b>
                     </p>
                   </td>
@@ -6238,10 +6238,10 @@
                   <td colspan="4" class="sbgCertificateText" id="sbgCertificateText4">4. Certified that - (a) the expenditure on conveyance hire included in this bill was actually incurred, was un-avoidable and is within the scheduled scale of charges for the conveyance used and (b) the Government servant concerned is not entitled to draw travelling allowance under the ordinary rules for the journey he is not granted any compensatory leave and does not and will not receive any special remuneration for the performance of the duty which necessitated the journey.</td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="2">Received payments.</td>
@@ -6272,10 +6272,10 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="4" style="text-align: center">
@@ -6291,13 +6291,13 @@
                   <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow"></td>
+                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="4" style="text-align: center">Space of pre-audit enforcement in respect of Bills submitted for pre-audit. For use in AG's Office</td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-top: solid 1px black"></td>
+                  <td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="2">Head of Account</td>
@@ -7170,7 +7170,7 @@
 
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden && window.appState === 'READY' && window.isUserLoggedIn) {
-          hideLoader();
+          completeLoader();
         }
       });
 
@@ -7463,6 +7463,10 @@
 
         // Simply call the engine. The engine handles the loader and the transition.
         await loadAllData();
+        if (window.appState === 'READY') {
+          await handlePostDataInitialization();
+          completeLoader();
+        }
 
         // Final Reveal: Only reached when loadAllData and init are complete
         id('loginPage').style.display = 'none';
@@ -7943,10 +7947,13 @@
         if (window.appState !== 'UNINITIALIZED') return;
         window.appState = 'FETCHING';
 
+        const baseUrl = 'https://office-management-f425.onrender.com';
+
         const tasks = [
-          ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart', false)],
-          ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB', false)],
-          ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB', false)],
+          // [Title, LoadFunction, Optional Refresh Endpoint]
+          ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart', false), '/refresh/duty'],
+          ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB', false), '/refresh/esr'],
+          ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB', false), '/refresh/txn'],
           [
             'Loading Pay Bill + CPC Data...',
             async () => {
@@ -7955,40 +7962,40 @@
               initFilters();
               await syncPBtoSBG();
               buildSBGMenuListsForChart();
-            }
+            },
+            '/refresh/pb' // Example: refreshes both PB and CPC
           ],
-          ['Loading DG Log...', () => loadTable('dg', 'DGlog', false)],
-          ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog', false)],
-          ['Loading Electricity Log...', () => loadTable('eb', 'EBlog', false)],
-          ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB', false)],
-          ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB', false)],
+          ['Loading DG Log...', () => loadTable('dg', 'DGlog', false), '/refresh/dg'],
+          ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog', false), '/refresh/hsd'],
+          ['Loading Electricity Log...', () => loadTable('eb', 'EBlog', false), '/refresh/eb'],
+          ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB', false), '/refresh/sbg'],
+          ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB', false), '/refresh/sbgexp'],
           [
             'Preparing Budget Matrix...',
             () => {
               renderBudgetfromPBData();
               renderFilterMainBudgetExpTable();
-            }
+            },
+            null
           ],
-          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB', false), loadTable('city', 'CityZoneDB', false), loadTable('comm', 'CommFactDB', false), loadTable('it', 'ITDB', false)])]
+          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB', false), loadTable('city', 'CityZoneDB', false), loadTable('comm', 'CommFactDB', false), loadTable('it', 'ITDB', false)]), null]
         ];
 
         const totalTasks = tasks.length;
+        window.visualProgress = 0;
 
         function animateProgress(target, apiName) {
           return new Promise((resolve) => {
             const start = window.visualProgress;
             const diff = target - start;
-            const duration = 280;
+            const duration = 200;
             let startTime = null;
 
             function step(timestamp) {
               if (!startTime) startTime = timestamp;
-              const elapsed = timestamp - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 3);
-              window.visualProgress = start + diff * eased;
-
-              if (window.isUserLoggedIn) updateLoader(window.visualProgress, apiName, 'download');
+              const progress = Math.min((timestamp - startTime) / duration, 1);
+              window.visualProgress = start + diff * (1 - Math.pow(1 - progress, 3));
+              if (window.isUserLoggedIn) updateLoader(window.visualProgress, apiName, 'sync');
               if (progress < 1) requestAnimationFrame(step);
               else resolve();
             }
@@ -7997,14 +8004,23 @@
         }
 
         for (let i = 0; i < totalTasks; i++) {
-          const [title, task] = tasks[i];
-          const targetPercent = ((i + 1) / totalTasks) * 96;
+          const [title, task, endpoint] = tasks[i];
+          const targetPercent = ((i + 1) / totalTasks) * 100;
+
+          // 1. Refresh specific data if endpoint exists
+          if (endpoint) {
+            try {
+              await fetch(`${baseUrl}${endpoint}`, { method: 'POST' });
+            } catch (e) {
+              console.warn(`Refresh skipped for ${endpoint}`);
+            }
+          }
+
+          // 2. Perform the load task and animate progress
           await Promise.all([animateProgress(targetPercent, title), Promise.resolve().then(task)]);
         }
 
         window.appState = 'READY';
-
-        // Hand off to UI builder
         if (window.isUserLoggedIn) await handlePostDataInitialization();
       }
 
@@ -17385,7 +17401,7 @@
                 font-weight:bold;
                 padding-right:6px;
               ">
-            ${formatCurrency(totalAmount).replace('₹', '').trim()}
+            ${formatCurrency(totalAmount)}
           </td>
         `;
 
@@ -17969,12 +17985,17 @@
 
               // 🔥 HEADER
               else if (rowIds.includes('sbgBillHeader')) {
-                finalHeight = 40;
+                finalHeight = 55;
+              }
+
+              // 🔥 BLANK ROWS
+              else if (rowIds.includes('sbgBlankRows')) {
+                finalHeight = 10;
               }
 
               // 🔥 CERTIFICATE 1
               else if (rowIds.includes('sbgCertificateText1')) {
-                finalHeight = 115;
+                finalHeight = 105;
               }
 
               // 🔥 CERTIFICATE 2
@@ -17989,7 +18010,7 @@
 
               // 🔥 CERTIFICATE 4
               else if (rowIds.includes('sbgCertificateText4')) {
-                finalHeight = 70;
+                finalHeight = 65;
               } else if (rowIds.includes('sbgDesignationSign')) {
                 finalHeight = 65;
               }
@@ -18042,32 +18063,26 @@
           }
         ];
 
-        sheet.columns = [{ width: 15 }, { width: 10 }, { width: 80 }, { width: 18 }];
+        sheet.columns = [{ width: 15 }, { width: 10 }, { width: 90 }, { width: 18 }];
 
         sheet.pageSetup = {
           paperSize: 9,
-
           orientation: 'portrait',
 
+          // Disable 'fitToPage' to allow manual control over width/height
           fitToPage: true,
 
+          // Set these to force columns to fit the page width
           fitToWidth: 1,
-
-          fitToHeight: false,
+          fitToHeight: 0, // 0 or false means "as many pages as needed vertically"
 
           printArea: `A1:D${lastRow}`,
-
           margins: {
             left: 0.3,
-
             right: 0.3,
-
             top: 0.5,
-
             bottom: 0.5,
-
             header: 0.3,
-
             footer: 0.3
           }
         };
