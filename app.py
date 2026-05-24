@@ -425,18 +425,35 @@ def update_sbgexp():
             return jsonify({"status": "nochange"})
 
         # =====================================================
-        # 🔥 APPLY UPDATES & SORT
+        # 🔥 APPLY UPDATES & SORT (CLEAN VERSION)
         # =====================================================
-        if update_cells: safe_sheet_call(lambda: sbgexp_sheet.batch_update(update_cells, value_input_option="USER_ENTERED"))
-        if new_rows: safe_sheet_call(lambda: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED"))
 
+        # 1. Apply batch updates for existing rows
+        if update_cells:
+            safe_sheet_call(lambda: sbgexp_sheet.batch_update(update_cells, value_input_option="USER_ENTERED"))
+
+        # 2. Append new rows (these are only data, no headers)
+        if new_rows:
+            safe_sheet_call(lambda: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED"))
+
+        # 3. Reload everything to get the full, updated set
         latest_data = safe_sheet_call(lambda: sbgexp_sheet.get_all_values())
         if latest_data and len(latest_data) > 1:
-            sorted_body = sorted(latest_data[1:], key=lambda r: (
+            headers = latest_data[0] # Save headers separately
+            body = latest_data[1:]   # Data only
+
+            # 4. Sort only the data
+            sorted_body = sorted(body, key=lambda r: (
                 datetime.strptime(r[0], "%d-%m-%Y") if r[0] else datetime.min,
                 str(r[1]).lower(), str(r[3]).lower()
             ))
-            safe_sheet_call(lambda: sbgexp_sheet.update('A2', [headers] + sorted_body, value_input_option="USER_ENTERED"))
+
+            # 5. CLEAR ALL DATA in the sheet starting from A2
+            # This is safer than delete_rows.
+            safe_sheet_call(lambda: sbgexp_sheet.batch_clear(['A2:Z10000']))
+
+            # 6. Write ONLY the sorted body
+            safe_sheet_call(lambda: sbgexp_sheet.update('A2', sorted_body, value_input_option="USER_ENTERED"))
 
         return jsonify({"status": "conflict" if conflicts else "success", "updatedRows": updated_rows, "addedRows": added_rows, "rows": conflicts})
 
