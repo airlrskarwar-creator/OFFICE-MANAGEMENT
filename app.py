@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
+from requests.exceptions import SSLError, ProtocolError, ConnectionResetError
 from flask import Response, stream_with_context
 from datetime import datetime
 import gspread
@@ -9,6 +10,7 @@ import json
 import threading
 import time
 import requests
+import socket
 
 app = Flask(__name__)
 CORS(app)
@@ -24,16 +26,6 @@ scope = [
 creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-
-pb_progress = {
-    "percent": 0,
-    "message": "Idle"
-}
-
-sbg_progress = {
-    "percent": 0,
-    "message": "Idle"
-}
 
 # Open Files
 sbgexp_file = client.open_by_key("1d_KdfKp4ZnnmJ_5W_F03RKdlhnScJKQgsUEklss2edY")
@@ -103,6 +95,27 @@ def cache_to_json(cache_data):
     if not cache_data:
         return {"headers": [], "rows": []}
     return {"headers": cache_data[0], "rows": cache_data[1:]}
+
+# =========================================================
+# 🔥 SAFE GOOGLE SHEET RETRY
+# =========================================================
+def safe_sheet_call(func, retries=5, delay=2):
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return func()
+        except (
+            SSLError,
+            ProtocolError,
+            ConnectionResetError,
+            socket.error,
+            requests.exceptions.RequestException
+        ) as e:
+            print(f"🔁 GOOGLE API RETRY {attempt + 1}/{retries}")
+            print("ERROR:", str(e))
+            last_error = e
+            time.sleep(delay)
+    raise last_error
 
 # =========================================================
 # 🚀 FAST READ APIs (Instant response from memory)
@@ -327,58 +340,124 @@ def update_pb():
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
     try:
-        global SBGEXP_CACHE
+        global SBGEXP_CACHE, sbg_progress
+        sbg_progress.update({"percent": 1, "message": "Starting..."})
+
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        if not edit_rows: return jsonify({"status": "error", "message": "No data"}), 400
+        mode = req_data.get("mode", "sync")
 
-        headers = SBGEXP_CACHE[0]
-        body = SBGEXP_CACHE[1:]
+        if not edit_rows:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # 1. Map existing rows for quick lookup
-        row_map = {
-            f"{str(r[0]).strip().lower()}|{str(r[1]).strip().lower()}|{str(r[2]).strip().lower()}|{str(r[3]).strip().lower()}|{str(r[4]).strip().lower()}": r
-            for r in body if len(r) >= 5
-        }
+        data = safe_sheet_call(lambda: sbgexp_sheet.get_all_values())
+        headers, rows = data[0], data[1:]
+        last_updated_idx = headers.index("Last Updated") if "Last Updated" in headers else -1
 
-        updated_list, added_list = [], []
+        def normalize(val):
+            if val is None: return ""
+            val = str(val).replace("₹", "").replace(",", "").replace("\r", "").replace("\n", " ").strip().lower()
+            if val in ["true", "yes", "checked", "1"]: return "true"
+            if val in ["false", "no", "0", "unchecked"]: return "false"
+            if val in ["--", "-"]: return ""
+            try: return f"{float(val):.3f}"
+            except: return val
 
-        # 2. Process updates and additions in memory
-        for obj in edit_rows:
-            key = f"{str(obj.get('Date','')).strip().lower()}|{str(obj.get('Station','')).strip().lower()}|{str(obj.get('Bill / Invoice Details','')).strip().lower()}|{str(obj.get('SBG Expenditure Under','')).strip().lower()}|{str(obj.get('Expenditure Details','')).strip().lower()}"
-            row_data = [str(obj.get(h, "")) for h in headers]
+        update_cells, new_rows = [], []
+        updated_rows, added_rows, conflicts = [], [], []
 
-            if key in row_map:
-                old_row = row_map[key]
-                changed_cols = [headers[i] for i in range(len(headers)) if str(old_row[i]).strip() != str(row_data[i]).strip()]
-                if changed_cols:
-                    updated_list.append({"info": key, "changedColumns": changed_cols})
-                    row_map[key] = row_data  # Update existing
+        # =====================================================
+        # 🔥 ORIGINAL ROW PROCESSING LOGIC
+        # =====================================================
+        processed = 0
+        total_rows = len(edit_rows)
+
+        for row_obj in edit_rows:
+            processed += 1
+            sbg_progress.update({"percent": int(10 + (processed / total_rows) * 60), "message": f"Saving {processed}/{total_rows} rows"})
+
+            row_num = row_obj.get("_RowIndex")
+
+            # 🔄 SYNC MODE
+            if mode == "sync":
+                matched_row = None
+                for idx, existing_row in enumerate(rows):
+                    try:
+                        while len(existing_row) < len(headers): existing_row.append("")
+                        if (normalize(existing_row[0]) == normalize(row_obj.get("Date", "")) and
+                            normalize(existing_row[1]) == normalize(row_obj.get("Station", "")) and
+                            normalize(existing_row[2]) == normalize(row_obj.get("Bill / Invoice Details", "")) and
+                            normalize(existing_row[3]) == normalize(row_obj.get("SBG Expenditure Under", "")) and
+                            normalize(existing_row[4]) == normalize(row_obj.get("Expenditure Details", ""))):
+                            matched_row = idx + 2
+                            break
+                    except: pass
+
+                if matched_row:
+                    existing_row = rows[matched_row - 2]
+                    merged_row = existing_row.copy()
+                    for col_idx, header in enumerate(headers):
+                        if header in row_obj: merged_row[col_idx] = row_obj.get(header, "")
+
+                    changed_columns = [h for i, h in enumerate(headers) if h != "Last Updated" and normalize(existing_row[i]) != normalize(merged_row[i])]
+                    if not changed_columns: continue
+
+                    if last_updated_idx >= 0: merged_row[last_updated_idx] = datetime.now().isoformat()
+                    update_cells.append({"range": f"A{matched_row}:{gspread.utils.rowcol_to_a1(matched_row, len(headers))}", "values": [merged_row]})
+                    updated_rows.append({"date": row_obj.get("Date", ""), "station": row_obj.get("Station", ""), "budget": row_obj.get("SBG Expenditure Under", ""), "amount": row_obj.get("Expenditure Amount (₹ in 000)", ""), "monthlyCumulative": row_obj.get("Monthly Cumulative Sum of Expenditure (₹ in 000)", ""), "cumulative": row_obj.get("Cumulative Sum of Expenditure (₹ in 000)", ""), "changedColumns": changed_columns})
+                else:
+                    new_row = [datetime.now().isoformat() if h == "Last Updated" else row_obj.get(h, "") for h in headers]
+                    new_rows.append(new_row)
+                    added_rows.append({"date": row_obj.get("Date", ""), "station": row_obj.get("Station", ""), "budget": row_obj.get("SBG Expenditure Under", ""), "amount": row_obj.get("Expenditure Amount (₹ in 000)", ""), "monthlyCumulative": row_obj.get("Monthly Cumulative Sum of Expenditure (₹ in 000)", ""), "cumulative": row_obj.get("Cumulative Sum of Expenditure (₹ in 000)", "")})
+
+            # 🔄 EDIT MODE
+            elif mode == "edit" and row_num:
+                try:
+                    row_num = int(row_num)
+                    existing_row = rows[row_num - 2]
+                    if last_updated_idx >= 0 and existing_row[last_updated_idx] != row_obj.get("_lastUpdated", ""):
+                        conflicts.append({"row": row_num, "station": row_obj.get("Station", "")}); continue
+
+                    merged_row = [row_obj.get(h, existing_row[i] if i < len(existing_row) else "") for i, h in enumerate(headers)]
+                    changed_columns = [h for i, h in enumerate(headers) if h not in ["Last Updated", "_lastUpdated"] and normalize(existing_row[i]) != normalize(merged_row[i])]
+
+                    if not changed_columns: continue
+                    if last_updated_idx >= 0: merged_row[last_updated_idx] = datetime.now().isoformat()
+
+                    update_cells.append({"range": f"A{row_num}:{gspread.utils.rowcol_to_a1(row_num, len(headers))}", "values": [merged_row]})
+                    updated_rows.append({"date": row_obj.get("Date", ""), "station": row_obj.get("Station", ""), "budget": row_obj.get("SBG Expenditure Under", ""), "amount": row_obj.get("Expenditure Amount (₹ in 000)", ""), "monthlyCumulative": row_obj.get("Monthly Cumulative Sum of Expenditure (₹ in 000)", ""), "cumulative": row_obj.get("Cumulative Sum of Expenditure (₹ in 000)", ""), "changedColumns": changed_columns})
+                except: pass
+
+            # ➕ ADD MODE
             else:
-                added_list.append({"info": key})
-                body.append(row_data) # Add new
+                new_row = [datetime.now().isoformat() if h == "Last Updated" else row_obj.get(h, "") for h in headers]
+                new_rows.append(new_row)
+                added_rows.append({"date": row_obj.get("Date", ""), "station": row_obj.get("Station", ""), "budget": row_obj.get("SBG Expenditure Under", ""), "amount": row_obj.get("Expenditure Amount (₹ in 000)", ""), "monthlyCumulative": row_obj.get("Monthly Cumulative Sum of Expenditure (₹ in 000)", ""), "cumulative": row_obj.get("Cumulative Sum of Expenditure (₹ in 000)", "")})
 
-        if not updated_list and not added_list:
+        if not update_cells and not new_rows:
+            sbg_progress.update({"percent": 100, "message": "No Changes"})
             return jsonify({"status": "nochange"})
 
-        # Rebuild full body list from updated map and original body
-        final_body = list(row_map.values()) + [r for r in body if r not in row_map.values()]
+        # =====================================================
+        # 🔥 APPLY UPDATES & SORT
+        # =====================================================
+        sbg_progress.update({"percent": 85, "message": "Updating and Organizing..."})
+        if update_cells: safe_sheet_call(lambda: sbgexp_sheet.batch_update(update_cells, value_input_option="USER_ENTERED"))
+        if new_rows: safe_sheet_call(lambda: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED"))
 
-        # 3. 🔥 CHRONOLOGICAL SORTING
-        # Date is assumed to be index 0 in DD-MM-YYYY format
-        final_body.sort(key=lambda r: datetime.strptime(r[0], "%d-%m-%Y") if r[0] else datetime(1900,1,1))
+        latest_data = safe_sheet_call(lambda: sbgexp_sheet.get_all_values())
+        if latest_data and len(latest_data) > 1:
+            sorted_body = sorted(latest_data[1:], key=lambda r: (
+                datetime.strptime(r[0], "%d-%m-%Y") if r[0] else datetime.min,
+                str(r[1]).lower(), str(r[3]).lower()
+            ))
+            safe_sheet_call(lambda: sbgexp_sheet.update('A2', sorted_body, value_input_option="USER_ENTERED"))
 
-        # 4. 🔥 HIGH-SPEED WRITE (Clear + Full Update)
-        sbgexp_sheet.clear(start='A2')
-        if final_body:
-            sbgexp_sheet.update('A2', final_body, value_input_option="USER_ENTERED")
+        sbg_progress.update({"percent": 100, "message": "Completed"})
+        return jsonify({"status": "conflict" if conflicts else "success", "updatedRows": updated_rows, "addedRows": added_rows, "rows": conflicts})
 
-        # 5. Refresh Cache
-        SBGEXP_CACHE = [headers] + final_body
-
-        return jsonify({"status": "success", "updatedRows": updated_list, "addedRows": added_list})
     except Exception as e:
-        print("❌ SBGExp Update Error:", str(e))
+        sbg_progress.update({"percent": 100, "message": "Error"})
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
