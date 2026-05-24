@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
-from requests.exceptions import SSLError, ProtocolError, ConnectionResetError
+from requests.exceptions import SSLError, ConnectionResetError
+from urllib3.exceptions import ProtocolError
 from flask import Response, stream_with_context
 from datetime import datetime
 import gspread
