@@ -155,20 +155,37 @@ def get_sbgexp():
     return jsonify(cache_to_json(SBGEXP_CACHE))
 
 
-@app.route("/refresh-all", methods=["POST"])
-def refresh_all_caches():
+# app.py
+@app.route("/refresh/<api_name>", methods=["POST"])
+def refresh_single_module(api_name):
+    global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE, DUTY_CACHE, ESR_CACHE, TXN_CACHE, HSD_CACHE, EMP_CACHE
+
     try:
-        global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
+        if api_name == 'emp': EMP_CACHE = emp_sheet.get("A:ZZ")
+        elif api_name == 'pb': PB_CACHE = pb_sheet.get("A:ZZ")
+        elif api_name == 'sbgexp': SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+        elif api_name == 'sbg': SBG_CACHE = sbg_sheet.get("A:ZZ")
+        elif api_name == 'dg': DG_CACHE = dg_sheet.get("A:ZZ")
+        elif api_name == 'eb': EB_CACHE = eb_sheet.get("A:ZZ")
+        elif api_name == 'duty': DUTY_CACHE = duty_sheet.get("A:ZZ")
+        elif api_name == 'esr': ESR_CACHE = esr_sheet.get("A:ZZ")
+        elif api_name == 'txn': TXN_CACHE = txn_sheet.get("A:ZZ")
+        elif api_name == 'hsd': HSD_CACHE = hsd_sheet.get("A:ZZ")
 
-        # Perform the actual sheet fetches
-        EMP_CACHE = emp_sheet.get("A:ZZ")
-        PB_CACHE = pb_sheet.get("A:ZZ")
-        SBG_CACHE = sbg_sheet.get("A:ZZ")
-        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-        DG_CACHE = dg_sheet.get("A:ZZ")
-        EB_CACHE = eb_sheet.get("A:ZZ")
-
-        return jsonify({"status": "success", "message": "All caches refreshed"})
+        # ... add others ...
+        elif api_name == 'all':
+            # Perform full refresh (only call this on login/admin)
+            EMP_CACHE = emp_sheet.get("A:ZZ")
+            PB_CACHE = pb_sheet.get("A:ZZ")
+            SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+            SBG_CACHE = sbg_sheet.get("A:ZZ")
+            DG_CACHE = dg_sheet.get("A:ZZ")
+            EB_CACHE = eb_sheet.get("A:ZZ")
+            DUTY_CACHE = duty_sheet.get("A:ZZ")
+            ESR_CACHE = esr_sheet.get("A:ZZ")
+            TXN_CACHE = txn_sheet.get("A:ZZ")
+            HSD_CACHE = hsd_sheet.get("A:ZZ")
+        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
