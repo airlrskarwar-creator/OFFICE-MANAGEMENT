@@ -4809,280 +4809,6 @@
         font-weight: bold;
         text-align: right;
       }
-
-      /* ===============================================
-        RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
-      =================================================== */
-      @media only screen and (max-width: 1200px) {
-        html,
-        * {
-          font-size: 10px;
-        }
-
-        body::before {
-          opacity: 0.03;
-          /* Softer watermark on small screens */
-        }
-
-        .button-bar {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        select {
-          min-width: 100px;
-          width: 100%;
-        }
-
-        .right-panel {
-          min-width: 100px !important;
-          height: 100% !important;
-        }
-
-        div {
-          width: 100%;
-        }
-
-        .Selection-bar {
-          flex-direction: column;
-          max-height: 150px;
-          overflow-y: auto;
-          min-height: 0;
-        }
-
-        .Error_Note {
-          display: none;
-        }
-
-        .action-group,
-        .SBGaction-group,
-        .SSaction-group,
-        .DGaction-group {
-          width: 100%;
-        }
-
-        .sidebar-header {
-          padding: 2px;
-        }
-
-        .side-list {
-          max-height: 60px;
-          overflow-y: auto;
-        }
-
-        .side-header {
-          position: relative;
-        }
-
-        .button-bar button {
-          width: 100%;
-          text-align: center;
-          flex: none;
-          /* 🔥 restore base look */
-          background: #e5e7eb;
-          color: #374151;
-        }
-
-        /* 🔥 active button visible */
-        .button-bar button.active {
-          background: #111827;
-          color: #ffffff;
-        }
-
-        /* 🔥 remove sliding indicator */
-        .button-bar::after {
-          display: none;
-        }
-
-        /* Sidebar collapse */
-        .left-panel {
-          width: 60px !important;
-          min-width: 60px !important;
-        }
-
-        /* Hide text */
-        .left-panel .menu-btn span,
-        .logout-btn span,
-        .sidebar-header .app-title {
-          display: none;
-        }
-
-        .login-left {
-          display: none;
-        }
-
-        .menu-footer {
-          padding: 2px;
-        }
-
-        #EmpPage td:first-child {
-          width: 140px;
-        }
-
-        .DB-Table-Wrapper,
-        .SalarySlipTableWrapper,
-        .ITtableWrapper,
-        .PensionTableWrapper,
-        .DGlogTableWrapper,
-        .EBtableWrapper {
-          width: 100% !important;
-          min-height: 0 !important;
-          height: 100% !important;
-          max-height: 100% !important;
-          overflow: auto !important;
-          flex: 1;
-        }
-
-        .sbg-dashboard {
-          grid-template-columns: 1fr;
-          height: auto;
-        }
-
-        .chart-container {
-          height: 350px;
-        }
-
-        .chart-layout {
-          grid-template-columns: 1fr;
-          height: 100%;
-        }
-
-        .table-box,
-        .chart-box {
-          overflow-x: auto;
-        }
-
-        .side-list {
-          display: flex;
-          overflow-x: hidden;
-          overflow-y: auto;
-          height: auto;
-        }
-
-        .dashboard-footer {
-          display: none;
-        }
-
-        .DutyTableWrapper {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .DutyTableWrapper div {
-          width: 100% !important;
-          height: 100% !important;
-        }
-
-        .req-select {
-          width: 100% !important;
-        }
-
-        .PensionInfoPanel {
-          overflow-x: auto;
-          width: 100%;
-        }
-
-        .PB-Table-Wrapper {
-          height: 100%;
-        }
-
-        .BudgetTableWrapper,
-        .BudgetTablefromPBWrapper {
-          flex-direction: column;
-          height: 100%;
-        }
-
-        .Emp-Table-Wrapper {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-
-        .input-box select::picker(select) {
-          margin-left: 0px;
-          width: max-content;
-        }
-
-        .login-container {
-          grid-template-columns: 1fr;
-          height: auto;
-        }
-
-        .login-left {
-          padding: 50px 28px;
-        }
-
-        .login-right {
-          padding: 110px 28px 100px;
-        }
-
-        .branding h1 {
-          font-size: 20px;
-        }
-
-        .login-right h2 {
-          font-size: 20px;
-          margin-top: 10px;
-        }
-
-        .login-logo {
-          width: 100px;
-        }
-
-        .login-credit {
-          right: 0px;
-          justify-content: center;
-          top: 0;
-        }
-
-        #SBGPanel {
-          flex-direction: column;
-          overflow-y: auto;
-          gap: 4px;
-        }
-        #SBGPanel div {
-          min-height: 32px;
-        }
-
-        #ITInfoPanel,
-        #PensionInfoPanel {
-          flex-direction: column;
-          overflow-y: auto;
-          gap: 4px;
-        }
-
-        .pensionMainInputDiv {
-          flex-direction: column;
-          overflow-y: auto;
-          gap: 4px;
-        }
-
-        #EBinputTableDiv {
-          flex-direction: column;
-        }
-
-        #EBinputTableDiv .EBleftPanel {
-          width: 100%;
-          min-width: 100%;
-        }
-
-        #EBinputTableDiv .EBtableWrapper {
-          width: 100%;
-          min-width: 100%;
-          height: auto;
-          min-height: 500px;
-        }
-        .EBpanelDiv {
-          flex-direction: column;
-          overflow-y: auto;
-          gap: 4px;
-        }
-
-        .DGpanelDiv {
-          flex-direction: column;
-          overflow-y: auto;
-        }
-      }
     </style>
   </head>
   <body>
@@ -7109,9 +6835,10 @@
       }
 
       /* =====================================================
-      🔥 DISABLE PULL TO REFRESH
+      🔥 SMOOTH DISABLE PULL TO REFRESH
       ===================================================== */
       let startY = 0;
+
       document.addEventListener(
         'touchstart',
         (e) => {
@@ -7119,12 +6846,25 @@
         },
         { passive: false }
       );
+
       document.addEventListener(
         'touchmove',
         (e) => {
           const y = e.touches[0].clientY;
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          if (scrollTop <= 0 && y > startY) {
+
+          // 1. Only prevent if we are at the very top
+          // 2. Only prevent if the user is pulling DOWN (y > startY)
+          // 3. Only prevent if the target is NOT inside a scrollable div
+          const isAtTop = scrollTop <= 0;
+          const isPullingDown = y > startY;
+
+          // Check if the target is a scrollable area (like your tables)
+          // If the target has 'overflow: auto/scroll', we should let it handle its own touch
+          const target = e.target;
+          const isInsideScrollable = target.closest('.data-table') || target.closest('.scroll-container');
+
+          if (isAtTop && isPullingDown && !isInsideScrollable) {
             e.preventDefault();
           }
         },
