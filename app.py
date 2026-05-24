@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
 from flask import Response, stream_with_context
+from datetime import datetime
 import gspread
 import os
 import json
@@ -333,35 +334,51 @@ def update_sbgexp():
 
         headers = SBGEXP_CACHE[0]
         body = SBGEXP_CACHE[1:]
-        row_map = {}
-        for i, r in enumerate(body, start=2):
-            if len(r) >= 5:
-                key = f"{str(r[0]).strip().lower()}|{str(r[1]).strip().lower()}|{str(r[2]).strip().lower()}|{str(r[3]).strip().lower()}|{str(r[4]).strip().lower()}"
-                row_map[key] = {"row_num": i, "data": r}
 
-        updates, new_rows = [], []
+        # 1. Map existing rows for quick lookup
+        row_map = {
+            f"{str(r[0]).strip().lower()}|{str(r[1]).strip().lower()}|{str(r[2]).strip().lower()}|{str(r[3]).strip().lower()}|{str(r[4]).strip().lower()}": r
+            for r in body if len(r) >= 5
+        }
+
         updated_list, added_list = [], []
 
+        # 2. Process updates and additions in memory
         for obj in edit_rows:
             key = f"{str(obj.get('Date','')).strip().lower()}|{str(obj.get('Station','')).strip().lower()}|{str(obj.get('Bill / Invoice Details','')).strip().lower()}|{str(obj.get('SBG Expenditure Under','')).strip().lower()}|{str(obj.get('Expenditure Details','')).strip().lower()}"
             row_data = [str(obj.get(h, "")) for h in headers]
 
             if key in row_map:
-                old_row = row_map[key]["data"]
+                old_row = row_map[key]
                 changed_cols = [headers[i] for i in range(len(headers)) if str(old_row[i]).strip() != str(row_data[i]).strip()]
                 if changed_cols:
-                    updates.append({"range": f"A{row_map[key]['row_num']}", "values": [row_data]})
                     updated_list.append({"info": key, "changedColumns": changed_cols})
+                    row_map[key] = row_data  # Update existing
             else:
-                new_rows.append(row_data)
                 added_list.append({"info": key})
+                body.append(row_data) # Add new
 
-        if not updates and not new_rows: return jsonify({"status": "nochange"})
-        if updates: sbgexp_sheet.batch_update(updates, value_input_option="USER_ENTERED")
-        if new_rows: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
-        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-        return jsonify({"status": "success", "updated": updated_list, "added": added_list})
+        if not updated_list and not added_list:
+            return jsonify({"status": "nochange"})
+
+        # Rebuild full body list from updated map and original body
+        final_body = list(row_map.values()) + [r for r in body if r not in row_map.values()]
+
+        # 3. 🔥 CHRONOLOGICAL SORTING
+        # Date is assumed to be index 0 in DD-MM-YYYY format
+        final_body.sort(key=lambda r: datetime.strptime(r[0], "%d-%m-%Y") if r[0] else datetime(1900,1,1))
+
+        # 4. 🔥 HIGH-SPEED WRITE (Clear + Full Update)
+        sbgexp_sheet.clear(start='A2')
+        if final_body:
+            sbgexp_sheet.update('A2', final_body, value_input_option="USER_ENTERED")
+
+        # 5. Refresh Cache
+        SBGEXP_CACHE = [headers] + final_body
+
+        return jsonify({"status": "success", "updatedRows": updated_list, "addedRows": added_list})
     except Exception as e:
+        print("❌ SBGExp Update Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
