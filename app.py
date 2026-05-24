@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
 from requests.exceptions import SSLError, ConnectionError, RequestException
-from urllib3.exceptions import ProtocolError, ConnectionResetError
+import urllib3
 from datetime import datetime
 import gspread
 import os
@@ -11,6 +11,10 @@ import threading
 import time
 import requests
 import socket
+
+# Create aliases for the exceptions to keep your safe_sheet_call logic working
+ProtocolError = urllib3.exceptions.ProtocolError
+ConnectionResetError = ConnectionResetError # This is a built-in Python exception
 
 app = Flask(__name__)
 CORS(app)
@@ -110,7 +114,6 @@ def safe_sheet_call(func, retries=5, delay=2):
             last_error = e
             time.sleep(delay)
     raise last_error
-
 
 # =========================================================
 # 🚀 FAST READ APIs (Instant response from memory)
