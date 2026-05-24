@@ -154,6 +154,25 @@ def get_sbgexp():
     global SBGEXP_CACHE
     return jsonify(cache_to_json(SBGEXP_CACHE))
 
+
+@app.route("/refresh-all", methods=["POST"])
+def refresh_all_caches():
+    try:
+        global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
+
+        # Perform the actual sheet fetches
+        EMP_CACHE = emp_sheet.get("A:ZZ")
+        PB_CACHE = pb_sheet.get("A:ZZ")
+        SBG_CACHE = sbg_sheet.get("A:ZZ")
+        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
+        DG_CACHE = dg_sheet.get("A:ZZ")
+        EB_CACHE = eb_sheet.get("A:ZZ")
+
+        return jsonify({"status": "success", "message": "All caches refreshed"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 # =========================================================
 # 🔐 LOGIN API
 # =========================================================
@@ -164,15 +183,6 @@ def login():
         station = (data.get("station") or "").strip()
         user = (data.get("user") or "").strip().upper()
         password = (data.get("password") or "").strip()
-
-        # 🔥 FORCE RE-READ ALL SHEETS FROM GOOGLE
-        global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE
-        EMP_CACHE = emp_sheet.get("A:ZZ")
-        PB_CACHE = pb_sheet.get("A:ZZ")
-        SBG_CACHE = sbg_sheet.get("A:ZZ")
-        SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-        DG_CACHE = dg_sheet.get("A:ZZ")
-        EB_CACHE = eb_sheet.get("A:ZZ")
 
         # 1. Verify Credentials
         role_user = next((r for r in ROLE_USERS if r["user"].upper() == user and r["password"] == password), None)
@@ -311,18 +321,14 @@ def update_pb():
 
         # 1. Build a map of existing data for quick lookups
         row_map = {}
-        for i, r in enumerate(body, start=2): # start=2 because Google Sheets is 1-indexed & header is row 1
+        for i, r in enumerate(body, start=2):
             key = str(r[month_idx]).strip().lower()
             if hris_idx >= 0 and hris_idx < len(r):
                 key += f"|{str(r[hris_idx]).strip().lower()}"
-
-            # Store both the row number and the actual existing row data
             row_map[key] = {"row_num": i, "data": r}
 
         updates = []
         new_rows = []
-
-        # Track for frontend alerts
         updated_employees = []
         added_employees = []
 
@@ -345,13 +351,17 @@ def update_pb():
                 changed_cols = []
 
                 for col_idx, h in enumerate(headers):
-                    # Keep existing data if obj doesn't have the key
-                    new_val = str(obj.get(h, padded_existing[col_idx])).strip()
-                    old_val = str(padded_existing[col_idx]).strip()
+                    incoming_val = str(obj.get(h, "")).strip()
+                    existing_val = str(padded_existing[col_idx]).strip()
 
-                    row_data.append(new_val)
-                    if old_val.upper() != new_val.upper():
-                        changed_cols.append(h)
+                    # 🔥 NON-DESTRUCTIVE RULE:
+                    # If incoming is empty but existing has data, keep existing.
+                    if incoming_val == "" and existing_val != "":
+                        row_data.append(existing_val)
+                    else:
+                        row_data.append(incoming_val)
+                        if incoming_val.upper() != existing_val.upper():
+                            changed_cols.append(h)
 
                 if changed_cols:
                     updates.append({"range": f"A{row_num}", "values": [row_data]})
@@ -359,25 +369,22 @@ def update_pb():
 
             else:
                 # --- ADD NEW ROW ---
-                # Ensure all headers are accounted for in new rows
                 row_data = [str(obj.get(h, "")).strip() for h in headers]
                 new_rows.append(row_data)
                 added_employees.append({"employee": emp_name, "month": sal_month})
 
-        # 3. Check if anything actually needs to be written to Google Sheets
+        # 3. Commit to Database
         if not updates and not new_rows:
             return jsonify({"status": "nochange"})
 
-        # 4. Commit to Database
         if updates:
             pb_sheet.batch_update(updates, value_input_option="USER_ENTERED")
         if new_rows:
             pb_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
-        # 5. Refresh Cache
+        # 4. Refresh Cache
         PB_CACHE = pb_sheet.get("A:ZZ")
 
-        # 6. Send detailed success payload to frontend
         return jsonify({
             "status": "success",
             "updatedEmployees": updated_employees,
@@ -386,10 +393,7 @@ def update_pb():
 
     except Exception as e:
         print("❌ PB Update Error:", str(e))
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/sbgexp/update", methods=["POST"])
