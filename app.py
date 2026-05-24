@@ -97,6 +97,7 @@ def cache_to_json(cache_data):
         return {"headers": [], "rows": []}
     return {"headers": cache_data[0], "rows": cache_data[1:]}
 
+
 # =========================================================
 # 🔥 SAFE GOOGLE SHEET RETRY
 # =========================================================
@@ -112,11 +113,10 @@ def safe_sheet_call(func, retries=5, delay=2):
             socket.error,
             requests.exceptions.RequestException
         ) as e:
-            print(f"🔁 GOOGLE API RETRY {attempt + 1}/{retries}")
-            print("ERROR:", str(e))
             last_error = e
             time.sleep(delay)
     raise last_error
+
 
 # =========================================================
 # 🚀 FAST READ APIs (Instant response from memory)
@@ -341,8 +341,7 @@ def update_pb():
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
     try:
-        global SBGEXP_CACHE, sbg_progress
-
+        global SBGEXP_CACHE
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
         mode = req_data.get("mode", "sync")
@@ -369,12 +368,7 @@ def update_sbgexp():
         # =====================================================
         # 🔥 ORIGINAL ROW PROCESSING LOGIC
         # =====================================================
-        processed = 0
-        total_rows = len(edit_rows)
-
         for row_obj in edit_rows:
-            processed += 1
-
             row_num = row_obj.get("_RowIndex")
 
             # 🔄 SYNC MODE
@@ -453,6 +447,7 @@ def update_sbgexp():
         return jsonify({"status": "conflict" if conflicts else "success", "updatedRows": updated_rows, "addedRows": added_rows, "rows": conflicts})
 
     except Exception as e:
+        print("❌ SBG UPDATE ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
