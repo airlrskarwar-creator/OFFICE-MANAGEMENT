@@ -359,9 +359,6 @@ def update_sbgexp():
         update_cells, new_rows = [], []
         updated_rows, added_rows, conflicts = [], [], []
 
-        # =====================================================
-        # 🔥 ORIGINAL ROW PROCESSING LOGIC
-        # =====================================================
         for row_obj in edit_rows:
             row_num = row_obj.get("_RowIndex")
 
@@ -436,7 +433,7 @@ def update_sbgexp():
                 datetime.strptime(r[0], "%d-%m-%Y") if r[0] else datetime.min,
                 str(r[1]).lower(), str(r[3]).lower()
             ))
-            safe_sheet_call(lambda: sbgexp_sheet.update('A2', sorted_body, value_input_option="USER_ENTERED"))
+            safe_sheet_call(lambda: sbgexp_sheet.update('A2', [headers] + sorted_body, value_input_option="USER_ENTERED"))
 
         return jsonify({"status": "conflict" if conflicts else "success", "updatedRows": updated_rows, "addedRows": added_rows, "rows": conflicts})
 
