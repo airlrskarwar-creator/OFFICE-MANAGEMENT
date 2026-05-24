@@ -1,9 +1,8 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from oauth2client.service_account import ServiceAccountCredentials
-from requests.exceptions import SSLError, ConnectionResetError
-from urllib3.exceptions import ProtocolError
-from flask import Response, stream_with_context
+from requests.exceptions import SSLError, ConnectionError, RequestException
+from urllib3.exceptions import ProtocolError, ConnectionResetError
 from datetime import datetime
 import gspread
 import os
@@ -106,13 +105,8 @@ def safe_sheet_call(func, retries=5, delay=2):
     for attempt in range(retries):
         try:
             return func()
-        except (
-            SSLError,
-            ProtocolError,
-            ConnectionResetError,
-            socket.error,
-            requests.exceptions.RequestException
-        ) as e:
+        except (SSLError, ProtocolError, ConnectionResetError, socket.error, RequestException) as e:
+            print(f"🔁 GOOGLE API RETRY {attempt + 1}/{retries} | ERROR: {str(e)}")
             last_error = e
             time.sleep(delay)
     raise last_error
