@@ -158,23 +158,17 @@ def get_sbgexp():
 # app.py
 @app.route("/refresh/<api_name>", methods=["POST"])
 def refresh_single_module(api_name):
-    global PB_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, EMP_CACHE, SBGEXP_CACHE, DUTY_CACHE, ESR_CACHE, TXN_CACHE, HSD_CACHE, EMP_CACHE
+    # Mapping for easy lookup
+    sheet_map = {
+        'emp': emp_sheet, 'pb': pb_sheet, 'sbgexp': sbgexp_sheet,
+        'sbg': sbg_sheet, 'dg': dg_sheet, 'eb': eb_sheet,
+        'duty': duty_sheet, 'esr': esr_sheet, 'txn': txn_sheet, 'hsd': hsd_sheet
+    }
 
     try:
-        if api_name == 'emp': EMP_CACHE = emp_sheet.get("A:ZZ")
-        elif api_name == 'pb': PB_CACHE = pb_sheet.get("A:ZZ")
-        elif api_name == 'sbgexp': SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
-        elif api_name == 'sbg': SBG_CACHE = sbg_sheet.get("A:ZZ")
-        elif api_name == 'dg': DG_CACHE = dg_sheet.get("A:ZZ")
-        elif api_name == 'eb': EB_CACHE = eb_sheet.get("A:ZZ")
-        elif api_name == 'duty': DUTY_CACHE = duty_sheet.get("A:ZZ")
-        elif api_name == 'esr': ESR_CACHE = esr_sheet.get("A:ZZ")
-        elif api_name == 'txn': TXN_CACHE = txn_sheet.get("A:ZZ")
-        elif api_name == 'hsd': HSD_CACHE = hsd_sheet.get("A:ZZ")
-
-        # ... add others ...
-        elif api_name == 'all':
-            # Perform full refresh (only call this on login/admin)
+        if api_name == 'all':
+            # Refresh everything
+            global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, DUTY_CACHE, ESR_CACHE, TXN_CACHE, HSD_CACHE
             EMP_CACHE = emp_sheet.get("A:ZZ")
             PB_CACHE = pb_sheet.get("A:ZZ")
             SBGEXP_CACHE = sbgexp_sheet.get("A:ZZ")
@@ -185,7 +179,14 @@ def refresh_single_module(api_name):
             ESR_CACHE = esr_sheet.get("A:ZZ")
             TXN_CACHE = txn_sheet.get("A:ZZ")
             HSD_CACHE = hsd_sheet.get("A:ZZ")
-        return jsonify({"status": "success"})
+
+        elif api_name in sheet_map:
+            # Refresh specific module using globals
+            data = sheet_map[api_name].get("A:ZZ")
+            # Dynamic global update
+            globals()[f"{api_name.upper()}_CACHE"] = data
+
+        return jsonify({"status": "success", "refreshed": api_name})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
