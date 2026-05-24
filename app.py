@@ -342,7 +342,6 @@ def update_pb():
 def update_sbgexp():
     try:
         global SBGEXP_CACHE, sbg_progress
-        sbg_progress.update({"percent": 1, "message": "Starting..."})
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
@@ -375,7 +374,6 @@ def update_sbgexp():
 
         for row_obj in edit_rows:
             processed += 1
-            sbg_progress.update({"percent": int(10 + (processed / total_rows) * 60), "message": f"Saving {processed}/{total_rows} rows"})
 
             row_num = row_obj.get("_RowIndex")
 
@@ -436,13 +434,11 @@ def update_sbgexp():
                 added_rows.append({"date": row_obj.get("Date", ""), "station": row_obj.get("Station", ""), "budget": row_obj.get("SBG Expenditure Under", ""), "amount": row_obj.get("Expenditure Amount (₹ in 000)", ""), "monthlyCumulative": row_obj.get("Monthly Cumulative Sum of Expenditure (₹ in 000)", ""), "cumulative": row_obj.get("Cumulative Sum of Expenditure (₹ in 000)", "")})
 
         if not update_cells and not new_rows:
-            sbg_progress.update({"percent": 100, "message": "No Changes"})
             return jsonify({"status": "nochange"})
 
         # =====================================================
         # 🔥 APPLY UPDATES & SORT
         # =====================================================
-        sbg_progress.update({"percent": 85, "message": "Updating and Organizing..."})
         if update_cells: safe_sheet_call(lambda: sbgexp_sheet.batch_update(update_cells, value_input_option="USER_ENTERED"))
         if new_rows: safe_sheet_call(lambda: sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED"))
 
@@ -454,11 +450,9 @@ def update_sbgexp():
             ))
             safe_sheet_call(lambda: sbgexp_sheet.update('A2', sorted_body, value_input_option="USER_ENTERED"))
 
-        sbg_progress.update({"percent": 100, "message": "Completed"})
         return jsonify({"status": "conflict" if conflicts else "success", "updatedRows": updated_rows, "addedRows": added_rows, "rows": conflicts})
 
     except Exception as e:
-        sbg_progress.update({"percent": 100, "message": "Error"})
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
