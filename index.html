@@ -658,6 +658,7 @@
         backdrop-filter: blur(10px);
         transition: all 0.28s ease;
         z-index: 10;
+        cursor: pointer;
       }
 
       .input-box:hover {
@@ -1352,8 +1353,8 @@
 
       .reportTypeBtn {
         border: solid 1px silver;
-        background: #6f768d;
-        color: yellow !important;
+        background: #dfdfdf;
+        color: black !important;
         font-weight: 700;
         padding: 8px;
         border-radius: 6px;
@@ -4810,6 +4811,279 @@
         font-weight: bold;
         text-align: right;
       }
+      /* ===============================================
+        RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
+      =================================================== */
+      @media only screen and (max-width: 1200px) {
+        html,
+        * {
+          font-size: 10px;
+        }
+
+        body::before {
+          opacity: 0.03;
+          /* Softer watermark on small screens */
+        }
+
+        .button-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        select {
+          min-width: 100px;
+          width: 100%;
+        }
+
+        .right-panel {
+          min-width: 100px !important;
+          height: 100% !important;
+        }
+
+        div {
+          width: 100%;
+        }
+
+        .Selection-bar {
+          flex-direction: column;
+          max-height: 150px;
+          overflow-y: auto;
+          min-height: 0;
+        }
+
+        .Error_Note {
+          display: none;
+        }
+
+        .action-group,
+        .SBGaction-group,
+        .SSaction-group,
+        .DGaction-group {
+          width: 100%;
+        }
+
+        .sidebar-header {
+          padding: 2px;
+        }
+
+        .side-list {
+          max-height: 60px;
+          overflow-y: auto;
+        }
+
+        .side-header {
+          position: relative;
+        }
+
+        .button-bar button {
+          width: 100%;
+          text-align: center;
+          flex: none;
+          /* 🔥 restore base look */
+          background: #e5e7eb;
+          color: #374151;
+        }
+
+        /* 🔥 active button visible */
+        .button-bar button.active {
+          background: #111827;
+          color: #ffffff;
+        }
+
+        /* 🔥 remove sliding indicator */
+        .button-bar::after {
+          display: none;
+        }
+
+        /* Sidebar collapse */
+        .left-panel {
+          width: 60px !important;
+          min-width: 60px !important;
+        }
+
+        /* Hide text */
+        .left-panel .menu-btn span,
+        .logout-btn span,
+        .sidebar-header .app-title {
+          display: none;
+        }
+
+        .login-left {
+          display: none;
+        }
+
+        .menu-footer {
+          padding: 2px;
+        }
+
+        #EmpPage td:first-child {
+          width: 140px;
+        }
+
+        .DB-Table-Wrapper,
+        .SalarySlipTableWrapper,
+        .ITtableWrapper,
+        .PensionTableWrapper,
+        .DGlogTableWrapper,
+        .EBtableWrapper {
+          width: 100% !important;
+          min-height: 0 !important;
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: auto !important;
+          flex: 1;
+        }
+
+        .sbg-dashboard {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        .chart-container {
+          height: 350px;
+        }
+
+        .chart-layout {
+          grid-template-columns: 1fr;
+          height: 100%;
+        }
+
+        .table-box,
+        .chart-box {
+          overflow-x: auto;
+        }
+
+        .side-list {
+          display: flex;
+          overflow-x: hidden;
+          overflow-y: auto;
+          height: auto;
+        }
+
+        .dashboard-footer {
+          display: none;
+        }
+
+        .DutyTableWrapper {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .DutyTableWrapper div {
+          width: 100% !important;
+          height: 100% !important;
+        }
+
+        .req-select {
+          width: 100% !important;
+        }
+
+        .PensionInfoPanel {
+          overflow-x: auto;
+          width: 100%;
+        }
+
+        .PB-Table-Wrapper {
+          height: 100%;
+        }
+
+        .BudgetTableWrapper,
+        .BudgetTablefromPBWrapper {
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .Emp-Table-Wrapper {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .input-box select::picker(select) {
+          margin-left: 0px;
+          width: max-content;
+        }
+
+        .login-container {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        .login-left {
+          padding: 50px 28px;
+        }
+
+        .login-right {
+          padding: 110px 28px 100px;
+        }
+
+        .branding h1 {
+          font-size: 20px;
+        }
+
+        .login-right h2 {
+          font-size: 20px;
+          margin-top: 10px;
+        }
+
+        .login-logo {
+          width: 100px;
+        }
+
+        .login-credit {
+          right: 0px;
+          justify-content: center;
+          top: 0;
+        }
+
+        #SBGPanel {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+        #SBGPanel div {
+          min-height: 32px;
+        }
+
+        #ITInfoPanel,
+        #PensionInfoPanel {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+
+        .pensionMainInputDiv {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+
+        #EBinputTableDiv {
+          flex-direction: column;
+        }
+
+        #EBinputTableDiv .EBleftPanel {
+          width: 100%;
+          min-width: 100%;
+        }
+
+        #EBinputTableDiv .EBtableWrapper {
+          width: 100%;
+          min-width: 100%;
+          height: auto;
+          min-height: 500px;
+        }
+        .EBpanelDiv {
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 4px;
+        }
+
+        .DGpanelDiv {
+          flex-direction: column;
+          overflow-y: auto;
+        }
+      }
     </style>
   </head>
   <body>
@@ -5080,9 +5354,7 @@
           </div>
           <div class="Emp-Table-Wrapper">
             <table id="EmpDetailTbl">
-              <tr>
-                <th colspan="2">Personal Details</th>
-              </tr>
+              <tr><th colspan="2">Personal Details</th></tr>
               <tr>
                 <td>Name</td>
                 <td id="Employee Name"></td>
@@ -5145,9 +5417,7 @@
               </tr>
             </table>
             <table>
-              <tr>
-                <th colspan="2">Pay Details</th>
-              </tr>
+              <tr><th colspan="2">Pay Details</th></tr>
               <tr>
                 <td>Date of Birth</td>
                 <td id="DOB"></td>
@@ -5886,51 +6156,58 @@
             <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none"></div>
             <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
             <div class="BudgetReportTableWrapper" id="BudgetReportTableWrapper" style="display: none">
-              <table id="ContingentBillReport" style="border-collapse: collapse; width: 100%">
+              <table id="ContingentBillReport" style="border-collapse: collapse; width: 100%; table-layout: fixed">
                 <colgroup>
                   <col style="width: 15%" />
                   <col style="width: 5%" />
                   <col style="width: 65%" />
                   <col style="width: 15%" />
                 </colgroup>
+
                 <tr>
-                  <td colspan="2" style="border: solid 1px black" id="sbgBillMainHeader">
+                  <td rowspan="2" colspan="2" style="border: 1px solid black; padding: 5px" id="sbgBillMainHeader">
                     Form T.R. - 30 (Large)
                     <br />
                     (See Treasury Rule-306)
                   </td>
-                  <td style="text-align: center">
-                    <b><h3 style="width: 100%; font-size: 13px; font-weight: bold">FULLY VOUCHED CONTINGENT BILL</h3></b>
+                  <td rowspan="2" style="border: none; border-left: solid 1px black; text-align: center; vertical-align: middle">
+                    <h3 style="margin: 0; font-size: 14px">FULLY VOUCHED CONTINGENT BILL</h3>
                   </td>
-                  <td style="text-align: right">CENTRAL</td>
+                  <td rowspan="2" style="border: none; text-align: right; vertical-align: middle">CENTRAL</td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
                 </tr>
+
                 <tr>
-                  <td colspan="2" style="border: solid 1px black; text-align: center; vertical-align: top" id="sbgBillHeader">
-                    ALL INDIA RADIO
-                    <br />
-                    <span id="sbgStation" style="font-weight: bold"></span>
-                  </td>
-                  <td style="border: solid 1px black; min-height: 40px">
+                  <td colspan="2" style="border: 1px solid black; border-bottom: none; text-align: center; vertical-align: top; padding: 5px" id="sbgBillHeader">ALL INDIA RADIO</td>
+                  <td style="border: solid 1px black; border-bottom: none; padding: 5px; vertical-align: top">
                     <label style="margin: 0; padding: 0; font-weight: 100">
                       Detailed Bill of contingent charges for the month of
                       <span id="headerMonth"></span>
                     </label>
-                    <br />
-                    <p style="margin: 0px; margin-top: 5px; padding: 0">
+                  </td>
+                  <td style="border: solid 1px black; border-bottom: none; text-align: center; vertical-align: top"><b>Voucher No.</b></td>
+                </tr>
+                <tr>
+                  <td rowspan="2" colspan="2" style="border: 1px solid black; border-top: none; text-align: center; vertical-align: top; padding: 5px">
+                    <span id="sbgStation" style="font-weight: bold"></span>
+                  </td>
+                  <td rowspan="2" style="border: 1px solid black; border-top: none; padding: 5px; vertical-align: top; font-weight: bold">
+                    <label style="margin: 0px; margin-top: 5px; padding: 0; font-weight: bold">
                       <b>
                         Head of Account :
                         <span id="headAccountSBGName" style="font-weight: bold"></span>
                       </b>
-                    </p>
+                    </label>
                   </td>
-                  <td style="border: solid 1px black; text-align: center; vertical-align: top"><b>Voucher No.</b></td>
+                  <td rowspan="2" style="border: 1px solid black; border-top: none"></td>
                 </tr>
+                <tr><td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td></tr>
+
                 <tr>
                   <td colspan="4" style="padding: 0">
-                    <table style="border-collapse: collapse; width: 100%" id="SBGmonthWiseDetails">
+                    <table id="SBGmonthWiseDetails" style="border-collapse: collapse; width: 100%">
                       <colgroup>
                         <col style="width: 15%" />
                         <col style="width: 5%" />
@@ -5939,62 +6216,52 @@
                       </colgroup>
                       <thead>
                         <tr>
-                          <th style="border: solid 1px black; text-align: center" id="sbgBillSubHeader">
+                          <th rowspan="2" id="sbgBillSubHeader" style="border: 1px solid black; text-align: center; padding: 2px">
                             Number of
                             <br />
                             Sub-Voucher
                           </th>
-                          <th colspan="2" style="border: solid 1px black; text-align: center">Description of Charge</th>
-                          <th style="border: solid 1px black; text-align: center">Amount</th>
+                          <th rowspan="2" colspan="2" style="border: 1px solid black; text-align: center; padding: 2px" id="SBGHeader">Description of Charge</th>
+                          <th rowspan="2" style="border: 1px solid black; text-align: center; padding: 2px">Amount</th>
                         </tr>
                       </thead>
                       <tbody></tbody>
                     </table>
                   </td>
                 </tr>
+                <tr><td colspan="4" style="height: 10px"></td></tr>
+                <tr><td rowspan="6" colspan="4" class="sbgCertificateText" id="sbgCertificateText1" style="padding: 2px 5px; font-size: 11px">1. I certify that the expenditure included in this bill could not, with due regard to the interest of the public service be avoided. I certify that to the best of my knowledge and belief, the payments entered in this bill have been duly made to the parties entitled to receive them with the exception noted below, which exceed the balance of the payment advance and will be paid on receipt of the money drawn on this bill. Vouchers for all sums of Rs.1000/- and above in amounts are attached to this bill, save those noted below, which will be forwarded as soon as the amounts have been paid. I have, as far as possible, obtained vouchers for other sums and am responsible that they have been destroyed or so defected or mutilated that they cannot be used again. All work bills are annexed.</td></tr>
+                <tr><td rowspan="2" colspan="4" class="sbgCertificateText" id="sbgCertificateText2" style="padding: 2px 5px; font-size: 11px">2. Certified that all the Articles detailed in the vouchers attached to the bill and in those retained in my office have been accounted for in the stock register.</td></tr>
+                <tr><td rowspan="3" colspan="4" class="sbgCertificateText" id="sbgCertificateText3" style="padding: 2px 5px; font-size: 11px">3. Certified that the purchases billed have been received in good order, that their quantities are correct and their quality good and according to specifications, that the rates paid are not in excess of the accepted that the market rates and that suitable notes of payment have been recorded against the indents and invoices concerned to prevent double payments.</td></tr>
+                <tr><td rowspan="2" colspan="4" class="sbgCertificateText" id="sbgCertificateText4" style="padding: 2px 5px; font-size: 11px">4. Certified that the expenditure on conveyance hire included in this bill was actually incurred.</td></tr>
                 <tr>
-                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText1">1. I certify that the expenditure included in this bill could not, with due regard to the interest of the public service be avoided. I certify that to the best of my knowledge and belief, the payments entered in this bill have been duly made to the parties entitled to receive them with the exception noted below, which exceed the balance of the payment advance and will be paid on receipt of the money drawn on this bill. Vouchers for all sums of Rs.1000/- and above in amounts are attached to this bill, save those noted below, which will be forwarded as soon as the amounts have been paid. I have, as far as possible, obtained vouchers for other sums and am responsible that they have been destroyed or so defected or mutilated that they cannot be used again. All work bills are annexed.</td>
+                  <td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
-                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText2">2. Certified that all the Articles detailed in the vouchers attached to the bill and in those retained in my office have been accounted for in the stock register.</td>
-                </tr>
-                <tr>
-                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText3">3. Certified that the purchases billed have been received in good order, that their quantities are correct and their quality good and according to specifications, that the rates paid are not in excess of the accepted that the market rates and that suitable notes of payment have been recorded against the indents and invoices concerned to prevent double payments.</td>
-                </tr>
-                <tr>
-                  <td colspan="4" class="sbgCertificateText" id="sbgCertificateText4">4. Certified that - (a) the expenditure on conveyance hire included in this bill was actually incurred, was un-avoidable and is within the scheduled scale of charges for the conveyance used and (b) the Government servant concerned is not entitled to draw travelling allowance under the ordinary rules for the journey he is not granted any compensatory leave and does not and will not receive any special remuneration for the performance of the duty which necessitated the journey.</td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
-                </tr>
-                <tr>
-                  <td colspan="2">Received payments.</td>
-                  <td style="text-align: right">Appropriation for the current year Rs.</td>
-                  <td style="border: solid 1px black">
+                  <td colspan="2" style="padding: 2px 5px">Received payments.</td>
+                  <td style="text-align: right; padding: 2px 5px">Appropriation for the current year Rs.</td>
+                  <td style="border: 1px solid black; padding: 2px 5px">
                     <b><span id="SBG_Sanctioned"></span></b>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2"></td>
-                  <td style="text-align: right">Expenditure including this Bill Rs.</td>
-                  <td style="border: solid 1px black">
+                  <td colspan="2" style="padding: 2px 5px"></td>
+                  <td style="text-align: right; padding: 2px 5px">Expenditure including this Bill Rs.</td>
+                  <td style="border: 1px solid black; padding: 2px 5px">
                     <b><span id="Monthly_Expenditure"></span></b>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2"></td>
-                  <td style="text-align: right">Amount of work Bill Annexed Rs.</td>
-                  <td style="border: solid 1px black">
+                  <td colspan="2" style="padding: 2px 5px"></td>
+                  <td style="text-align: right; padding: 2px 5px">Amount of work Bill Annexed Rs.</td>
+                  <td style="border: 1px solid black; padding: 2px 5px">
                     <b><span id="Present_Expenditure"></span></b>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2">D.D.O.</td>
-                  <td style="text-align: right">Balance Available Rs.</td>
-                  <td style="border: solid 1px black">
+                  <td colspan="2" style="padding: 2px 5px">D.D.O.</td>
+                  <td style="text-align: right; padding: 2px 5px">Balance Available Rs.</td>
+                  <td style="border: 1px solid black; padding: 2px 5px">
                     <b><span id="Available_SBG"></span></b>
                   </td>
                 </tr>
@@ -6009,23 +6276,16 @@
                     <span id="Present_Expenditure2" style="font-weight: bold"></span>
                   </td>
                 </tr>
+                <tr><td rowspan="3" colspan="4" style="height: 50px" id="sbgDesignationSign"></td></tr>
                 <tr>
-                  <td style="height: 50px; vertical-align: bottom; text-align: center" id="sbgDesignationSign">DA</td>
-                  <td colspan="2" style="height: 50px; vertical-align: bottom; text-align: center">Accountant</td>
-                  <td style="height: 50px; vertical-align: bottom; text-align: center">D.D.O./A.O.</td>
+                  <td style="vertical-align: bottom; text-align: center">DA</td>
+                  <td colspan="2" style="vertical-align: bottom; text-align: center">Accountant</td>
+                  <td style="vertical-align: bottom; text-align: center">D.D.O./A.O.</td>
                 </tr>
-                <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="text-align: center">Space of pre-audit enforcement in respect of Bills submitted for pre-audit. For use in AG's Office</td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td>
-                </tr>
+                <tr><td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td></tr>
+                <tr><td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td></tr>
+                <tr><td colspan="4" style="text-align: center">Space of pre-audit enforcement in respect of Bills submitted for pre-audit. For use in AG's Office</td></tr>
+                <tr><td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td></tr>
                 <tr>
                   <td colspan="2">Head of Account</td>
                   <td style="text-align: right">Admitted for Rs.</td>
@@ -6040,6 +6300,37 @@
                   <td colspan="2" style="border-bottom: solid 1px black"></td>
                   <td colspan="2" style="font-weight: bold; border-bottom: solid 1px black">Reason of objection :</td>
                 </tr>
+              </table>
+
+              <table id="SBGwatchSystem" style="border-collapse: collapse; width: 100%">
+                <colgroup>
+                  <col style="width: 110px" />
+                  <col style="width: 300px" />
+                  <col style="width: 150px" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th colspan="3" style="height: 40px; border: solid 1px black"><span id="headAccountSBGName2" style="font-weight: bold"></span></th>
+                  </tr>
+                  <tr>
+                    <th colspan="2" style="border: solid 1px black; text-align: left">FUNDS WATCHING SYSTEM</th>
+                    <th style="border: solid 1px black; text-align: left"><span id="SBG_Sanctioned2" style="font-weight: bold"></span></th>
+                  </tr>
+                  <tr>
+                    <th colspan="2" style="border: solid 1px black; text-align: left">Total Progressive</th>
+                    <th style="border: solid 1px black; text-align: left"><span id="Monthly_Expenditure2"></span></th>
+                  </tr>
+                  <tr>
+                    <th colspan="2" style="border: solid 1px black; text-align: left">Balance of Fund</th>
+                    <th style="border: solid 1px black; text-align: left"><span id="Available_SBG2"></span></th>
+                  </tr>
+                  <tr>
+                    <th>Date</th>
+                    <th>Details</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
               </table>
             </div>
           </div>
@@ -6924,6 +7215,12 @@
           Chart.register(columnLabelPlugin);
         }
 
+        requestAnimationFrame(() => {
+          renderIcons();
+          id('todayDate').textContent = getTodayFormatted();
+          startDigitalClock();
+        });
+
         const loginPage = id('loginPage');
         const mainPage = id('mainPage');
         if (loginPage) loginPage.style.display = 'flex';
@@ -7174,16 +7471,12 @@
           const data = await res.json();
 
           if (data.success) {
-            // 1. Enter "Transition Mode"
-
-            showLoader();
-            updateLoader(10, 'Login successful, synchronizing data...', 'lock_open');
             window.currentStation = station;
             window.currentInitial = data.initial || '';
-
             // 2. Perform Login Success Pipeline
             await loginSuccess(data.user, data.displayName || data.user, station);
           } else {
+            hideLoader();
             errormsg.textContent = data.message;
           }
         } catch (err) {
@@ -7196,6 +7489,8 @@
       });
 
       async function loginSuccess(user, displayName, loginStation) {
+        showLoader();
+        updateLoader(10, 'Login successful, synchronizing data...', 'lock_open');
         window.isUserLoggedIn = true;
         window.currentUser = user;
 
@@ -7219,7 +7514,7 @@
           //updateLoader(98, 'Finalizing Workspace...', 'settings');
 
           // 1. Background Refresh (Optional, non-blocking)
-          fetch('https://office-management-f425.onrender.com/refresh/all', { method: 'POST' }).catch((e) => console.warn('Refresh skipped'));
+          //fetch('https://office-management-f425.onrender.com/refresh/all', { method: 'POST' }).catch((e) => console.warn('Refresh skipped'));
 
           // 2. Initial UI Bindings
           initUI();
@@ -7381,9 +7676,6 @@
 
         requestAnimationFrame(() => {
           initButtons();
-          renderIcons();
-          id('todayDate').textContent = getTodayFormatted();
-          startDigitalClock();
         });
       }
 
@@ -7426,7 +7718,12 @@
 
       function initBindings() {
         enableAllButtons();
+
         bindPayBillView('PayBillPage_Station', 'PayBillPage_FY', 'PayBillPage_SalMonth');
+
+        // 🔥 FORCE INITIAL DROPDOWN POPULATION
+        id('PayBillPage_Station')?.dispatchEvent(new Event('change'));
+        id('PayBillPage_FY')?.dispatchEvent(new Event('change'));
 
         on('PayBillPage_SalMonth', 'change', () => {
           setDAPercent();
@@ -7516,6 +7813,9 @@
         const badge = id('dbBadge');
         const db = id('DatabaseIcon');
         if (!badge || !db) return;
+
+        badge.style.background = '#db0707';
+        badge.style.color = '#fff';
 
         badge.textContent = `${success}/${total}`;
         const percent = success / total;
@@ -7714,6 +8014,7 @@
           [
             'Preparing Budget Matrix...',
             () => {
+              loadBudgetMonthDropdown();
               renderBudgetfromPBData();
               renderFilterMainBudgetExpTable();
             },
@@ -8311,6 +8612,7 @@
       selectMap.station.forEach((fid) => {
         on(fid, 'change', () => handleStationChange(fid));
       });
+
       [...selectMap.fy, ...selectMap.month].forEach((fid) => {
         on(fid, 'change', refreshPBView);
       });
@@ -8360,35 +8662,79 @@
       }
 
       function updateAllSelects(type, dataSet, selectedValue) {
-        let values = [...dataSet].sort((a, b) => {
-          const order = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+        const labelMap = {
+          fy: 'Select FY',
+          month: 'Select Month',
+          station: 'Select Station',
+          employee: 'Select Employee'
+        };
 
-          let [ma, ya] = a.split('-');
-          let [mb, yb] = b.split('-');
+        let values = [...dataSet];
 
-          ya = parseInt(ya);
-          yb = parseInt(yb);
+        // ================= SORT =================
+        if (type === 'fy' || type === 'month') {
+          values.sort((a, b) => {
+            const order = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
 
-          // sort by financial year logic
-          if (ya !== yb) return ya - yb;
+            let [ma, ya] = String(a).split('-');
+            let [mb, yb] = String(b).split('-');
 
-          return order.indexOf(ma) - order.indexOf(mb);
-        });
+            ya = parseInt(ya);
+            yb = parseInt(yb);
+
+            if (ya !== yb) {
+              return ya - yb;
+            }
+
+            return order.indexOf(ma) - order.indexOf(mb);
+          });
+        } else {
+          values.sort();
+        }
+
+        // ================= FINAL VALUE =================
         let valid = values.includes(selectedValue);
+
         let finalValue = valid ? selectedValue : '';
 
+        // ================= UPDATE SELECTS =================
         selectMap[type].forEach((eid) => {
           let select = id(eid);
+
           if (!select) return;
 
-          select.innerHTML = "<option value='' hidden>Select</option>";
+          // 🔥 RESET
+          select.innerHTML = '';
 
+          // ================= DEFAULT OPTION =================
+          const defaultOpt = document.createElement('option');
+
+          defaultOpt.value = '';
+
+          defaultOpt.textContent = labelMap[type] || 'Select';
+
+          defaultOpt.hidden = true;
+
+          defaultOpt.selected = !finalValue;
+
+          select.appendChild(defaultOpt);
+
+          // ================= OPTIONS =================
           values.forEach((val) => {
-            let sel = val === finalValue ? 'selected' : '';
-            select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
+            const opt = document.createElement('option');
+
+            opt.value = val;
+            opt.textContent = val;
+
+            if (val === finalValue) {
+              opt.selected = true;
+            }
+
+            select.appendChild(opt);
           });
 
-          select.value = finalValue;
+          // 🔥 IMPORTANT FIX
+          select.value = finalValue || '';
         });
 
         return finalValue;
@@ -8491,14 +8837,24 @@
         if (filters.station) {
           const sortedFY = [...valid.fy].sort((a, b) => parseInt(a) - parseInt(b));
 
-          if (!valid.fy.has(filters.fy)) {
-            filters.fy = sortedFY.at(-1) || '';
-          }
+          // ================= FY (PRESENT FY selected) =================
+          //if (!valid.fy.has(filters.fy)) {
+          //  filters.fy = sortedFY.at(-1) || '';
+          //}
 
           // To select 1st employee on Station Dropdown Change
           //if (!valid.employee.has(filters.employee)) {
           //  filters.employee = [...valid.employee].sort().at(-1) || '';
           //}
+
+          // ================= FY (SELECT FY selected) =================
+
+          // 🔥 KEEP SELECT FY DEFAULT
+          if (!filters.fy || filters.fy === '' || filters.fy === 'Select FY') {
+            filters.fy = 'Select FY';
+          } else if (!valid.fy.has(filters.fy)) {
+            filters.fy = 'Select FY';
+          }
         }
 
         // ================= MONTH =================
@@ -8530,25 +8886,35 @@
         function updateMonthDropdown(months) {
           selectMap.month.forEach((eid) => {
             const select = id(eid);
+
             if (!select) return;
 
-            select.innerHTML = "<option value='' hidden></option>";
+            select.innerHTML = `
+              <option value="Select Month" hidden>
+                Select Month
+              </option>
+            `;
 
             months.forEach((val) => {
               const opt = document.createElement('option');
+
               opt.value = val;
               opt.textContent = val;
-              if (val === filters.month) opt.selected = true;
+
+              if (val === filters.month) {
+                opt.selected = true;
+              }
+
               select.appendChild(opt);
             });
 
-            select.value = filters.month;
+            select.value = filters.month && filters.month !== '' ? filters.month : 'Select Month';
           });
         }
 
         function toggleDropdowns() {
           const hasStation = !!filters.station;
-          const hasFY = !!filters.fy;
+          const hasFY = !!filters.fy && filters.fy !== 'Select FY';
 
           selectMap.fy.forEach((eid) => {
             const el = id(eid);
@@ -8568,7 +8934,9 @@
             const el = id(eid);
             if (!el) return;
             el.disabled = !hasFY;
-            if (!hasFY) el.value = '';
+            if (!hasFY) {
+              el.value = 'Select Month';
+            }
           });
         }
       }
@@ -10703,7 +11071,7 @@
           }
         }
 
-        console.warn('❌ No DA% match for:', selectedMonth);
+        console.warn('❌ Pay Bill: No DA% match for:', selectedMonth);
         return 0;
       }
 
@@ -15616,7 +15984,7 @@
         if (first) select.value = first.value;
 
         // 🔁 Next dependent dropdown
-        loadBudgetMonthDropdown();
+        //loadBudgetMonthDropdown();
       }
 
       function loadBudgetMonthDropdown() {
@@ -15634,27 +16002,36 @@
         const selectedFY = fySelect.value;
         const selectedBudget = budgetSelect.value;
 
+        const hasValidFY = selectedFY && selectedFY !== 'Select FY';
+        select.disabled = !hasValidFY;
+
         const monthMap = new Map();
 
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+        // ================= FILTER ROWS =================
         sbgExpData.rows.forEach((row) => {
-          const dateStr = row[0]; // Date
-          const budget = String(row[3] || '').trim(); // Budget column
+          const dateStr = row[0];
+          const budget = String(row[3] || '').trim();
 
           if (!dateStr) return;
 
           // 🔥 FILTER BY BUDGET
-          if (selectedBudget && budget !== selectedBudget) return;
+          if (selectedBudget && budget !== selectedBudget) {
+            return;
+          }
 
-          // 🔥 GET FY FROM DATE
+          // 🔥 FY FROM DATE
           const fy = getFYFromDateStr(dateStr);
 
-          // 🔥 FILTER BY FY
-          if (selectedFY && fy !== selectedFY) return;
+          // 🔥 FILTER BY FY ONLY IF VALID FY SELECTED
+          if (hasValidFY && fy !== selectedFY) {
+            return;
+          }
 
           // 🔥 EXTRACT MONTH
           const parts = dateStr.split('-');
+
           if (parts.length !== 3) return;
 
           const mm = parseInt(parts[1], 10);
@@ -15663,31 +16040,47 @@
           if (!mm || !yyyy) return;
 
           const monthText = `${monthNames[mm - 1]}-${yyyy}`;
+
           const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
 
           monthMap.set(key, monthText);
         });
 
-        // 🔥 SORT
+        // ================= SORT MONTHS =================
         const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
 
-        // 🔥 RESET DROPDOWN
+        // ================= RESET =================
         select.innerHTML = '';
 
-        // ✅ ALWAYS ADD "ALL MONTHS"
-        const allOpt = document.createElement('option');
-        allOpt.value = 'ALL';
-        allOpt.textContent = 'All Months';
-        allOpt.selected = true;
-        select.appendChild(allOpt);
+        // ================🔥 NO VALID FY=====================
 
-        // 🔥 IF NO DATA → STOP HERE
-        if (!sortedMonths.length) {
-          console.warn('⚠ No months found for selected FY/Budget');
+        if (!hasValidFY) {
+          select.innerHTML = `
+            <option value="" selected>
+              Select Month
+            </option>
+          `;
+
+          select.selectedIndex = 0; // 🔥 IMPORTANT
           return;
         }
 
-        // 🔥 ADD MONTHS
+        // =====================🔥 VALID FY==================
+
+        select.innerHTML = `
+          <option value="ALL" selected>
+            All Months
+          </option>
+        `;
+
+        // ================= NO DATA =================
+        if (!sortedMonths.length) {
+          console.warn('⚠ No months found for selected FY/Budget');
+          select.value = 'ALL';
+          return;
+        }
+
+        // ================= MONTH OPTIONS =================
         sortedMonths.forEach((month) => {
           const opt = document.createElement('option');
           opt.value = month;
@@ -15695,7 +16088,8 @@
           select.appendChild(opt);
         });
 
-        //console.log("✅ Filtered Months:", sortedMonths);
+        // ================= FINAL VALUE =================
+        select.value = 'ALL';
       }
 
       function getBudgetFY(dateStr) {
@@ -16296,11 +16690,11 @@
         loadBudgetDropdown();
 
         // Only load months if we actually have expenditure data loaded
-        if (sbgExpData?.rows?.length) {
-          loadBudgetMonthDropdown();
-        } else {
-          console.log('ℹ️ Waiting for SBGExp data to load months...');
-        }
+        //if (sbgExpData?.rows?.length) {
+        //  loadBudgetMonthDropdown();
+        //} else {
+        //  console.log('ℹ️ Waiting for SBGExp data to load months...');
+        //}
       }
 
       async function calculateAndPushSBGBudget() {
@@ -16545,11 +16939,9 @@
 
         table.innerHTML = `
           <colgroup>
-            <col style="width: 7%;">
-            <col style="width: 7%;">
-            <col style="width: 13%;">
-            <col style="width: 16%;">
-            <col style="width: 25%;">
+            <col style="width: 8%;">
+            <col style="width: 20%;">
+            <col style="width: 40%;">
             <col style="width: 8%;">
             <col style="width: 8%;">
             <col style="width: 8%;">
@@ -16557,16 +16949,17 @@
           </colgroup>
 
           <thead>
+            <tr class="SBGreport-header"><th  colspan="7" style="text-align:center;font-size:12px;">Details of SBG Expenditure under Head '${budget}' for the ${month && month !== 'ALL' ? `Month ${month}` : `FY ${fy}`}</th></tr>
             <tr>
               <th>Date</th>
-              <th>Station</th>
-              <th>Bill / Invoice Details</th>
-              <th>SBG Expenditure Under</th>
+              <th style="display:none;">Station</th>
+              <th >Bill / Invoice Details</th>
+              <th style="display:none;">SBG Expenditure Under</th>
               <th>Expenditure Details</th>
               <th>Expenditure Amount</th>
               <th>Monthly Cumulative Sum of Expenditure</th>
               <th>Cumulative Sum of Expenditure</th>
-              <th>Report</th>
+              <th class="SBGreport-col">Report</th>
             </tr>
           </thead>
         `;
@@ -16645,6 +17038,11 @@
             row.forEach((cell, i) => {
               const td = document.createElement('td');
 
+              // 🔥 HIDE STATION + BUDGET COLUMNS
+              if (i === 1 || i === 3) {
+                td.style.display = 'none';
+              }
+
               // ======================================
               // 💰 AMOUNT + CUMULATIVES
               // ======================================
@@ -16680,7 +17078,7 @@
             // 🔥 REPORT COLUMN
             // =========================
             const reportTd = document.createElement('td');
-
+            reportTd.className = 'SBGreport-col';
             reportTd.style.textAlign = 'center';
             reportTd.style.whiteSpace = 'nowrap';
 
@@ -16733,11 +17131,8 @@
       function openSBGReportOptions(rowIndex, type = 'print') {
         showConfirmBox({
           title: 'Contingent Bill Report Options',
-
           icon: '📑',
-
           message: 'Report Type',
-
           subMessage: `
 
             <div
@@ -16848,11 +17243,8 @@
         const tbody = qs('#budgetPBBody');
 
         if (!tbody) return;
-
         const rows = [...tbody.children];
-
         const selectedRow = rows[rowIndex];
-
         if (!selectedRow) return;
 
         // ======================================
@@ -16917,78 +17309,58 @@
         else if (mode === 'month') {
           detailRows = rows.filter((r) => {
             const dt = r.children[0]?.textContent?.trim() || '';
-
             const { mm, yyyy } = getDateParts(dt);
-
             return mm === selectedMonth && yyyy === selectedYear;
           });
 
           const lastMonthIndex = rows.findLastIndex((r) => {
             const dt = r.children[0]?.textContent?.trim() || '';
-
             const { mm, yyyy } = getDateParts(dt);
-
             return mm === selectedMonth && yyyy === selectedYear;
           });
 
           cumulativeRows = rows.slice(0, lastMonthIndex + 1);
         }
 
-        // ======================================
-        // 🔥 FY
-        // ======================================
+        // ==========🔥 FY===================
         else if (mode === 'fy') {
           detailRows = rows;
-
           cumulativeRows = rows;
         }
 
-        // ======================================
-        // 🔥 TOTAL AMOUNT
-        // ======================================
+        // ===================🔥 TOTAL AMOUNT==================
 
         let totalAmount = 0;
-
         detailRows.forEach((r) => {
           totalAmount += Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
         });
 
-        // ======================================
-        // 🔥 MONTHLY EXPENDITURE
-        // ======================================
+        // ==================🔥 MONTHLY EXPENDITURE=======================
 
         let monthlyExpenditure = 0;
-
         cumulativeRows.forEach((r) => {
           monthlyExpenditure += Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
         });
 
-        // ======================================
-        // 🔥 SANCTIONED
-        // ======================================
+        // ===================🔥 SANCTIONED=======================
 
         const sanctioned = Number(CurrencytoNum(id('SBGsanctioned')?.value || 0));
-
         const available = sanctioned - monthlyExpenditure;
 
-        // ======================================
-        // 🔥 SET TEXT
-        // ======================================
+        // ================🔥 SET TEXT=======================
 
         const setText = (idName, value) => {
           const el = id(idName);
-
           if (el) {
             el.textContent = value;
           }
         };
 
         setText('SBG_Sanctioned', formatCurrency(sanctioned).replace('₹', '').trim());
-
+        setText('SBG_Sanctioned2', formatCurrency(sanctioned).replace('₹', '').trim());
         setText('Monthly_Expenditure', formatCurrency(monthlyExpenditure).replace('₹', '').trim());
-
+        setText('Monthly_Expenditure2', formatCurrency(monthlyExpenditure).replace('₹', '').trim());
         setText('Present_Expenditure', formatCurrency(totalAmount).replace('₹', '').trim());
-
         id('Present_Expenditure2').innerHTML = `
 
           Pay Rs.
@@ -17008,6 +17380,7 @@
         `;
 
         setText('Available_SBG', formatCurrency(available).replace('₹', '').trim());
+        setText('Available_SBG2', formatCurrency(available).replace('₹', '').trim());
 
         const monthName = new Date(selectedYear, Number(selectedMonth) - 1).toLocaleString('default', {
           month: 'long'
@@ -17023,43 +17396,26 @@
           setText('headerMonth', `${monthName}-${selectedYear}`);
         }
 
-        setText(
-          'headAccountSBGName',
-
-          `${id('BudgetUnderSelect')?.value}
-          (RNP)
-          ${id('BudgetPage_FY')?.value}`
-        );
-
-        setText(
-          'sbgStation',
-
-          id('BudgetPage_Station')?.value || ''
-        );
+        setText('headAccountSBGName', `${id('BudgetUnderSelect')?.value}(RNP)${id('BudgetPage_FY')?.value}`);
+        setText('headAccountSBGName2', `${id('BudgetUnderSelect')?.value}(RNP)${id('BudgetPage_FY')?.value}`);
+        setText('sbgStation', id('BudgetPage_Station')?.value || '');
 
         // ======================================
         // 🔥 DETAILS TABLE
         // ======================================
 
         const detailsTbody = qs('#SBGmonthWiseDetails tbody');
-
         if (!detailsTbody) return;
-
         detailsTbody.innerHTML = '';
-
         // ======================================
         // 🔥 ADD DETAIL ROWS
         // ======================================
 
         detailRows.forEach((r, idx) => {
           const desc = r.children[4]?.textContent?.trim() || '';
-
           const amt = Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
-
           const tr = document.createElement('tr');
-
           tr.innerHTML = `
-
               <td
                   style="
                     border:solid 1px black;
@@ -17147,6 +17503,83 @@
         `;
 
         detailsTbody.appendChild(totalRow);
+
+        // ======================================
+        // 🔥 STORE DYNAMIC ROWS
+        // ======================================
+
+        window.sbgDynamicExcelRows = {
+          detailCount: detailRows.length,
+
+          blankCount: blankNeeded,
+
+          totalRows: detailRows.length + blankNeeded + 1 // total row
+        };
+
+        // ======================================
+        // 🔥 WATCH SYSTEM TABLE
+        // ======================================
+
+        const watchTbody = qs('#SBGwatchSystem tbody');
+
+        if (watchTbody) {
+          watchTbody.innerHTML = '';
+          // ================🔥 GET ALL ROWS OF SAME BUDGET=========================
+
+          const selectedBudget = selectedRow.children[3]?.textContent?.trim() || '';
+
+          const allBudgetRows = rows.filter((r) => {
+            const budget = r.children[3]?.textContent?.trim() || '';
+
+            return budget === selectedBudget;
+          });
+
+          // ======================================
+          // 🔥 ADD ROWS
+          // ======================================
+
+          allBudgetRows.forEach((r) => {
+            const date = r.children[0]?.textContent?.trim() || '';
+
+            const details = r.children[4]?.textContent?.trim() || '';
+
+            const amt = r.children[5]?.textContent?.trim() || '';
+
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+              <td
+                style="
+                  border:solid 1px black;
+                  text-align:center;
+                "
+              >
+                ${date}
+              </td>
+
+              <td
+                style="
+                  border:solid 1px black;
+                  padding-left:4px;
+                "
+              >
+                ${details}
+              </td>
+
+              <td
+                style="
+                  border:solid 1px black;
+                  text-align:right;
+                  padding-right:4px;
+                "
+              >
+                ${amt}
+              </td>
+            `;
+
+            watchTbody.appendChild(tr);
+          });
+        }
       }
 
       function buildPrintSBGContingentHTML() {
@@ -17158,9 +17591,10 @@
         🔥 GET ALL MONTH TABLES
         ===================================================== */
 
-        const table = wrapper.querySelector('table');
+        // 🔥 GET BOTH TABLES
+        const tables = [id('ContingentBillReport'), id('SBGwatchSystem')].filter(Boolean);
 
-        if (!table) {
+        if (!tables.length) {
           showCustomAlert('❌ No data to print');
 
           return '';
@@ -17223,6 +17657,15 @@
             padding: 4px;
             line-height: 1 !important;
           }
+
+          table{
+            border-collapse:collapse !important;
+          }
+
+          td[rowspan]{
+            vertical-align:top !important;
+            display:table-cell !important;
+          }
         `;
 
         doc.head.appendChild(style);
@@ -17234,53 +17677,96 @@
         const container = doc.createElement('div');
 
         /* =====================================================
-        🔥 CLONE TABLES
+        🔥 CLONE ALL TABLES
         ===================================================== */
-        const clone = table.cloneNode(true);
 
-        clone.classList.add('DGprint-table');
+        tables.forEach((table, idx) => {
+          const clone = table.cloneNode(true);
+          // ======================================
+          // 🔥 FIX INVALID ROWSPAN FOR PDF ONLY
+          // ======================================
 
-        /* =========================================
+          clone.querySelectorAll('.sbgCertificateText').forEach((cell) => {
+            // 🔥 remove rowspan only in print clone
+            cell.removeAttribute('rowspan');
+
+            // 🔥 normal block rendering
+            cell.style.display = 'table-cell';
+
+            cell.style.verticalAlign = 'top';
+
+            cell.style.height = 'auto';
+          });
+
+          // ======================================
+          // 🔥 FIX NESTED SBG TABLE PRINT
+          // ======================================
+
+          const nestedSBG = clone.querySelector('#SBGmonthWiseDetails');
+
+          if (nestedSBG) {
+            // 🔥 prevent nested table layout breaking
+            nestedSBG.style.width = '100%';
+
+            nestedSBG.style.tableLayout = 'fixed';
+
+            nestedSBG.style.margin = '0';
+
+            nestedSBG.style.borderCollapse = 'collapse';
+
+            // ======================================
+            // 🔥 FORCE ROW HEIGHTS
+            // ======================================
+
+            nestedSBG.querySelectorAll('tr').forEach((tr) => {
+              tr.style.height = '22px';
+
+              tr.style.pageBreakInside = 'avoid';
+            });
+
+            // ======================================
+            // 🔥 FIX CELLS
+            // ======================================
+
+            nestedSBG.querySelectorAll('td,th').forEach((cell) => {
+              cell.style.wordBreak = 'break-word';
+
+              cell.style.whiteSpace = 'normal';
+
+              cell.style.verticalAlign = 'middle';
+
+              cell.style.lineHeight = '1.1';
+
+              cell.style.padding = '2px';
+            });
+          }
+
+          clone.classList.add('DGprint-table');
+
+          /* =========================================
           🔥 REMOVE UI ELEMENTS
           ========================================= */
 
-        clone.querySelectorAll('.no-print').forEach((el) => el.remove());
+          clone.querySelectorAll('.no-print').forEach((el) => el.remove());
 
-        /* =========================================
+          /* =========================================
           🔥 REMOVE INLINE UI STYLES
           ========================================= */
 
-        clone.querySelectorAll('*').forEach((el) => {
-          el.style.position = '';
+          // =========================================
+          // 🔥 WATCH SYSTEM TABLE → NEXT PAGE
+          // =========================================
 
-          el.style.top = '';
+          if (clone.id === 'SBGwatchSystem') {
+            clone.style.pageBreakBefore = 'always';
 
-          el.style.left = '';
+            clone.style.breakBefore = 'page';
 
-          el.style.right = '';
+            clone.style.marginTop = '10px';
+          }
 
-          el.style.bottom = '';
-
-          el.style.transform = '';
-
-          el.style.translate = '';
-
-          el.style.scale = '';
-
-          el.style.overflow = '';
-
-          el.style.overflowX = '';
-
-          el.style.overflowY = '';
-
-          el.style.zIndex = '';
-
-          el.style.minWidth = '';
-
-          el.style.maxWidth = '';
+          container.appendChild(clone);
         });
-
-        container.appendChild(clone);
 
         /* =====================================================
         🔥 PAGE
@@ -17313,9 +17799,11 @@
         }
 
         const mainTable = wrapper.querySelector('table');
+        // 🔥 WATCH TABLE
+        const watchTable = id('SBGwatchSystem');
 
-        if (!mainTable) {
-          showCustomAlert('❌ Table not found');
+        if (!mainTable || !watchTable) {
+          showCustomAlert('❌ Tables are not found');
 
           return;
         }
@@ -17360,8 +17848,13 @@
         // 🔥 TABLE PROCESSOR
         // =========================
 
-        function processTable(sheet, table) {
-          let currentRow = 1;
+        function processTable(sheet, table, startRow = 1, startCol = 1) {
+          let currentRow = startRow;
+          // ======================================
+          // 🔥 TRACK USED ROWS
+          // ======================================
+
+          const occupiedRows = new Set();
 
           function cleanCellText(cell) {
             const clone = cell.cloneNode(true);
@@ -17465,6 +17958,14 @@
 
               let colIndex = 1;
 
+              // ======================================
+              // 🔥 FIND NEXT FREE ROW
+              // ======================================
+
+              while (occupiedRows.has(currentRow)) {
+                currentRow++;
+              }
+
               const excelRow = sheet.getRow(currentRow);
 
               let maxHeight = 20;
@@ -17486,7 +17987,7 @@
 
                 const rowSpan = cell.rowSpan || 1;
 
-                const excelCell = excelRow.getCell(colIndex);
+                const excelCell = excelRow.getCell(startCol + colIndex - 1);
                 // =====================
                 // 🔥 SUB HEADER HEIGHT
                 // =====================
@@ -17539,31 +18040,26 @@
                 const computedStyle = window.getComputedStyle(cell);
 
                 // 🔥 actual font size
-                const fontSize = parseFloat(computedStyle.fontSize) || 11;
+                //const fontSize = parseFloat(computedStyle.fontSize) || 11;
 
                 // 🔥 actual weight
                 const fontWeight = computedStyle.fontWeight;
+                // =========== 🔥 FONT SIZE ==================
+                const finalFontSize = cell.id === 'SBGHeader' ? 12 : 12; //12 for header : 11 for default
 
                 // 🔥 bold detection
                 const isReallyBold = fontWeight === 'bold' || parseInt(fontWeight) >= 600 || cell.querySelector('b,strong');
 
                 // 🔥 actual family
                 const fontFamily = computedStyle.fontFamily?.split(',')[0]?.replace(/["']/g, '')?.trim() || 'Calibri';
-
+                // =============🔥 FONT=========================
                 excelCell.font = {
                   name: fontFamily,
-
-                  size: fontSize,
-
+                  size: finalFontSize,
                   bold: isReallyBold,
-
                   italic: computedStyle.fontStyle === 'italic',
-
                   underline: computedStyle.textDecoration?.includes('underline'),
-
-                  color: {
-                    argb: rgbToARGB(computedStyle.color) || 'FF000000'
-                  }
+                  color: { argb: rgbToARGB(computedStyle.color) || 'FF000000' }
                 };
 
                 // =====================
@@ -17674,100 +18170,51 @@
                   try {
                     sheet.mergeCells(
                       currentRow,
-
-                      colIndex,
+                      startCol + colIndex - 1,
 
                       currentRow + rowSpan - 1,
 
-                      colIndex + colSpan - 1
+                      startCol + colIndex + colSpan - 2
                     );
                   } catch {}
                 }
 
-                // =====================
-                // 🔥 AUTO HEIGHT
-                // =====================
-
-                const approxWidth = colSpan >= 3 ? 85 : colSpan === 2 ? 45 : 18;
-
-                const lineBreaks = text.split('\n').length;
-
-                const wrappedLines = Math.ceil(text.length / approxWidth);
-
-                const lines = Math.max(lineBreaks, wrappedLines, 1);
-
-                const height = Math.min(120, Math.max(20, lines * 15));
-
-                maxHeight = Math.max(maxHeight, height);
-
                 colIndex += colSpan;
               });
 
-              // =====================
-              // 🔥 DEFAULT HEIGHT
-              // =====================
+              // =====================// 🔥 APPLY HEIGHT=======================
 
-              let finalHeight = excelRow.height || 20;
+              excelRow.height = 17;
 
-              // =====================
-              // 🔥 ROW IDS
-              // =====================
-
-              const rowIds = [...cells].map((c) => c.id || '').join(' ');
-
-              // ======================================
-              // 🔥 FIXED HEIGHTS
-              // ======================================
-
-              // 🔥 MAIN TITLE
-              if (rowIds.includes('sbgBillMainHeader')) {
-                finalHeight = 36;
-              }
-
-              // 🔥 HEADER
-              else if (rowIds.includes('sbgBillHeader')) {
-                finalHeight = 55;
-              }
-
-              // 🔥 BLANK ROWS
-              else if (rowIds.includes('sbgBlankRows')) {
-                finalHeight = 10;
-              }
-
-              // 🔥 CERTIFICATE 1
-              else if (rowIds.includes('sbgCertificateText1')) {
-                finalHeight = 105;
-              }
-
-              // 🔥 CERTIFICATE 2
-              else if (rowIds.includes('sbgCertificateText2')) {
-                finalHeight = 40;
-              }
-
-              // 🔥 CERTIFICATE 3
-              else if (rowIds.includes('sbgCertificateText3')) {
-                finalHeight = 55;
-              }
-
-              // 🔥 CERTIFICATE 4
-              else if (rowIds.includes('sbgCertificateText4')) {
-                finalHeight = 65;
-              } else if (rowIds.includes('sbgDesignationSign')) {
-                finalHeight = 65;
-              }
-              // ======================================
-              // 🔥 APPLY HEIGHT
-              // ======================================
-
-              excelRow.height = finalHeight;
-
-              // ======================================
-              // 🔥 COMMIT
-              // ======================================
+              // =============🔥 COMMIT==============
 
               excelRow.commit();
 
-              currentRow++;
+              // ==============🔥 HANDLE ROWSPAN=============
+
+              let maxRowSpan = 1;
+
+              cells.forEach((cell) => {
+                const rs = cell.rowSpan || 1;
+
+                if (rs > maxRowSpan) {
+                  maxRowSpan = rs;
+                }
+              });
+
+              // ======================================
+              // 🔥 MARK ROWS OCCUPIED
+              // ======================================
+
+              for (let r = currentRow; r < currentRow + maxRowSpan; r++) {
+                occupiedRows.add(r);
+              }
+
+              // ======================================
+              // 🔥 MOVE POINTER
+              // ======================================
+
+              currentRow += maxRowSpan;
             });
           }
 
@@ -17776,11 +18223,7 @@
           // ======================================
 
           sheet.eachRow((row) => {
-            // 🔥 keep fixed rows
-            if (row.height === 36 || row.height === 40 || row.height === 55 || row.height === 65 || row.height === 70 || row.height === 115) return;
-
-            // 🔥 let excel auto fit
-            row.height = undefined;
+            row.height = 16;
           });
 
           walk(table);
@@ -17792,7 +18235,24 @@
         // 🔥 PROCESS TABLE
         // =========================
 
-        const lastRow = processTable(sheet, mainTable);
+        // ======================================
+        // 🔥 MAIN TABLE
+        // ======================================
+
+        const lastRow = processTable(sheet, mainTable, 1, 1);
+
+        // ======================================
+        // 🔥 WATCH SYSTEM @ G4
+        // ======================================
+
+        if (watchTable) {
+          processTable(
+            sheet,
+            watchTable,
+            4, // row
+            6 // column F
+          );
+        }
 
         // =========================
         // 🔥 SETTINGS
@@ -17804,7 +18264,18 @@
           }
         ];
 
-        sheet.columns = [{ width: 15 }, { width: 10 }, { width: 90 }, { width: 18 }];
+        sheet.columns = [
+          { width: 15 }, // A
+          { width: 10 }, // B
+          { width: 90 }, // C
+          { width: 18 }, // D
+          { width: 5 }, // E
+
+          // 🔥 WATCH SYSTEM
+          { width: 18 }, // F
+          { width: 50 }, // G
+          { width: 18 } // H
+        ];
 
         sheet.pageSetup = {
           paperSize: 9,
@@ -18474,6 +18945,12 @@
       /* =========================================================
       🔥 SBG TOGGLE BUTTON
       ========================================================= */
+      function toggleColumnVisibility(isVisible) {
+        const cells = document.querySelectorAll('.SBGreport-col');
+        cells.forEach((cell) => {
+          cell.style.display = isVisible ? '' : 'none';
+        });
+      }
 
       function setupSBGToggleButton(btnId, config, modeType) {
         const selectedBudget = id('BudgetUnderSelect');
@@ -18503,7 +18980,7 @@
 
             if (!isSBGModeActive) {
               isSBGModeActive = true;
-
+              toggleColumnVisibility(false);
               currentSBGMode = modeType;
 
               /* =====================================
@@ -18700,7 +19177,7 @@
         /* =====================================
         🔥 RELOAD TABLE
         ===================================== */
-
+        toggleColumnVisibility(true);
         renderFilterMainBudgetExpTable();
       }
 
@@ -18844,12 +19321,12 @@
         header.classList.add('print-header');
 
         // 🔥 CUSTOM SUB HEADER
-        const subHeader = doc.createElement('div');
-        subHeader.style.textAlign = 'center';
-        subHeader.style.fontWeight = 'bold';
-        subHeader.style.margin = '5px 0 10px 0';
+        //const subHeader = doc.createElement('div');
+        //subHeader.style.textAlign = 'center';
+        //subHeader.style.fontWeight = 'bold';
+        //subHeader.style.margin = '5px 0 10px 0';
 
-        subHeader.textContent = `Details of Expenditure under ${budget} for the FY-${fy}`;
+        //subHeader.textContent = `Details of Expenditure under ${budget} for the FY-${fy}`;
 
         function getInputValue(idName) {
           const el = document.getElementById(idName);
@@ -18878,7 +19355,7 @@
 
         // 🔥 APPEND
         page.appendChild(header);
-        page.appendChild(subHeader);
+        //page.appendChild(subHeader);
         page.appendChild(summaryTable);
         page.appendChild(clone);
 
@@ -19147,7 +19624,8 @@
         // =========================
         // 🔥 TABLE DATA
         // =========================
-        const rows = table.querySelectorAll('tr');
+        // 🔥 SKIP CUSTOM TITLE ROW
+        const rows = table.querySelectorAll('tr:not(.SBGreport-header)');
 
         rows.forEach((tr) => {
           const cells = tr.querySelectorAll('th, td');
