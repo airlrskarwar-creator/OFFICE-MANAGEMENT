@@ -1485,7 +1485,7 @@
       }
 
       /* =========================================
-      🔥 AFTER LOGIN
+      🔥 AFTER LOGIN (EXPANDED)
       ========================================= */
 
       body.logged-in .dashboard-footer {
@@ -1605,6 +1605,7 @@
           transform 0.2s ease,
           background 1s cubic-bezier(0.22, 1, 0.36, 1),
           color 0.4s ease;
+        background: red;
       }
 
       /* 🔥 Blinking effect */
@@ -1614,6 +1615,7 @@
 
       #DatabaseIcon {
         font-size: 22px;
+        color: red;
       }
 
       .db-rotate {
@@ -5139,7 +5141,7 @@
               </span>
             </div>
           </div>
-          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: none" onclick="shortcut()">⚡ Shortcut</button>
+          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: block" onclick="shortcut()">⚡ Shortcut</button>
           <!-- LOGIN BUTTON -->
           <button id="loginBtn">
             <i class="material-icons">login</i>
@@ -7005,14 +7007,41 @@
           const result = await res.json();
 
           if (config) {
-            if (result && result.headers && result.rows) {
-              config.storage().headers = result.headers;
-              config.storage().rows = result.rows;
-            } else if (Array.isArray(result) && result.length > 0) {
-              const generatedHeaders = Object.keys(result[0]);
-              config.storage().headers = generatedHeaders;
-              config.storage().rows = result.map((obj) => generatedHeaders.map((h) => obj[h]));
+            let dataRows = [];
+            let headers = [];
+
+            /* =====================================
+            🔥 FORMAT 1
+            { headers, rows }
+            ===================================== */
+
+            if (result && Array.isArray(result.headers) && Array.isArray(result.rows)) {
+              headers = result.headers;
+              dataRows = result.rows;
+            } else if (result && Array.isArray(result.data) && result.data.length) {
+              /* =====================================
+            🔥 FORMAT 2
+            { success:true, data:[...] }
+            ===================================== */
+              headers = Object.keys(result.data[0]);
+
+              dataRows = result.data.map((obj) => headers.map((h) => obj[h]));
+            } else if (Array.isArray(result) && result.length) {
+              /* =====================================
+            🔥 FORMAT 3
+            [ {...}, {...} ]
+            ===================================== */
+              headers = Object.keys(result[0]);
+
+              dataRows = result.map((obj) => headers.map((h) => obj[h]));
             }
+
+            /* =====================================
+            🔥 SAVE
+            ===================================== */
+
+            config.storage().headers = headers;
+            config.storage().rows = dataRows;
           }
 
           if (config) {
@@ -7068,22 +7097,37 @@
           const data = config.storage();
           if (!data.rows.length) return;
 
-          // Efficient DOM building
-          const fragment = document.createDocumentFragment();
-          const tbody = document.createElement('tbody');
+          /* =====================================
+          🔥 BUILD THEAD
+          ===================================== */
 
-          data.rows.forEach((row) => {
+          const thead = document.createElement('thead');
+          const headRow = document.createElement('tr');
+          (data.headers || []).forEach((header) => {
+            const th = document.createElement('th');
+            th.textContent = header ?? '';
+            headRow.appendChild(th);
+          });
+
+          thead.appendChild(headRow);
+          /* ==================🔥 BUILD TBODY================ */
+
+          const tbody = document.createElement('tbody');
+          (data.rows || []).forEach((row) => {
             const tr = document.createElement('tr');
             row.forEach((val) => {
               const td = document.createElement('td');
               td.textContent = val ?? '';
               tr.appendChild(td);
             });
+
             tbody.appendChild(tr);
           });
 
-          // Clear and append
-          table.querySelector('tbody')?.remove();
+          /* =====================🔥 REPLACE TABLE CONTENT================= */
+
+          table.innerHTML = '';
+          table.appendChild(thead);
           table.appendChild(tbody);
         });
       }
@@ -7490,21 +7534,32 @@
 
       async function loginSuccess(user, displayName, loginStation) {
         showLoader();
+
         updateLoader(10, 'Login successful, synchronizing data...', 'lock_open');
+
         window.isUserLoggedIn = true;
         window.currentUser = user;
 
+        // LOGIN STATE
         document.body.classList.add('logged-in');
+
+        // APPLY SAVED SIDEBAR STATE IMMEDIATELY
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+        syncSidebarUI(isCollapsed);
+
+        // USER UI
         id('welcomeUser').textContent = `Welcome ${displayName}`;
 
-        // Simply call the engine. The engine handles the loader and the transition.
+        // LOAD DATA
         await loadAllData();
+
         if (window.appState === 'READY') {
           await handlePostDataInitialization();
           completeLoader();
         }
 
-        // Final Reveal: Only reached when loadAllData and init are complete
+        // FINAL REVEAL
         id('loginPage').style.display = 'none';
         id('mainPage').style.display = 'flex';
       }
@@ -7794,46 +7849,70 @@
       function updateDBBadge() {
         const icons = qsa('.dashboard-footer-database .material-symbols-outlined');
         const total = icons.length;
-        if (!total) return;
+
+        const badge = id('dbBadge');
+        const db = id('DatabaseIcon');
+
+        if (!badge || !db) return;
+
+        // RESET
+        badge.classList.remove('blink');
+        db.classList.remove('db-sync', 'db-rotate');
+
+        // DEFAULT RED
+        badge.style.background = '#db0707';
+        badge.style.color = '#fff';
+
+        // NO DATABASES
+        if (!total) {
+          badge.textContent = '0/0';
+
+          db.textContent = 'database_off';
+          db.style.color = '#db0707';
+          return;
+        }
 
         let success = 0;
         let isSyncing = false;
 
-        for (let i = 0; i < total; i++) {
-          const icon = icons[i];
-          const txt = icon.textContent;
+        icons.forEach((icon) => {
+          const txt = icon.textContent.trim();
 
+          // SUCCESS
           if (txt === 'database' || txt === 'data_check') {
             success++;
-          } else if (txt === 'sync' || icon.classList.contains('db-sync')) {
+          }
+
+          // SYNCING
+          if (txt === 'sync' || icon.classList.contains('db-sync')) {
             isSyncing = true;
           }
+        });
+
+        // BADGE TEXT
+        badge.textContent = `${success}/${total}`;
+
+        // ONLY APPLY HSL IF THERE IS SUCCESS
+        if (success > 0) {
+          const percent = success / total;
+          const hue = percent * 120;
+
+          badge.style.background = `hsl(${hue}, 80%, 45%)`;
+          badge.style.color = hue > 60 ? '#000' : '#fff';
         }
 
-        const badge = id('dbBadge');
-        const db = id('DatabaseIcon');
-        if (!badge || !db) return;
-
-        badge.style.background = '#db0707';
-        badge.style.color = '#fff';
-
-        badge.textContent = `${success}/${total}`;
-        const percent = success / total;
-        const hue = percent * 120;
-
-        badge.style.background = `hsl(${hue}, 80%, 45%)`;
-        badge.style.color = hue > 60 ? '#000' : '#fff';
-
+        // SYNCING
         if (isSyncing) {
           badge.classList.add('blink');
+
           db.textContent = 'sync';
+          db.style.color = '#2196f3';
+
           db.classList.add('db-sync', 'db-rotate');
           return;
         }
 
-        badge.classList.remove('blink');
-        db.classList.remove('db-sync', 'db-rotate');
-
+        // DATABASE STATUS
         if (success === 0) {
           db.textContent = 'database_off';
           db.style.color = '#db0707';
@@ -7925,56 +8004,37 @@
 
       function showCustomAlert(message) {
         const modal = id('customAlert');
-
         const msgBox = id('customAlertMsg');
-
         const header = id('customAlertHeader');
-
         if (!modal || !msgBox || !header) return;
-
         // 🔥 RESET CLASSES
         header.classList.remove('success', 'error', 'warning', 'info');
-
-        /* =========================
-              🔥 DETECT ALERT TYPE
-              ========================= */
+        /* ================🔥 DETECT ALERT TYPE====== */
 
         let title = '🔔 Alert Message';
-
         // ❌ ERROR
         if (message.includes('❌') || message.toLowerCase().includes('error')) {
           header.classList.add('error');
-
           title = '🔔 Error Message';
         }
 
         // ⚠️ WARNING / NO CHANGE
         else if (message.includes('⚠️') || message.includes('ℹ️') || message.includes('🚫') || message.toLowerCase().includes('no changes')) {
           header.classList.add('warning');
-
           title = '🔔 Notice Message';
         }
 
         // ✅ SUCCESS
         else if (message.includes('✅') || message.toLowerCase().includes('success')) {
           header.classList.add('success');
-
           title = '🔔 Success Message';
+        } else {
+          header.classList.add('info'); // 🔵 DEFAULT
         }
 
-        // 🔵 DEFAULT
-        else {
-          header.classList.add('info');
-        }
-
-        // 🔥 SET HEADER TITLE
-        header.innerHTML = title;
-
-        // 🔥 SET MESSAGE
-        msgBox.innerHTML = message;
-
-        // 🔥 SHOW MODAL
-        modal.classList.remove('hidden');
+        header.innerHTML = title; // 🔥 SET HEADER TITLE
+        msgBox.innerHTML = message; // 🔥 SET MESSAGE
+        modal.classList.remove('hidden'); // 🔥 SHOW MODAL
       }
 
       id('customAlertOk')?.addEventListener('click', () => {
@@ -8801,7 +8861,17 @@
         const sets = {
           station: new Set(),
           employee: new Set(),
-          fy: new Set()
+
+          // 🔥 MODULE FY SETS
+          fy: {
+            PayBillPage_FY: new Set(),
+            ITPage_FY: new Set(),
+            SalSlipPage_FY: new Set(),
+            BudgetPage_FY: new Set(),
+            EBPage_FY: new Set(),
+            DGPage_FY: new Set(),
+            HSDPage_FY: new Set()
+          }
         };
 
         const valid = {
@@ -8817,10 +8887,17 @@
           const month = r[idx.month];
           const fy = getFinancialYear(month);
 
+          /* =====================================
+          🔥 PAY BILL FY
+          ===================================== */
+
+          ['PayBillPage_FY', 'ITPage_FY', 'SalSlipPage_FY'].forEach((idStr) => {
+            sets.fy[idStr].add(fy);
+          });
+
           // global sets
           sets.station.add(station);
           sets.employee.add(emp);
-          sets.fy.add(fy);
 
           // filtered sets
           if (!filters.station || station === filters.station) {
@@ -8835,8 +8912,6 @@
 
         // ================= FY + EMP VALIDATION =================
         if (filters.station) {
-          const sortedFY = [...valid.fy].sort((a, b) => parseInt(a) - parseInt(b));
-
           // ================= FY (PRESENT FY selected) =================
           //if (!valid.fy.has(filters.fy)) {
           //  filters.fy = sortedFY.at(-1) || '';
@@ -8851,8 +8926,6 @@
 
           // 🔥 KEEP SELECT FY DEFAULT
           if (!filters.fy || filters.fy === '' || filters.fy === 'Select FY') {
-            filters.fy = 'Select FY';
-          } else if (!valid.fy.has(filters.fy)) {
             filters.fy = 'Select FY';
           }
         }
@@ -8874,12 +8947,154 @@
           filters.month = sortedMonths.at(-1) || '';
         }
 
+        /* =====================================
+        🔥 MODULE FY DATASETS
+        ===================================== */
+
+        function populateFYFromDataset(selectId, dataObj) {
+          const select = id(selectId);
+
+          if (!select) return;
+
+          const rows = dataObj?.rows || [];
+          const headers = dataObj?.headers || [];
+
+          /* =====================================
+          🔥 UNIVERSAL FY COLUMN DETECTION
+          ===================================== */
+
+          const possibleColumns = ['Date', 'Salary Month', 'Month-Year', 'Month', 'Bill Month', 'Financial Month'];
+
+          let idxDate = -1;
+
+          // EXACT MATCH
+          for (let i = 0; i < possibleColumns.length; i++) {
+            idxDate = headers.findIndex((h) => String(h).trim().toLowerCase() === possibleColumns[i].toLowerCase());
+
+            if (idxDate !== -1) break;
+          }
+
+          // PARTIAL FALLBACK
+          if (idxDate === -1) {
+            idxDate = headers.findIndex((h) => {
+              const col = String(h).trim().toLowerCase();
+
+              return col.includes('date') || col.includes('month');
+            });
+          }
+
+          /* =====================================
+          🚫 NO VALID COLUMN
+          ===================================== */
+
+          if (idxDate === -1) {
+            console.warn(`❌ No valid FY column found for ${selectId}`, headers);
+
+            return;
+          }
+
+          /* =====================================
+          🔥 BUILD FY SET
+          ===================================== */
+
+          const fySet = new Set();
+
+          for (let i = 0; i < rows.length; i++) {
+            const value = String(rows[i][idxDate] || '').trim();
+
+            if (!value) continue;
+
+            let fy = '';
+
+            const parts = value.split('-');
+
+            /* =====================================
+            🔥 DD-MM-YYYY
+            ===================================== */
+
+            if (parts.length === 3 && parts[2].length === 4) {
+              const mm = parseInt(parts[1], 10);
+
+              const yyyy = parseInt(parts[2], 10);
+
+              fy = mm >= 4 ? `${yyyy}-${String(yyyy + 1).slice(-2)}` : `${yyyy - 1}-${String(yyyy).slice(-2)}`;
+            } else {
+              /* =====================================
+            🔥 MON-YYYY
+            ===================================== */
+              fy = getFinancialYear(value);
+            }
+
+            if (fy) {
+              fySet.add(fy);
+            }
+          }
+
+          /* =====================================
+          🔥 SORT FY
+          ===================================== */
+
+          const sortedFY = [...fySet].sort((a, b) => {
+            const ay = parseInt(a.split('-')[0], 10);
+
+            const by = parseInt(b.split('-')[0], 10);
+
+            return ay - by;
+          });
+
+          /* =====================================
+          🔥 RENDER SELECT
+          ===================================== */
+
+          select.innerHTML = `
+            <option value="Select FY" hidden>
+              Select FY
+            </option>
+          `;
+
+          sortedFY.forEach((fy) => {
+            const opt = document.createElement('option');
+
+            opt.value = fy;
+
+            opt.textContent = fy;
+
+            if (fy === filters.fy) {
+              opt.selected = true;
+            }
+
+            select.appendChild(opt);
+          });
+
+          /* =====================================
+          🔥 DEFAULT VALUE
+          ===================================== */
+
+          select.value = filters.fy && filters.fy !== '' ? filters.fy : 'Select FY';
+        }
         updateMonthDropdown(sortedMonths);
 
         // ================= FINAL DROPDOWNS =================
         filters.station = updateAllSelects('station', sets.station, filters.station);
         filters.employee = updateAllSelects('employee', sets.employee, filters.employee);
-        filters.fy = updateAllSelects('fy', sets.fy, filters.fy);
+        // 🔥 PAY BILL / SALARY
+        populateFYFromDataset('PayBillPage_FY', pbData);
+
+        populateFYFromDataset('ITPage_FY', pbData);
+
+        populateFYFromDataset('SalSlipPage_FY', pbData);
+
+        // 🔥 BUDGET
+        populateFYFromDataset('BudgetPage_FY', sbgExpData);
+
+        // 🔥 EB
+        populateFYFromDataset('EBPage_FY', ebData);
+
+        // 🔥 DG
+        populateFYFromDataset('DGPage_FY', dgData);
+
+        // 🔥 HSD
+        populateFYFromDataset('HSDPage_FY', hsdData);
 
         toggleDropdowns();
 
@@ -27886,11 +28101,8 @@
         if (!ebData?.headers || !ebData?.rows) return;
 
         const station = String(id('EBPage_Station')?.value || '').trim();
-
         const fy = String(id('EBPage_FY')?.value || '').trim();
-
         const headers = ebData.headers;
-
         const allRows = [...ebData.rows];
 
         /* =====================================
@@ -27913,9 +28125,7 @@
 
         const stationRows = allRows.filter((r) => {
           const rowStation = String(r[idx.station] || '').trim();
-
           const monthStr = String(r[idx.month] || '').trim();
-
           const rowFY = getFinancialYear(monthStr);
 
           if (station && rowStation !== station) {
@@ -28228,7 +28438,7 @@
               🚫 NO DATA
               ========================= */
 
-        if (!rows.length) {
+        if (!fy || fy === 'Select FY' || !rows.length) {
           html += `
                   <tr>
                     <td colspan="${visibleHeaders.length}"
@@ -29730,17 +29940,13 @@
 
         return headers.findIndex((h) => String(h).replace(/\s+/g, ' ').trim().toLowerCase() === name.toLowerCase());
       }
-      /* =========================================
-            🔥 DG MAP FOR EACH STATION
-            ========================================= */
+      /* ==================🔥 DG MAP FOR EACH STATION====================== */
       const stationDGData = {
         'AV KARWAR': ['62.5KVA', '40KVA'],
         'AV DHARWAD': ['100KVA', '55KVA']
       };
 
-      /* =========================================
-            🔥 DG HSD CONSUMPTION MAP
-            ========================================= */
+      /* =====================🔥 DG HSD CONSUMPTION MAP (AVG MILAGE)==================== */
 
       const DG_HSD_MAP = {
         'AV KARWAR': { '62.5KVA': 7, '40KVA': 10 },
@@ -29779,61 +29985,90 @@
 
         const select = id('DGPage_Month');
         const fySelect = id('DGPage_FY');
+
         if (!select || !fySelect) return;
 
-        if (!fySelect.value) {
-          const now = new Date();
-          const currentMonth = now.toLocaleString('en-US', { month: 'short' });
-          fySelect.value = getFinancialYear(`${currentMonth}-${now.getFullYear()}`);
+        const selectedFY = fySelect.value || '';
+
+        /* =====================================
+        🚫 INVALID FY
+        ===================================== */
+
+        if (!selectedFY || selectedFY === 'Select FY') {
+          select.innerHTML = `
+            <option value="Select Month">
+              Select Month
+            </option>
+          `;
+
+          select.value = 'Select Month';
+
+          select.disabled = true;
+
+          return;
         }
 
-        const selectedFY = fySelect.value;
+        /* =====================================
+        ✅ ENABLE MONTH
+        ===================================== */
+
+        select.disabled = false;
+
         const monthMap = new Map();
+
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Cache index to bypass loop overhead
+        // Cache index
         const idxDate = dgData.headers.indexOf('Date');
+
         if (idxDate === -1) return;
 
         const rows = dgData.rows;
-        const len = rows.length;
 
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < rows.length; i++) {
           const dateStr = String(rows[i][idxDate] || '').trim();
+
           if (!dateStr) continue;
 
           const parts = dateStr.split('-');
+
           if (parts.length !== 3) continue;
 
           const mm = parseInt(parts[1], 10);
           const yyyy = parts[2];
+
           if (!mm || !yyyy) continue;
 
           const monthStr = `${monthNames[mm - 1]}-${yyyy}`;
+
           const year = parseInt(yyyy, 10);
+
           const fy = mm >= 4 ? `${year}-${String(year + 1).slice(-2)}` : `${year - 1}-${String(year).slice(-2)}`;
 
-          if (selectedFY && fy !== selectedFY) continue;
+          if (fy !== selectedFY) continue;
 
           const key = `${yyyy}-${String(mm).padStart(2, '0')}`;
+
           monthMap.set(key, monthStr);
         }
 
         const sortedMonths = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => e[1]);
 
-        let htmlBuffer = `<option value="ALL">All Months</option>`;
-        if (!sortedMonths.length) {
-          select.innerHTML = htmlBuffer;
-          SyncAllPage();
-          return;
-        }
+        let htmlBuffer = `
+          <option value="ALL">All Months</option>
+        `;
 
         for (let i = 0; i < sortedMonths.length; i++) {
-          htmlBuffer += `<option value="${sortedMonths[i]}">${sortedMonths[i]}</option>`;
+          htmlBuffer += `
+            <option value="${sortedMonths[i]}">
+              ${sortedMonths[i]}
+            </option>
+          `;
         }
 
         select.innerHTML = htmlBuffer;
         select.value = 'ALL';
+        select.disabled = false;
         select.dispatchEvent(new Event('change'));
       }
 
@@ -29843,6 +30078,17 @@
       function getDGFilteredRows() {
         const selectedFY = id('DGPage_FY')?.value || '';
         const selectedMonth = id('DGPage_Month')?.value || '';
+        /* =====================================
+        🚫 INVALID FILTER STATES
+        ===================================== */
+
+        if (!selectedFY || selectedFY === 'Select FY') {
+          return [];
+        }
+
+        if (!selectedMonth || selectedMonth === 'Select Month') {
+          return [];
+        }
 
         // 🌟 CRITICAL FIX: Filtering table data directly by the DG Station List value
         const selectedDG = id('StationDGList')?.value || '';
@@ -29932,11 +30178,6 @@
         const selectedFY = id('DGPage_FY')?.value || '';
         const station = id('DGPage_Station')?.value || '';
 
-        if (!tbodyData.length) {
-          wrapper.innerHTML = `<div style="background:#edebb7; text-align:center; padding:20px; font-weight:bold; color:red;">==============🚫 No Data Found 🚫==============</div>`;
-          return;
-        }
-
         const visibleHeaders = headers.filter((_, i) => !hiddenCols.includes(i));
         const groupedMonths = {};
         const idxDate = headers.indexOf('Date');
@@ -29955,55 +30196,130 @@
         }
 
         const sortedMonths = Object.keys(groupedMonths);
+
         let html = '';
 
         /* =====================================================
-        🔥 HTML GENERATOR STREAM (Handles Both Modes Native)
+        🔥 HTML GENERATOR STREAM
         ===================================================== */
         const compileTableLayout = (monthLabel, monthRows) => {
           let tbHTML = `
             <div class="DGPrintMonthBlock">
+
               <table class="data-table DGprint-table">
+
                 <colgroup>
                   ${headers
                     .map((_, i) => {
                       if (hiddenCols.includes(i)) return '';
-                      // 🌟 CRITICAL FIX: Set 1st column width to exactly 100px
-                      return `<col style="width:${i === 0 ? '90px' : '4.5%'};">`;
+
+                      return `
+                        <col style="
+                          width:${i === 0 ? '90px' : '4.5%'};
+                        ">
+                      `;
                     })
                     .join('')}
                 </colgroup>
+
                 <thead>
+
                   <tr class="DGPrintHeaderRow">
                     <th colspan="${visibleHeaders.length}">
+
                       <div class="DGPrintHeaderBox">
-                        <div class="DGPrintLogo"><img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"></div>
-                        <div class="DGPrintTitle">
-                          <div>PRASAR BHARATI</div><div>INDIA'S PUBLIC SERVICE BROADCASTER</div>
-                          <div>ALL INDIA RADIO</div><div>${station}</div>
-                          <div class="DGPrintFY">FY - ${selectedFY}</div>
+
+                        <div class="DGPrintLogo">
+                          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
                         </div>
+
+                        <div class="DGPrintTitle">
+                          <div>PRASAR BHARATI</div>
+                          <div>INDIA'S PUBLIC SERVICE BROADCASTER</div>
+                          <div>ALL INDIA RADIO</div>
+                          <div>${station}</div>
+
+                          <div class="DGPrintFY">
+                            FY - ${selectedFY}
+                          </div>
+                        </div>
+
                       </div>
+
                     </th>
                   </tr>
+
                   <tr class="DGMonthRepeatRow">
-                    <th colspan="${visibleHeaders.length}" style="text-align:center; font-weight:bold; padding:5px; font-size:12px; border-top:double black; border-bottom:double black; background:white !important;color:black !important;">
+                    <th
+                      colspan="${visibleHeaders.length}"
+                      style="
+                        text-align:center;
+                        font-weight:bold;
+                        padding:5px;
+                        font-size:12px;
+                        border-top:double black;
+                        border-bottom:double black;
+                        background:white !important;
+                        color:black !important;
+                      "
+                    >
                       DG Log book for the Month of ${monthLabel}
                     </th>
                   </tr>
+
                   <tr class="DGColumnHeaderRow">
                     ${headers.map((h, i) => (hiddenCols.includes(i) ? '' : `<th>${h}</th>`)).join('')}
                   </tr>
+
                 </thead>
+
                 <tbody>
           `;
 
+          // 🔥 ROWS
           for (let i = 0; i < monthRows.length; i++) {
             tbHTML += buildDGRowHTML(monthRows[i], headers, hiddenCols, dgData.rows.indexOf(monthRows[i]));
           }
-          tbHTML += `</tbody></table></div>`;
+
+          /* =========================================
+          🔥 NO DATA ROW
+          ========================================= */
+
+          if (!monthRows.length || selectedFY === 'Select FY') {
+            tbHTML += `
+              <tr class="DGNoDataRow">
+
+                <td
+                  colspan="${visibleHeaders.length}"
+                  style="
+                    background:#edebb7;
+                    text-align:center;
+                    padding:20px;
+                    font-weight:700;
+                    color:#ef4444;
+                    font-size:14px;
+                  "
+                >
+                  ==============🚫 No Data Found 🚫==============
+                </td>
+
+              </tr>
+            `;
+          }
+
+          tbHTML += `
+                </tbody>
+              </table>
+
+            </div>
+          `;
+
           return tbHTML;
         };
+
+        /* =====================================================
+        🔥 RENDER
+        ===================================================== */
 
         if (selectedMonth === 'ALL') {
           for (let i = 0; i < sortedMonths.length; i++) {
