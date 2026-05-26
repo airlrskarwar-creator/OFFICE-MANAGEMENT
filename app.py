@@ -89,12 +89,6 @@ ESR_CACHE    = fetch_cache(esr_sheet)
 TXN_CACHE    = fetch_cache(txn_sheet)
 print("✅ Caches loaded successfully.")
 
-ROLE_USERS = [
-    {"user": "MASTER", "password": "master@11051993"},
-    {"user": "ENGG", "password": "engg@225344"},
-    {"user": "ADMIN", "password": "admin@221902"}
-]
-
 def cache_to_json(cache_data):
     if not cache_data:
         return {"headers": [], "rows": []}
@@ -206,37 +200,83 @@ def refresh_single_module(api_name):
 # =========================================================
 # 🔐 LOGIN API
 # =========================================================
+ROLE_USERS = [
+    {"user": "MASTER", "password": "master@11051993"},
+    {"user": "ENGG", "password": "engg@225344"},
+    {"user": "ADMIN", "password": "admin@221902"}
+]
+
 @app.route("/login", methods=["POST"])
 def login():
     try:
         data = request.get_json()
+
         station = (data.get("station") or "").strip()
-        user = (data.get("user") or "").strip().upper()
+        user = (data.get("user") or "").strip()
         password = (data.get("password") or "").strip()
 
-        # 1. Verify Credentials
-        role_user = next((r for r in ROLE_USERS if r["user"].upper() == user and r["password"] == password), None)
+        # =====================================================
+        # 1. CHECK ROLE USERS
+        # =====================================================
+        role_user = next(
+            (
+                r for r in ROLE_USERS
+                if r["user"].strip().upper() == user.upper()
+                and r["password"] == password
+            ),
+            None
+        )
 
-        # 2. If credentials match, trigger a GLOBAL REFRESH of all caches
-        if role_user or (found_user := next((emp for emp in [dict(zip(EMP_CACHE[0], row)) for row in EMP_CACHE[1:]] if str(emp.get("User", "")).strip().upper() == user), None)):
-
-            # 3. Return user details
-            if role_user:
-                return jsonify({"success": True, "user": role_user["user"], "displayName": role_user["user"], "station": station, "role": role_user["user"]})
-
+        if role_user:
             return jsonify({
                 "success": True,
-                "user": found_user.get("User", ""),
-                "displayName": found_user.get("Employee Name", user),
+                "user": role_user["user"],
+                "displayName": role_user["user"],
                 "station": station,
-                "role": "USER"
+                "role": role_user["user"]
             })
 
-        return jsonify({"success": False, "message": "Invalid user credentials"})
+        # =====================================================
+        # 2. CHECK EMPLOYEE USERS USING HRIS + PASSWORD
+        # =====================================================
+        employees = [
+            dict(zip(EMP_CACHE[0], row))
+            for row in EMP_CACHE[1:]
+        ]
+
+        found_user = next(
+            (
+                emp for emp in employees
+                if str(emp.get("HRIS", "")).strip() == str(user).strip()
+                and str(emp.get("Password", "")).strip() == password
+            ),
+            None
+        )
+
+        if found_user:
+            return jsonify({
+                "success": True,
+                "user": found_user.get("Initials", ""),
+                "displayName": found_user.get("Employee Name", ""),
+                "station": station,
+                "role": "USER",
+                "hris": found_user.get("HRIS", "")
+            })
+
+        # =====================================================
+        # INVALID LOGIN
+        # =====================================================
+        return jsonify({
+            "success": False,
+            "message": "Invalid user credentials"
+        })
 
     except Exception as e:
         print("❌ Login Error:", str(e))
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 # =========================================================
 # 🔥 OPM UPDATE ROUTINES (Direct Batching & Cache Refresh)
