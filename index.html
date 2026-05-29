@@ -1574,7 +1574,7 @@
         height: 18px;
         font-size: 18px;
         /* icon size inside */
-        color: rgb(156, 156, 156);
+        color: rgb(255, 0, 0);
       }
 
       .dashboard-footer .material-symbols-outlined.syncing {
@@ -2208,6 +2208,19 @@
         background: #ffffff;
         border-radius: 8px;
         margin: 0 auto;
+      }
+
+      #SBGDetailsTable {
+        border-collapse: collapse;
+        width: 100%;
+        color: black;
+        background: #ffffff;
+      }
+
+      #SBGDetailsTable th,
+      #SBGDetailsTable td {
+        padding: 4px;
+        border: solid 1px black;
       }
 
       /* =====HEADER (TOP ROW)========== */
@@ -4813,6 +4826,56 @@
         font-weight: bold;
         text-align: right;
       }
+
+      /* =========================================
+      🔥 MAIN HEADER
+      ========================================= */
+
+      .sbg-main-header,
+      .sbg-main-header td,
+      .sbg-main-header th,
+      .sbg-header-row,
+      .sbg-header-row td,
+      .sbg-header-row th {
+        font-weight: 700 !important;
+      }
+
+      /* =========================================
+      🔥 SUB HEADER
+      ========================================= */
+
+      .sbg-sub-header,
+      .sbg-sub-header td,
+      .sbg-sub-header th {
+        font-weight: 700 !important;
+
+        border-top: 2px solid #000 !important;
+        border-bottom: 2px solid #000 !important;
+      }
+
+      /* =========================================
+      🔥 SUB TOTAL ROW
+      ========================================= */
+
+      .sbg-subtotal-row,
+      .sbg-subtotal-row td {
+        font-weight: 700 !important;
+
+        border-top: 2px solid #000 !important;
+        border-bottom: 2px solid #000 !important;
+      }
+
+      /* =========================================
+      🔥 GRAND TOTAL ROW
+      ========================================= */
+
+      .sbg-grand-total-row,
+      .sbg-grand-total-row td {
+        font-weight: 800 !important;
+
+        border-top: 2px solid #000 !important;
+        border-bottom: 2px solid #000 !important;
+      }
       /* ===============================================
         RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
       =================================================== */
@@ -5698,6 +5761,7 @@
           <div class="Error_Note">
             <span id="DA_Error" class="PB-error"></span>
             <span id="GPF_Error" class="PB-error"></span>
+            <span id="Inc_Note" class="PB-error"></span>
           </div>
         </div>
 
@@ -6157,6 +6221,9 @@
           <div style="display: flex">
             <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none"></div>
             <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
+            <div class="SBGDetailsTableWrapper" id="SBGDetailsTableWrapper" style="display: none">
+              <table id="SBGDetailsTable"></table>
+            </div>
             <div class="BudgetReportTableWrapper" id="BudgetReportTableWrapper" style="display: none">
               <table id="ContingentBillReport" style="border-collapse: collapse; width: 100%; table-layout: fixed">
                 <colgroup>
@@ -7259,24 +7326,31 @@
           Chart.register(columnLabelPlugin);
         }
 
+        // 🔥 Load internet/local time once
+        await initAppTime();
+
         requestAnimationFrame(() => {
           renderIcons();
+
           id('todayDate').textContent = getTodayFormatted();
+
           startDigitalClock();
         });
 
         const loginPage = id('loginPage');
         const mainPage = id('mainPage');
+
         if (loginPage) loginPage.style.display = 'flex';
         if (mainPage) mainPage.style.display = 'none';
 
         qs('.app')?.classList.add('loaded');
 
-        // Prime the application core authentication profile data pass instantly
+        // Prime authentication profile
         await loadTable('emp', 'EmpDB', false);
+
         populateloginStationDropdown();
 
-        // Spawns tracking pipeline seamlessly in the background loop matrix layers
+        // Background loading
         window.backgroundLoadPromise = loadAllData();
       });
 
@@ -7317,6 +7391,7 @@
         const idx = {
           station: headers.indexOf('Station'),
           user: headers.indexOf('Employee Name'),
+          hris: headers.indexOf('HRIS'),
           initial: headers.indexOf('Initials'),
           pass: headers.indexOf('Password'),
           dept: headers.indexOf('Section')
@@ -7330,6 +7405,7 @@
           map[r[idx.user]] = {
             station: r[idx.station],
             user: r[idx.user],
+            hris: String(r[idx.hris]).trim(),
             initial: r[idx.initial]?.trim().toUpperCase(),
             name: r[idx.user],
             password: String(r[idx.pass]).trim(),
@@ -7352,35 +7428,61 @@
 
       function applyStation_UserControl(loginStation, user, userRole) {
         const role = userRole?.trim().toUpperCase();
+
         const isRestrictedUser = !['MASTER', 'ADMIN', 'ENGG'].includes(role);
 
+        // =========================================
+        // STATION DROPDOWNS
+        // =========================================
         const stationDropdowns = qsa('.stationDropdown');
+
         for (let i = 0; i < stationDropdowns.length; i++) {
           const stationEl = stationDropdowns[i];
+
           stationEl.value = loginStation;
+
           stationEl.dispatchEvent(new Event('change'));
+
           stationEl.disabled = isRestrictedUser;
         }
 
-        const employeeDropdowns = qsa('.employeeDropdown');
-        for (let i = 0; i < employeeDropdowns.length; i++) {
-          const empEl = employeeDropdowns[i];
-          if ([...empEl.options].some((opt) => opt.value === user)) {
-            empEl.value = user;
-            empEl.dispatchEvent(new Event('change'));
-          }
-        }
+        // =========================================
+        // WAIT FOR EMPLOYEE DROPDOWNS TO POPULATE
+        // =========================================
+        setTimeout(() => {
+          const employeeDropdowns = qsa('.employeeDropdown');
 
+          for (let i = 0; i < employeeDropdowns.length; i++) {
+            const empEl = employeeDropdowns[i];
+
+            const optionExists = [...empEl.options].some((opt) => String(opt.value) === String(user));
+
+            if (optionExists) {
+              empEl.value = String(user);
+
+              empEl.dispatchEvent(new Event('change'));
+            }
+
+            empEl.disabled = isRestrictedUser;
+          }
+        }, 300);
+
+        // =========================================
+        // OBSERVER
+        // =========================================
         if (!globalEmployeeObserver) {
           globalEmployeeObserver = new MutationObserver(() => {
             const targets = qsa('.employeeDropdown');
+
             for (let j = 0; j < targets.length; j++) {
-              if (targets[j].disabled !== isRestrictedUser) {
-                targets[j].disabled = isRestrictedUser;
-              }
+              targets[j].disabled = isRestrictedUser;
             }
           });
-          globalEmployeeObserver.observe(document.body, { childList: true, subtree: true });
+
+          globalEmployeeObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
         }
       }
 
@@ -7412,7 +7514,10 @@
         for (let i = 0; i < users.length; i++) {
           if (users[i].station === station) {
             filteredUsers.push(users[i]);
-            html += `<option value="${users[i].user}">👤 ${users[i].user}</option>`;
+            html += `
+              <option value="${users[i].hris}">
+                👤 ${users[i].user}-(${users[i].hris})
+              </option>`;
           }
         }
 
@@ -7430,7 +7535,7 @@
       on('loginUserDropdown', 'change', () => {
         const user = id('loginUserDropdown').value;
         if (!user || !window.userList) return;
-        const record = window.userList.find((u) => u.user === user);
+        const record = window.userList.find((u) => String(u.hris) === String(user));
         if (record && id('SalSlipPage_Emp')) id('SalSlipPage_Emp').value = record.name;
       });
 
@@ -7518,7 +7623,7 @@
             window.currentStation = station;
             window.currentInitial = data.initial || '';
             // 2. Perform Login Success Pipeline
-            await loginSuccess(data.user, data.displayName || data.user, station);
+            await loginSuccess(data.user, data.displayName || data.user, station, data.role, data.hris);
           } else {
             hideLoader();
             errormsg.textContent = data.message;
@@ -7532,7 +7637,7 @@
         }
       });
 
-      async function loginSuccess(user, displayName, loginStation) {
+      async function loginSuccess(user, displayName, loginStation, userRole, hris) {
         showLoader();
 
         updateLoader(10, 'Login successful, synchronizing data...', 'lock_open');
@@ -7556,6 +7661,7 @@
 
         if (window.appState === 'READY') {
           await handlePostDataInitialization();
+          applyStation_UserControl(loginStation, hris, userRole);
           completeLoader();
         }
 
@@ -7574,8 +7680,6 @@
           // 2. Initial UI Bindings
           initUI();
           initAfterData();
-          initBindings();
-          initDefaultView();
           initPostSetup();
           applyUserAccess(window.currentUser);
 
@@ -7588,12 +7692,8 @@
           syncSelect('station', window.currentStation);
           filters.station = window.currentStation;
           applyFilters();
-
-          recalculateAllRows();
-          refreshPBView();
           lockRequirementTableForUser(window.currentUser);
           completeLoader();
-          // 5. Background Render for remainder
           requestIdleCallback(() => renderDatabaseTables(false));
         } catch (err) {
           console.error('❌ Init Error:', err);
@@ -7746,7 +7846,6 @@
           refreshPBView();
           renderFromDropdowns();
           loadDGList();
-          loadDGMonthsByFY();
         });
       }
 
@@ -7771,37 +7870,6 @@
         setupSBGToggleButton('SBGeditBtn', { defaultText: 'Edit', activeText: 'Update', defaultIcon: 'edit', activeIcon: 'upload', className: 'upload-mode' }, 'edit');
       }
 
-      function initBindings() {
-        enableAllButtons();
-
-        bindPayBillView('PayBillPage_Station', 'PayBillPage_FY', 'PayBillPage_SalMonth');
-
-        // 🔥 FORCE INITIAL DROPDOWN POPULATION
-        id('PayBillPage_Station')?.dispatchEvent(new Event('change'));
-        id('PayBillPage_FY')?.dispatchEvent(new Event('change'));
-
-        on('PayBillPage_SalMonth', 'change', () => {
-          setDAPercent();
-          resetDAAInEditTables();
-          updateAndRenderDAA();
-        });
-
-        on('PayBillPage_Station', 'change', setDAPercent);
-      }
-
-      function initDefaultView() {
-        requestAnimationFrame(() => {
-          const station = id('PayBillPage_Station')?.value;
-          const fy = id('PayBillPage_FY')?.value;
-          const month = id('PayBillPage_SalMonth')?.value;
-
-          if (station && fy && month) {
-            createPayBillViewTables(station, fy, month);
-            setDAPercent();
-          }
-        });
-      }
-
       function initPostSetup() {
         disableGroups(['.SSaction-group button', '.ITaction-group button', '.Pensionaction-group button']);
         loadCommutationOptions();
@@ -7820,15 +7888,51 @@
       /* ============================================================================
           ⚡ HIGH-SPEED CLOCK ENGINE (Cached options object to lower memory usage)
       ============================================================================ */
+      let appTime = null;
+
+      async function getInternetTime() {
+        try {
+          const res = await fetch('https://office-management-f425.onrender.com/time');
+
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+
+          console.log('🌐 Server time loaded:', data.serverTime);
+
+          return new Date(data.serverTime);
+        } catch (err) {
+          console.warn('⚠ Server time unavailable, using local time', err);
+
+          return new Date();
+        }
+      }
+
+      async function initAppTime() {
+        appTime = await getInternetTime();
+
+        setInterval(() => {
+          appTime = new Date(appTime.getTime() + 1000);
+        }, 1000);
+      }
+
       function startDigitalClock() {
         const clock = id('digitalClock');
         if (!clock) return;
 
-        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-        const formatter = new Intl.DateTimeFormat('en-IN', timeOptions);
+        const formatter = new Intl.DateTimeFormat('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
 
         function update() {
-          clock.textContent = formatter.format(new Date());
+          if (!appTime) return;
+
+          clock.textContent = formatter.format(appTime);
         }
 
         update();
@@ -7836,13 +7940,12 @@
       }
 
       function getTodayFormatted() {
-        const now = new Date();
-        const month = now.toLocaleString('en-US', { month: 'long' });
-        const day = String(now.getDate()).padStart(2, '0');
-        const year = now.getFullYear();
-        return `${month}-${day}, ${year}`;
-      }
+        const now = appTime || new Date();
 
+        return `${now.toLocaleString('en-US', {
+          month: 'long'
+        })}-${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`;
+      }
       /* ============================================================================
           ⚡ CACHED HARDWARE GRAPHICS BADGE SYSTEM
       ============================================================================ */
@@ -8129,6 +8232,9 @@
       /* =========================
             🔥 UNIVERSAL DATE UTILITY
             ========================= */
+      function makeEmpKey(name, hris) {
+        return `${String(name || '').trim()}|${String(hris || '').trim()}`;
+      }
 
       const DateUtil = (() => {
         const monthMap = {
@@ -8253,18 +8359,20 @@
         let rows = pbData.rows;
 
         let empIdx = headers.indexOf('Employee Name');
+        let hrisIdx = headers.indexOf('HRIS');
         let monthIdx = headers.indexOf('Salary Month');
 
         let latest = {};
 
         rows.forEach((r) => {
-          let emp = r[empIdx];
+          let key = makeEmpKey(r[empIdx], r[hrisIdx]);
+
           let month = r[monthIdx];
 
-          if (!emp || !month) return;
+          if (!key || !month) return;
 
-          if (!latest[emp] || DateUtil.toTime(month) > DateUtil.toTime(latest[emp][monthIdx])) {
-            latest[emp] = r;
+          if (!latest[key] || DateUtil.toTime(month) > DateUtil.toTime(latest[key][monthIdx])) {
+            latest[key] = r;
           }
         });
 
@@ -8334,6 +8442,7 @@
             console.warn('❌ Emp/PB data not ready');
 
             updateStatus('empDatabase', 'db', false);
+
             return;
           }
 
@@ -8349,6 +8458,7 @@
           let finalRows = [];
 
           let empIdx = eHeaders.indexOf('Employee Name');
+          let hrisIdx = eHeaders.indexOf('HRIS');
           let dobIdx = eHeaders.indexOf('DOB');
           let dojIdx = eHeaders.indexOf('DOJ');
 
@@ -8363,10 +8473,14 @@
 
           eRows.forEach((r) => {
             let emp = r[empIdx];
+            let empHRIS = r[hrisIdx];
+
+            let empKey = makeEmpKey(emp, empHRIS);
+
             let dob = r[dobIdx];
             let doj = r[dojIdx];
 
-            let pb = latest[emp] || [];
+            let pb = latest[empKey] || [];
 
             let lastMonth = pb[monthIdx] || '';
             let lastinc = pb[lastincIdx] || '';
@@ -8376,13 +8490,16 @@
             let cpcindex = pb[indexIdx] || '';
 
             let pg = getPayBandAndGradePay(payLevel);
+
             let payBand = pg.payBand;
             let gradePay = pg.gradePay;
 
             let superDate = calcSuperannuation(dob);
+
             let endDate = formatToInputDate(superDate);
 
             let service = calcService(doj, endDate);
+
             let sixMonth = calcSixMonth(doj, endDate);
 
             let emoluments = calcLast10MonthsEmoluments(pb);
@@ -8404,7 +8521,6 @@
           clearSyncStatus('empDatabase', 'db', false);
         }
       }
-
       /* ==========🔥 RENDER TABLE============ */
 
       function renderTable(id, headers, rows) {
@@ -8433,16 +8549,21 @@
         let rows = pbData.rows;
 
         let empIdx = headers.indexOf('Employee Name');
+        let hrisIdx = headers.indexOf('HRIS');
         let monthIdx = headers.indexOf('Salary Month');
 
         let map = {};
 
         rows.forEach((r) => {
-          let emp = r[empIdx];
+          let key = makeEmpKey(r[empIdx], r[hrisIdx]);
+
           let month = r[monthIdx];
 
-          if (!map[emp]) map[emp] = {};
-          map[emp][month] = r;
+          if (!map[key]) {
+            map[key] = {};
+          }
+
+          map[key][month] = r;
         });
 
         return map;
@@ -8927,6 +9048,9 @@
           // 🔥 KEEP SELECT FY DEFAULT
           if (!filters.fy || filters.fy === '' || filters.fy === 'Select FY') {
             filters.fy = 'Select FY';
+            disableAllButtons();
+          } else {
+            enableAllButtons();
           }
         }
 
@@ -8943,7 +9067,13 @@
           return ya - yb || monthOrder.indexOf(ma) - monthOrder.indexOf(mb);
         });
 
-        if (!isAddMode && !valid.month.has(filters.month)) {
+        // =====================================
+        // 🔥 FORCE ADD MONTH
+        // =====================================
+
+        if (isAddMode && window.forcePBMonth && valid.month.has(window.forcePBMonth)) {
+          filters.month = window.forcePBMonth;
+        } else if (!isAddMode && !valid.month.has(filters.month)) {
           filters.month = sortedMonths.at(-1) || '';
         }
 
@@ -8988,8 +9118,7 @@
           ===================================== */
 
           if (idxDate === -1) {
-            console.warn(`❌ No valid FY column found for ${selectId}`, headers);
-
+            //console.warn(`❌ No valid FY column found for ${selectId}`, headers);
             return;
           }
 
@@ -9104,26 +9233,60 @@
 
             if (!select) return;
 
+            // =====================================
+            // 🔥 SAVE CURRENT VALUE
+            // =====================================
+
+            const forcedValue = isAddMode && window.forcePBMonth ? window.forcePBMonth : filters.month;
+
+            // =====================================
+            // 🔥 RESET OPTIONS
+            // =====================================
+
             select.innerHTML = `
               <option value="Select Month" hidden>
                 Select Month
               </option>
             `;
 
+            // =====================================
+            // 🔥 ADD MONTHS
+            // =====================================
+
             months.forEach((val) => {
               const opt = document.createElement('option');
 
               opt.value = val;
+
               opt.textContent = val;
 
-              if (val === filters.month) {
+              // 🔥 FORCE SELECT
+              if (String(val).trim() === String(forcedValue).trim()) {
                 opt.selected = true;
               }
 
               select.appendChild(opt);
             });
 
-            select.value = filters.month && filters.month !== '' ? filters.month : 'Select Month';
+            // =====================================
+            // 🔥 FORCE VALUE
+            // =====================================
+
+            if (forcedValue && forcedValue !== '') {
+              select.value = forcedValue;
+            } else {
+              select.value = 'Select Month';
+            }
+
+            // =====================================
+            // 🔥 FINAL SAFETY
+            // =====================================
+
+            const optionIndex = [...select.options].findIndex((o) => String(o.value).trim() === String(forcedValue).trim());
+
+            if (optionIndex >= 0) {
+              select.selectedIndex = optionIndex;
+            }
           });
         }
 
@@ -9147,8 +9310,18 @@
 
           selectMap.month.forEach((eid) => {
             const el = id(eid);
+
             if (!el) return;
+
+            // 🔥 NEVER RESET DURING ADD MODE
+            if (isAddMode) {
+              el.disabled = false;
+
+              return;
+            }
+
             el.disabled = !hasFY;
+
             if (!hasFY) {
               el.value = 'Select Month';
             }
@@ -10753,6 +10926,8 @@
         const namePB = getColIndex(pbHeaders, 'Employee Name');
         const stationPB = getColIndex(pbHeaders, 'Pay Drawn Station');
         const monthPB = getColIndex(pbHeaders, 'Salary Month');
+        const hrisPB = getColIndex(pbHeaders, 'HRIS');
+        const designationPB = getColIndex(pbHeaders, 'Designation on Salary Month');
 
         const nameCalc = getColIndex(calcHeaders, 'Employee Name');
         const stationCalc = getColIndex(calcHeaders, 'Station');
@@ -10761,8 +10936,22 @@
         const statusIdx = getColIndex(calcHeaders, 'Status');
         const vrsIdx = getColIndex(calcHeaders, 'VRS / Deceased Date');
 
+        // =========================================
+        // 🔥 FIND LAST AVAILABLE MONTH FOR STATION
+        // =========================================
+
+        const stationMonthVals = pbRows
+          .filter((r) => String(r[stationPB]).trim() === String(station).trim())
+          .map((r) => parseMonthYear(r[monthPB]))
+          .filter(Boolean);
+
+        if (!stationMonthVals.length) return;
+
+        // 🔥 Latest month already present in PB
+        const prevMonthVal = Math.max(...stationMonthVals);
+
+        // Use passed month as target
         const nextVal = parseMonthYear(nextMonth);
-        const prevMonthVal = nextVal - 1;
 
         // =========================
         // 🔹 PARSE DATE
@@ -10798,22 +10987,39 @@
         // =========================
         // 🔹 GET DOR
         // =========================
-        function getEmpDOR(empName, station) {
-          const row = calcRows.find((r) => String(r[nameCalc]).trim() === String(empName).trim() && String(r[stationCalc]).trim() === String(station).trim());
+        function getEmpDOR(empName, empHRIS, station) {
+          const hrisCalc = getColIndex(calcHeaders, 'HRIS');
+
+          const targetKey = makeEmpKey(empName, empHRIS);
+
+          const row = calcRows.find((r) => {
+            const rowKey = makeEmpKey(r[nameCalc], r[hrisCalc]);
+
+            return rowKey === targetKey && String(r[stationCalc]).trim() === String(station).trim();
+          });
+
           return row ? parseDOR(row[dorIdx]) : 0;
         }
 
+        const hrisCalc = getColIndex(calcHeaders, 'HRIS');
         // =========================
         // 🔹 GET VRS
         // =========================
-        function getEmpVRS(empName, station) {
-          const row = calcRows.find((r) => String(r[nameCalc]).trim() === String(empName).trim() && String(r[stationCalc]).trim() === String(station).trim());
+        function getEmpVRS(empName, empHRIS, station) {
+          const targetKey = makeEmpKey(empName, empHRIS);
+
+          const row = calcRows.find((r) => {
+            const rowKey = makeEmpKey(r[nameCalc], r[hrisCalc]);
+
+            return rowKey === targetKey && String(r[stationCalc]).trim() === String(station).trim();
+          });
 
           if (!row) return 0;
 
           const status = String(row[statusIdx] || '')
             .trim()
             .toUpperCase();
+
           if (!['VRS', 'DECEASED'].includes(status)) return 0;
 
           return parseDOR(row[vrsIdx]);
@@ -10845,8 +11051,9 @@
           if (String(r[stationPB]).trim() === String(station).trim() && parseMonthYear(r[monthPB]) === nextVal) {
             const empName = String(r[namePB]).trim();
 
-            const dorVal = getEmpDOR(empName, station);
-            const vrsVal = getEmpVRS(empName, station);
+            const empHRIS = r[hrisPB];
+            const dorVal = getEmpDOR(empName, empHRIS, station);
+            const vrsVal = getEmpVRS(empName, empHRIS, station);
 
             // ❌ remove if BEFORE current month
             if ((dorVal && dorVal < nextVal) || (vrsVal && vrsVal < nextVal)) {
@@ -10862,7 +11069,7 @@
 
         pbRows.forEach((r) => {
           if (String(r[stationPB]).trim() === String(station).trim() && parseMonthYear(r[monthPB]) === prevMonthVal) {
-            prevEmployees.add(String(r[namePB]).trim());
+            prevEmployees.add(makeEmpKey(r[namePB], r[hrisPB]));
           }
         });
 
@@ -10873,7 +11080,7 @@
 
         pbRows.forEach((r) => {
           if (String(r[stationPB]).trim() === String(station).trim() && parseMonthYear(r[monthPB]) === nextVal) {
-            existingSet.add(String(r[namePB]).trim());
+            existingSet.add(makeEmpKey(r[namePB], r[hrisPB]));
           }
         });
 
@@ -10888,8 +11095,12 @@
 
           if (!empName || empStation !== String(station).trim()) return;
 
-          if (!prevEmployees.has(empName)) return;
-          if (existingSet.has(empName)) return;
+          const empHRIS = String(emp[hrisCalc] || '').trim();
+
+          const empKey = makeEmpKey(empName, empHRIS);
+
+          if (!prevEmployees.has(empKey)) return;
+          if (existingSet.has(empKey)) return;
 
           const dorVal = getEmpDOR(empName, station);
           const vrsVal = getEmpVRS(empName, station);
@@ -10902,6 +11113,9 @@
           row[namePB] = empName;
           row[stationPB] = station;
           row[monthPB] = nextMonth;
+          if (designationPB !== -1) {
+            row[designationPB] = getEmpDesignation(empName, station, empHRIS);
+          }
 
           const set = (col, val) => {
             const i = getColIndex(pbHeaders, col);
@@ -10914,7 +11128,7 @@
           set('TA Entitled', true);
 
           pbRows.push(row);
-          existingSet.add(empName);
+          existingSet.add(empKey);
 
           count++;
         });
@@ -10942,9 +11156,48 @@
         const statusIdx = getColIndex(calcHeaders, 'Status');
         const vrsIdx = getColIndex(calcHeaders, 'VRS / Deceased Date');
 
-        const prevMonth = getPreviousMonthStr(nextMonth);
-        const nextVal = parseMonthYear(nextMonth);
-        const prevMonthVal = nextVal - 1;
+        // =========================================
+        // 🔥 FIND LAST ENTERED MONTH FOR STATION
+        // =========================================
+
+        const stationMonths = rows
+          .filter((r) => String(r[stationIdx]).trim() === String(station).trim())
+          .map((r) => parseMonthYear(r[monthIdx]))
+          .filter(Boolean);
+
+        if (!stationMonths.length) return;
+
+        const prevMonthVal = Math.max(...stationMonths);
+
+        // Convert YYYYMM → MMM-YYYY
+        function monthValToStr(val) {
+          const year = Math.floor(val / 100);
+          const month = val % 100;
+
+          return new Date(year, month - 1, 1)
+            .toLocaleDateString('en-US', {
+              month: 'short',
+              year: 'numeric'
+            })
+            .replace(' ', '-');
+        }
+
+        const prevMonth = monthValToStr(prevMonthVal);
+
+        // 🔥 NEXT MONTH OF LAST AVAILABLE MONTH
+        const nextDate = new Date(Math.floor(prevMonthVal / 100), prevMonthVal % 100, 1);
+
+        const nextMonthAuto = nextDate
+          .toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric'
+          })
+          .replace(' ', '-');
+
+        const nextVal = parseMonthYear(nextMonthAuto);
+
+        // overwrite passed value
+        nextMonth = nextMonthAuto;
 
         // =========================
         // 🔹 PARSE DATE
@@ -11006,9 +11259,14 @@
         // =========================
         const existingSet = new Set();
 
+        const hrisIdx = headers.indexOf('HRIS');
+
         rows.forEach((r) => {
           if (String(r[stationIdx]).trim() === String(station).trim() && parseMonthYear(r[monthIdx]) === nextVal) {
-            existingSet.add(String(r[nameIdx]).trim());
+            const empName = String(r[nameIdx] || '').trim();
+            const hris = String(r[hrisIdx] || '').trim();
+            const empKey = makeEmpKey(empName, hris);
+            existingSet.add(empKey);
           }
         });
 
@@ -11024,10 +11282,12 @@
           const rowMonth = String(row[monthIdx]).trim();
 
           if (rowStation === String(station).trim() && rowMonth === prevMonth) {
-            const empName = String(row[nameIdx]).trim();
+            const empName = String(row[nameIdx] || '').trim();
+            const empHRIS = String(row[hrisIdx] || '').trim();
+            const empKey = makeEmpKey(empName, empHRIS);
 
             // ❌ Skip duplicate
-            if (existingSet.has(empName)) return;
+            if (existingSet.has(empKey)) return;
 
             const dorVal = getEmpDOR(empName, station);
             const vrsVal = getEmpVRS(empName, station);
@@ -11050,8 +11310,43 @@
               if (idx !== -1) newRow[idx] = '';
             });
 
+            // =========================================
+            // 🔥 INCREMENT LOGIC
+            // =========================================
+
+            const incrementIdx = headers.indexOf('Last Increment');
+            const salaryMonthIdx = headers.indexOf('Salary Month');
+            const cpcIdx = headers.indexOf('7CPC Index');
+            const incrementVal = String(newRow[incrementIdx] || '').trim();
+            const salaryMonthVal = String(newRow[salaryMonthIdx] || '').trim();
+
+            // 🔥 GET MONTH ONLY
+            const incrementMonth = incrementVal.substring(0, 3).trim().toUpperCase();
+            const salaryMonth = salaryMonthVal.substring(0, 3).trim().toUpperCase();
+
+            // 🔥 IF SAME MONTH → +1 INDEX + NEXT INCREMENT YEAR
+            if (incrementMonth && incrementMonth === salaryMonth) {
+              const currentIndex = Number(newRow[cpcIdx]) || 0;
+              newRow[cpcIdx] = currentIndex + 1;
+
+              // =========================================
+              // 🔥 MOVE LAST INCREMENT TO NEXT YEAR
+              // =========================================
+
+              const parts = incrementVal.split('-');
+
+              if (parts.length === 2) {
+                const mon = parts[0].trim();
+                const year = parseInt(parts[1].trim(), 10);
+
+                if (!isNaN(year)) {
+                  newRow[incrementIdx] = `${mon}-${year + 1}`;
+                }
+              }
+            }
+
             newRows.push(newRow);
-            existingSet.add(empName);
+            existingSet.add(empKey);
           }
         });
 
@@ -11769,6 +12064,7 @@
 
         renderPBEditTable('PB_GOEditTbl', headers, goRows, station, selectedMonth);
         renderPBEditTable('PB_NPSEditTbl', headers, npsRows, station, selectedMonth);
+        renderIncrementDueList();
       }
 
       const READ_ONLY_COLUMNS = ['Basic Pay', 'DA', 'DA on TA', 'HRA', 'NPSE', 'NPS', 'DA%', 'NPSE Ded', 'Total DAA', 'TA Rate', 'TA', 'NPSC', 'DAA', 'DAA on TA', 'Gross Income', 'Total Deduction', 'Cess @4%', 'DAA on NPS', 'Net IT', 'CGEIS', 'W Ch', 'L Fee', 'Net Income'];
@@ -11978,35 +12274,134 @@
 
               select.value = val || options[0];
 
+              // 🔥 Highlight 7CPC Index when increment due
+              if (colName === '7CPC Index') {
+                const incIdx = selectedHeaders.indexOf('Last Increment');
+
+                const incrementVal = String(row[incIdx] || '').trim();
+
+                const incrementMonth = incrementVal.substring(0, 3).toUpperCase();
+
+                const salaryMonth = new Date(selectedMonth)
+                  .toLocaleDateString('en-US', {
+                    month: 'short'
+                  })
+                  .toUpperCase();
+
+                if (incrementMonth === salaryMonth) {
+                  td.style.color = 'red';
+                  td.style.fontWeight = 'bold';
+                  select.style.fontWeight = 'bold';
+                  select.style.border = '1px solid red';
+                  td.style.border = '1px solid red';
+                  td.style.padding = '0';
+                  select.style.margin = '0';
+                }
+              }
+
               td.appendChild(select);
             } else if (colName === 'Last Increment') {
-              /* Default input */
-              const input = createEl('input', {
-                type: 'text',
-                value: formatMonthDisplay(formatMonthForInput(val)) // MMM-YYYY
-              });
+              function toMonthInputFormat(value) {
+                if (!value) return '';
+
+                const months = {
+                  Jan: '01',
+                  Feb: '02',
+                  Mar: '03',
+                  Apr: '04',
+                  May: '05',
+                  Jun: '06',
+                  Jul: '07',
+                  Aug: '08',
+                  Sep: '09',
+                  Oct: '10',
+                  Nov: '11',
+                  Dec: '12'
+                };
+
+                if (/^\d{4}-\d{2}$/.test(value)) {
+                  return value;
+                }
+
+                const parts = String(value).trim().split('-');
+
+                if (parts.length !== 2) return '';
+
+                const mon = months[parts[0]];
+                const year = parts[1];
+
+                if (!mon || !year) return '';
+
+                return `${year}-${mon}`;
+              }
+
+              const input = createEl('input');
+
+              input.type = 'text';
+              input.value = String(val || '');
 
               input.classList.add('month-toggle-input');
 
-              // 🔥 store actual value
-              input.dataset.value = formatMonthForInput(val); // YYYY-MM
+              const incrementMonth = String(val || '')
+                .substring(0, 3)
+                .toUpperCase();
 
-              // 🔥 on focus → switch to month picker
+              const salaryMonth = new Date(selectedMonth)
+                .toLocaleDateString('en-US', {
+                  month: 'short'
+                })
+                .toUpperCase();
+
+              if (incrementMonth === salaryMonth) {
+                td.style.color = 'red';
+                td.style.fontWeight = 'bold';
+
+                input.style.color = 'red';
+                input.style.fontWeight = 'bold';
+
+                td.style.border = '1px solid red';
+                input.style.border = '1px solid red';
+
+                td.style.padding = '0';
+              }
+
+              input.dataset.value = toMonthInputFormat(val);
+
               input.addEventListener('focus', () => {
+                const yyyyMM = input.dataset.value;
+
+                input.value = '';
+
                 input.type = 'month';
-                input.value = input.dataset.value || '';
-                input.showPicker?.();
+
+                requestAnimationFrame(() => {
+                  input.value = yyyyMM || '';
+
+                  input.showPicker?.();
+                });
               });
 
-              // 🔥 on change → update value
               input.addEventListener('change', () => {
                 input.dataset.value = input.value;
+
+                if (input.value) {
+                  const d = new Date(input.value + '-01');
+
+                  input.dataset.display = d
+                    .toLocaleDateString('en-US', {
+                      month: 'short',
+                      year: 'numeric'
+                    })
+                    .replace(' ', '-');
+                }
               });
 
-              // 🔥 on blur → switch back to text
               input.addEventListener('blur', () => {
+                const display = input.dataset.display || String(val || '');
+
                 input.type = 'text';
-                input.value = formatMonthDisplay(input.dataset.value);
+
+                input.value = display;
               });
 
               td.appendChild(input);
@@ -12996,6 +13391,140 @@
         } else {
           gpfError.textContent = '';
         }
+      }
+
+      function renderIncrementDueList() {
+        const span = id('Inc_Note');
+        if (!span) return;
+
+        if (!pbData?.rows || !pbData?.headers) {
+          span.innerText = '';
+          return;
+        }
+
+        const headers = pbData.headers;
+        const rows = pbData.rows;
+
+        const nameIdx = headers.indexOf('Employee Name');
+        const incIdx = headers.indexOf('Last Increment');
+        const stationIdx = headers.indexOf('Pay Drawn Station');
+        const hrisIdx = headers.indexOf('HRIS');
+        const salMonthIdx = headers.indexOf('Salary Month');
+
+        const currentMonth = id('PayBillPage_SalMonth')?.value?.trim();
+        const currentStation = id('PayBillPage_Station')?.value?.trim();
+
+        if (!currentMonth || currentMonth === 'Select Month') {
+          span.innerText = '';
+          return;
+        }
+
+        // =========================================
+        // 🔥 EMP CALC LOOKUP
+        // =========================================
+
+        const calcHeaders = window.empCalcHeaders || [];
+        const calcRows = window.empCalcRows || [];
+
+        const nameCalc = getColIndex(calcHeaders, 'Employee Name');
+        const stationCalc = getColIndex(calcHeaders, 'Station');
+        const dorIdx = getColIndex(calcHeaders, 'Superannuation');
+
+        function parseDOR(dorStr) {
+          if (!dorStr) return 0;
+
+          const months = {
+            Jan: 1,
+            Feb: 2,
+            Mar: 3,
+            Apr: 4,
+            May: 5,
+            Jun: 6,
+            Jul: 7,
+            Aug: 8,
+            Sep: 9,
+            Oct: 10,
+            Nov: 11,
+            Dec: 12
+          };
+
+          const parts = String(dorStr).split(',');
+          if (parts.length !== 2) return 0;
+
+          const year = parseInt(parts[1].trim(), 10);
+          const monPart = parts[0].split('-')[0].trim();
+          const month = months[monPart];
+
+          return year * 100 + month;
+        }
+
+        function getEmpDOR(empName, station) {
+          const row = calcRows.find((r) => String(r[nameCalc]).trim() === String(empName).trim() && String(r[stationCalc]).trim() === String(station).trim());
+
+          return row ? parseDOR(row[dorIdx]) : 0;
+        }
+
+        // =========================================
+        // 🔥 SALARY MONTH VALUE
+        // =========================================
+
+        const salDate = new Date(currentMonth);
+        const salVal = salDate.getFullYear() * 100 + (salDate.getMonth() + 1);
+
+        const selectedMon = currentMonth.substring(0, 3).toUpperCase();
+
+        const dueList = [];
+        const dueSet = new Set();
+
+        rows.forEach((r) => {
+          const station = String(r[stationIdx] || '').trim();
+          if (currentStation && station !== currentStation) return;
+
+          const rowSalMonth = String(r[salMonthIdx] || '').trim();
+          if (rowSalMonth !== currentMonth) return;
+
+          const increment = String(r[incIdx] || '').trim();
+          const incMonth = increment.substring(0, 3).toUpperCase();
+
+          if (incMonth === selectedMon) {
+            const emp = String(r[nameIdx] || '').trim();
+            const hris = String(r[hrisIdx] || '').trim();
+
+            // 🔥 Skip retired employees
+            const dorVal = getEmpDOR(emp, station);
+
+            if (dorVal && dorVal < salVal) {
+              return;
+            }
+
+            const empKey = makeEmpKey(emp, hris);
+
+            if (emp && !dueSet.has(empKey)) {
+              dueSet.add(empKey);
+              dueList.push(emp);
+            }
+          }
+        });
+
+        span.innerHTML = dueList.length
+          ? `Increment Due :
+              ${dueList
+                .map(
+                  (emp) => `
+                <span style="
+                  display:inline-block;
+                  background:#dc3545;
+                  color:#fff;
+                  padding:2px 8px;
+                  margin:2px;
+                  border-radius:12px;
+                  font-weight:600;
+                  font-size:11px;
+                ">${emp}</span>
+              `
+                )
+                .join('')}`
+          : '';
       }
 
       function addMonths(val, n) {
@@ -14029,15 +14558,26 @@
         setDAPercent();
       }
 
+      // =========================================
+      // 🔥 TEMP ADD MODE TRACKERS
+      // =========================================
+      let addedPBMonth = '';
+      let previousPBMonth = '';
+
       on('PBaddBtn', 'click', async () => {
         const monthEl = id('PayBillPage_SalMonth');
         const station = id('PayBillPage_Station')?.value;
+
         if (!monthEl || !station) return;
+
         isEditMode = false;
 
-        // ================= FIRST CLICK =================
+        // =====================================
+        // 🔥 FIRST CLICK
+        // =====================================
         if (!isAddMode) {
           isAddMode = true;
+
           // 🔥 ENTER EDIT MODE UI
           document.body.classList.add('edit-mode');
 
@@ -14045,48 +14585,124 @@
           qsa('.menu-list button').forEach((btn) => {
             btn.disabled = true;
           });
-
           id('logoutBtn').disabled = true;
 
-          const currentMonth = String(monthEl.value || '').trim();
+          // =====================================
+          // 🔥 FIND LATEST MONTH FOR STATION
+          // =====================================
 
-          const nextMonth = getNextMonthStr(currentMonth);
+          const monthIdx = getColIndex(pbData.headers, 'Salary Month');
 
+          const stationIdx = getColIndex(pbData.headers, 'Pay Drawn Station');
+
+          const stationMonths = pbData.rows
+            .filter((r) => String(r[stationIdx]).trim() === String(station).trim())
+            .map((r) => parseMonthYear(r[monthIdx]))
+            .filter(Boolean);
+
+          if (!stationMonths.length) return;
+
+          const latestVal = Math.max(...stationMonths);
+
+          function monthValToStr(val) {
+            const year = Math.floor(val / 100);
+            const month = val % 100;
+
+            return new Date(year, month - 1, 1)
+              .toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric'
+              })
+              .replace(' ', '-');
+          }
+
+          const latestMonth = monthValToStr(latestVal);
+
+          const nextMonth = getNextMonthStr(latestMonth);
+
+          // 🔥 TRACK TEMP MONTH
+          previousPBMonth = latestMonth;
+          addedPBMonth = nextMonth;
+
+          // 🔥 COPY DATA
           copyPreviousMonthData(nextMonth, station);
           addNewEmployeesFromEmpDB(nextMonth, station);
 
+          // 🔥 UPDATE FILTERS
           filters.station = String(station).trim();
           filters.month = String(nextMonth).trim();
           filters.fy = getFinancialYear(nextMonth);
-
+          // 🔥 FORCE GLOBAL MONTH
+          window.forcePBMonth = nextMonth;
+          // 🔥 APPLY FILTERS
           applyFilters();
+
+          // 🔥 FORCE MONTH AFTER FILTER REBUILD
+          const el = id('PayBillPage_SalMonth');
+          if (el) {
+            // 🔥 ADD OPTION
+            const exists = [...el.options].some((o) => String(o.value).trim() === nextMonth);
+            if (!exists) {
+              el.appendChild(createEl('option', { value: nextMonth, text: nextMonth }));
+            }
+
+            // 🔥 FORCE VALUE
+            el.value = nextMonth;
+
+            // 🔥 FORCE FILTER
+            filters.month = nextMonth;
+
+            // 🔥 FORCE INDEX
+            const optionIndex = [...el.options].findIndex((o) => String(o.value).trim() === nextMonth);
+            if (optionIndex >= 0) {
+              el.selectedIndex = optionIndex;
+            }
+          }
+
+          // 🔥 REFRESH VIEW
           resetDAAInEditTables();
           refreshPBView();
 
-          const el = id('PayBillPage_SalMonth');
-
-          if (el) {
-            el.value = nextMonth;
-            el.dispatchEvent(
-              new Event('change', {
-                bubbles: true
-              })
-            );
-          }
+          // =====================================
+          // 🔥 FY DROPDOWN UPDATE
+          // =====================================
 
           updateFYDropdown(nextMonth);
+
+          // =====================================
+          // 🔥 FORCE SELECT AFTER ALL REBUILDS
+          // =====================================
+
+          setTimeout(() => {
+            const sel = id('PayBillPage_SalMonth');
+
+            if (!sel) return;
+
+            // 🔥 FIND OPTION
+            const option = [...sel.options].find((o) => String(o.value).trim() === nextMonth);
+
+            if (option) {
+              sel.value = nextMonth;
+
+              sel.selectedIndex = [...sel.options].indexOf(option);
+
+              filters.month = nextMonth;
+            }
+          }, 50);
 
           return;
         }
 
-        // ================= SAVE =================
+        // =====================================
+        // 🔥 SAVE
+        // =====================================
         setSyncStatus('pbDatabase');
-
         await savePBData('ADD');
 
-        return;
+        // 🔥 RESET TEMP TRACKERS
+        addedPBMonth = '';
+        previousPBMonth = '';
       });
-
       /* =========================
             🔥 EDIT BUTTON
             ========================= */
@@ -14199,6 +14815,41 @@
               }
             }
 
+            // =========================================
+            // 🔥 REMOVE TEMP ADDED MONTH
+            // =========================================
+
+            if (isAddMode && addedPBMonth) {
+              const monthEl = id('PayBillPage_SalMonth');
+
+              if (monthEl) {
+                const option = [...monthEl.options].find((o) => String(o.value).trim() === addedPBMonth);
+
+                // 🔥 REMOVE OPTION
+                if (option) {
+                  option.remove();
+                }
+
+                // 🔥 RESTORE OLD MONTH
+                monthEl.value = previousPBMonth;
+
+                monthEl.dispatchEvent(
+                  new Event('change', {
+                    bubbles: true
+                  })
+                );
+              }
+
+              const monthIdx = pbData.headers.indexOf('Salary Month');
+              // 🔥 REMOVE TEMP ROWS
+              pbData.rows = pbData.rows.filter((r) => String(r[monthIdx]).trim() !== addedPBMonth);
+
+              // 🔥 RESET
+              addedPBMonth = '';
+
+              previousPBMonth = '';
+            }
+
             /* =================================
             🔥 EXIT MODE
             ================================= */
@@ -14230,6 +14881,8 @@
         applyFilters();
 
         refreshPBView();
+
+        id('Inc_Note').innerHTML = '';
 
         // 🔥 FORCE REPAINT
         requestAnimationFrame(() => {
@@ -14313,12 +14966,22 @@
           // 2. Resolve HRIS
           const empName = rowObj['Employee Name'];
           const empStation = rowObj['Pay Drawn Station'];
+          // 2. Resolve HRIS
           rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
 
-          // 3. 🔥 EXCLUDE DESIGNATION FROM PAYLOAD
-          // By setting to undefined, JSON.stringify will skip this key entirely.
-          // The backend will then preserve the existing DB value automatically.
-          rowObj['Designation on Salary Month'] = undefined;
+          rowObj['HRIS'] = rowObj['HRIS'] || getHRIS(empName, empStation);
+
+          // =========================================
+          // 🔥 DESIGNATION LOGIC
+          // ADD  -> fetch from empCalc
+          // EDIT -> preserve existing DB value
+          // =========================================
+
+          if (mode === 'ADD') {
+            rowObj['Designation on Salary Month'] = getEmpDesignation(empName, empStation, rowObj['HRIS']);
+          } else {
+            delete rowObj['Designation on Salary Month'];
+          }
 
           // 4. Clean up misc
           rowObj['Arrears Details'] = rowObj['Arrears Details'] || '';
@@ -17075,41 +17738,63 @@
       function toggleSBGButtons(mode = 'default') {
         const budget = id('BudgetUnderSelect');
         const sbgindex = budget?.selectedIndex ?? -1;
-
+        const fy = id('BudgetPage_FY')?.value?.trim();
+        const isFYNotSelected = !fy || fy === 'Select FY';
         const sbgedit = id('SBGeditBtn');
         const sbgadd = id('SBGaddBtn');
         const sbgprint = id('SBGprintBtn');
         const sbgXL = id('SBGexcelBtn');
 
+        // =========================================
         // 🔄 RESET ALL FIRST
+        // =========================================
+
         if (sbgedit) sbgedit.disabled = false;
         if (sbgadd) sbgadd.disabled = false;
         if (sbgprint) sbgprint.disabled = false;
         if (sbgXL) sbgXL.disabled = false;
 
+        // =========================================
+        // 🔥 FY NOT SELECTED
+        // =========================================
+
+        if (isFYNotSelected) {
+          if (sbgprint) sbgprint.disabled = true;
+          if (sbgXL) sbgXL.disabled = true;
+        }
+
         // =========================
         // 🔴 MODE: ALL DISABLED
         // =========================
+
         if (mode === 'allDisabled') {
           if (sbgedit) sbgedit.disabled = true;
           if (sbgadd) sbgadd.disabled = true;
-          if (sbgprint) sbgprint.disabled = true;
-          if (sbgXL) sbgXL.disabled = true;
+
+          // 🔥 FY CONDITION
+          if (!isFYNotSelected) {
+            if (sbgprint) sbgprint.disabled = false;
+            if (sbgXL) sbgXL.disabled = false;
+          }
           return;
         }
 
         // =========================
-        // 🟡 MODE: NO DATA (only ADD enabled)
+        // 🟡 MODE: NO DATA
         // =========================
+
         if (mode === 'noData') {
           if (sbgindex >= 0 && sbgindex <= 8) {
             if (sbgedit) sbgedit.disabled = true;
             if (sbgadd) sbgadd.disabled = true;
-            if (sbgprint) sbgprint.disabled = true;
-            if (sbgXL) sbgXL.disabled = true;
+
+            if (!isFYNotSelected) {
+              if (sbgprint) sbgprint.disabled = false;
+              if (sbgXL) sbgXL.disabled = false;
+            }
           } else {
             if (sbgedit) sbgedit.disabled = true;
-            if (sbgadd) sbgadd.disabled = false; // ✅ only this enabled
+            if (sbgadd) sbgadd.disabled = false;
             if (sbgprint) sbgprint.disabled = true;
             if (sbgXL) sbgXL.disabled = true;
           }
@@ -17117,20 +17802,24 @@
         }
 
         // =========================
-        // 🟢 MODE: DATA EXISTS → INDEX RULE
+        // 🟢 MODE: DATA EXISTS
         // =========================
+
         if (mode === 'pbData') {
           if (sbgindex >= 0 && sbgindex <= 8) {
-            // ❌ disable all
             if (sbgedit) sbgedit.disabled = true;
             if (sbgadd) sbgadd.disabled = true;
-            if (sbgprint) sbgprint.disabled = false;
-            if (sbgXL) sbgXL.disabled = false;
+            if (!isFYNotSelected) {
+              if (sbgprint) sbgprint.disabled = false;
+              if (sbgXL) sbgXL.disabled = false;
+            }
           } else {
             if (sbgedit) sbgedit.disabled = false;
             if (sbgadd) sbgadd.disabled = false;
-            if (sbgprint) sbgprint.disabled = false;
-            if (sbgXL) sbgXL.disabled = false;
+            if (!isFYNotSelected) {
+              if (sbgprint) sbgprint.disabled = false;
+              if (sbgXL) sbgXL.disabled = false;
+            }
           }
         }
       }
@@ -19007,6 +19696,7 @@
         id(idName)?.addEventListener('change', () => {
           getBudgetFYColumns();
           renderFilterMainBudgetExpTable();
+          renderSBGDetailsTable(id('BudgetPage_Station').value, id('BudgetPage_FY').value, id('BudgetPage_Month').value);
         });
       });
       ['BudgetPage_Station', 'BudgetPage_FY'].forEach((idName) => {
@@ -19014,6 +19704,7 @@
           loadBudgetMonthDropdown();
           getBudgetFYColumns();
           renderFilterMainBudgetExpTable();
+          renderSBGDetailsTable(id('BudgetPage_Station').value, id('BudgetPage_FY').value, id('BudgetPage_Month').value);
         });
       });
 
@@ -19396,211 +20087,467 @@
         renderFilterMainBudgetExpTable();
       }
 
+      function renderSBGDetailsTable(station, fy, selectedMonth) {
+        if (!sbgData?.rows || !sbgExpData?.rows) {
+          throw new Error('Data not ready');
+        }
+
+        const table = id('SBGDetailsTable');
+        if (!table) return;
+
+        table.innerHTML = '';
+
+        // =========================================
+        // 🔥 SBG DATA
+        // =========================================
+        const headers = sbgData.headers;
+        const dataRows = sbgData.rows.slice(1);
+
+        // =========================================
+        // 🔥 FY COLUMN
+        // =========================================
+        const sbgCol = headers.findIndex((h) => String(h).includes(fy) && String(h).includes('(SBG)'));
+
+        if (sbgCol === -1) {
+          table.innerHTML = `<tr><td>No FY Data Found</td></tr>`;
+          return;
+        }
+
+        // =========================================
+        // 🔥 MONTHS
+        // =========================================
+        const monthNames = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+        const selectedMonthShort = String(selectedMonth).split('-')[0].trim();
+        const selectedMonthIndex = monthNames.findIndex((m) => m.toUpperCase() === selectedMonthShort.toUpperCase());
+
+        // =========================================
+        // 🔥 FY YEAR
+        // =========================================
+        const fyStartYear = Number(String(fy).split('-')[0]);
+
+        // =========================================
+        // 🔥 EXP DATA
+        // =========================================
+        const expHeaders = sbgExpData.headers;
+        const expRows = sbgExpData.rows;
+        const expStationIdx = expHeaders.indexOf('Station');
+        const expHeadIdx = expHeaders.indexOf('SBG Expenditure Under');
+        const expDateIdx = expHeaders.indexOf('Date');
+        const expAmountIdx = expHeaders.indexOf('Expenditure Amount (₹ in 000)');
+
+        // =========================================
+        // 🔥 ALL MONTH LOGIC
+        // =========================================
+        let isAllMonth = selectedMonthShort.toUpperCase() === 'ALL';
+        let effectiveMonthIndex = selectedMonthIndex;
+
+        if (isAllMonth) {
+          let latestFound = -1;
+          expRows.forEach((exp) => {
+            const expDate = String(exp[expDateIdx] || '').trim();
+            if (!expDate) return;
+            const parts = expDate.split('-');
+            if (parts.length !== 3) return;
+            const monthNum = Number(parts[1]);
+            const yearNum = Number(parts[2]);
+            if (isNaN(monthNum) || isNaN(yearNum)) return;
+
+            const isCurrentFY = (yearNum === fyStartYear && monthNum >= 4) || (yearNum === fyStartYear + 1 && monthNum <= 3);
+            if (!isCurrentFY) return;
+
+            const idx = monthNum >= 4 ? monthNum - 4 : monthNum + 8;
+            if (idx > latestFound) latestFound = idx;
+          });
+          effectiveMonthIndex = latestFound;
+        }
+
+        // =========================================
+        // 🔥 DISPLAY MONTH
+        // =========================================
+        let displayMonth = selectedMonth;
+        if (isAllMonth && effectiveMonthIndex >= 0) {
+          displayMonth = `${monthNames[effectiveMonthIndex]}-${fyStartYear}`;
+          if (effectiveMonthIndex >= 9) {
+            displayMonth = `${monthNames[effectiveMonthIndex]}-${fyStartYear + 1}`;
+          }
+        }
+
+        // =========================================
+        // 🔥 TABLE HEADER
+        // =========================================
+        let html = `
+          <colgroup>
+            <col style="width:5%"><col style="width:35%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:8%">
+          </colgroup>
+          <thead>
+            <div style="font-size:12px;font-weight:bold;border:none;text-align:right;position:absolute;top:0;right:2px">${station} ${fy}</div>
+            <tr><th colspan="7" style="border:none;font-size:12px;padding:0">प्रसार भारती / PRASAR BHARATI</th></tr>
+            <tr><th colspan="7" style="border:none;padding:0">भारत के लोक सेवा प्रसारक / INDIA'S PUBLIC SERVICE BROADCASTER</th></tr>
+            <tr><th colspan="7" style="border:none;font-size:12px;padding:0">आकाशवाणी धारवाड़ / AKASHAVANI DHARWAD - 580 008</th></tr>
+            <tr class="sbg-title-row">
+              <th colspan="7" style="text-align:center;font-weight:bold;border:none;height:50px;padding-bottom:5px">
+                STATEMENT SHOWING CONSOLIDATED MONTHLY EXPENDITURE UPTO THE MONTH OF : ${displayMonth}<br>
+                IN RESPECT OF DG : AIR STATIONS / OFFICES
+              </th>
+            </tr>
+            <tr class="sbg-header-row">
+              <th style="font-weight:900;border:1px solid #000;">SL. No.</th>
+              <th style="font-weight:900;border:1px solid #000;">SUB HEADS</th>
+              <th style="font-weight:900;border:1px solid #000;">SBG <br>${fy}</th>
+              <th style="font-weight:900;border:1px solid #000;">EXPDT. UPTO<br> PREV.MONTH</th>
+              <th style="font-weight:900;border:1px solid #000;">EXPDT. DURING <br>THE MONTH</th>
+              <th style="font-weight:900;border:1px solid #000;">PROG. <br>EXPENDITURE</th>
+              <th style="font-weight:900;border:1px solid #000;">% of <br>EXPDT.</th>
+            </tr>
+          </thead>
+          <tbody>
+        `;
+
+        const groups = [
+          {
+            title: 'A) Salary',
+            subGroups: [
+              { title: 'I) For Govt. Employees', start: 0, end: 2, totalTitle: 'Total (I)' },
+              { title: 'II) For PB Employees', start: 3, end: 7, totalTitle: 'Total (II)' }
+            ],
+            finalTotalTitle: 'Sub-Total (A)'
+          },
+          { title: 'B) Other Admn Expenditure (IEBR)', start: 8, end: 28, finalTotalTitle: 'Sub-Total (B)' },
+          { title: 'C) Programme Expenses', start: 29, end: 35, finalTotalTitle: 'Sub-Total (C)' }
+        ];
+
+        function calcRowValues(row) {
+          const budgetHead = String(row[0] || '').trim();
+          const sbgValue = Number(row[sbgCol]) || 0;
+          let previousUsed = 0,
+            currentMonthUsed = 0;
+
+          expRows.forEach((exp) => {
+            const expStation = String(exp[expStationIdx] || '').trim();
+            const expHead = String(exp[expHeadIdx] || '').trim();
+            const amount = Number(exp[expAmountIdx]) || 0;
+
+            if (expStation !== String(station).trim() || expHead !== budgetHead) return;
+
+            const expDate = String(exp[expDateIdx] || '').trim();
+            if (!expDate) return;
+
+            const parts = expDate.split('-');
+            if (parts.length !== 3) return;
+
+            const monthNum = Number(parts[1]);
+            const yearNum = Number(parts[2]);
+            const isCurrentFY = (yearNum === fyStartYear && monthNum >= 4) || (yearNum === fyStartYear + 1 && monthNum <= 3);
+            if (!isCurrentFY) return;
+
+            const expMonthIndex = monthNum >= 4 ? monthNum - 4 : monthNum + 8;
+            if (expMonthIndex < effectiveMonthIndex) previousUsed += amount;
+            if (expMonthIndex === effectiveMonthIndex) currentMonthUsed += amount;
+          });
+
+          return {
+            sbgValue,
+            previousUsed,
+            currentMonthUsed,
+            progressive: previousUsed + currentMonthUsed,
+            percent: sbgValue > 0 ? ((previousUsed + currentMonthUsed) / sbgValue) * 100 : 0
+          };
+        }
+
+        function renderTotalRow(title, totals, isGrand = false) {
+          html += `
+            <tr class="${isGrand ? 'sbg-grand-total-row' : 'sbg-subtotal-row'}">
+              <td></td>
+              <td style="font-weight:900;border:2px solid #000;">${title}</td>
+              <td style="font-weight:900;border:2px solid #000;">${totals.sbg.toFixed(0)}</td>
+              <td style="font-weight:900;border:2px solid #000;">${totals.prev.toFixed(1)}</td>
+              <td style="font-weight:900;border:2px solid #000;">${totals.current.toFixed(1)}</td>
+              <td style="font-weight:900;border:2px solid #000;">${totals.prog.toFixed(1)}</td>
+              <td style="font-weight:900;border:2px solid #000;"></td>
+            </tr>
+          `;
+        }
+
+        let grandTotals = { sbg: 0, prev: 0, current: 0, prog: 0 };
+
+        groups.forEach((group) => {
+          html += `<tr class="sbg-main-category"><td colspan="7" style="font-weight:900;border:2px solid #000;background:#f3f3f3;">${group.title}</td></tr>`;
+          let groupTotals = { sbg: 0, prev: 0, current: 0, prog: 0 };
+
+          if (group.subGroups) {
+            group.subGroups.forEach((sub) => {
+              html += `<tr class="sbg-sub-header"><td colspan="7" style="font-weight:900;border:2px solid #000;background:#fafafa;">${sub.title}</td></tr>`;
+              let subTotals = { sbg: 0, prev: 0, current: 0, prog: 0 };
+
+              for (let i = sub.start; i <= sub.end; i++) {
+                const row = dataRows[i];
+                if (!row) continue;
+                const vals = calcRowValues(row);
+                subTotals.sbg += vals.sbgValue;
+                subTotals.prev += vals.previousUsed;
+                subTotals.current += vals.currentMonthUsed;
+                subTotals.prog += vals.progressive;
+                groupTotals.sbg += vals.sbgValue;
+                groupTotals.prev += vals.previousUsed;
+                groupTotals.current += vals.currentMonthUsed;
+                groupTotals.prog += vals.progressive;
+                grandTotals.sbg += vals.sbgValue;
+                grandTotals.prev += vals.previousUsed;
+                grandTotals.current += vals.currentMonthUsed;
+                grandTotals.prog += vals.progressive;
+                html += `<tr><td>${i + 1}</td><td class="budget-name">${row[0]}</td><td>${vals.sbgValue.toFixed(0)}</td><td>${vals.previousUsed.toFixed(1)}</td><td>${vals.currentMonthUsed.toFixed(1)}</td><td>${vals.progressive.toFixed(1)}</td><td>${vals.percent.toFixed(2)}%</td></tr>`;
+              }
+              renderTotalRow(sub.totalTitle, subTotals);
+            });
+          } else {
+            for (let i = group.start; i <= group.end; i++) {
+              const row = dataRows[i];
+              if (!row) continue;
+              const vals = calcRowValues(row);
+              groupTotals.sbg += vals.sbgValue;
+              groupTotals.prev += vals.previousUsed;
+              groupTotals.current += vals.currentMonthUsed;
+              groupTotals.prog += vals.progressive;
+              grandTotals.sbg += vals.sbgValue;
+              grandTotals.prev += vals.previousUsed;
+              grandTotals.current += vals.currentMonthUsed;
+              grandTotals.prog += vals.progressive;
+              html += `<tr><td>${i + 1}</td><td class="budget-name">${row[0]}</td><td>${vals.sbgValue.toFixed(0)}</td><td>${vals.previousUsed.toFixed(1)}</td><td>${vals.currentMonthUsed.toFixed(1)}</td><td>${vals.progressive.toFixed(1)}</td><td>${vals.percent.toFixed(2)}%</td></tr>`;
+            }
+          }
+          renderTotalRow(group.finalTotalTitle, groupTotals);
+        });
+
+        const serviceTaxRow = dataRows[36];
+        if (serviceTaxRow) {
+          const vals = calcRowValues(serviceTaxRow);
+          grandTotals.sbg += vals.sbgValue;
+          grandTotals.prev += vals.previousUsed;
+          grandTotals.current += vals.currentMonthUsed;
+          grandTotals.prog += vals.progressive;
+          html += `<tr class="sbg-main-category"><td colspan="7" style="font-weight:900;border:2px solid #000;background:#f3f3f3;">D) Service Tax</td></tr><tr><td>37</td><td>${serviceTaxRow[0]}</td><td>${vals.sbgValue.toFixed(0)}</td><td>${vals.previousUsed.toFixed(1)}</td><td>${vals.currentMonthUsed.toFixed(1)}</td><td>${vals.progressive.toFixed(1)}</td><td>${vals.percent.toFixed(2)}%</td></tr>`;
+        }
+
+        let cGroup = groups.find((g) => g.title === 'C) Programme Expenses');
+        let cTotals = { sbg: 0, prev: 0, current: 0, prog: 0 };
+        if (cGroup) {
+          for (let i = cGroup.start; i <= cGroup.end; i++) {
+            const vals = calcRowValues(dataRows[i]);
+            cTotals.sbg += vals.sbgValue;
+            cTotals.prev += vals.previousUsed;
+            cTotals.current += vals.currentMonthUsed;
+            cTotals.prog += vals.progressive;
+          }
+        }
+        if (serviceTaxRow) {
+          const dVals = calcRowValues(serviceTaxRow);
+          cTotals.sbg += dVals.sbgValue;
+          cTotals.prev += dVals.previousUsed;
+          cTotals.current += dVals.currentMonthUsed;
+          cTotals.prog += dVals.progressive;
+        }
+        renderTotalRow('Sub total Programming Exps. (C + D)', cTotals);
+        renderTotalRow('TOTAL (A + B + C + D)', grandTotals, true);
+        html += `</tbody>`;
+        table.innerHTML = html;
+      }
+
       async function buildBudgetHTML() {
-        const wrapper = id('BudgetTableWrapper');
         const budget = id('BudgetUnderSelect')?.value || '';
         const station = id('BudgetPage_Station')?.value;
         const fy = id('BudgetPage_FY')?.value;
-        if (!wrapper) return '';
+        const wrapper = id('SBGDetailsTableWrapper');
 
-        const table = wrapper.querySelector('table');
-        if (!table) {
+        if (!wrapper) {
           showCustomAlert('🚫 No data to print');
           return '';
         }
 
-        const doc = document.implementation.createHTMLDocument('SBG Expenditure');
+        const doc = document.implementation.createHTMLDocument('SBG Expenditure Statement');
 
+        // =========================================
         // 🔥 COPY STYLES
+        // =========================================
+
         qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
             doc.head.appendChild(el.cloneNode(true));
           } catch {}
         });
 
+        // =========================================
         // 🔥 PRINT CSS
+        // =========================================
+
         const style = doc.createElement('style');
+
         style.textContent = `
-              @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm; background: white; }
 
-              body {
-                margin: 0;
-                font-size: 10px;
-                background: white;
-                border-radius: 0 !important;
-              }
+          @page {
+            size: A4 portrait;
+            margin: 5mm 5mm 5mm 5mm;
+            background: white;
+          }
 
-              .page {
-                margin: 0 auto;
-                padding-right: 2mm;
-                background: white;
-                border-radius: 0 !important;
-                padding-top: 10mm;
-              }
+          body {
+            margin: 0;
+            font-size: 10px;
+            background: white;
+            border-radius: 0 !important;
+          }
 
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                border: 1px solid gray;
-                background: white;
-                border-radius: 0 !important;
-              }
+          .page {
+            margin: 0 auto;
+            padding-right: 2mm;
+            background: white;
+            border-radius: 0 !important;
+            padding-top: 10mm;
+          }
 
-              td, th {
-                padding: 4px;
-                font-size: 10px;
-                background: white;
-                border-radius: 0 !important;
-              }
+          #SBGDetailsTable,
+          .SBGprint-table,
+          table {
 
-              .print-header {
-                border: none;
-              }
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0 !important;
+            display: table !important;
+            visibility: visible !important;
 
-              div {
-                border: none;
-                border-radius: 0 !important;
-              }
+          }
 
-              /* 🔥 CONTROL COLUMN WIDTHS */
-              .SBGprint-table col:nth-child(1) { width: 10% !important; }
-              .SBGprint-table col:nth-child(2) { width: 20% !important; }
-              .SBGprint-table col:nth-child(3) { width: 40% !important; }
-              .SBGprint-table col:nth-child(4) { width: 15% !important; }
-              .SBGprint-table col:nth-child(5) { width: 15% !important; }
+          th {
+            font-size: 10px !important;
+            background: white;
+            border-radius: 0 !important;
+          }
 
-              /* 🔥 HIDE 4th COLUMN (Budget column) */
-              .SBGprint-table th:nth-child(4),
-              .SBGprint-table td:nth-child(4),
-              .SBGprint-table th:nth-child(9),
-              .SBGprint-table td:nth-child(9),
-              .SBGprint-table th:nth-child(7),
-              .SBGprint-table td:nth-child(7),
-              .SBGprint-table th:nth-child(2),
-              .SBGprint-table td:nth-child(2)  {
-                display: none !important;
-              }
+          td {
+            padding: 2px !important;
+            font-size: 10px !important;
+            background: white;
+            border-radius: 0 !important;
+            max-height:20px;
+          }
 
-              /* 🔥 FORCE REMOVE FROM ALL ELEMENTS */
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                border-radius: 0 !important;
-              }
+          div {
+            border: none;
+            border-radius: 0 !important;
+          }
 
-              /* 🔥 EXTRA STRONG FIX (IMPORTANT) */
-              table, tr, td, th {
-                border-radius: 0 !important;
-              }
+          /* 🔥 COLUMN WIDTHS */
 
-              /* 🔥 HEADER (TOP LEFT) */
-              .print-top-header {
-                position: fixed;
-                top: 5mm;
-                left: 5mm;
-                font-size: 9px;
-                font-style: italic;
-                color: #808080;
-              }
+          .SBGprint-table col:nth-child(1) {
+            width: 7% !important;
+          }
 
-              /* 🔹 FOOTER CONTAINER */
-            .print-footer {
-              position: fixed;
-              bottom: 5mm;
-              right: 5mm;   /* ✅ push to right */
-              width: auto;  /* ✅ IMPORTANT */
-              font-size: 9px;
-              color: #808080;
-              text-align: right;
-            }
+          .SBGprint-table col:nth-child(2) {
+            width: 33% !important;
+          }
 
-            /* 🔹 REMOVE absolute positioning (if any) */
-            .print-footer-right {
-              position: static !important;
-            }
-            `;
+          .SBGprint-table col:nth-child(3),
+          .SBGprint-table col:nth-child(4),
+          .SBGprint-table col:nth-child(5),
+          .SBGprint-table col:nth-child(6),
+          .SBGprint-table col:nth-child(7) {
+            width: 12% !important;
+          }
+
+          /* 🔥 FORCE REMOVE */
+
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            border-radius: 0 !important;
+          }
+
+          table,
+          tr,
+          td,
+          th {
+            border-radius: 0 !important;
+          }
+
+          /* 🔥 TOTALS */
+
+          .sbg-subtotal-row td,
+          .sbg-grand-total-row td {
+
+            font-weight: 900 !important;
+            border: 2px solid #000 !important;
+
+          }
+
+          /* 🔥 MAIN HEADER */
+
+          .sbg-main-category td {
+
+            font-weight: 900 !important;
+            border: 2px solid #000 !important;
+            background: #f3f3f3 !important;
+
+          }
+
+          /* 🔥 SUB HEADER */
+
+          .sbg-sub-header td {
+
+            font-weight: 900 !important;
+            border: 2px solid #000 !important;
+            background: #fafafa !important;
+
+          }
+
+        `;
+
         doc.head.appendChild(style);
 
-        // 🔥 CLONE TABLE
-        const clone = table.cloneNode(true);
-        clone.classList.add('SBGprint-table');
-        removeNumberFormatting(clone);
+        // =========================================
+        // 🔥 CLONE WRAPPER
+        // =========================================
 
+        const clone = wrapper.cloneNode(true);
+
+        clone.classList.add('SBGprint-table-wrapper');
+
+        // 🔥 FORCE SHOW WRAPPER
+        clone.style.display = 'block';
+        clone.style.visibility = 'visible';
+        clone.hidden = false;
+
+        // 🔥 FORCE SHOW TABLE
+        clone.querySelector('#SBGDetailsTable')?.style.setProperty('display', 'table', 'important');
+
+        clone.querySelectorAll('*').forEach((el) => {
+          if (getComputedStyle(el).display === 'none') {
+            el.style.display = '';
+          }
+          el.hidden = false;
+        });
+
+        // REMOVE PRINT BLOCKS
         clone.querySelectorAll('.no-print').forEach((el) => el.remove());
 
+        // =========================================
         // 🔥 PAGE
+        // =========================================
+
         const page = doc.createElement('div');
         page.className = 'page';
-
-        const header = buildPrintHeader(doc, station);
-        header.classList.add('print-header');
-
-        // 🔥 CUSTOM SUB HEADER
-        //const subHeader = doc.createElement('div');
-        //subHeader.style.textAlign = 'center';
-        //subHeader.style.fontWeight = 'bold';
-        //subHeader.style.margin = '5px 0 10px 0';
-
-        //subHeader.textContent = `Details of Expenditure under ${budget} for the FY-${fy}`;
-
-        function getInputValue(idName) {
-          const el = document.getElementById(idName);
-          return el?.value || '0';
-        }
-
-        const sanctioned = getInputValue('SBGsanctioned');
-        const utilised = getInputValue('SBGutilised');
-        const available = getInputValue('SBGavailable');
-
-        const summaryTable = doc.createElement('table');
-        summaryTable.style.width = '100%';
-        summaryTable.style.margin = '5px 0 10px 0';
-        summaryTable.style.borderCollapse = 'collapse';
-
-        summaryTable.innerHTML = `
-                  <tr style="font-weight:bold; text-align:center;">
-                    <td style="text-align:right">SBG Sanctioned :</td>
-                    <td style="text-align:left">${sanctioned}</td>
-                    <td style="text-align:right">SBG Utilised :</td>
-                    <td style="text-align:left">${utilised}</td>
-                    <td style="text-align:right">SBG Available :</td>
-                    <td style="text-align:left">${available}</td>
-                  </tr>
-                `;
-
-        // 🔥 APPEND
-        page.appendChild(header);
-        //page.appendChild(subHeader);
-        page.appendChild(summaryTable);
         page.appendChild(clone);
 
-        // 🔥 FILE NAME (same as Excel)
+        // =========================================
+        // 🔥 FILE NAME
+        // =========================================
+
         const fileName = `${station}-${budget}-${fy}-SBG`;
-
-        // 🔹 HEADER (TOP LEFT)
-        const topHeader = doc.createElement('div');
-        topHeader.className = 'print-top-header';
-        topHeader.textContent = fileName;
-
-        // 🔹 FOOTER (RIGHT ONLY)
-        const footer = doc.createElement('div');
-        footer.className = 'print-footer';
-
-        footer.textContent = 'Generated on ' + new Date().toLocaleDateString('en-GB');
-
-        doc.body.appendChild(footer);
-
-        // 🔹 APPEND
-        doc.body.appendChild(topHeader);
-        doc.body.appendChild(footer);
-
-        // ADD TO DOC
-        doc.body.appendChild(topHeader);
-        doc.body.appendChild(footer);
-
         doc.body.appendChild(page);
 
-        // ✅ RETURN HTML (CRITICAL FIX)
+        // =========================================
+        // ✅ RETURN HTML
+        // =========================================
+
         return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
       }
 
@@ -19622,366 +20569,298 @@
       });
 
       async function exportSBGExcel() {
+        // =========================================
+        // 🔥 WORKBOOK
+        // =========================================
         const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Prasar Bharati';
+        workbook.company = 'Akashavani';
+        workbook.calcProperties.fullCalcOnLoad = true;
 
-        const wrapper = id('BudgetTableWrapper');
+        const wrapper = id('SBGDetailsTableWrapper');
         if (!wrapper) return;
+
+        // =========================================
+        // 🔥 FORCE SHOW WRAPPER
+        // =========================================
+        const prevDisplay = wrapper.style.display;
+        wrapper.style.display = 'block';
 
         const table = wrapper.querySelector('table');
         if (!table) {
           showCustomAlert('🚫 No data to export');
+          wrapper.style.display = prevDisplay;
           return;
         }
 
         const station = id('BudgetPage_Station')?.value || '';
-        const budget = id('BudgetUnderSelect')?.value || '';
         const fy = id('BudgetPage_FY')?.value || '';
+        const fileName = `${station}-SBG-${fy}.xlsx`;
 
-        const getVal = (idName) => document.getElementById(idName)?.value || '0';
-
-        const sanctioned = getVal('SBGsanctioned');
-        const utilised = getVal('SBGutilised');
-        const available = getVal('SBGavailable');
-
+        // =========================================
+        // 🔥 SHEET
+        // =========================================
         const sheet = workbook.addWorksheet('SBG Expenditure');
+        sheet.properties.defaultRowHeight = 17;
+        sheet.columns = [{ width: 6 }, { width: 55 }, { width: 17 }, { width: 17 }, { width: 17 }, { width: 17 }, { width: 10 }];
 
-        sheet.properties.defaultRowHeight = 18;
+        // =========================================
+        // 🔥 BORDER
+        // =========================================
+        const FULL_BORDER = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
 
-        // =========================
-        // 🔥 HELPERS (COLOR)
-        // =========================
-        function isValidFill(bg) {
-          if (!bg) return false;
-          if (bg === 'transparent') return false;
-          if (bg.includes('rgba') && bg.endsWith(', 0)')) return false;
-
-          const m = bg.match(/\d+/g);
-          if (!m || m.length < 3) return false;
-
-          const [r, g, b] = m.map(Number);
-
-          // ❌ skip black
-          if (r === 0 && g === 0 && b === 0) return false;
-
-          return true;
-        }
-
-        function rgbToARGB(rgb) {
-          const m = rgb.match(/\d+/g);
-          if (!m || m.length < 3) return null;
-
-          const [r, g, b] = m.map(Number);
-
-          // ❌ skip black
-          if (r === 0 && g === 0 && b === 0) return null;
-
-          return 'FF' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
-        }
-
-        function getFontColor(color) {
-          const m = color?.match(/\d+/g);
-          if (!m || m.length < 3) return undefined;
-
-          const [r, g, b] = m.map(Number);
-
-          // skip black (default)
-          if (r === 0 && g === 0 && b === 0) return undefined;
-
-          return {
-            argb: 'FF' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
-          };
-        }
-
+        // =========================================
+        // 🔥 HELPERS
+        // =========================================
         function parseValue(text) {
-          if (!text) return ' ';
-          const clean = text.replace(/[,₹\s]/g, '');
+          if (!text) return '';
+          const clean = text.replace(/[,₹%]/g, '').trim();
           return !isNaN(clean) && clean !== '' ? Number(clean) : text;
         }
 
-        function isMerged(sheet, row, col) {
-          const cell = sheet.getCell(row, col);
-          return !!cell.master && cell.master !== cell;
-        }
-
-        function getEffectiveBackground(cell) {
-          let bg = window.getComputedStyle(cell).backgroundColor;
-
-          if (bg && bg !== 'transparent' && !bg.includes('rgba(0, 0, 0, 0)')) {
-            return bg;
-          }
-
-          const tr = cell.closest('tr');
-          if (tr) {
-            bg = window.getComputedStyle(tr).backgroundColor;
-            if (bg && bg !== 'transparent' && !bg.includes('rgba(0, 0, 0, 0)')) {
-              return bg;
-            }
-          }
-
-          const table = cell.closest('table');
-          if (table) {
-            bg = window.getComputedStyle(table).backgroundColor;
-            if (bg && bg !== 'transparent' && !bg.includes('rgba(0, 0, 0, 0)')) {
-              return bg;
-            }
-          }
-
-          return null;
-        }
-
-        // =========================
-        // 🔥 HEADER
-        // =========================
-        sheet.mergeCells(1, 1, 1, 5);
-
-        const headerCell = sheet.getCell(1, 1);
-
-        headerCell.value = {
+        // =========================================
+        // 🔥 MANUAL HEADER ROWS 1-4
+        // =========================================
+        sheet.mergeCells('A1:G1');
+        const r1 = sheet.getCell('A1');
+        r1.value = {
           richText: [
-            { text: 'PRASAR BHARATI\n', font: { bold: true, size: 12 } },
-            {
-              text: "INDIA'S PUBLIC SERVICE BROADCASTER\n",
-              font: { bold: true, size: 12 }
-            },
-            { text: 'ALL INDIA RADIO\n', font: { bold: true, size: 12 } },
-            { text: `${station}`, font: { bold: true, size: 12 } }
+            { text: 'प्रसार भारती ', font: { bold: true, size: 12, name: 'Mangal' } },
+            { text: '/ PRASAR BHARATI', font: { bold: true, size: 12, name: 'Calibri' } }
           ]
         };
+        r1.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        headerCell.alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-          wrapText: true
+        sheet.mergeCells('A2:G2');
+        const r2 = sheet.getCell('A2');
+        r2.value = {
+          richText: [
+            { text: 'भारत के लोक सेवा प्रसारक ', font: { bold: true, size: 12, name: 'Mangal' } },
+            { text: "/ INDIA'S PUBLIC SERVICE BROADCASTER", font: { bold: true, size: 12, name: 'Calibri' } }
+          ]
         };
+        r2.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        headerCell.border = {
-          bottom: { style: 'medium', color: { argb: 'FF000000' } }
+        sheet.mergeCells('A3:G3');
+        const r3 = sheet.getCell('A3');
+        r3.value = {
+          richText: [
+            { text: 'आकाशवाणी धारवाड़ ', font: { bold: true, size: 12, name: 'Mangal' } },
+            { text: '/ AKASHAVANI DHARWAD - 580 008', font: { bold: true, size: 12, name: 'Calibri' } }
+          ]
         };
+        r3.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        sheet.getRow(1).height = 78;
-        sheet.getRow(2).height = 25;
+        const htmlRow4 = table.querySelectorAll('tr')[3];
+        const htmlRow4Text = htmlRow4?.innerText?.trim() || '';
 
-        // =========================
-        // 🔥 LOGO
-        // =========================
-        const base64 = await urlToBase64('https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l');
+        sheet.mergeCells('A4:E4');
+        const r4 = sheet.getCell('A4');
+        r4.value = htmlRow4Text;
+        r4.font = { bold: true, size: 12, name: 'Calibri' };
+        r4.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-        const imageId = workbook.addImage({
-          base64,
-          extension: 'png'
-        });
+        sheet.mergeCells('F4:G4');
+        const r4Right = sheet.getCell('F4');
+        r4Right.value = `${station}\n${fy}`;
+        r4Right.font = { bold: true, size: 12, name: 'Calibri' };
+        r4Right.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-        sheet.addImage(imageId, {
-          tl: { col: 0.2, row: 0 },
-          ext: { width: 60, height: 60 }
-        });
+        sheet.getRow(1).height = 16;
+        sheet.getRow(2).height = 16;
+        sheet.getRow(3).height = 16;
+        sheet.getRow(4).height = 70;
 
-        // =========================
-        // 🔥 SUB HEADER
-        // =========================
-        sheet.mergeCells(2, 1, 2, 5);
+        // =========================================
+        // 🔥 START TABLE FROM ROW 5
+        // =========================================
+        const rows = table.querySelectorAll('tr');
+        let excelRowIndex = 5;
 
-        const subCell = sheet.getCell(2, 1);
-        subCell.value = `Details of Expenditure under ${budget} for the FY-${fy}`;
-        subCell.font = { bold: true };
-        subCell.alignment = { horizontal: 'center', wrapText: true };
-
-        // =========================
-        // 🔥 SUMMARY ROW
-        // =========================
-        sheet.getCell('A3').value = 'SBG Sanctioned';
-        sheet.getCell('C3').value = 'SBG Utilised';
-        sheet.getCell('D3').value = 'SBG Available';
-
-        // 🔥 MERGE CELLS
-        sheet.mergeCells('A3:B3');
-        sheet.mergeCells('D3:E3');
-
-        // 🔥 STYLE
-        ['A3', 'C3', 'D3'].forEach((cell) => {
-          const c = sheet.getCell(cell);
-          c.font = { bold: true };
-          c.alignment = { horizontal: 'center', vertical: 'middle' };
-          c.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-        });
-
-        // =========================
-        // 🔥 SUMMARY VALUE ROW (ROW 4)
-        // =========================
-        sheet.getCell('A4').value = CurrencytoNum(sanctioned);
-        sheet.getCell('C4').value = CurrencytoNum(utilised);
-        sheet.getCell('D4').value = CurrencytoNum(available);
-
-        // 🔥 MERGE
-        sheet.mergeCells('A4:B4');
-        sheet.mergeCells('D4:E4');
-
-        // 🔥 STYLE VALUES
-        ['A4', 'C4', 'D4'].forEach((cell) => {
-          const c = sheet.getCell(cell);
-          c.alignment = { horizontal: 'center', vertical: 'middle' };
-          c.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-        });
-
-        // 🔥 NEXT ROW START
-        let currentRow = 6;
-
-        // =========================
-        // 🔥 TABLE DATA
-        // =========================
-        // 🔥 SKIP CUSTOM TITLE ROW
-        const rows = table.querySelectorAll('tr:not(.SBGreport-header)');
-
-        rows.forEach((tr) => {
+        rows.forEach((tr, trIndex) => {
+          if (trIndex < 4) return;
           const cells = tr.querySelectorAll('th, td');
-          const excelRow = sheet.getRow(currentRow++);
+          if (!cells.length) return;
 
-          let colPointer = 1;
+          const excelRow = sheet.getRow(excelRowIndex++);
+          let colIndex = 1;
 
-          cells.forEach((cell, colIndex) => {
-            if (colIndex === 1 || colIndex === 3 || colIndex === 6 || colIndex === 8) return;
+          cells.forEach((cell) => {
+            const colspan = Number(cell.getAttribute('colspan') || 1);
+            const rowspan = Number(cell.getAttribute('rowspan') || 1);
 
-            let text = cell.innerText.trim().replace(/[,₹]/g, '');
-
-            // 🔥 KEEP EMPTY BILL/INVOICE EMPTY
-            let value = text;
-
-            // 🔥 convert only real numbers
-            if (text !== '' && !isNaN(text)) {
-              value = Number(text);
-            }
-
-            const c = excelRow.getCell(colPointer++);
-            c.value = value;
-
+            while (excelRow.getCell(colIndex).value !== null) colIndex++;
+            const excelCell = excelRow.getCell(colIndex);
+            const text = cell.innerText.trim();
             const cs = getComputedStyle(cell);
 
-            // FONT COLOR
-            const fontColor = getFontColor(cs.color);
-            c.font = {
-              name: 'Calibri',
-              size: 11,
-              bold: cs.fontWeight === 'bold' || parseInt(cs.fontWeight) >= 600,
-              ...(fontColor ? { color: fontColor } : {})
-            };
+            excelCell.value = parseValue(text);
+            excelCell.font = { name: 'Calibri', size: 12, bold: parseInt(cs.fontWeight) >= 600 };
+            excelCell.alignment = { vertical: 'middle', horizontal: isNaN(Number(text.replace(/[,₹%]/g, ''))) ? 'left' : 'right', wrapText: true };
 
-            // FORCE RED CLASS
-            if (cell.querySelector('.print-red')) {
-              c.font = {
-                ...(c.font || {}),
-                color: { argb: 'FFFF0000' },
-                bold: true
-              };
-            }
+            const isMainHeader = tr.classList.contains('sbg-main-category');
+            const isSubHeader = tr.classList.contains('sbg-sub-header');
+            const isSubtotal = tr.classList.contains('sbg-subtotal-row');
+            const isGrandTotal = tr.classList.contains('sbg-grand-total-row');
+            const isHeaderRow = tr.classList.contains('sbg-header-row');
 
-            // BACKGROUND
-            const bg = getEffectiveBackground(cell);
-            if (isValidFill(bg)) {
-              const argb = rgbToARGB(bg);
-              if (argb) {
-                c.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb }
-                };
+            let borderStyle = isMainHeader || isSubHeader || isSubtotal || isGrandTotal ? 'medium' : 'thin';
+            const borderObj = { top: { style: borderStyle, color: { argb: 'FF000000' } }, bottom: { style: borderStyle, color: { argb: 'FF000000' } }, left: { style: borderStyle, color: { argb: 'FF000000' } }, right: { style: borderStyle, color: { argb: 'FF000000' } } };
+            excelCell.border = borderObj;
+
+            if (colspan > 1 || rowspan > 1) {
+              sheet.mergeCells(excelRow.number, colIndex, excelRow.number + rowspan - 1, colIndex + colspan - 1);
+              for (let r = excelRow.number; r <= excelRow.number + rowspan - 1; r++) {
+                for (let c = colIndex; c <= colIndex + colspan - 1; c++) {
+                  sheet.getCell(r, c).border = borderObj;
+                }
               }
             }
-
-            c.alignment = {
-              vertical: 'middle',
-              horizontal: colPointer > 4 ? 'right' : 'left',
-              wrapText: true
-            };
-
-            c.border = {
-              top: { style: 'thin' },
-              bottom: { style: 'thin' },
-              left: { style: 'thin' },
-              right: { style: 'thin' }
-            };
+            colIndex += colspan;
           });
 
-          // FIX HEADER ROW WITHOUT OVERRITING COLORS
-          if (tr.querySelector('th')) {
-            excelRow.eachCell((cell) => {
-              cell.font = {
-                ...(cell.font || {}),
-                bold: true
-              };
-              cell.alignment = {
-                horizontal: 'center',
-                vertical: 'middle',
-                wrapText: true
-              };
-            });
-          }
-
-          // 🔥 FIX WRAP ISSUE
-          excelRow.height = 22;
+          excelRow.height = excelRow.number === 5 ? 32 : 16;
         });
 
-        // 🔥 ALLOW AUTO HEIGHT AFTER RENDER
-        sheet.eachRow((row, rowNumber) => {
-          if (rowNumber >= 6) row.height = undefined;
-        });
-
-        // =========================
-        // 🔥 COLUMN WIDTH
-        // =========================
-        sheet.columns = [{ width: 12 }, { width: 28 }, { width: 55 }, { width: 18 }, { width: 20 }];
-
-        // =========================
-        // 🔥 PRINT SETUP
-        // =========================
-        const lastRow = currentRow - 1;
-
-        sheet.pageSetup = {
-          paperSize: 9, // 🔥 A4
-          orientation: 'portrait',
-          //scale: 100,
-          horizontalCentered: true,
-          verticalCentered: false,
-          fitToPage: true,
-          fitToWidth: 1,
-          //fitToHeight: false,
-          fitToHeight: 999,
-          margins: {
-            left: 0.3,
-            right: 0.3,
-            top: 0.5,
-            bottom: 0.5,
-            header: 0.3,
-            footer: 0.3
-          },
-          printArea: `A1:E${lastRow}`
-        };
-
-        const fileName = `${station}-${budget}-FY-${fy}-SBG.xlsx`;
+        // =========================================
+        // 🔥 PAGE SETUP
+        // =========================================
+        sheet.views = [{ showGridLines: false }];
+        sheet.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printArea: `A1:G${excelRowIndex - 1}`, margins: { left: 0.25, right: 0.25, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }, horizontalCentered: true, verticalCentered: false };
+        sheet.pageSetup.printTitlesRow = '1:5';
 
         sheet.headerFooter = {
-          differentFirst: false,
-          differentOddEven: false,
-
-          // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
           oddHeader: '&L&K808080&"Calibri,Italic"&10' + fileName.replace('.xlsx', ''),
-
-          // 🔹 FOOTER
           oddFooter: '&CPage &P of &N' + '&R&K808080Generated on ' + new Date().toLocaleDateString('en-GB')
         };
 
-        const buffer = await workbook.xlsx.writeBuffer();
+        // =========================================
+        // 🔥 DETAIL SHEETS FOR ALL BUDGETS
+        // =========================================
+        const expHeaders = sbgExpData.headers;
+        const expRows = sbgExpData.rows;
+        const idx = {
+          station: expHeaders.indexOf('Station'),
+          budget: expHeaders.indexOf('SBG Expenditure Under'),
+          date: expHeaders.indexOf('Date'),
+          bill: expHeaders.indexOf('Bill / Invoice Details'),
+          details: expHeaders.indexOf('Expenditure Details'),
+          amount: expHeaders.indexOf('Expenditure Amount (₹ in 000)'),
+          cumulative: expHeaders.indexOf('Cumulative Sum of Expenditure (₹ in 000)')
+        };
 
-        saveAs(new Blob([buffer]), `${fileName}`);
+        const sbgRows = sbgData.rows.slice(1);
+        const serialMap = {};
+        sbgRows.forEach((r, i) => {
+          serialMap[String(r[0]).trim()] = i + 1;
+        });
+
+        const allBudgets = [...new Set(expRows.map((r) => String(r[idx.budget]).trim()))].filter(Boolean);
+
+        allBudgets.forEach((budgetName) => {
+          const fyStart = Number(fy.split('-')[0]);
+          const fyEnd = fyStart + 1;
+
+          const matchingRows = expRows.filter((r) => {
+            const rowStation = String(r[idx.station]).trim();
+            const rowBudget = String(r[idx.budget]).trim();
+            const rawDate = String(r[idx.date] || '').trim();
+            const parts = rawDate.split('-');
+            if (parts.length !== 3) return false;
+            const rowDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+            return rowStation === station && rowBudget === budgetName && rowDate >= new Date(fyStart, 3, 1) && rowDate <= new Date(fyEnd, 2, 31);
+          });
+
+          if (!matchingRows.length) return;
+
+          const safeSheetName = (budgetName + ' Details').replace(/[*?:\\/[\]]/g, '-').substring(0, 31);
+          const detailSheet = workbook.addWorksheet(safeSheetName);
+
+          detailSheet.mergeCells('A1:E1');
+          const detailTitle = detailSheet.getCell('A1');
+          detailTitle.value = `Statement of Expenditure in r/o ${station}\nUnder Head : (${serialMap[budgetName]}). ${budgetName}`;
+          detailTitle.font = { bold: true, size: 12, name: 'Calibri' };
+          detailTitle.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+          detailSheet.getRow(1).height = 35;
+
+          detailSheet.columns = [{ width: 12 }, { width: 20 }, { width: 30 }, { width: 14 }, { width: 14 }];
+
+          const headers = ['Date', 'Bill / Invoice Details', 'Expenditure Details', 'Expdt. Amount (₹ in 000)', 'Prog Expdt. (₹ in 000)'];
+          const headerRow = detailSheet.getRow(2);
+          headerRow.height = 47;
+          headers.forEach((h, i) => {
+            const cell = headerRow.getCell(i + 1);
+            cell.value = h;
+            cell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E78' } };
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            cell.border = FULL_BORDER;
+          });
+
+          let runningTotal = 0;
+          let excelRow = 3;
+
+          matchingRows.forEach((r) => {
+            const row = detailSheet.getRow(excelRow++);
+            row.height = undefined;
+
+            // 🔥 Calculate running total dynamically
+            const amount = Number(r[idx.amount]) || 0;
+            runningTotal += amount;
+
+            const dbCumulative = Number(r[idx.cumulative]) || 0;
+
+            // Prepare the values array
+            const vals = [r[idx.date] || '', r[idx.bill] || '', r[idx.details] || '', amount, dbCumulative];
+
+            vals.forEach((v, i) => {
+              const cell = row.getCell(i + 1);
+              cell.value = v;
+              cell.border = FULL_BORDER;
+              cell.font = { bold: false, size: 11 };
+              cell.alignment = {
+                vertical: 'middle',
+                horizontal: typeof v === 'number' ? 'right' : 'left',
+                wrapText: true
+              };
+
+              if (typeof v === 'number') {
+                cell.numFmt = '0.000';
+              }
+
+              // 🔥 Conditional formatting for the Cumulative column (index 4)
+              if (i === 4) {
+                // Use a small epsilon (0.001) for float comparison to avoid precision errors
+                const isMatch = Math.abs(runningTotal - dbCumulative) < 0.001;
+
+                cell.font = {
+                  bold: true,
+                  size: 12,
+                  color: { argb: isMatch ? 'FF008000' : 'FFFF0000' } // Green : Red
+                };
+              }
+            });
+          });
+
+          detailSheet.views = [{ showGridLines: false }];
+          detailSheet.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printArea: `A1:E${excelRow - 1}`, margins: { left: 0.5, right: 0.25, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }, horizontalCentered: true, verticalCentered: false };
+        });
+
+        // =========================================
+        // 🔥 RESTORE AND EXPORT
+        // =========================================
+        wrapper.style.display = prevDisplay;
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
       }
 
       //================================================================================//
@@ -22503,6 +23382,10 @@
         setDAPercent();
         handleITChange();
         handlePensionChange();
+        const fy = id('DGPage_FY')?.value?.trim();
+
+        id('DGPage_Month').disabled = !fy || fy === 'Select FY';
+        loadDGMonthsByFY();
         filterDGTable();
         filterEBTable();
         //================== Salary Slip Change ==================//
@@ -30069,7 +30952,7 @@
         select.innerHTML = htmlBuffer;
         select.value = 'ALL';
         select.disabled = false;
-        select.dispatchEvent(new Event('change'));
+        //select.dispatchEvent(new Event('change'));
       }
 
       /* ============================================================================
@@ -30822,21 +31705,18 @@
 
       on('DGPage_Station', 'change', () => {
         loadDGList();
-        loadDGMonthsByFY();
         SyncAllPage();
         clearDGInputs();
         id('DGdate').value = '';
       });
 
       on('DGPage_FY', 'change', () => {
-        loadDGMonthsByFY();
         SyncAllPage();
         clearDGInputs();
         id('DGdate').value = '';
       });
 
       on('StationDGList', 'change', () => {
-        loadDGMonthsByFY();
         SyncAllPage();
         clearDGInputs();
         id('DGdate').value = '';
@@ -31337,7 +32217,6 @@
                 ===================================== */
           await fetch('https://office-management-f425.onrender.com/refresh/dg', { method: 'POST' });
           await loadTable('dg', 'DGlog');
-          loadDGMonthsByFY();
           SyncAllPage();
           clearDGInputs();
           id('DGdate').value = '';
