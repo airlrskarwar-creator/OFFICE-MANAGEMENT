@@ -11496,6 +11496,27 @@
               td.classList.add('currency');
             }
 
+            // =====================================
+            // 🔥 SPECIAL COLUMN COLORS
+            // =====================================
+
+            const header = selectedHeaders[i];
+
+            if (header === 'Gross Income') {
+              td.style.color = '#000ed1'; // Blue
+              td.style.fontWeight = 'bold';
+            }
+
+            if (header === 'Total Deduction') {
+              td.style.color = '#dc3545'; // Red
+              td.style.fontWeight = 'bold';
+            }
+
+            if (header === 'Net Income') {
+              td.style.color = '#198754'; // Green
+              td.style.fontWeight = 'bold';
+            }
+
             if (!activeCols[i]) {
               td.classList.add('hidden-col');
             }
@@ -11519,6 +11540,27 @@
             td.textContent = ''; // HRIS column empty in total
           } else {
             td.textContent = formatCurrency(sums[i]);
+          }
+
+          // =====================================
+          // 🔥 SPECIAL COLUMN COLORS
+          // =====================================
+
+          const header = selectedHeaders[i];
+
+          if (header === 'Gross Income') {
+            td.style.color = '#0d6efd'; // Blue
+            td.style.fontWeight = 'bold';
+          }
+
+          if (header === 'Total Deduction') {
+            td.style.color = '#dc3545'; // Red
+            td.style.fontWeight = 'bold';
+          }
+
+          if (header === 'Net Income') {
+            td.style.color = '#198754'; // Green
+            td.style.fontWeight = 'bold';
           }
 
           if (!activeCols[i]) {
