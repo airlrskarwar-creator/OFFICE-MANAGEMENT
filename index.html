@@ -7648,10 +7648,9 @@
         // LOGIN STATE
         document.body.classList.add('logged-in');
 
-        // APPLY SAVED SIDEBAR STATE IMMEDIATELY
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-        syncSidebarUI(isCollapsed);
+        // 🔥 ALWAYS START COLLAPSED
+        localStorage.setItem('sidebarCollapsed', 'true');
+        syncSidebarUI(true);
 
         // USER UI
         id('welcomeUser').textContent = `Welcome ${displayName}`;
@@ -7688,7 +7687,11 @@
           renderDatabaseTables(true); // Only Dashboard
 
           // 4. Routing & Pipeline
-          show('DashBoard');
+          if (['MASTER', 'ADMIN'].includes(String(window.currentUser || '').toUpperCase())) {
+            show('DashBoard');
+          } else {
+            show('EmpPage');
+          }
           syncSelect('station', window.currentStation);
           filters.station = window.currentStation;
           applyFilters();
