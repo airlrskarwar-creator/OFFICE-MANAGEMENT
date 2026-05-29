@@ -4,6 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from requests.exceptions import SSLError, ConnectionError, RequestException
 import urllib3
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import gspread
 import os
 import json
@@ -115,7 +116,9 @@ def safe_sheet_call(func, retries=5, delay=2):
 @app.route("/time", methods=["GET"])
 def get_time():
     return jsonify({
-        "serverTime": datetime.now().isoformat()
+        "serverTime": datetime.now(
+            ZoneInfo("Asia/Kolkata")
+        ).isoformat()
     })
 
 # =========================================================
