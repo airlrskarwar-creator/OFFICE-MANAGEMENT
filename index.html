@@ -2126,6 +2126,17 @@
       }
 
       /* ==========TABLE WRAPPER FOR EMPOLYEE DETAIL PAGE================== */
+      .ZoneBadge {
+        border-radius: 6px !important;
+        padding: 5px 6px !important;
+        color: white !important;
+        background: rgb(0, 2, 132) !important;
+        border: none !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        height: 100% !important;
+      }
+
       .Emp-Table-Wrapper {
         flex: 1;
         overflow: auto;
@@ -2708,9 +2719,9 @@
         z-index: 10;
         background: white;
         white-space: nowrap;
-        min-width: 200px;
-        width: 200px;
-        max-width: 200px;
+        min-width: 300px;
+        width: 300px;
+        max-width: 300px;
       }
 
       /* ================= EDIT TABLE STICKY ================= */
@@ -5409,11 +5420,11 @@
             </div>
             <div class="select-group">
               <label>TA Zone :</label>
-              <input disabled id="EmpPage_TAZone" />
+              <input class="ZoneBadge" disabled id="EmpPage_TAZone" />
             </div>
             <div class="select-group">
               <label>HRA Zone :</label>
-              <input disabled id="EmpPage_HRAZone" />
+              <input class="ZoneBadge" disabled id="EmpPage_HRAZone" />
             </div>
             <div class="action-group"></div>
           </div>
@@ -5563,11 +5574,11 @@
             </div>
             <div class="select-group">
               <label>TA Zone :</label>
-              <input disabled id="PayBillPage_TAZone" />
+              <input class="ZoneBadge" disabled id="PayBillPage_TAZone" />
             </div>
             <div class="select-group">
               <label>HRA Zone :</label>
-              <input disabled id="PayBillPage_HRAZone" />
+              <input class="ZoneBadge" disabled id="PayBillPage_HRAZone" />
               <input hidden id="PayBillPage_HRA%" />
             </div>
             <div class="action-group">
@@ -7694,6 +7705,21 @@
           }
           syncSelect('station', window.currentStation);
           filters.station = window.currentStation;
+
+          const zone = getCityZone(window.currentStation) || {
+            ta: '',
+            hra: ''
+          };
+
+          ['PayBillPage', 'EmpPage'].forEach((page) => {
+            const taZone = id(`${page}_TAZone`);
+            const hraZone = id(`${page}_HRAZone`);
+
+            if (taZone) taZone.value = zone.ta || '';
+            if (hraZone) hraZone.value = zone.hra || '';
+            console.log(zone.ta, zone.hra);
+          });
+
           applyFilters();
           lockRequirementTableForUser(window.currentUser);
           completeLoader();
@@ -8750,43 +8776,52 @@
 
       function handleStationChange(sourceId) {
         const station = id(sourceId).value;
-        if (!station || station === filters.station) return; // 🔥 Guard against redundant execution
 
-        // 1. Sync all station dropdowns and global filters
-        syncSelect('station', station);
-        filters.station = station;
-        applyFilters();
+        if (!station || station === filters.station) return;
 
-        // 2. Reset Employee Selection
-        filters.employee = '';
-        setValueSelect('employee', '');
-        selectMap.employee.forEach((eid) => {
-          const el = id(eid);
-          if (el) el.selectedIndex = -1;
-        });
-
-        // 3. Zone Logic (Ensure elements exist before accessing .value)
-        const zone = getCityZone(station) || { ta: '', hra: '' };
         const daInput = id('PayBillPage_DA%');
         const daPercent = Number(daInput?.value) || 0;
 
         let percent = zone.hra === 'X' ? 28 : zone.hra === 'Y' ? 18 : 8;
-        if (daPercent >= 50) percent += 2;
-        else if (daPercent >= 25) percent += 1;
 
-        // Apply zone values safely
-        ['PayBillPage', 'EmpPage'].forEach((page) => {
-          const taZone = id(`${page}_TAZone`);
-          const hraZone = id(`${page}_HRAZone`);
-          if (taZone) taZone.value = zone.ta || '';
-          if (hraZone) hraZone.value = zone.hra || '';
-        });
+        if (daPercent >= 50) {
+          percent += 2;
+        } else if (daPercent >= 25) {
+          percent += 1;
+        }
 
         const hraPercentInput = id('PayBillPage_HRA%');
-        if (hraPercentInput) hraPercentInput.value = percent;
 
-        // 4. Trigger UI Updates
-        // Wrap in requestAnimationFrame to ensure DOM is ready
+        if (hraPercentInput) {
+          hraPercentInput.value = percent;
+        }
+
+        // =====================================
+        // 🔥 NOW APPLY FILTERS
+        // =====================================
+
+        syncSelect('station', station);
+
+        filters.station = station;
+
+        applyFilters();
+
+        // =====================================
+        // 🔥 RESET EMPLOYEE
+        // =====================================
+
+        filters.employee = '';
+
+        setValueSelect('employee', '');
+
+        selectMap.employee.forEach((eid) => {
+          const el = id(eid);
+
+          if (el) {
+            el.selectedIndex = -1;
+          }
+        });
+
         requestAnimationFrame(() => {
           recalculateAllRows();
           refreshPBView();
@@ -11552,7 +11587,7 @@
           const header = selectedHeaders[i];
 
           if (header === 'Gross Income') {
-            td.style.color = '#0d6efd'; // Blue
+            td.style.color = '#000ed1'; // Blue
             td.style.fontWeight = 'bold';
           }
 
@@ -19412,17 +19447,7 @@
             <td style="padding:0px"><input style="width:100%;border-radius:0" type="date"></td>
 
             <td style="padding:0px">
-              <input style="width:100%;border-radius:0;height:100%" value="${selectedStation}">
-            </td>
-
-            <td style="padding:0px">
               <textarea class="bill-text"></textarea>
-            </td>
-
-            <td>
-              <span style="width:280px" class="budget-val" data-value="${selectedBudget}">
-                ${selectedBudget}
-              </span>
             </td>
 
             <td style="padding:0px">
@@ -19762,15 +19787,43 @@
           return String(val).replace(/₹/g, '').replace(/,/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
         };
 
+        const selectedStation = id('BudgetPage_Station')?.value?.trim() || '';
+        const selectedBudget = id('BudgetUnderSelect')?.options[id('BudgetUnderSelect').selectedIndex]?.text?.trim() || '';
+
         rows.forEach((tr) => {
           const dateInput = tr.children[0]?.querySelector('input[type="date"]')?.value || tr.children[0]?.textContent?.trim() || '';
-          const station = tr.children[1]?.querySelector('input')?.value || tr.children[1]?.textContent?.trim() || '';
-          const bill = tr.children[2]?.querySelector('textarea')?.value || tr.children[2]?.textContent?.trim() || '';
-          const budget = tr.children[3]?.textContent?.trim() || '';
-          const details = tr.children[4]?.querySelector('textarea')?.value || tr.children[4]?.textContent?.trim() || '';
-          const amount = Number(tr.querySelector('.amt')?.value || tr.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
-          const monthlyCumulative = Number(tr.children[6]?.dataset?.value || tr.children[6]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
-          const cumulative = Number(tr.children[7]?.dataset?.value || tr.children[7]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+          let station, budget, bill, details;
+          let amount, monthlyCumulative, cumulative;
+
+          if (modeType === 'add') {
+            station = selectedStation;
+            budget = selectedBudget;
+
+            bill = tr.children[1]?.querySelector('textarea')?.value || tr.children[1]?.textContent?.trim() || '';
+
+            details = tr.children[2]?.querySelector('textarea')?.value || tr.children[2]?.textContent?.trim() || '';
+
+            amount = Number(tr.children[3]?.querySelector('.amt')?.value || tr.children[3]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+            monthlyCumulative = Number(tr.children[4]?.dataset?.value || tr.children[4]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+            cumulative = Number(tr.children[5]?.dataset?.value || tr.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+          } else {
+            station = tr.children[1]?.querySelector('input')?.value || tr.children[1]?.textContent?.trim() || '';
+
+            budget = tr.children[3]?.textContent?.trim() || '';
+
+            bill = tr.children[2]?.querySelector('textarea')?.value || tr.children[2]?.textContent?.trim() || '';
+
+            details = tr.children[4]?.querySelector('textarea')?.value || tr.children[4]?.textContent?.trim() || '';
+
+            amount = Number(tr.querySelector('.amt')?.value || tr.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+            monthlyCumulative = Number(tr.children[6]?.dataset?.value || tr.children[6]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+
+            cumulative = Number(tr.children[7]?.dataset?.value || tr.children[7]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
+          }
 
           if (!station || !dateInput || !budget || amount === 0) return;
 
