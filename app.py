@@ -110,6 +110,15 @@ def safe_sheet_call(func, retries=5, delay=2):
     raise last_error
 
 # =========================================================
+# 🔥 GET INTERNET TIME
+# =========================================================
+@app.route("/time", methods=["GET"])
+def get_time():
+    return jsonify({
+        "serverTime": datetime.now().isoformat()
+    })
+
+# =========================================================
 # 🚀 FAST READ APIs (Instant response from memory)
 # =========================================================
 @app.route("/emp", methods=["GET"])
