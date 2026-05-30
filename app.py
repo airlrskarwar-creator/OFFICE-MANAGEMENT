@@ -178,10 +178,9 @@ def get_sbgexp():
     return jsonify(cache_to_json(SBGEXP_CACHE))
 
 
-# app.py
 @app.route("/refresh/<api_name>", methods=["POST"])
 def refresh_single_module(api_name):
-    # Mapping for easy lookup
+
     sheet_map = {
         'emp': emp_sheet,
         'pb': pb_sheet,
@@ -193,7 +192,12 @@ def refresh_single_module(api_name):
         'holidays': holiday_sheet,
         'esr': esr_sheet,
         'txn': txn_sheet,
-        'hsd': hsd_sheet
+        'hsd': hsd_sheet,
+        'cpc': cpc_sheet,
+        'city': city_sheet,
+        'qtrs': qtrs_sheet,
+        'comm': comm_sheet,
+        'it': it_sheet
     }
 
     cache_map = {
@@ -207,33 +211,68 @@ def refresh_single_module(api_name):
         'holidays': 'HOLIDAY_CACHE',
         'esr': 'ESR_CACHE',
         'txn': 'TXN_CACHE',
-        'hsd': 'HSD_CACHE'
+        'hsd': 'HSD_CACHE',
+        'cpc': 'CPC_CACHE',
+        'city': 'CITY_CACHE',
+        'qtrs': 'QTRS_CACHE',
+        'comm': 'COMM_CACHE',
+        'it': 'IT_CACHE'
     }
+
     try:
         if api_name == 'all':
-            # Refresh everything
-            global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, DUTY_CACHE, HOLIDAY_CACHE, ESR_CACHE, TXN_CACHE, HSD_CACHE
-            EMP_CACHE     = emp_sheet.get("A:ZZ")
-            PB_CACHE      = pb_sheet.get("A:ZZ")
-            SBGEXP_CACHE  = sbgexp_sheet.get("A:ZZ")
-            SBG_CACHE     = sbg_sheet.get("A:ZZ")
-            DG_CACHE      = dg_sheet.get("A:ZZ")
-            EB_CACHE      = eb_sheet.get("A:ZZ")
-            DUTY_CACHE    = duty_sheet.get("A:ZZ")
-            HOLIDAY_CACHE = holiday_sheet.get("A:ZZ")
-            ESR_CACHE     = esr_sheet.get("A:ZZ")
-            TXN_CACHE     = txn_sheet.get("A:ZZ")
-            HSD_CACHE     = hsd_sheet.get("A:ZZ")
+
+            global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE
+            global DG_CACHE, EB_CACHE, DUTY_CACHE, HOLIDAY_CACHE
+            global ESR_CACHE, TXN_CACHE, HSD_CACHE
+            global CPC_CACHE, CITY_CACHE, QTRS_CACHE
+            global COMM_CACHE, IT_CACHE
+
+            EMP_CACHE      = fetch_cache(emp_sheet)
+            PB_CACHE       = fetch_cache(pb_sheet)
+            SBGEXP_CACHE   = fetch_cache(sbgexp_sheet)
+            SBG_CACHE      = fetch_cache(sbg_sheet)
+
+            DG_CACHE       = fetch_cache(dg_sheet)
+            EB_CACHE       = fetch_cache(eb_sheet)
+            DUTY_CACHE     = fetch_cache(duty_sheet)
+            HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
+
+            ESR_CACHE      = fetch_cache(esr_sheet)
+            TXN_CACHE      = fetch_cache(txn_sheet)
+            HSD_CACHE      = fetch_cache(hsd_sheet)
+
+            CPC_CACHE      = fetch_cache(cpc_sheet)
+            CITY_CACHE     = fetch_cache(city_sheet)
+            QTRS_CACHE     = fetch_cache(qtrs_sheet)
+            COMM_CACHE     = fetch_cache(comm_sheet)
+            IT_CACHE       = fetch_cache(it_sheet)
+
+            print("✅ All caches refreshed")
 
         elif api_name in sheet_map:
-            # Refresh specific module using globals
-            data = sheet_map[api_name].get("A:ZZ")
-            # Dynamic global update
+            data = fetch_cache(sheet_map[api_name])
             globals()[cache_map[api_name]] = data
+            print(f"✅ Cache refreshed: {api_name}")
 
-        return jsonify({"status": "success", "refreshed": api_name})
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"Unknown module: {api_name}"
+            }), 400
+
+        return jsonify({
+            "status": "success",
+            "refreshed": api_name
+        })
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"❌ Refresh failed: {api_name} | {str(e)}")
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 # =========================================================
