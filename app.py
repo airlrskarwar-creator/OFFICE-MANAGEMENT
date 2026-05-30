@@ -286,14 +286,13 @@ def refresh_single_module(api_name):
 def refresh_reference():
 
     global CPC_CACHE, CITY_CACHE, QTRS_CACHE
-    global COMM_CACHE, IT_CACHE, HOLIDAY_CACHE
+    global COMM_CACHE, IT_CACHE
 
     CPC_CACHE      = fetch_cache(cpc_sheet)
     CITY_CACHE     = fetch_cache(city_sheet)
     QTRS_CACHE     = fetch_cache(qtrs_sheet)
     COMM_CACHE     = fetch_cache(comm_sheet)
     IT_CACHE       = fetch_cache(it_sheet)
-    HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
 
     return jsonify({
         "status": "success",
