@@ -704,6 +704,7 @@ def update_coff():
     global COFF_CACHE
 
     try:
+
         data = request.get_json(force=True)
 
         new_rows = data.get("rows", [])
@@ -711,112 +712,139 @@ def update_coff():
         if not new_rows:
             return jsonify({
                 "status": "success",
-                "updated": 0
+                "updated": 0,
+                "added": 0
             })
 
         sheet_data = fetch_cache(coff_sheet)
 
-        headers = [
-            "Employee Name",
-            "Leave Type",
-            "Claimed Date",
-            "Duty Date",
-            "Actual Duty",
-            "Extra Duty",
-            "Details"
-        ]
-
-        # Empty sheet
         if not sheet_data:
+
+            headers = [
+                "Employee Name",
+                "Leave Type",
+                "Claimed Date",
+                "Duty Date",
+                "Actual Duty",
+                "Extra Duty",
+                "Details"
+            ]
+
             coff_sheet.update("A1:G1", [headers])
+
             sheet_data = [headers]
 
         existing_rows = sheet_data[1:]
 
         # ==========================================
-        # Existing row lookup
+        # BUILD LOOKUP
         # ==========================================
 
         row_map = {}
 
         for sheet_row_num, row in enumerate(existing_rows, start=2):
 
-            employee = str(row[0]).strip() if len(row) > 0 else ""
-            leave_type = str(row[1]).strip() if len(row) > 1 else ""
-            claimed_date = str(row[2]).strip() if len(row) > 2 else ""
-            duty_date = str(row[3]).strip() if len(row) > 3 else ""
+            row = row + [""] * (7 - len(row))
 
-            key = f"{employee}|{leave_type}|{claimed_date}|{duty_date}"
+            key = (
+                f"{str(row[0]).strip()}|"
+                f"{str(row[1]).strip()}|"
+                f"{str(row[2]).strip()}|"
+                f"{str(row[3]).strip()}"
+            )
 
             row_map[key] = {
                 "row_num": sheet_row_num,
-                "data": row
+                "data": row[:7]
             }
 
-        updated_count = 0
-        appended_count = 0
+        updates = []
+        appends = []
 
         # ==========================================
-        # Process incoming rows
+        # PROCESS INCOMING ROWS
         # ==========================================
 
         for row in new_rows:
 
-            employee = str(row[0]).strip()
-            leave_type = str(row[1]).strip()
-            claimed_date = str(row[2]).strip()
-            duty_date = str(row[3]).strip()
+            row = list(row) + [""] * (7 - len(row))
+            row = row[:7]
 
-            key = f"{employee}|{leave_type}|{claimed_date}|{duty_date}"
+            key = (
+                f"{str(row[0]).strip()}|"
+                f"{str(row[1]).strip()}|"
+                f"{str(row[2]).strip()}|"
+                f"{str(row[3]).strip()}"
+            )
 
             # --------------------------------------
-            # Existing row
+            # EXISTING ROW
             # --------------------------------------
 
             if key in row_map:
 
                 existing = row_map[key]["data"]
 
-                existing = existing + [""] * (7 - len(existing))
-                incoming = row + [""] * (7 - len(row))
+                if existing != row:
 
-                if existing[:7] != incoming[:7]:
-
-                    row_num = row_map[key]["row_num"]
-
-                    coff_sheet.update(
-                        f"A{row_num}:G{row_num}",
-                        [incoming[:7]]
+                    updates.append(
+                        (
+                            row_map[key]["row_num"],
+                            row
+                        )
                     )
 
-                    updated_count += 1
+                    row_map[key]["data"] = row
 
             # --------------------------------------
-            # New row
+            # NEW ROW
             # --------------------------------------
 
             else:
 
-                coff_sheet.append_row(row)
+                appends.append(row)
 
-                appended_count += 1
+                # prevent duplicate append in same request
+                row_map[key] = {
+                    "row_num": -1,
+                    "data": row
+                }
 
         # ==========================================
-        # Refresh Cache
+        # UPDATE CHANGED ROWS
+        # ==========================================
+
+        for row_num, row_data in updates:
+
+            coff_sheet.update(
+                f"A{row_num}:G{row_num}",
+                [row_data]
+            )
+
+        # ==========================================
+        # APPEND NEW ROWS
+        # ==========================================
+
+        if appends:
+
+            coff_sheet.append_rows(appends)
+
+        # ==========================================
+        # REFRESH CACHE
         # ==========================================
 
         COFF_CACHE = fetch_cache(coff_sheet)
 
         print(
             f"✅ Coff Sync Complete | "
-            f"Updated: {updated_count} | "
-            f"Added: {appended_count}"
+            f"Updated: {len(updates)} | "
+            f"Added: {len(appends)}"
         )
 
         return jsonify({
             "status": "success",
-            "updated": updated_count,
-            "added": appended_count
+            "updated": len(updates),
+            "added": len(appends)
         })
 
     except Exception as e:
