@@ -63,6 +63,7 @@ qtrs_sheet = ref_file.worksheet("QtrsRateDB")
 comm_sheet = ref_file.worksheet("CommFactDB")
 it_sheet   = ref_file.worksheet("ITDB")
 holiday_sheet  = duty_file.worksheet("Holidays")
+coff_sheet  = duty_file.worksheet("CoffList")
 
 # =========================================================
 # ⚡ GLOBAL MEMORY CACHE (Standardized Max Column Width)
@@ -90,6 +91,7 @@ DUTY_CACHE   = fetch_cache(duty_sheet)
 ESR_CACHE    = fetch_cache(esr_sheet)
 TXN_CACHE    = fetch_cache(txn_sheet)
 HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
+COFF_CACHE  = fetch_cache(coff_sheet)
 print("✅ Caches loaded successfully.")
 
 def cache_to_json(cache_data):
@@ -165,6 +167,9 @@ def get_duty(): return jsonify(cache_to_json(DUTY_CACHE))
 @app.route("/holidays", methods=["GET"])
 def get_holidays(): return jsonify(cache_to_json(HOLIDAY_CACHE))
 
+@app.route("/coff", methods=["GET"])
+def get_coff(): return jsonify(cache_to_json(COFF_CACHE))
+
 @app.route("/esr", methods=["GET"])
 def get_esr(): return jsonify(cache_to_json(ESR_CACHE))
 
@@ -190,6 +195,7 @@ def refresh_single_module(api_name):
         'eb': eb_sheet,
         'duty': duty_sheet,
         'holidays': holiday_sheet,
+        'coff': coff_sheet,
         'esr': esr_sheet,
         'txn': txn_sheet,
         'hsd': hsd_sheet,
@@ -209,6 +215,7 @@ def refresh_single_module(api_name):
         'eb': 'EB_CACHE',
         'duty': 'DUTY_CACHE',
         'holidays': 'HOLIDAY_CACHE',
+        'coff': 'COFF_CACHE',
         'esr': 'ESR_CACHE',
         'txn': 'TXN_CACHE',
         'hsd': 'HSD_CACHE',
@@ -223,7 +230,7 @@ def refresh_single_module(api_name):
         if api_name == 'all':
 
             global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE
-            global DG_CACHE, EB_CACHE, DUTY_CACHE, HOLIDAY_CACHE
+            global DG_CACHE, EB_CACHE, DUTY_CACHE, HOLIDAY_CACHE, COFF_CACHE
             global ESR_CACHE, TXN_CACHE, HSD_CACHE
             global CPC_CACHE, CITY_CACHE, QTRS_CACHE
             global COMM_CACHE, IT_CACHE
@@ -237,6 +244,7 @@ def refresh_single_module(api_name):
             EB_CACHE       = fetch_cache(eb_sheet)
             DUTY_CACHE     = fetch_cache(duty_sheet)
             HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
+            COFF_CACHE     = fetch_cache(coff_sheet)
 
             ESR_CACHE      = fetch_cache(esr_sheet)
             TXN_CACHE      = fetch_cache(txn_sheet)
