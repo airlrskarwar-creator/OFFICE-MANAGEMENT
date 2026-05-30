@@ -708,42 +708,75 @@ def update_coff():
 
         new_rows = data.get("rows", [])
 
-        if not new_rows:
-            return jsonify({
-                "status": "success",
-                "updated": 0,
-                "added": 0
-            })
+        if new_rows is None:
+            new_rows = []
+
+        # ==========================================
+        # SORT BY CLAIM DATE
+        # Claimed first
+        # Pending C/O at bottom
+        # ==========================================
+
+        from datetime import datetime
+
+        def parse_date(date_str):
+            try:
+                return datetime.strptime(
+                    str(date_str).strip(),
+                    "%d-%m-%Y"
+                )
+            except:
+                return datetime.max
+
+        new_rows.sort(
+            key=lambda r: (
+                parse_date(
+                    r[2]
+                    if len(r) > 2 and str(r[2]).strip()
+                    else "31-12-9999"
+                ),
+                parse_date(
+                    r[3]
+                    if len(r) > 3 and str(r[3]).strip()
+                    else "31-12-9999"
+                ),
+                str(r[0]).strip()
+            )
+        )
 
         sheet_data = fetch_cache(coff_sheet)
 
+        headers = [
+            "Employee Name",
+            "Leave Type",
+            "Claimed Date",
+            "Duty Date",
+            "Actual Duty",
+            "Extra Duty",
+            "Details"
+        ]
+
         if not sheet_data:
 
-            headers = [
-                "Employee Name",
-                "Leave Type",
-                "Claimed Date",
-                "Duty Date",
-                "Actual Duty",
-                "Extra Duty",
-                "Details"
-            ]
-
-            coff_sheet.update("A1:G1", [headers])
+            coff_sheet.update(
+                "A1:G1",
+                [headers]
+            )
 
             sheet_data = [headers]
 
         existing_rows = sheet_data[1:]
 
         # ==========================================
-        # BUILD LOOKUP
+        # BUILD EXISTING LOOKUP
         # ==========================================
 
         row_map = {}
 
         for sheet_row_num, row in enumerate(existing_rows, start=2):
 
-            row = row + [""] * (7 - len(row))
+            row = list(row) + [""] * (7 - len(row))
+            row = row[:7]
 
             key = (
                 f"{str(row[0]).strip()}|"
@@ -755,11 +788,12 @@ def update_coff():
 
             row_map[key] = {
                 "row_num": sheet_row_num,
-                "data": row[:7]
+                "data": row
             }
 
         updates = []
         appends = []
+        incoming_keys = set()
 
         # ==========================================
         # PROCESS INCOMING ROWS
@@ -778,10 +812,9 @@ def update_coff():
                 f"{str(row[6]).strip()}"
             )
 
-            # --------------------------------------
-            # EXISTING ROW
-            # --------------------------------------
+            incoming_keys.add(key)
 
+            # Existing row
             if key in row_map:
 
                 existing = row_map[key]["data"]
@@ -797,19 +830,32 @@ def update_coff():
 
                     row_map[key]["data"] = row
 
-            # --------------------------------------
-            # NEW ROW
-            # --------------------------------------
-
+            # New row
             else:
 
                 appends.append(row)
 
-                # prevent duplicate append in same request
                 row_map[key] = {
                     "row_num": -1,
                     "data": row
                 }
+
+        # ==========================================
+        # FIND ROWS TO DELETE
+        # ==========================================
+
+        rows_to_delete = []
+
+        for key, info in row_map.items():
+
+            if info["row_num"] == -1:
+                continue
+
+            if key not in incoming_keys:
+
+                rows_to_delete.append(
+                    info["row_num"]
+                )
 
         # ==========================================
         # UPDATE CHANGED ROWS
@@ -831,27 +877,28 @@ def update_coff():
             coff_sheet.append_rows(appends)
 
         # ==========================================
+        # DELETE OBSOLETE ROWS
+        # Bottom → Top
+        # ==========================================
+
+        for row_num in sorted(rows_to_delete, reverse=True):
+
+            coff_sheet.delete_rows(row_num)
+
+        # ==========================================
         # REFRESH CACHE
         # ==========================================
 
         COFF_CACHE = fetch_cache(coff_sheet)
 
-        print(
-            f"✅ Coff Sync Complete | "
-            f"Updated: {len(updates)} | "
-            f"Added: {len(appends)}"
-        )
-
         return jsonify({
             "status": "success",
             "updated": len(updates),
-            "added": len(appends)
+            "added": len(appends),
+            "deleted": len(rows_to_delete)
         })
 
     except Exception as e:
-
-        print(f"❌ Coff Update Failed: {e}")
-
         return jsonify({
             "status": "error",
             "message": str(e)
