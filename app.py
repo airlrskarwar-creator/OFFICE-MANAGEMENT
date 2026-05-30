@@ -222,18 +222,31 @@ def refresh_single_module(api_name):
     try:
         if api_name == 'all':
 
-            global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE, DG_CACHE, EB_CACHE, DUTY_CACHE, ESR_CACHE, TXN_CACHE, HSD_CACHE
+            global EMP_CACHE, PB_CACHE, SBGEXP_CACHE, SBG_CACHE
+            global DG_CACHE, EB_CACHE, DUTY_CACHE, HOLIDAY_CACHE
+            global ESR_CACHE, TXN_CACHE, HSD_CACHE
+            global CPC_CACHE, CITY_CACHE, QTRS_CACHE
+            global COMM_CACHE, IT_CACHE
 
             EMP_CACHE      = fetch_cache(emp_sheet)
             PB_CACHE       = fetch_cache(pb_sheet)
             SBGEXP_CACHE   = fetch_cache(sbgexp_sheet)
             SBG_CACHE      = fetch_cache(sbg_sheet)
+
             DG_CACHE       = fetch_cache(dg_sheet)
             EB_CACHE       = fetch_cache(eb_sheet)
             DUTY_CACHE     = fetch_cache(duty_sheet)
+            HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
+
             ESR_CACHE      = fetch_cache(esr_sheet)
             TXN_CACHE      = fetch_cache(txn_sheet)
             HSD_CACHE      = fetch_cache(hsd_sheet)
+
+            CPC_CACHE      = fetch_cache(cpc_sheet)
+            CITY_CACHE     = fetch_cache(city_sheet)
+            QTRS_CACHE     = fetch_cache(qtrs_sheet)
+            COMM_CACHE     = fetch_cache(comm_sheet)
+            IT_CACHE       = fetch_cache(it_sheet)
 
             print("✅ All caches refreshed")
 
@@ -264,7 +277,8 @@ def refresh_single_module(api_name):
 @app.route("/refresh/reference", methods=["POST"])
 def refresh_reference():
 
-    global CPC_CACHE, CITY_CACHE, QTRS_CACHE, COMM_CACHE, IT_CACHE, HOLIDAY_CACHE
+    global CPC_CACHE, CITY_CACHE, QTRS_CACHE
+    global COMM_CACHE, IT_CACHE, HOLIDAY_CACHE
 
     CPC_CACHE      = fetch_cache(cpc_sheet)
     CITY_CACHE     = fetch_cache(city_sheet)
