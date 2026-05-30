@@ -62,6 +62,7 @@ city_sheet = ref_file.worksheet("CityZoneDB")
 qtrs_sheet = ref_file.worksheet("QtrsRateDB")
 comm_sheet = ref_file.worksheet("CommFactDB")
 it_sheet   = ref_file.worksheet("ITDB")
+holiday_sheet  = duty_file.worksheet("Holidays")
 
 # =========================================================
 # ⚡ GLOBAL MEMORY CACHE (Standardized Max Column Width)
@@ -88,6 +89,7 @@ EB_CACHE     = fetch_cache(eb_sheet)
 DUTY_CACHE   = fetch_cache(duty_sheet)
 ESR_CACHE    = fetch_cache(esr_sheet)
 TXN_CACHE    = fetch_cache(txn_sheet)
+HOLIDAY_CACHE  = fetch_cache(holiday_sheet)
 print("✅ Caches loaded successfully.")
 
 def cache_to_json(cache_data):
@@ -159,6 +161,9 @@ def get_eb(): return jsonify(cache_to_json(EB_CACHE))
 
 @app.route("/duty", methods=["GET"])
 def get_duty(): return jsonify(cache_to_json(DUTY_CACHE))
+
+@app.route("/holidays", methods=["GET"])
+def get_holidays(): return jsonify(cache_to_json(HOLIDAY_CACHE))
 
 @app.route("/esr", methods=["GET"])
 def get_esr(): return jsonify(cache_to_json(ESR_CACHE))
