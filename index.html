@@ -1146,6 +1146,7 @@
         font-size: 14px;
         font-weight: 600;
         letter-spacing: 0.4px;
+        line-height: 1;
       }
 
       /* =========================================================
@@ -1160,6 +1161,13 @@
       SYNC ICON
     ========================================================= */
       .loader-status.sync i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        line-height: 1;
+        transform-origin: center center;
         animation: syncAnim 1s linear infinite;
       }
 
@@ -1387,6 +1395,7 @@
         visibility: hidden;
         pointer-events: none;
         transform: scale(0.985);
+        display: none;
 
         transition:
           opacity 0.35s ease,
@@ -1397,6 +1406,7 @@
       .app.loaded {
         opacity: 1;
         visibility: visible;
+        display: flex;
         pointer-events: auto;
         transform: scale(1);
       }
@@ -4197,8 +4207,8 @@
         position: sticky;
         top: 30px;
         z-index: 5;
-        background: #404040;
-        color: white;
+        background: #cdcdcd;
+        color: black;
       }
 
       /* =========================================================
@@ -4211,8 +4221,8 @@
         position: sticky;
         left: 0;
         z-index: 4;
-        color: white;
-        background: #404040;
+        color: black;
+        background: #cdcdcd;
       }
 
       /* =========================================================
@@ -6958,6 +6968,8 @@
             <button onclick="showSheet('HSDlog', this)">HSD Log</button>
             <button onclick="showSheet('EBlog', this)">EB Log</button>
             <button onclick="showSheet('DutyChart', this)">Duty Chart</button>
+            <button onclick="showSheet('Holidays', this)">Holidays</button>
+            <button onclick="showSheet('CoffDB', this)">Leave Database</button>
             <button onclick="showSheet('ESRDB', this)">ESR</button>
             <button onclick="showSheet('TxNDB', this)">Transmission Log</button>
           </div>
@@ -6976,6 +6988,8 @@
             <table id="HSDlog" style="display: none"></table>
             <table id="EBlog" style="display: none"></table>
             <table id="DutyChart" style="display: none"></table>
+            <table id="Holidays" style="display: none"></table>
+            <table id="CoffDB" style="display: none"></table>
             <table id="ESRDB" style="display: none"></table>
             <table id="TxNDB" style="display: none"></table>
           </div>
@@ -7031,6 +7045,14 @@
           <div>
             <span class="material-symbols-outlined" id="dutyDatabase">database_off</span>
             <h3>Duty Chart Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="coffDatabase">database_off</span>
+            <h3>Leave Database</h3>
+          </div>
+          <div>
+            <span class="material-symbols-outlined" id="holidaysDatabase">data_alert</span>
+            <h3>Holiday Reference</h3>
           </div>
           <div>
             <span class="material-symbols-outlined" id="itDatabase">data_alert</span>
@@ -7098,8 +7120,10 @@
       let hsdData = { headers: [], rows: [] };
       let ebData = { headers: [], rows: [] };
       let dutyData = { headers: [], rows: [] };
+      let coffData = { headers: [], rows: [] };
       let esrData = { headers: [], rows: [] };
       let txnData = { headers: [], rows: [] };
+      let holidaysData = { headers: [], rows: [] };
 
       let currentYear = '';
 
@@ -7115,20 +7139,45 @@
         hsd: { storage: () => hsdData, elId: 'hsdDatabase', type: 'db' },
         eb: { storage: () => ebData, elId: 'ebDatabase', type: 'db' },
         duty: { storage: () => dutyData, elId: 'dutyDatabase', type: 'db' },
+        coff: { storage: () => coffData, elId: 'coffDatabase', type: 'db' },
         esr: { storage: () => esrData, elId: 'esrDatabase', type: 'db' },
         txn: { storage: () => txnData, elId: 'txnDatabase', type: 'db' },
         it: { storage: () => itData, elId: 'itDatabase', type: 'data' },
         cpc: { storage: () => cpcData, elId: 'cpcDatabase', type: 'data' },
         qtrs: { storage: () => qtrsData, elId: 'qtrDatabase', type: 'data' },
         city: { storage: () => cityData, elId: 'cityDatabase', type: 'data' },
-        comm: { storage: () => commData, elId: 'commDatabase', type: 'data' }
+        comm: { storage: () => commData, elId: 'commDatabase', type: 'data' },
+        holidays: { storage: () => holidaysData, elId: 'holidaysDatabase', type: 'data' }
       };
+
+      const dbMappings = [
+        { api: 'emp', id: 'EmpDB', name: 'Employee Database' },
+        { api: 'pb', id: 'PBDB', name: 'Pay Bill Database' },
+        { api: 'sbg', id: 'BudgetDB', name: 'SBG Budget' },
+        { api: 'sbgexp', id: 'SBGexpenditureDB', name: 'SBG Expenditure Logs' },
+        { api: 'dg', id: 'DGlog', name: 'Diesel Generator Logs' },
+        { api: 'hsd', id: 'HSDlog', name: 'HSD Consumption Logs' },
+        { api: 'eb', id: 'EBlog', name: 'Electricity Bill Logs' },
+        { api: 'duty', id: 'DutyChart', name: 'Duty Chart Details' },
+        { api: 'coff', id: 'CoffDB', name: 'Leaves' },
+        { api: 'holidays', id: 'Holidays', name: 'Holidays List' },
+        { api: 'esr', id: 'ESRDB', name: 'ESR Database' },
+        { api: 'txn', id: 'TxNDB', name: 'Transmission Logs' },
+        { api: 'cpc', id: 'CPC7DB', name: 'Pay Matrix' },
+        { api: 'qtrs', id: 'QtrsRateDB', name: 'Qtrs Rate List' },
+        { api: 'city', id: 'CityZoneDB', name: 'City Zone List' },
+        { api: 'comm', id: 'CommFactDB', name: 'Commutation Factor' },
+        { api: 'it', id: 'ITDB', name: 'IT Reference' }
+      ];
+
+      // 🔥 Lookup map
+      const dbNameMap = Object.fromEntries(dbMappings.map(({ api, name }) => [api, name]));
 
       /* ============================================================================
           ⚡ OPTIMIZED TABLE LOADER (Designed for cached {"headers":[], "rows":[]} data)
       ============================================================================ */
       async function loadTable(api, tableId, shouldRender = true) {
-        console.log('🌐 Connecting Database Route:', api);
+        console.log(`⏳ ${dbNameMap[api] || api} ✅`);
         const config = apiStatusMap[api];
 
         try {
@@ -7204,24 +7253,6 @@
           ⚡ POST-LOGIN BATCH TABLE RENDERER (Paints cached memory to DOM)
       ============================================================================ */
       function renderDatabaseTables(onlyDashboard = false) {
-        const dbMappings = [
-          { api: 'emp', id: 'EmpDB' },
-          { api: 'pb', id: 'PBDB' },
-          { api: 'sbg', id: 'BudgetDB' },
-          { api: 'sbgexp', id: 'SBGexpenditureDB' },
-          { api: 'dg', id: 'DGlog' },
-          { api: 'hsd', id: 'HSDlog' },
-          { api: 'eb', id: 'EBlog' },
-          { api: 'duty', id: 'DutyChart' },
-          { api: 'esr', id: 'ESRDB' },
-          { api: 'txn', id: 'TxNDB' },
-          { api: 'cpc', id: 'CPC7DB' },
-          { api: 'qtrs', id: 'QtrsRateDB' },
-          { api: 'city', id: 'CityZoneDB' },
-          { api: 'comm', id: 'CommFactDB' },
-          { api: 'it', id: 'ITDB' }
-        ];
-
         dbMappings.forEach((mapping) => {
           // If we are only doing immediate render, skip everything but the dashboard
           if (onlyDashboard && mapping.id !== 'BudgetDB') return;
@@ -7412,12 +7443,15 @@
         if (loginPage) loginPage.style.display = 'flex';
         if (mainPage) mainPage.style.display = 'none';
 
-        qs('.app')?.classList.add('loaded');
-
         // Prime authentication profile
+        await fetch('https://office-management-f425.onrender.com/refresh/emp', { method: 'POST' });
         await loadTable('emp', 'EmpDB', false);
 
         populateloginStationDropdown();
+
+        await fetch('https://office-management-f425.onrender.com/refresh/holidays', { method: 'POST' });
+        await loadTable('holidays', 'Holidays', false);
+        window.holidayLookup = buildHolidayLookup();
 
         // Background loading
         window.backgroundLoadPromise = loadAllData();
@@ -7572,7 +7606,7 @@
             filteredUsers.push(users[i]);
             html += `
               <option value="${users[i].hris}">
-                👤 ${users[i].user}-(${users[i].hris})
+                👨‍💼 ${users[i].user}-(${users[i].hris})
               </option>`;
           }
         }
@@ -7722,6 +7756,15 @@
 
         // FINAL REVEAL
         id('loginPage').style.display = 'none';
+
+        const app = qs('.app');
+
+        app.style.display = 'flex';
+
+        requestAnimationFrame(() => {
+          app.classList.add('loaded');
+        });
+
         id('mainPage').style.display = 'flex';
       }
 
@@ -7974,7 +8017,7 @@
 
           const data = await res.json();
 
-          console.log('🌐 Server time loaded:', data.serverTime);
+          console.log('🌐 Server time :', data.serverTime);
 
           return new Date(data.serverTime);
         } catch (err) {
@@ -8228,12 +8271,17 @@
         const baseUrl = 'https://office-management-f425.onrender.com';
 
         const tasks = [
-          // [Title, LoadFunction, Optional Refresh Endpoint]
-          ['Loading Duty Chart...', () => loadTable('duty', 'DutyChart', false), '/refresh/duty'],
+          [
+            'Loading Duty Chart & Leave Database...',
+            async () => {
+              await syncDutyChartToCoffList();
+            },
+            null
+          ],
           ['Loading ESR Logs...', () => loadTable('esr', 'ESRDB', false), '/refresh/esr'],
           ['Loading Transmission Logs...', () => loadTable('txn', 'TxNDB', false), '/refresh/txn'],
           [
-            'Loading Pay Bill + CPC Data...',
+            'Loading Pay Bill Database...',
             async () => {
               await Promise.all([loadTable('pb', 'PBDB', false), loadTable('cpc', 'CPC7DB', false)]);
               buildEmpDBWithCalc();
@@ -8246,8 +8294,8 @@
           ['Loading DG Log...', () => loadTable('dg', 'DGlog', false), '/refresh/dg'],
           ['Loading HSD Log...', () => loadTable('hsd', 'HSDlog', false), '/refresh/hsd'],
           ['Loading Electricity Log...', () => loadTable('eb', 'EBlog', false), '/refresh/eb'],
-          ['Loading Budget Database...', () => loadTable('sbg', 'BudgetDB', false), '/refresh/sbg'],
-          ['Loading Expenditure Data...', () => loadTable('sbgexp', 'SBGexpenditureDB', false), '/refresh/sbgexp'],
+          ['Loading SBG Database...', () => loadTable('sbg', 'BudgetDB', false), '/refresh/sbg'],
+          ['Loading SBG Expenditure Database...', () => loadTable('sbgexp', 'SBGexpenditureDB', false), '/refresh/sbgexp'],
           [
             'Preparing Budget Matrix...',
             () => {
@@ -8257,7 +8305,13 @@
             },
             null
           ],
-          ['Loading Reference Data...', () => Promise.all([loadTable('qtrs', 'QtrsRateDB', false), loadTable('city', 'CityZoneDB', false), loadTable('comm', 'CommFactDB', false), loadTable('it', 'ITDB', false)]), null]
+          [
+            'Loading Reference Data...',
+            async () => {
+              await Promise.all([loadTable('qtrs', 'QtrsRateDB', false), loadTable('city', 'CityZoneDB', false), loadTable('comm', 'CommFactDB', false), loadTable('it', 'ITDB', false), loadTable('cpc', 'CPC7DB', false)]);
+            },
+            '/refresh/reference'
+          ]
         ];
 
         const totalTasks = tasks.length;
@@ -17213,6 +17267,7 @@
       async function updateSBGSheet(rows, mode = 'sync') {
         // 🔥 START → yellow sync
         setSyncStatus('sbgexpDatabase');
+        console.log('🔄 SBG Expenditure : Sync Started...');
 
         try {
           if (!rows || !rows.length) {
@@ -17286,10 +17341,9 @@
 
           const result = await res.json();
 
-          //console.log('✅ SBGExp Sync:', result);
+          console.log('✅ SBG Expenditure : Sync Completed');
         } catch (err) {
-          console.error('❌ SBGExp Update Failed:', err);
-
+          console.error('❌ SBG Expenditure : Sync Failed:', err);
           clearSyncStatus('sbgexpDatabase', 'db', false);
         } finally {
           // 🔥 SUCCESS → green
@@ -17305,17 +17359,11 @@
 
         // Populate dropdowns only if we have data to look at
         loadBudgetDropdown();
-
-        // Only load months if we actually have expenditure data loaded
-        //if (sbgExpData?.rows?.length) {
-        //  loadBudgetMonthDropdown();
-        //} else {
-        //  console.log('ℹ️ Waiting for SBGExp data to load months...');
-        //}
       }
 
       async function calculateAndPushSBGBudget() {
         setSyncStatus('sbgDatabase');
+        console.log('🔄 SBG : Sync Started...');
         try {
           if (!sbgData?.rows || !sbgExpData?.rows) throw new Error('Data not ready');
 
@@ -17360,9 +17408,14 @@
           });
 
           if (!res.ok) throw new Error('Failed to update SBG DB');
+
+          const result = await res.json();
+
+          console.log('✅ SBG  : Sync Completed');
+
           clearSyncStatus('sbgDatabase', 'db', true);
         } catch (err) {
-          console.error('❌ SBG Calculation Sync Failed:', err);
+          console.error('❌ SBG : Sync Failed:', err);
           clearSyncStatus('sbgDatabase', 'db', false);
         }
       }
@@ -17397,15 +17450,13 @@
 
         isSyncRunning = true;
         try {
-          console.log('📡 Starting Paybill to SBG Sync...');
-
           // 2. Process PB Data into Expenditure format
           const pbRows = buildPBBudgetRows();
           if (!pbRows.length) throw new Error('No expenditure rows generated');
 
+          //console.log('🔄 Sync Pay Bill to SBG Expenditure ...');
           // 3. Sync to server
           await updateSBGSheet(pbRows, 'sync');
-
           // 4. Reload dependencies in sequence
           await reloadSBGExpData();
           await loadSBGData();
@@ -17413,7 +17464,7 @@
           // 5. Final calculation
           await calculateAndPushSBGBudget();
 
-          console.log('📡 Full Sync Success');
+          //console.log('📡 Full Sync Success');
         } catch (err) {
           console.error('❌ Sync Failed:', err);
         } finally {
@@ -27498,7 +27549,10 @@
           // 🔹 Row 1 → DATE
           html += `
             <tr>
-              <td style="padding:0;height:40px">${days[i]}<br>${dateText}</td>
+              <td style="padding:0;height:40px">
+                ${days[i]}${getHolidayBadge(d.date)}<br>
+                ${dateText}
+              </td>
               <td style="padding:0;height:40px">${d.MOR.join(', ')}</td>
               <td style="padding:0;height:40px">${d.GEN.join(', ')}</td>
               <td style="padding:0;height:40px">${d.EVE.join(', ')}</td>
@@ -27582,6 +27636,67 @@
         const pad = (n) => String(n).padStart(2, '0');
 
         return `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      }
+
+      function buildHolidayLookup() {
+        const lookup = {};
+
+        (holidaysData.rows || []).forEach((row) => {
+          const date = String(row[0] || '').trim();
+          const type = String(row[1] || '').trim(); // H / RH
+          const name = String(row[2] || '').trim();
+
+          if (!date || !type) return;
+
+          if (!lookup[date]) {
+            lookup[date] = {
+              H: [],
+              RH: []
+            };
+          }
+
+          lookup[date][type]?.push(name);
+        });
+
+        return lookup;
+      }
+
+      function getHolidayBadge(dateObj) {
+        const dateText = formatDutyChartDate(dateObj);
+
+        const info = window.holidayLookup?.[dateText];
+
+        if (!info) return '';
+
+        const hasH = info.H?.length;
+        const hasRH = info.RH?.length;
+
+        let text = '';
+        let tooltip = '';
+
+        if (hasH && hasRH) {
+          text = '(H / RH)';
+
+          tooltip = [`Holiday:\n${info.H.join('\n')}`, `\nRestricted Holiday:\n${info.RH.join('\n')}`].join('\n');
+        } else if (hasH) {
+          text = '(H)';
+          tooltip = info.H.join('\n');
+        } else if (hasRH) {
+          text = '(RH)';
+          tooltip = info.RH.join('\n');
+        }
+
+        return `
+          <span
+            title="${tooltip.replace(/"/g, '&quot;')}"
+            style="
+              font-weight:bold;
+              cursor:help;
+              color:#b00020;
+            ">
+            ${text}
+          </span>
+        `;
       }
 
       function renderRequirementTableSeparate(data, weekStart, statusRow) {
@@ -27682,7 +27797,7 @@
                       .map(
                         (d, i) => `
                       <th>
-                        ${days[i]}<br>
+                        ${days[i]}${getHolidayBadge(d.date)}<br>
                         ${formatDutyChartDate(d.date)}
                       </th>
                     `
@@ -27929,7 +28044,7 @@
                       .map(
                         (d, i) => `
                       <th>
-                        ${days[i]}<br>
+                        ${days[i]}${getHolidayBadge(d.date)}<br>
                         ${formatDutyChartDate(d.date)}
                       </th>
                     `
@@ -28526,7 +28641,7 @@
           // =====================================================
 
           if (result.status === 'success') {
-            await fetch('https://office-management-f425.onrender.com/refresh/duty', { method: 'POST' });
+            await syncDutyChartToCoffList();
             showCustomAlert('✅ Saved successfully');
           } else {
             showCustomAlert('❌ Save failed');
@@ -28578,6 +28693,360 @@
         // 🔥 USE EXISTING DROPDOWN FLOW
         renderFromDropdowns();
       });
+
+      function getDutyTimings(duty) {
+        duty = String(duty || '')
+          .toUpperCase()
+          .trim();
+
+        switch (duty) {
+          case 'MOR':
+            return {
+              actual: '05:00 - 12:20',
+              extra: ''
+            };
+
+          case 'GEN':
+            return {
+              actual: '10:00 - 17:20',
+              extra: ''
+            };
+
+          case 'EVE':
+            return {
+              actual: '16:00 - 23:20',
+              extra: ''
+            };
+
+          case 'MOR,GEN':
+            return {
+              actual: '05:00 - 12:20',
+              extra: '10:00 - 17:20'
+            };
+
+          case 'GEN,EVE':
+            return {
+              actual: '10:00 - 17:20',
+              extra: '16:00 - 23:20'
+            };
+
+          case 'MOR,EVE':
+            return {
+              actual: '05:00 - 12:20',
+              extra: '16:00 - 23:20'
+            };
+
+          default:
+            return {
+              actual: '',
+              extra: ''
+            };
+        }
+      }
+
+      function isHoliday(dateStr) {
+        const holiday = window.holidayLookup?.[dateStr];
+
+        if (!holiday) return false;
+
+        const types = holiday.types || [];
+
+        return types.includes('H'); // Skip RH
+      }
+
+      function findDutyOnDate(empName, dutyDate) {
+        const headers = dutyData.headers || [];
+        const rows = dutyData.rows || [];
+
+        const dateCol = headers.indexOf('Date');
+        const dutyCol = headers.indexOf(`${empName} Duty`);
+
+        if (dateCol === -1 || dutyCol === -1) return '';
+
+        const row = rows.find((r) => String(r[dateCol] || '').trim() === String(dutyDate).trim());
+
+        return row ? String(row[dutyCol] || '').trim() : '';
+      }
+
+      function buildCoffListRecords() {
+        const records = [];
+
+        const headers = dutyData.headers || [];
+        const rows = dutyData.rows || [];
+        const dateCol = headers.indexOf('Date');
+        if (dateCol === -1) return records;
+        const leaveRegex = /^(EL|CL|RH|HPL|ML|SCL|LAP|LHAP|EOL|C\/O)/i;
+
+        // Employee duty columns
+        const dutyColumns = headers.map((h, i) => ({ header: h, index: i })).filter((c) => c.header.endsWith(' Duty'));
+
+        // =====================================
+        // CURRENT WEEK ENDING (SATURDAY)
+        // =====================================
+
+        const today = new Date();
+        const currentWeekEnd = new Date(today);
+        const diff = 6 - currentWeekEnd.getDay(); // Saturday = 6
+        currentWeekEnd.setDate(currentWeekEnd.getDate() + diff);
+        const filteredRows = rows.filter((row) => {
+          const dutyDate = parseDDMMYYYY(String(row[dateCol] || '').trim());
+          return dutyDate && dutyDate <= currentWeekEnd;
+        });
+
+        // =====================================
+        // 🔥 FIND ALREADY CLAIMED C/O DATES
+        // =====================================
+
+        const claimedCOFFDates = new Set();
+
+        filteredRows.forEach((row) => {
+          dutyColumns.forEach(({ index }) => {
+            const value = String(row[index] || '').trim();
+
+            const match = value.match(/C\/O\((.*?)\)/i);
+
+            if (match) {
+              claimedCOFFDates.add(match[1]);
+            }
+          });
+        });
+
+        // =====================================
+        // 🔥 BUILD RECORDS
+        // =====================================
+
+        filteredRows.forEach((row) => {
+          const currentDate = String(row[dateCol] || '').trim();
+
+          dutyColumns.forEach(({ header, index }) => {
+            const value = String(row[index] || '').trim();
+
+            if (!value) return;
+
+            const empName = header.replace(' Duty', '').trim();
+
+            /* =====================================
+            🔥 LEAVE / C-OFF CLAIMS
+            ===================================== */
+
+            if (leaveRegex.test(value)) {
+              let leaveType = value;
+              let dutyDate = '';
+              let actualDuty = '';
+              let extraDuty = '';
+              let claimedDate = currentDate;
+              let details = 'Leave';
+
+              const coffMatch = value.match(/C\/O\((.*?)\)/i);
+
+              if (coffMatch) {
+                leaveType = 'C/O';
+
+                dutyDate = coffMatch[1];
+
+                const originalDuty = findDutyOnDate(empName, dutyDate);
+
+                const timing = getDutyTimings(originalDuty);
+
+                actualDuty = timing.actual;
+                extraDuty = timing.extra;
+
+                details = 'Double Duty';
+              }
+
+              records.push([empName, leaveType, claimedDate, dutyDate, actualDuty, extraDuty, details]);
+
+              return;
+            }
+
+            /* =====================================
+            🔥 HOLIDAY DUTY (H ONLY)
+            ===================================== */
+
+            const holidayInfo = window.holidayLookup?.[currentDate];
+
+            const isHolidayDate = holidayInfo?.H?.length > 0;
+
+            const dutyValue = value.toUpperCase();
+
+            if (isHolidayDate && ['MOR', 'GEN', 'EVE', 'MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
+              const timing = getDutyTimings(dutyValue);
+
+              // ----------------------------------
+              // Holiday Duty Entry
+              // ----------------------------------
+
+              records.push([
+                empName,
+                'C/O',
+                '',
+                currentDate,
+                timing.actual,
+                '', // No extra duty
+                'Holiday Duty'
+              ]);
+
+              // ----------------------------------
+              // Holiday + Double Duty Entry
+              // ----------------------------------
+
+              if (['MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
+                records.push([empName, 'C/O', '', currentDate, timing.actual, timing.extra, 'Holiday Double Duty']);
+              }
+
+              return;
+            }
+
+            /* =====================================
+            🔥 UNCLAIMED DOUBLE DUTY
+            ===================================== */
+
+            if (['MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
+              // Already claimed through C/O
+              if (claimedCOFFDates.has(currentDate)) {
+                return;
+              }
+
+              const timing = getDutyTimings(dutyValue);
+
+              records.push([
+                empName,
+                'C/O',
+                '', // not yet claimed
+                currentDate, // duty performed date
+                timing.actual,
+                timing.extra,
+                'Double Duty'
+              ]);
+            }
+          });
+        });
+
+        /* =====================================
+        🔥 MISSED OFF (ALL WEEKS)
+        ===================================== */
+
+        const leaveCodes = ['EL', 'CL', 'RH', 'ML', 'HPL', 'SCL', 'LAP', 'LHAP', 'EOL'];
+
+        const weekMap = new Map();
+
+        // Group rows by week ending
+        filteredRows.forEach((row) => {
+          const dateStr = String(row[dateCol] || '').trim();
+
+          const dutyDate = parseDDMMYYYY(dateStr);
+
+          if (!dutyDate) return;
+
+          const weekEnd = new Date(dutyDate);
+
+          // Saturday = week ending
+          const diff = 6 - weekEnd.getDay();
+
+          weekEnd.setDate(weekEnd.getDate() + diff);
+
+          const weekEndingDate = formatDutyChartDate(weekEnd);
+
+          if (!weekMap.has(weekEndingDate)) {
+            weekMap.set(weekEndingDate, []);
+          }
+
+          weekMap.get(weekEndingDate).push(row);
+        });
+
+        // Check every employee for every week
+        weekMap.forEach((weekRows, weekEndingDate) => {
+          dutyColumns.forEach(({ header, index }) => {
+            const empName = header.replace(' Duty', '').trim();
+
+            let woCount = 0;
+            let leaveDays = 0;
+
+            weekRows.forEach((r) => {
+              const duty = String(r[index] || '')
+                .trim()
+                .toUpperCase();
+
+              if (duty === 'W/O') {
+                woCount++;
+              }
+
+              if (leaveCodes.includes(duty)) {
+                leaveDays++;
+              }
+            });
+
+            // Skip if entire week is leave
+            const workingDays = weekRows.filter((r) => String(r[index] || '').trim()).length;
+            if (workingDays > 0 && leaveDays === workingDays) {
+              return;
+            }
+
+            // No weekly off in the week
+            if (woCount === 0) {
+              const alreadyExists = records.some((r) => r[0] === empName && r[1] === 'C/O' && r[3] === weekEndingDate && String(r[6]).startsWith('Missed Off'));
+
+              if (!alreadyExists) {
+                records.push([empName, 'C/O', '', weekEndingDate, '', '', `Missed Off for Week Ending ${weekEndingDate}`]);
+              }
+            }
+          });
+        });
+
+        return records;
+      }
+
+      async function syncDutyChartToCoffList() {
+        setSyncStatus('coffDatabase');
+
+        console.log('🔄 Leave List : Sync Started...');
+
+        try {
+          // 🔥 Refresh latest Duty Chart cache
+          await fetch('https://office-management-f425.onrender.com/refresh/duty', { method: 'POST' });
+
+          // 🔥 Reload dutyData used by buildCoffListRecords()
+          await loadTable('duty', 'DutyChart', false);
+
+          const coffRows = buildCoffListRecords();
+
+          if (!coffRows.length) {
+            console.log('ℹ️ Leave List : No records found');
+
+            clearSyncStatus('coffDatabase', 'db', true);
+
+            return;
+          }
+
+          const res = await fetch('https://office-management-f425.onrender.com/coff/bulk-update', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              rows: coffRows
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error('Failed to update Coff List');
+          }
+
+          await fetch('https://office-management-f425.onrender.com/refresh/coff', {
+            method: 'POST'
+          });
+
+          await loadTable('coff', 'CoffDB', false);
+
+          console.log(`✅ Leave List : Sync Completed (${coffRows.length} records)`);
+
+          clearSyncStatus('coffDatabase', 'db', true);
+        } catch (err) {
+          console.error('❌ Leave List : Sync Failed:', err);
+
+          clearSyncStatus('coffDatabase', 'db', false);
+        }
+      }
 
       function buildPrintDutyChartHTML() {
         const doc = document.implementation.createHTMLDocument('Duty Chart');
