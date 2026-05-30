@@ -749,7 +749,8 @@ def update_coff():
                 f"{str(row[0]).strip()}|"
                 f"{str(row[1]).strip()}|"
                 f"{str(row[2]).strip()}|"
-                f"{str(row[3]).strip()}"
+                f"{str(row[3]).strip()}|"
+                f"{str(row[6]).strip()}"
             )
 
             row_map[key] = {
@@ -773,7 +774,8 @@ def update_coff():
                 f"{str(row[0]).strip()}|"
                 f"{str(row[1]).strip()}|"
                 f"{str(row[2]).strip()}|"
-                f"{str(row[3]).strip()}"
+                f"{str(row[3]).strip()}|"
+                f"{str(row[6]).strip()}"
             )
 
             # --------------------------------------
