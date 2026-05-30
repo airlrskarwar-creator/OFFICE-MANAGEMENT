@@ -698,6 +698,97 @@ def update_duty():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/coff/bulk-update", methods=["POST"])
+def update_coff():
+
+    global COFF_CACHE
+
+    try:
+        data = request.get_json(force=True)
+
+        new_rows = data.get("rows", [])
+
+        if not new_rows:
+            return jsonify({
+                "status": "success",
+                "updated": 0
+            })
+
+        sheet_data = fetch_cache(coff_sheet)
+
+        if not sheet_data:
+            sheet_data = [[
+                "Employee Name",
+                "Leave Type",
+                "Claimed Date",
+                "Duty Date",
+                "Actual Duty",
+                "Extra Duty",
+                "Details"
+            ]]
+
+        headers = sheet_data[0]
+        existing_rows = sheet_data[1:]
+
+        claimed_idx = headers.index("Claimed Date")
+
+        # Existing rows keyed by Claimed Date
+        row_map = {}
+
+        for i, row in enumerate(existing_rows, start=2):
+            claimed_date = str(row[claimed_idx]).strip() if len(row) > claimed_idx else ""
+
+            if claimed_date:
+                row_map[claimed_date] = i
+
+        updated_count = 0
+
+        for row in new_rows:
+
+            claimed_date = str(row[2]).strip()  # Claimed Date column
+
+            if not claimed_date:
+                continue
+
+            # Existing row → update only if changed
+            if claimed_date in row_map:
+
+                sheet_row = row_map[claimed_date]
+
+                current = coff_sheet.row_values(sheet_row)
+
+                if current[:len(row)] != row:
+
+                    coff_sheet.update(
+                        f"A{sheet_row}:G{sheet_row}",
+                        [row]
+                    )
+
+                    updated_count += 1
+
+            else:
+                # New record
+                coff_sheet.append_row(row)
+
+                updated_count += 1
+
+        COFF_CACHE = fetch_cache(coff_sheet)
+
+        return jsonify({
+            "status": "success",
+            "updated": updated_count
+        })
+
+    except Exception as e:
+
+        print(f"❌ Coff Update Failed: {e}")
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 @app.route("/eb/update", methods=["POST"])
 def update_eb():
     try:
