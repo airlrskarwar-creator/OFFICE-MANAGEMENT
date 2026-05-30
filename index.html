@@ -654,7 +654,7 @@
         margin-bottom: 10px;
         border-radius: 4px;
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgb(105, 105, 105);
         backdrop-filter: blur(10px);
         transition: all 0.28s ease;
         z-index: 10;
@@ -669,7 +669,7 @@
 
       .input-box:focus-within {
         box-shadow: inset 0 -4px 0 0 #44d0ff;
-        background: #3b83f65f;
+        background: #29518f;
       }
 
       /* =========================================================
@@ -758,7 +758,7 @@
         overflow-x: hidden;
         border: none;
         border-radius: 4px;
-        background: #315897af;
+        background: #315897;
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
         box-shadow:
@@ -781,8 +781,8 @@
         align-items: center;
         padding: 4px 8px;
         border-radius: 4px;
-        background: transparent;
-        color: rgba(255, 255, 255, 0.88);
+        background: #2c4b80;
+        color: rgb(255, 255, 255);
         font-size: 13px;
         font-weight: 500;
         line-height: 2;
@@ -2360,7 +2360,6 @@
       /* ================= CHILD TABLE WRAPPERS ================= */
       .PB-Table-WrapperGO,
       .PB-Table-WrapperNPS,
-      .BudgetTableWrapper,
       .BudgetTablefromPBWrapper,
       .BudgetReportTableWrapper,
       .EBtableWrapper {
@@ -2382,7 +2381,24 @@
       }
 
       .BudgetTableWrapper {
-        max-height: calc(100% - 150px);
+        flex: 1;
+        height: calc(100% - 145px);
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        min-height: 0;
+        max-height: 100% !important;
+        display: block !important;
+        width: 100%;
+      }
+
+      .BudgetTableWrapper table td {
+        max-height: 22px;
+        min-height: 22px;
+        height: 22px;
+      }
+
+      .SBGreport-col {
+        padding: 0 !important;
       }
 
       .budgetReportBtn {
@@ -2731,13 +2747,13 @@
       #PB_NPSEditTbl th:first-child,
       #PB_NPSEditTbl td:first-child {
         position: sticky;
-        left: 180px;
+        left: 0px;
         z-index: 20;
         background: white;
         white-space: nowrap;
-        min-width: 210px;
-        width: 210px;
-        max-width: 210px;
+        min-width: 160px;
+        width: 160px;
+        max-width: 160px;
       }
 
       /* ================= SECOND COLUMN ================= */
@@ -2746,8 +2762,24 @@
       #PB_NPSEditTbl th:nth-child(2),
       #PB_GOEditTbl td:nth-child(2),
       #PB_NPSEditTbl td:nth-child(2) {
-        min-width: 70px;
-        width: 70px;
+        position: sticky;
+        left: 160px;
+        z-index: 20;
+        background: white;
+        white-space: nowrap;
+        min-width: 210px;
+        width: 210px;
+        max-width: 210px;
+        padding-left: 4px !important;
+      }
+
+      /* ================= THIRD COLUMN ================= */
+
+      #PB_GOEditTbl th:nth-child(3),
+      #PB_NPSEditTbl th:nth-child(3),
+      #PB_GOEditTbl td:nth-child(3),
+      #PB_NPSEditTbl td:nth-child(3) {
+        padding-left: 4px !important;
         text-align: center;
       }
 
@@ -2756,9 +2788,15 @@
       #PB_GOViewTbl thead tr th:first-child,
       #PB_NPSViewTbl thead tr th:first-child,
       #PB_GOEditTbl thead tr th:first-child,
-      #PB_NPSEditTbl thead tr th:first-child,
-      #PB_GOITCalc thead tr th:first-child,
-      #PB_NPSITCalc thead tr th:first-child {
+      #PB_NPSEditTbl thead tr th:first-child {
+        z-index: 50;
+        background: #1f4e79;
+        color: #ffffff;
+      }
+
+      /* ================= HEADER FIRST COLUMN ================= */
+      #PB_GOEditTbl thead tr th:nth-child(2),
+      #PB_NPSEditTbl thead tr th:nth-child(2) {
         z-index: 50;
         background: #1f4e79;
         color: #ffffff;
@@ -2768,16 +2806,17 @@
 
       #PB_GOViewTbl td:first-child,
       #PB_NPSViewTbl td:first-child,
-      #PB_GOEditTbl td:first-child,
-      #PB_NPSEditTbl td:first-child,
-      #PB_GOITCalc td:first-child,
-      #PB_NPSITCalc td:first-child,
       #PB_GOViewTbl th:first-child,
-      #PB_NPSViewTbl th:first-child,
-      #PB_GOEditTbl th:first-child,
-      #PB_NPSEditTbl th:first-child,
-      #PB_GOITCalc th:first-child,
-      #PB_NPSITCalc th:first-child {
+      #PB_NPSViewTbl th:first-child {
+        box-shadow: 2px 0 0 #e5e7eb;
+      }
+
+      /* ================= SEPARATOR ================= */
+
+      #PB_GOEditTbl td:nth-child(2),
+      #PB_NPSEditTbl td:nth-child(2),
+      #PB_GOEditTbl th:nth-child(2),
+      #PB_NPSEditTbl th:nth-child(2) {
         box-shadow: 2px 0 0 #e5e7eb;
       }
 
@@ -2790,7 +2829,8 @@
 
       /* ================= TOTAL ROW ================= */
 
-      .total-row td {
+      .total-row td,
+      .total-row td:hover {
         position: sticky;
         bottom: -1px;
         background: #fef3c7;
@@ -2805,9 +2845,14 @@
       #PB_GOViewTbl tr:last-child td:first-child,
       #PB_NPSViewTbl tr:last-child td:first-child,
       #PB_GOEditTbl tr:last-child td:first-child,
-      #PB_NPSEditTbl tr:last-child td:first-child,
-      #PB_GOITCalc tr:last-child td:first-child,
-      #PB_NPSITCalc tr:last-child td:first-child {
+      #PB_NPSEditTbl tr:last-child td:first-child {
+        border-top: 2px solid #f59e0b;
+        background: #fef3c7;
+        z-index: 999;
+      }
+
+      #PB_GOEditTbl tr:last-child td:nth-child(2),
+      #PB_NPSEditTbl tr:last-child td:nth-child(2) {
         border-top: 2px solid #f59e0b;
         background: #fef3c7;
         z-index: 999;
@@ -2818,12 +2863,10 @@
       ===================================================== */
 
       #PB_GOEditTbl tr,
-      #PB_GOITCalc tr,
-      #PB_NPSEditTbl tr,
-      #PB_NPSITCalc tr {
-        height: 26px !important;
-        min-height: 26px !important;
-        max-height: 26px !important;
+      #PB_GOITCalc tr {
+        height: 24px !important;
+        min-height: 24px !important;
+        max-height: 24px !important;
       }
 
       /* =====================================================
@@ -2831,14 +2874,10 @@
       ===================================================== */
 
       #PB_GOEditTbl td,
-      #PB_GOITCalc td,
       #PB_NPSEditTbl td,
-      #PB_NPSITCalc td,
       #PB_GOEditTbl th,
-      #PB_GOITCalc th,
-      #PB_NPSEditTbl th,
-      #PB_NPSITCalc th {
-        height: 26px !important;
+      #PB_NPSEditTbl th {
+        height: 24px !important;
         vertical-align: middle !important;
         box-sizing: border-box;
       }
@@ -2849,8 +2888,8 @@
 
       #PB_GOEditTbl input[type='checkbox'],
       #PB_NPSEditTbl input[type='checkbox'] {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         margin: auto !important;
         display: block;
       }
@@ -2860,9 +2899,7 @@
       ===================================================== */
 
       #PB_GOEditTbl td *,
-      #PB_NPSEditTbl td *,
-      #PB_GOITCalc td *,
-      #PB_NPSITCalc td * {
+      #PB_NPSEditTbl td * {
         line-height: 1 !important;
         box-sizing: border-box;
       }
@@ -2995,6 +3032,24 @@
       .PB-Table-Wrapper input[type='checkbox']:focus {
         outline: none;
         box-shadow: none;
+      }
+
+      .regime-badge {
+        display: inline-block;
+        padding: 4px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-right: 1px;
+        color: #fff;
+      }
+
+      .regime-badge.old {
+        background: #2563eb;
+      }
+
+      .regime-badge.new {
+        background: #16a34a;
       }
 
       .header-container {
@@ -4067,7 +4122,7 @@
       }
 
       .lieu-input {
-        width: 110px;
+        width: 115px;
         font-size: 11px;
         border-radius: 0;
         text-align: center;
@@ -5614,7 +5669,6 @@
           <div class="PB-Table-Wrapper">
             <div class="PB-Table-WrapperGO">
               <table id="PB_GOViewTbl"></table>
-              <table id="PB_GOITCalc"></table>
               <table id="PB_GOEditTbl"></table>
               <table class="daaArrearsTbl" id="daaGOTableCalculation">
                 <colgroup>
@@ -5685,7 +5739,6 @@
             </div>
             <div class="PB-Table-WrapperNPS">
               <table id="PB_NPSViewTbl"></table>
-              <table id="PB_NPSITCalc"></table>
               <table id="PB_NPSEditTbl"></table>
               <table class="daaArrearsTbl" id="daaNPSTableCalculation">
                 <colgroup>
@@ -6229,9 +6282,9 @@
               <input disabled id="SBGrevised" class="SBGinputs" />
             </div>
           </div>
+          <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
           <div style="display: flex">
             <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none"></div>
-            <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
             <div class="SBGDetailsTableWrapper" id="SBGDetailsTableWrapper" style="display: none">
               <table id="SBGDetailsTable"></table>
             </div>
@@ -6246,18 +6299,21 @@
 
                 <tr>
                   <td rowspan="2" colspan="2" style="border: 1px solid black; padding: 5px" id="sbgBillMainHeader">
-                    Form T.R. - 30 (Large)
-                    <br />
-                    (See Treasury Rule-306)
+                    <b>
+                      Form T.R. - 30 (Large)
+                      <br />
+                      (See Treasury Rule-306)
+                    </b>
                   </td>
                   <td rowspan="2" style="border: none; border-left: solid 1px black; text-align: center; vertical-align: middle">
-                    <h3 style="margin: 0; font-size: 14px">FULLY VOUCHED CONTINGENT BILL</h3>
+                    <b><h3 style="margin: 0; font-size: 14px">FULLY VOUCHED CONTINGENT BILL</h3></b>
                   </td>
                   <td rowspan="2" style="border: none; text-align: right; vertical-align: middle">CENTRAL</td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
+                  <td colspan="4"></td>
                 </tr>
+                <tr><td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td></tr>
 
                 <tr>
                   <td colspan="2" style="border: 1px solid black; border-bottom: none; text-align: center; vertical-align: top; padding: 5px" id="sbgBillHeader">ALL INDIA RADIO</td>
@@ -6271,7 +6327,7 @@
                 </tr>
                 <tr>
                   <td rowspan="2" colspan="2" style="border: 1px solid black; border-top: none; text-align: center; vertical-align: top; padding: 5px">
-                    <span id="sbgStation" style="font-weight: bold"></span>
+                    <b><span id="sbgStation" style="font-weight: bold"></span></b>
                   </td>
                   <td rowspan="2" style="border: 1px solid black; border-top: none; padding: 5px; vertical-align: top; font-weight: bold">
                     <label style="margin: 0px; margin-top: 5px; padding: 0; font-weight: bold">
@@ -6296,12 +6352,12 @@
                       </colgroup>
                       <thead>
                         <tr>
-                          <th rowspan="2" id="sbgBillSubHeader" style="border: 1px solid black; text-align: center; padding: 2px">
+                          <th rowspan="2" colspan="2" id="sbgBillSubHeader" style="border: 1px solid black; text-align: center; padding: 2px">
                             Number of
                             <br />
                             Sub-Voucher
                           </th>
-                          <th rowspan="2" colspan="2" style="border: 1px solid black; text-align: center; padding: 2px" id="SBGHeader">Description of Charge</th>
+                          <th rowspan="2" style="border: 1px solid black; text-align: center; padding: 2px" id="SBGHeader">Description of Charge</th>
                           <th rowspan="2" style="border: 1px solid black; text-align: center; padding: 2px">Amount</th>
                         </tr>
                       </thead>
@@ -6315,38 +6371,38 @@
                 <tr><td rowspan="3" colspan="4" class="sbgCertificateText" id="sbgCertificateText3" style="padding: 2px 5px; font-size: 11px">3. Certified that the purchases billed have been received in good order, that their quantities are correct and their quality good and according to specifications, that the rates paid are not in excess of the accepted that the market rates and that suitable notes of payment have been recorded against the indents and invoices concerned to prevent double payments.</td></tr>
                 <tr><td rowspan="2" colspan="4" class="sbgCertificateText" id="sbgCertificateText4" style="padding: 2px 5px; font-size: 11px">4. Certified that the expenditure on conveyance hire included in this bill was actually incurred.</td></tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td>
+                  <td colspan="4" style="height: 10px; border-top: solid 2px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="2" style="padding: 2px 5px">Received payments.</td>
                   <td style="text-align: right; padding: 2px 5px">Appropriation for the current year Rs.</td>
-                  <td style="border: 1px solid black; padding: 2px 5px">
+                  <td style="border: 2px solid black; padding: 2px 5px">
                     <b><span id="SBG_Sanctioned"></span></b>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="2" style="padding: 2px 5px"></td>
                   <td style="text-align: right; padding: 2px 5px">Expenditure including this Bill Rs.</td>
-                  <td style="border: 1px solid black; padding: 2px 5px">
+                  <td style="border: 2px solid black; padding: 2px 5px">
                     <b><span id="Monthly_Expenditure"></span></b>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="2" style="padding: 2px 5px"></td>
                   <td style="text-align: right; padding: 2px 5px">Amount of work Bill Annexed Rs.</td>
-                  <td style="border: 1px solid black; padding: 2px 5px">
+                  <td style="border: 2px solid black; padding: 2px 5px">
                     <b><span id="Present_Expenditure"></span></b>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="2" style="padding: 2px 5px">D.D.O.</td>
                   <td style="text-align: right; padding: 2px 5px">Balance Available Rs.</td>
-                  <td style="border: 1px solid black; padding: 2px 5px">
+                  <td style="border: 2px solid black; padding: 2px 5px">
                     <b><span id="Available_SBG"></span></b>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="height: 10px; border-bottom: solid 1px black" id="sbgBlankRows"></td>
+                  <td colspan="4" style="height: 10px; border-bottom: solid 2px black" id="sbgBlankRows"></td>
                 </tr>
                 <tr>
                   <td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td>
@@ -6356,16 +6412,18 @@
                     <span id="Present_Expenditure2" style="font-weight: bold"></span>
                   </td>
                 </tr>
-                <tr><td rowspan="3" colspan="4" style="height: 50px" id="sbgDesignationSign"></td></tr>
+                <tr><td colspan="4" rowspan="3" style="height: 50px" id="sbgDesignationSign"></td></tr>
+                <tr><td colspan="4"></td></tr>
+                <tr><td colspan="4"></td></tr>
                 <tr>
                   <td style="vertical-align: bottom; text-align: center">DA</td>
                   <td colspan="2" style="vertical-align: bottom; text-align: center">Accountant</td>
                   <td style="vertical-align: bottom; text-align: center">D.D.O./A.O.</td>
                 </tr>
-                <tr><td colspan="4" style="height: 10px; border-bottom: solid 1px black"></td></tr>
+                <tr><td colspan="4" style="height: 10px; border-bottom: solid 2px black"></td></tr>
                 <tr><td colspan="4" style="height: 10px" class="sbgEmptyRow" id="sbgBlankRows"></td></tr>
                 <tr><td colspan="4" style="text-align: center">Space of pre-audit enforcement in respect of Bills submitted for pre-audit. For use in AG's Office</td></tr>
-                <tr><td colspan="4" style="height: 10px; border-top: solid 1px black" id="sbgBlankRows"></td></tr>
+                <tr><td colspan="4" style="height: 10px; border-top: solid 2px black" id="sbgBlankRows"></td></tr>
                 <tr>
                   <td colspan="2">Head of Account</td>
                   <td style="text-align: right">Admitted for Rs.</td>
@@ -6377,8 +6435,8 @@
                   <td style="border: solid 1px black"></td>
                 </tr>
                 <tr>
-                  <td colspan="2" style="border-bottom: solid 1px black"></td>
-                  <td colspan="2" style="font-weight: bold; border-bottom: solid 1px black">Reason of objection :</td>
+                  <td colspan="2" style="border-bottom: solid 2px black"></td>
+                  <td colspan="2" style="font-weight: bold; border-bottom: solid 2px black">Reason of objection :</td>
                 </tr>
               </table>
 
@@ -7377,19 +7435,6 @@
           true
         );
       }
-
-      document.addEventListener('click', (e) => {
-        const el = e.target;
-        if (!el) return;
-        const tagName = el.tagName;
-        if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
-          Promise.resolve().then(() => {
-            try {
-              el.select();
-            } catch {}
-          });
-        }
-      });
 
       // ===============================================================================
       //                                    🔥Login Script Engine (High-Speed O(N))
@@ -9071,18 +9116,6 @@
 
         // ================= FY + EMP VALIDATION =================
         if (filters.station) {
-          // ================= FY (PRESENT FY selected) =================
-          //if (!valid.fy.has(filters.fy)) {
-          //  filters.fy = sortedFY.at(-1) || '';
-          //}
-
-          // To select 1st employee on Station Dropdown Change
-          //if (!valid.employee.has(filters.employee)) {
-          //  filters.employee = [...valid.employee].sort().at(-1) || '';
-          //}
-
-          // ================= FY (SELECT FY selected) =================
-
           // 🔥 KEEP SELECT FY DEFAULT
           if (!filters.fy || filters.fy === '' || filters.fy === 'Select FY') {
             filters.fy = 'Select FY';
@@ -9090,6 +9123,7 @@
           } else {
             enableAllButtons();
           }
+          toggleSBGButtons('pbData');
         }
 
         // ================= MONTH =================
@@ -11661,7 +11695,9 @@
           }
         }
 
-        console.warn('❌ Pay Bill: No DA% match for:', selectedMonth);
+        if (selectedMonth && selectedMonth !== 'Select Month') {
+          console.warn('❌ Pay Bill: No DA% match for:', selectedMonth);
+        }
         return 0;
       }
 
@@ -11694,7 +11730,11 @@
         const month = id('PayBillPage_SalMonth').value;
         const station = id('PayBillPage_Station').value;
 
-        if (!month) return;
+        if (!month || month === 'Select Month') {
+          id('PayBillPage_DA%').value = '';
+          id('PayBillPage_OldDA%').value = '';
+          return;
+        }
 
         const newDA = getDAPercentage(month);
         const oldDA = getOldDAFromPBData(month, station);
@@ -12234,10 +12274,30 @@
         const startIndex = getColIndex(headers, 'Last Increment');
         const endIndex = getColIndex(headers, 'Recovery Details');
 
-        const selectedHeaders = ['Employee Name', 'HRIS', ...headers.slice(startIndex, endIndex + 1)];
+        const selectedHeaders = ['IT Projection\n(Regime) IT + Cess = Net IT', 'Employee Name', 'HRIS', ...headers.slice(startIndex, endIndex + 1)];
+
+        const selectedFY = id('PayBillPage_FY')?.value || '';
+
+        const salMonthEl = id('PayBillPage_SalMonth');
+
+        const currentMonth = salMonthEl?.options?.[salMonthEl.selectedIndex]?.text || '';
 
         const processedRows = rows.map((row) => {
-          return [row[nameIndex], row[hrisIndex], ...row.slice(startIndex, endIndex + 1)];
+          const empName = row[nameIndex];
+
+          const oldTax = calculateMonthlyIT(empName, selectedFY, 'Old Regime', currentMonth);
+
+          const newTax = calculateMonthlyIT(empName, selectedFY, 'New Regime', currentMonth);
+
+          const tax = oldTax.netTax <= newTax.netTax ? oldTax : newTax;
+
+          const isOld = oldTax.netTax <= newTax.netTax;
+
+          const regimeBadge = isOld ? `<span class="regime-badge old">OLD</span>` : `<span class="regime-badge new">NEW</span>`;
+
+          const itProjection = `${regimeBadge} ${tax.it} + ${tax.cess} = ${tax.total}`;
+
+          return [itProjection, row[nameIndex], row[hrisIndex], ...row.slice(startIndex, endIndex + 1)];
         });
 
         /* ================= DROPDOWNS ================= */
@@ -12291,7 +12351,14 @@
         const trHead = createEl('tr');
 
         selectedHeaders.forEach((h) => {
-          trHead.appendChild(createEl('th', { text: h }));
+          const th = createEl('th', { text: h });
+
+          if (h.startsWith('IT Projection')) {
+            th.style.whiteSpace = 'pre-line';
+            th.style.lineHeight = '1.2';
+          }
+
+          trHead.appendChild(th);
         });
 
         thead.appendChild(trHead);
@@ -12308,15 +12375,19 @@
 
           // 🔥 STORE HRIS IN ROW
           tr.dataset.hris = empHRIS || '';
+          selectedHeaders.forEach((colName, i) => {
+            const val = row[i] ?? '';
 
-          row.forEach((val, i) => {
-            const colName = selectedHeaders[i];
             const td = createEl('td');
 
             td.setAttribute('data-col', colName);
+            if (colName.includes('IT Projection')) {
+              td.innerHTML = val;
 
-            /* Employee Name */
-            if (i === 0 || colName === 'HRIS') {
+              td.style.fontSize = '10px';
+              td.style.fontWeight = '600';
+              td.style.whiteSpace = 'nowrap';
+            } else if (colName === 'Employee Name' || colName === 'HRIS') {
               td.textContent = val;
             } else if (checkboxCols.includes(colName)) {
               /* Checkbox */
@@ -12535,7 +12606,7 @@
 
           applyColumnRules(tr, selectedHeaders, tableId);
 
-          const empName = tr.children[0].textContent.trim();
+          const empName = tr.children[1].textContent.trim();
           applyGPFRule_GO(tr, empName);
 
           tbody.appendChild(tr);
@@ -12552,7 +12623,7 @@
           const handler = () => {
             recalculateRow(tr, tableId);
 
-            const empName = tr.children[0].textContent.trim();
+            const empName = tr.children[1].textContent.trim();
 
             // 🔥 Delay ensures no override happens after
             setTimeout(() => {
@@ -12790,7 +12861,7 @@
           const isGO = table?.id === 'PB_GOEditTbl';
           const isNPS = table?.id === 'PB_NPSEditTbl';
 
-          const empName = tr.children[0]?.innerText?.trim();
+          const empName = getCellValue(tr, 'Employee Name')?.trim();
           if (!empName) return;
 
           const history = getPBDBHistory(empName);
@@ -13824,7 +13895,7 @@
         /* =========================
        🔹 NAME FETCH
       ========================= */
-        const name = tr.children[0]?.textContent?.trim() || '';
+        const name = tr.children[1]?.textContent?.trim() || '';
         if (!name) return;
 
         /* =========================
@@ -13958,238 +14029,6 @@
         };
       }
 
-      function calculateFYGrossFinal(empName, selectedFY, regime) {
-        if (!pbData || !pbData.headers || !pbData.rows) {
-          return { total: 0, department: '', isActive: false };
-        }
-
-        const headers = pbData.headers;
-        const rows = pbData.rows;
-
-        const getIdx = (name) => headers.indexOf(name);
-
-        const empIndex = getIdx('Employee Name');
-        const monthIndex = getIdx('Salary Month');
-
-        // 🔥 Earnings
-        const basicIdx = getIdx('Basic Pay');
-        const daIdx = getIdx('DA');
-        const hraIdx = getIdx('HRA');
-        const taIdx = getIdx('TA');
-        const npseIdx = getIdx('NPSE');
-
-        const bonusIdx = getIdx('Bonus');
-        const daaIdx = getIdx('Total DAA');
-        const arrearsIdx = getIdx('Arrears');
-        const ceaIdx = getIdx('CEA');
-        const elIdx = getIdx('EL Encash');
-        const uniIdx = getIdx('UniAll');
-
-        // 🔥 Deductions
-        const npseDedIdx = getIdx('NPSE Deduction');
-        const daaNpseIdx = getIdx('DAA on NPSE');
-
-        const npscIdx = getIdx('NPSC');
-        const gpfIdx = getIdx('GPF');
-        const cgeisIdx = getIdx('CGEIS');
-        const ptIdx = getIdx('Prof Tax');
-
-        let superMonth = null;
-        let department = '';
-
-        // 🔥 GET SUPERANNUATION
-        if (window.empCalcHeaders && window.empCalcRows) {
-          const eHeaders = window.empCalcHeaders;
-          const eRows = window.empCalcRows;
-
-          const eEmpIndex = getColIndex(eHeaders, 'Employee Name');
-          const supIndex = getColIndex(eHeaders, 'Superannuation');
-          const deptIndex = getColIndex(eHeaders, 'Department');
-
-          if (eEmpIndex !== -1 && supIndex !== -1 && deptIndex !== -1) {
-            for (let r of eRows) {
-              if (String(r[eEmpIndex]).trim() === String(empName).trim()) {
-                superMonth = normalizeMonthFormat(r[supIndex]);
-                department = r[deptIndex] || '';
-                break;
-              }
-            }
-          }
-        }
-
-        const startYear = parseInt(selectedFY.split('-')[0]);
-        const fyStart = `Mar-${startYear}`;
-
-        if (superMonth && monthToNumber(superMonth) < monthToNumber(fyStart)) {
-          return { total: 0, department, isActive: false };
-        }
-
-        let monthData = {};
-
-        // 🔥 SUMMARY OBJECT
-        let sum = {
-          basic: 0,
-          da: 0,
-          hra: 0,
-          ta: 0,
-          npse: 0,
-          bonus: 0,
-          daa: 0,
-          arrears: 0,
-          cea: 0,
-          el: 0,
-          uni: 0,
-          npseDed: 0,
-          daaNpse: 0,
-          npsc: 0,
-          gpf: 0,
-          cgeis: 0,
-          pt: 0,
-          gross: 0,
-          deductions: 0,
-          net: 0
-        };
-
-        rows.forEach((row) => {
-          if (String(row[empIndex]).trim() !== String(empName).trim()) return;
-
-          const monthStr = row[monthIndex];
-          const fy = getFinancialYear(monthStr);
-
-          if (fy !== selectedFY) return;
-
-          // 🔥 Earnings
-          const basic = parseFloat(row[basicIdx]) || 0;
-          const da = parseFloat(row[daIdx]) || 0;
-          const hra = parseFloat(row[hraIdx]) || 0;
-          const ta = parseFloat(row[taIdx]) || 0;
-          const npse = parseFloat(row[npseIdx]) || 0;
-
-          const bonus = parseFloat(row[bonusIdx]) || 0;
-          const totalDAA = parseFloat(row[daaIdx]) || 0;
-          const arrears = parseFloat(row[arrearsIdx]) || 0;
-          const cea = parseFloat(row[ceaIdx]) || 0;
-          const el = parseFloat(row[elIdx]) || 0;
-          const uni = parseFloat(row[uniIdx]) || 0;
-
-          // 🔥 Deductions
-          const npseDed = parseFloat(row[npseDedIdx]) || 0;
-          const daaOnNpse = parseFloat(row[daaNpseIdx]) || 0;
-
-          const npsc = parseFloat(row[npscIdx]) || 0;
-          const gpf = parseFloat(row[gpfIdx]) || 0;
-          const cgeis = parseFloat(row[cgeisIdx]) || 0;
-          const pt = parseFloat(row[ptIdx]) || 0;
-
-          // 🔥 GROSS
-          const grossIncome = basic + da + hra + ta + npse + bonus + totalDAA + arrears + cea + el + uni;
-
-          let netTaxable = 0;
-          let deductionsUsed = 0;
-
-          if (regime === 'Old Regime') {
-            deductionsUsed = npseDed + daaOnNpse + Math.min(150000, npsc + gpf + cgeis) + pt + uni;
-
-            netTaxable = grossIncome - deductionsUsed;
-          } else {
-            deductionsUsed = npseDed + daaOnNpse;
-
-            netTaxable = grossIncome - deductionsUsed;
-          }
-
-          // 🔥 ACCUMULATION
-          sum.basic += basic;
-          sum.da += da;
-          sum.hra += hra;
-          sum.ta += ta;
-          sum.npse += npse;
-
-          sum.bonus += bonus;
-          sum.daa += totalDAA;
-          sum.arrears += arrears;
-          sum.cea += cea;
-          sum.el += el;
-          sum.uni += uni;
-
-          sum.npseDed += npseDed;
-          sum.daaNpse += daaOnNpse;
-          sum.npsc += npsc;
-          sum.gpf += gpf;
-          sum.cgeis += cgeis;
-          sum.pt += pt;
-
-          sum.gross += grossIncome;
-          sum.deductions += deductionsUsed;
-          sum.net += netTaxable;
-
-          monthData[monthStr] = netTaxable;
-        });
-
-        if (Object.keys(monthData).length === 0) {
-          return { total: 0, department, isActive: false };
-        }
-
-        const fyMonths = [`Mar-${startYear}`, `Apr-${startYear}`, `May-${startYear}`, `Jun-${startYear}`, `Jul-${startYear}`, `Aug-${startYear}`, `Sep-${startYear}`, `Oct-${startYear}`, `Nov-${startYear}`, `Dec-${startYear}`, `Jan-${startYear + 1}`, `Feb-${startYear + 1}`];
-
-        let lastValue = monthData[`Mar-${startYear}`] ?? Object.values(monthData)[0];
-
-        let total = 0;
-
-        fyMonths.forEach((m) => {
-          if (superMonth && monthToNumber(m) > monthToNumber(superMonth)) return;
-
-          let value;
-
-          if (monthData[m] !== undefined) {
-            value = monthData[m];
-            lastValue = value;
-          } else {
-            value = lastValue;
-          }
-
-          total += value;
-        });
-
-        // 🔥 FINAL DEBUG OUTPUT
-        //if (empName === DEBUG_EMP) {
-        //  console.log("==== FY COMPONENT SUMMARY ====");
-        //  console.table({
-        //    Basic: sum.basic,
-        //    DA: sum.da,
-        //    HRA: sum.hra,
-        //    TA: sum.ta,
-        //    NPSE: sum.npse,
-
-        //    Bonus: sum.bonus,
-        //    "Total DAA": sum.daa,
-        //    Arrears: sum.arrears,
-        //    CEA: sum.cea,
-        //    "EL Encash": sum.el,
-        //    UniAll: sum.uni,
-
-        //    "Gross Income": sum.gross,
-
-        //    "NPSE Ded": sum.npseDed,
-        //    "DAA on NPSE": sum.daaNpse,
-        //    NPSC: sum.npsc,
-        //    GPF: sum.gpf,
-        //    CGEIS: sum.cgeis,
-        //   "Prof Tax": sum.pt,
-
-        //    "Total Deductions": sum.deductions,
-        //    "Net Taxable": sum.net,
-        //    "FY Total (Projected)": total,
-        //  });
-        //}
-
-        return {
-          total: Math.round(total),
-          department,
-          isActive: true,
-          superMonth
-        };
-      }
-
       function getEditTableEmployees() {
         const tableIds = ['PB_GOEditTbl', 'PB_NPSEditTbl'];
         const empIndex = pbData.headers.indexOf('Employee Name');
@@ -14210,184 +14049,6 @@
         });
 
         return [...names];
-      }
-
-      function renderGOITTable() {
-        const table = id('PB_GOITCalc');
-        if (!table) return;
-
-        let thead = table.querySelector('thead') || table.appendChild(document.createElement('thead'));
-        let tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
-
-        const selectedFY = id('PayBillPage_FY').value;
-        const empIndex = pbData.headers.indexOf('Employee Name');
-
-        let processed = new Set();
-        let grandTotal = 0;
-
-        // 🔥 Header
-        thead.innerHTML = `
-          <tr>
-            <th>
-              Next Month IT Deduction <br>
-              [Regime](IT + Cess = Net IT)
-            </th>
-          </tr>
-        `;
-
-        tbody.innerHTML = '';
-
-        // 🔥 Get current month correctly
-        const el = id('PayBillPage_SalMonth');
-        const currentMonth = el.options[el.selectedIndex]?.text;
-        const editEmployees = getEditTableEmployees();
-
-        editEmployees.forEach((empName) => {
-          if (processed.has(empName)) return;
-          processed.add(empName);
-
-          // 🔥 STEP 1: Calculate BOTH regimes
-          const oldTax = calculateMonthlyIT(empName, selectedFY, 'Old Regime', currentMonth);
-          const newTax = calculateMonthlyIT(empName, selectedFY, 'New Regime', currentMonth);
-
-          // 🔥 STEP 2: Select BEST regime
-          let tax, regime;
-
-          // 🔥 NORMAL CASE → pick minimum
-          if (oldTax.netTax <= newTax.netTax) {
-            tax = oldTax;
-            regime = 'Old Regime';
-          } else {
-            tax = newTax;
-            regime = 'New Regime';
-          }
-
-          // 🔥 STEP 3: Validate employee
-          const result = calculateFYGrossFinal(empName, selectedFY, regime);
-
-          if (!result.isActive) return;
-          if (!String(result.department).toUpperCase().includes('GO')) return;
-
-          grandTotal += tax.total;
-
-          // 🔥 Optional color highlight
-          const color = regime === 'Old Regime' ? '#2563eb' : '#16a34a';
-          const shortRegime = regime === 'Old Regime' ? 'Old' : 'New';
-
-          const tr = document.createElement('tr');
-
-          tr.innerHTML = `
-            <td>
-              <span style="background:${color};font-size:9px;color:white;padding:4px 4px;border-radius:4px;">${shortRegime}</span>
-              ${tax.it} +
-              ${tax.cess} =
-              ${formatCurrency(tax.total)}
-            </td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-
-        // 🔥 TOTAL ROW
-        const totalRow = document.createElement('tr');
-        totalRow.classList.add('total-row');
-        totalRow.innerHTML = `
-                <td style="height:26px"></td>
-              `;
-        //totalRow.innerHTML = `
-        //  <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
-        //`;
-
-        tbody.appendChild(totalRow);
-      }
-
-      function renderNPSITTable() {
-        const table = id('PB_NPSITCalc');
-        if (!table) return;
-
-        let thead = table.querySelector('thead') || table.appendChild(document.createElement('thead'));
-        let tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
-
-        const selectedFY = id('PayBillPage_FY').value;
-        const empIndex = pbData.headers.indexOf('Employee Name');
-
-        let processed = new Set();
-        let grandTotal = 0;
-
-        // 🔥 Header
-        thead.innerHTML = `
-          <tr>
-            <th>
-              Next Month IT Deduction <br>
-              [Regime]( IT + Cess = Net IT )
-            </th>
-          </tr>
-        `;
-
-        tbody.innerHTML = '';
-
-        // 🔥 Get current month correctly
-        const el = id('PayBillPage_SalMonth');
-        const currentMonth = el.options[el.selectedIndex]?.text;
-        const editEmployees = getEditTableEmployees();
-
-        editEmployees.forEach((empName) => {
-          if (processed.has(empName)) return;
-          processed.add(empName);
-
-          // 🔥 STEP 1: Calculate BOTH regimes
-          const oldTax = calculateMonthlyIT(empName, selectedFY, 'Old Regime', currentMonth);
-          const newTax = calculateMonthlyIT(empName, selectedFY, 'New Regime', currentMonth);
-
-          // 🔥 STEP 2: Select BEST regime
-          let tax, regime;
-
-          // 🔥 NORMAL CASE → pick minimum
-          if (oldTax.netTax <= newTax.netTax) {
-            tax = oldTax;
-            regime = 'Old Regime';
-          } else {
-            tax = newTax;
-            regime = 'New Regime';
-          }
-
-          // 🔥 STEP 3: Validate employee
-          const result = calculateFYGrossFinal(empName, selectedFY, regime);
-
-          if (!result.isActive) return;
-          if (String(result.department).toUpperCase().includes('GO')) return;
-
-          grandTotal += tax.total;
-
-          // 🔥 Optional color highlight
-          const color = regime === 'Old Regime' ? '#2563eb' : '#16a34a';
-          const shortRegime = regime === 'Old Regime' ? 'Old' : 'New';
-
-          const tr = document.createElement('tr');
-
-          tr.innerHTML = `
-            <td>
-              <span style="background:${color};font-size:9px;color:white;padding:4px 4px;border-radius:4px;">${shortRegime}</span>
-              ${tax.it} +
-              ${tax.cess} =
-              ${formatCurrency(tax.total)}
-            </td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-
-        // 🔥 TOTAL ROW
-        const totalRow = document.createElement('tr');
-        totalRow.classList.add('total-row');
-        totalRow.innerHTML = `
-          <td style="background:white;box-shadow:none;"></td>
-        `;
-        //totalRow.innerHTML = `
-        //  <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
-        //`;
-
-        tbody.appendChild(totalRow);
       }
 
       function calculateITFields(tr) {
@@ -14624,8 +14285,6 @@
           setupManualDAAHandlers();
           recalculateAllRows();
           recalculateAllTotals();
-          renderNPSITTable();
-          renderGOITTable();
         } else {
           ['PB_GOViewTbl', 'PB_NPSViewTbl'].forEach((idName) => {
             const el = id(idName);
@@ -15645,7 +15304,7 @@
         rows.forEach((tr) => {
           html += '<tr>';
 
-          const empName = String(tr.children[0]?.textContent || '')
+          const empName = String(tr.children[1]?.textContent || '')
             .replace(/\s+/g, '')
             .toLowerCase();
 
@@ -18021,7 +17680,9 @@
 
             row.forEach((cell, i) => {
               const td = document.createElement('td');
-
+              td.style.setProperty('height', '20px', 'important');
+              td.style.setProperty('min-height', '20px', 'important');
+              td.style.setProperty('max-height', '20px', 'important');
               // 🔥 HIDE STATION + BUDGET COLUMNS
               if (i === 1 || i === 3) {
                 td.style.display = 'none';
@@ -18075,8 +17736,8 @@
               <img
                 src="https://cdn-icons-png.flaticon.com/512/337/337946.png"
                 style="
-                  width:16px;
-                  height:16px;
+                  width:15px;
+                  height:15px;
                   object-fit:contain;
                 "
               />
@@ -18090,8 +17751,8 @@
               <img
                 src="https://cdn-icons-png.flaticon.com/512/732/732220.png"
                 style="
-                  width:16px;
-                  height:16px;
+                  width:15px;
+                  height:15px;
                   object-fit:contain;
                 "
               />
@@ -18400,7 +18061,7 @@
           const amt = Number(r.children[5]?.textContent?.replace(/[^0-9.-]/g, '') || 0);
           const tr = document.createElement('tr');
           tr.innerHTML = `
-              <td
+              <td colspan="2"
                   style="
                     border:solid 1px black;
                     text-align:center;
@@ -18408,7 +18069,7 @@
                 ${idx + 1}
               </td>
 
-              <td colspan="2" style="
+              <td style="
                     border:solid 1px black;
                   ">
                 ${desc}
@@ -18437,14 +18098,14 @@
 
           tr.innerHTML = `
 
-            <td
+            <td colspan="2"
                 style="
                   border:solid 1px black;
                   height:20px;
                 ">
             </td>
 
-            <td colspan="2" style="
+            <td  style="
                   border:solid 1px black;
                 ">
             </td>
@@ -18737,10 +18398,6 @@
           🔥 REMOVE INLINE UI STYLES
           ========================================= */
 
-          // =========================================
-          // 🔥 WATCH SYSTEM TABLE → NEXT PAGE
-          // =========================================
-
           if (clone.id === 'SBGwatchSystem') {
             clone.style.pageBreakBefore = 'always';
 
@@ -18988,7 +18645,9 @@
 
                 const isChildBody = cell.closest('#SBGmonthWiseDetails tbody');
 
-                if (isChildBody) {
+                const isWatchBody = cell.closest('#SBGwatchSystem tbody');
+
+                if (isChildBody || isWatchBody) {
                   // 🔥 make single logical line
                   // Excel will wrap automatically
 
@@ -19118,9 +18777,7 @@
 
                 function getExcelBorder(side, cs) {
                   const width = parseFloat(cs[`border${side}Width`]);
-
                   const style = cs[`border${side}Style`];
-
                   const color = rgbToARGB(cs[`border${side}Color`]) || 'FF000000';
 
                   if (style === 'none' || width <= 0) {
@@ -19128,7 +18785,7 @@
                   }
 
                   return {
-                    style: width >= 3 ? 'thick' : width >= 2 ? 'medium' : 'thin',
+                    style: width >= 2 ? 'thick' : width >= 1 ? 'thin' : 'thin',
 
                     color: {
                       argb: color
@@ -19190,15 +18847,13 @@
               // 🔥 MARK ROWS OCCUPIED
               // ======================================
 
+              // mark only extra rows occupied by rowspan
               for (let r = currentRow; r < currentRow + maxRowSpan; r++) {
                 occupiedRows.add(r);
               }
 
-              // ======================================
-              // 🔥 MOVE POINTER
-              // ======================================
-
-              currentRow += maxRowSpan;
+              // move to next logical row
+              currentRow++;
             });
           }
 
@@ -19214,14 +18869,6 @@
 
           return currentRow;
         }
-
-        // =========================
-        // 🔥 PROCESS TABLE
-        // =========================
-
-        // ======================================
-        // 🔥 MAIN TABLE
-        // ======================================
 
         const lastRow = processTable(sheet, mainTable, 1, 1);
 
@@ -19256,8 +18903,8 @@
           { width: 5 }, // E
 
           // 🔥 WATCH SYSTEM
-          { width: 18 }, // F
-          { width: 50 }, // G
+          { width: 15 }, // F
+          { width: 90 }, // G
           { width: 18 } // H
         ];
 
@@ -19365,63 +19012,7 @@
         return map;
       }
 
-      function ensureSBGTable() {
-        const container = id('BudgetTableWrapper');
-        if (!container) return null;
-
-        let table = container.querySelector('table');
-        let tbody;
-
-        // ✅ If table NOT exists → create full structure
-        if (!table) {
-          container.innerHTML = ''; // clear message like "No data"
-
-          table = document.createElement('table');
-          table.className = 'budget-table';
-
-          table.innerHTML = `
-            <colgroup>
-              <col style="width: 8%;">
-              <col style="width: 10%;">
-              <col style="width: 10%;">
-              <col style="width: 10%;">
-              <col style="width: 30%;">
-              <col style="width: 8%;">
-              <col style="width: 8%;">
-              <col style="width: 8%;">
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Station</th>
-                <th>Bill / Invoice Details</th>
-                <th>SBG Expenditure Under</th>
-                <th>Expenditure Details</th>
-                <th>Expenditure Amount (₹ in 000)</th>
-                <th>Monthly Cumulative Sum of Expenditure (₹ in 000)</th>
-                <th>Cumulative Sum of Expenditure (₹ in 000)</th>
-              </tr>
-            </thead>
-            <tbody id="budgetPBBody"></tbody>
-          `;
-
-          container.appendChild(table);
-        }
-
-        // ✅ Get tbody (existing or newly created)
-        tbody = table.querySelector('#budgetPBBody');
-
-        // fallback safety
-        if (!tbody) {
-          tbody = document.createElement('tbody');
-          tbody.id = 'budgetPBBody';
-          table.appendChild(tbody);
-        }
-
-        return tbody;
-      }
-
-      function addSBGRows(count = 5) {
+      function addSBGRows(count = 10) {
         const tbody = qs('#budgetPBBody');
         if (!tbody) return;
 
@@ -19566,7 +19157,23 @@
 
             const fy = getFYFromDateStr(dateStr);
 
-            if (!fy) return;
+            // 🔥 Invalid / empty date → clear cumulative columns
+            if (!fy) {
+              const monthCell = r.querySelector('.monthcum') || r.children[6];
+              const fyCell = r.querySelector('.cum') || r.children[7];
+
+              if (monthCell) {
+                monthCell.dataset.value = '';
+                monthCell.textContent = '';
+              }
+
+              if (fyCell) {
+                fyCell.dataset.value = '';
+                fyCell.textContent = '';
+              }
+
+              return;
+            }
 
             // ======================================
             // 🔥 MONTH KEY
@@ -20032,7 +19639,7 @@
               ===================================== */
 
               if (modeType === 'add') {
-                addSBGRows(5);
+                addSBGRows(10);
                 setTimeout(() => {
                   initPreviousCumulative();
                   CalculateCumulative('add');
@@ -20451,21 +20058,19 @@
       }
 
       async function buildBudgetHTML() {
-        const budget = id('BudgetUnderSelect')?.value || '';
-        const station = id('BudgetPage_Station')?.value;
-        const fy = id('BudgetPage_FY')?.value;
-        const wrapper = id('SBGDetailsTableWrapper');
+        const station = id('BudgetPage_Station')?.value || '';
+        const fy = id('BudgetPage_FY')?.value || '';
 
-        if (!wrapper) {
-          showCustomAlert('🚫 No data to print');
+        if (!station || !fy) {
+          showCustomAlert('🚫 Station / FY not selected');
           return '';
         }
 
         const doc = document.implementation.createHTMLDocument('SBG Expenditure Statement');
 
-        // =========================================
-        // 🔥 COPY STYLES
-        // =========================================
+        /* =========================================
+          🔥 COPY EXISTING STYLES
+        ========================================= */
 
         qsa("style, link[rel='stylesheet']").forEach((el) => {
           try {
@@ -20473,65 +20078,60 @@
           } catch {}
         });
 
-        // =========================================
-        // 🔥 PRINT CSS
-        // =========================================
+        /* =========================================
+          🔥 PRINT CSS
+        ========================================= */
 
         const style = doc.createElement('style');
 
         style.textContent = `
 
-          @page {
-            size: A4 portrait;
-            margin: 5mm 5mm 5mm 5mm;
-            background: white;
+          @page{
+            size:A4 portrait;
+            margin:10mm 5mm 5mm 5mm;
           }
 
-          body {
-            margin: 0;
-            font-size: 10px;
-            background: white;
-            border-radius: 0 !important;
+          *{
+            box-sizing:border-box;
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
           }
 
-          .page {
-            margin: 0 auto;
-            padding-right: 2mm;
-            background: white;
-            border-radius: 0 !important;
-            padding-top: 10mm;
+          body{
+            margin:0;
+            padding:0;
+            background:white;
+            font-family:Arial,sans-serif;
+            font-size:10px;
+          }
+
+          .page{
+            width:100%;
+            background:white;
+          }
+
+          .page:not(:last-child){
+            page-break-after:always;
+            break-after:page;
           }
 
           #SBGDetailsTable,
           .SBGprint-table,
           table {
-
             width: 100%;
             border-collapse: collapse;
             background: white;
             border-radius: 0 !important;
             display: table !important;
             visibility: visible !important;
-
           }
 
-          th {
-            font-size: 10px !important;
-            background: white;
-            border-radius: 0 !important;
-          }
-
-          td {
-            padding: 2px !important;
-            font-size: 10px !important;
-            background: white;
-            border-radius: 0 !important;
-            max-height:20px;
-          }
-
-          div {
-            border: none;
-            border-radius: 0 !important;
+          th,
+          td{
+            border:1px solid #000;
+            padding:2px !important;
+            font-size:10px;
+            vertical-align:top;
           }
 
           /* 🔥 COLUMN WIDTHS */
@@ -20552,101 +20152,359 @@
             width: 12% !important;
           }
 
-          /* 🔥 FORCE REMOVE */
-
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            border-radius: 0 !important;
+          .sbg-main-category td{
+            font-weight:900 !important;
+            border:2px solid #000 !important;
+            background:#f3f3f3 !important;
           }
 
-          table,
-          tr,
-          td,
-          th {
-            border-radius: 0 !important;
+          .sbg-sub-header td{
+            font-weight:900 !important;
+            border:2px solid #000 !important;
+            background:#fafafa !important;
           }
-
-          /* 🔥 TOTALS */
 
           .sbg-subtotal-row td,
-          .sbg-grand-total-row td {
-
-            font-weight: 900 !important;
-            border: 2px solid #000 !important;
-
+          .sbg-grand-total-row td{
+            font-weight:900 !important;
+            border:2px solid #000 !important;
           }
 
-          /* 🔥 MAIN HEADER */
-
-          .sbg-main-category td {
-
-            font-weight: 900 !important;
-            border: 2px solid #000 !important;
-            background: #f3f3f3 !important;
-
-          }
-
-          /* 🔥 SUB HEADER */
-
-          .sbg-sub-header td {
-
-            font-weight: 900 !important;
-            border: 2px solid #000 !important;
-            background: #fafafa !important;
-
+          .SBGDetailPrintTable th{
+            font-weight:900;
+            text-align:center;
           }
 
         `;
 
         doc.head.appendChild(style);
 
-        // =========================================
-        // 🔥 CLONE WRAPPER
-        // =========================================
+        /* =========================================
+          🔥 REFRESH SUMMARY TABLE
+        ========================================= */
 
-        const clone = wrapper.cloneNode(true);
+        const month = id('BudgetPage_Month')?.value || id('headerMonth')?.textContent || 'ALL';
 
-        clone.classList.add('SBGprint-table-wrapper');
+        renderSBGDetailsTable(station, fy, month);
 
-        // 🔥 FORCE SHOW WRAPPER
-        clone.style.display = 'block';
-        clone.style.visibility = 'visible';
-        clone.hidden = false;
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        // 🔥 FORCE SHOW TABLE
-        clone.querySelector('#SBGDetailsTable')?.style.setProperty('display', 'table', 'important');
+        /* =========================================
+          🔥 PAGE 1 : SUMMARY
+        ========================================= */
 
-        clone.querySelectorAll('*').forEach((el) => {
-          if (getComputedStyle(el).display === 'none') {
-            el.style.display = '';
+        const wrapper = id('SBGDetailsTableWrapper');
+
+        if (wrapper) {
+          const page = doc.createElement('div');
+
+          page.className = 'page';
+
+          const summaryClone = wrapper.cloneNode(true);
+
+          summaryClone.style.display = 'block';
+          summaryClone.style.visibility = 'visible';
+
+          summaryClone.querySelectorAll('.no-print').forEach((el) => el.remove());
+
+          summaryClone.querySelectorAll('*').forEach((el) => {
+            el.hidden = false;
+          });
+
+          const table = summaryClone.querySelector('#SBGDetailsTable');
+
+          if (table) {
+            table.classList.add('SBGprint-table');
+            table.style.display = 'table';
+            table.style.visibility = 'visible';
           }
-          el.hidden = false;
+
+          page.appendChild(summaryClone);
+
+          doc.body.appendChild(page);
+        }
+
+        /* =========================================
+          🔥 GET ALL BUDGETS
+        ========================================= */
+
+        const expHeaders = sbgExpData.headers;
+
+        const budgetIdx = expHeaders.indexOf('SBG Expenditure Under');
+
+        const allBudgets = [...new Set(sbgExpData.rows.map((r) => String(r[budgetIdx] || '').trim()))].filter(Boolean);
+
+        /* =========================================
+          🔥 DETAIL PAGE FOR EACH BUDGET
+        ========================================= */
+
+        allBudgets.forEach((budgetName) => {
+          const detailHTML = buildBudgetDetailHTML(budgetName, station, fy);
+
+          if (!detailHTML) return;
+
+          const page = doc.createElement('div');
+
+          page.className = 'page';
+
+          page.innerHTML = detailHTML;
+
+          doc.body.appendChild(page);
         });
 
-        // REMOVE PRINT BLOCKS
-        clone.querySelectorAll('.no-print').forEach((el) => el.remove());
-
-        // =========================================
-        // 🔥 PAGE
-        // =========================================
-
-        const page = doc.createElement('div');
-        page.className = 'page';
-        page.appendChild(clone);
-
-        // =========================================
-        // 🔥 FILE NAME
-        // =========================================
-
-        const fileName = `${station}-${budget}-${fy}-SBG`;
-        doc.body.appendChild(page);
-
-        // =========================================
-        // ✅ RETURN HTML
-        // =========================================
+        /* =========================================
+          🔥 RETURN HTML
+        ========================================= */
 
         return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+      }
+
+      function buildBudgetDetailHTML(budgetName, station, fy) {
+        const expHeaders = sbgExpData.headers;
+        const expRows = sbgExpData.rows;
+
+        const idx = {
+          station: expHeaders.indexOf('Station'),
+          budget: expHeaders.indexOf('SBG Expenditure Under'),
+          date: expHeaders.indexOf('Date'),
+          details: expHeaders.indexOf('Expenditure Details'),
+          amount: expHeaders.indexOf('Expenditure Amount (₹ in 000)'),
+          cumulative: expHeaders.indexOf('Cumulative Sum of Expenditure (₹ in 000)')
+        };
+
+        const fyStart = Number(fy.split('-')[0]);
+        const fyEnd = fyStart + 1;
+
+        // =====================================
+        // 🔥 BUDGET SUMMARY
+        // =====================================
+
+        const sbgHeaders = sbgData.headers;
+        const sbgRows = sbgData.rows.slice(1);
+
+        const sbgCol = sbgHeaders.findIndex((h) => String(h).includes(fy) && String(h).includes('(SBG)'));
+
+        let sanctionedBudget = 0;
+
+        const budgetRow = sbgRows.find((r) => String(r[0] || '').trim() === budgetName);
+
+        if (budgetRow && sbgCol >= 0) {
+          sanctionedBudget = Number(budgetRow[sbgCol]) || 0;
+        }
+
+        const matchingRows = expRows.filter((r) => {
+          const rowStation = String(r[idx.station] || '').trim();
+          const rowBudget = String(r[idx.budget] || '').trim();
+
+          if (rowStation !== station) return false;
+          if (rowBudget !== budgetName) return false;
+
+          const rawDate = String(r[idx.date] || '').trim();
+
+          const parts = rawDate.split('-');
+
+          if (parts.length !== 3) return false;
+
+          const rowDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+
+          return rowDate >= new Date(fyStart, 3, 1) && rowDate <= new Date(fyEnd, 2, 31);
+        });
+
+        const utilisedBudget = matchingRows.length ? Number(matchingRows[matchingRows.length - 1][idx.cumulative]) || 0 : 0;
+
+        const availableBudget = sanctionedBudget - utilisedBudget;
+
+        if (!matchingRows.length) return '';
+
+        let html = `
+
+          <table class="SBGDetailPrintTable"
+                style="width:100%;border-collapse:collapse;">
+
+            <thead>
+
+              <tr>
+
+                <th colspan="4"
+                  style="
+                    border:2px solid #000;
+                    font-size:14px;
+                    font-weight:900;
+                    text-align:center;
+                    padding:10px;
+                  ">
+
+                Budget Expenditure Statement in r/o of
+                ${station}
+
+                <br>
+
+                Under Head : ${budgetName}
+              </th>
+
+            </tr>
+            <tr>
+              <th colspan="4">
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    border:none;
+                    margin-top:5px;
+                ">
+
+                  <tr>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:700;
+                    ">
+                      SBG Sanctioned (in Rs. x 1000)
+                    </td>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:700;
+                    ">
+                      SBg Utilised (in Rs. x 1000)
+                    </td>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:700;
+                    ">
+                      SBG Available (in Rs. x 1000)
+                    </td>
+
+                  </tr>
+
+                  <tr>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:900;
+                    ">
+                      ${sanctionedBudget.toFixed(2)}
+                    </td>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:900;
+                    ">
+                      ${utilisedBudget.toFixed(2)}
+                    </td>
+
+                    <td style="
+                        border:none;
+                        text-align:center;
+                        font-weight:900;
+                    ">
+                      ${availableBudget.toFixed(2)}
+                    </td>
+
+                  </tr>
+
+                </table>
+              </th>
+
+            <tr>
+
+                <th style="
+                  width:12%;
+                  border:1px solid #000;
+                  font-weight:900;
+                ">
+                  Date
+                </th>
+
+                <th style="
+                  width:53%;
+                  border:1px solid #000;
+                  font-weight:900;
+                ">
+                  Expenditure Details
+                </th>
+
+                <th style="
+                  width:17%;
+                  border:1px solid #000;
+                  font-weight:900;
+                ">
+                  Amount
+                  <br>
+                  (₹ in 000)
+                </th>
+
+                <th style="
+                  width:18%;
+                  border:1px solid #000;
+                  font-weight:900;
+                ">
+                  Cumulative Sum
+                  <br>
+                  (₹ in 000)
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+        `;
+
+        matchingRows.forEach((r) => {
+          const amount = Number(r[idx.amount]) || 0;
+
+          const cumulative = Number(r[idx.cumulative]) || 0;
+
+          html += `
+
+            <tr>
+
+              <td style="
+                border:1px solid #000;
+                padding:4px;
+              ">
+                ${r[idx.date] || ''}
+              </td>
+
+              <td style="
+                border:1px solid #000;
+                padding:4px;
+              ">
+                ${r[idx.details] || ''}
+              </td>
+
+              <td style="
+                border:1px solid #000;
+                padding:4px;
+                text-align:right;
+              ">
+                ${amount.toFixed(3)}
+              </td>
+
+              <td style="
+                border:1px solid #000;
+                padding:4px;
+                text-align:right;
+              ">
+                ${cumulative.toFixed(3)}
+              </td>
+
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        return html;
       }
 
       const budgetprintBtn = id('SBGprintBtn');
@@ -20879,29 +20737,144 @@
           const safeSheetName = (budgetName + ' Details').replace(/[*?:\\/[\]]/g, '-').substring(0, 31);
           const detailSheet = workbook.addWorksheet(safeSheetName);
 
+          // =========================================
+          // 🔥 BUDGET SUMMARY
+          // =========================================
+
+          const sbgHeaders = sbgData.headers;
+
+          const sbgCol = sbgHeaders.findIndex((h) => String(h).includes(fy) && String(h).includes('(SBG)'));
+
+          let sanctionedBudget = 0;
+
+          const budgetRow = sbgRows.find((r) => String(r[0]).trim() === budgetName);
+
+          if (budgetRow && sbgCol >= 0) {
+            sanctionedBudget = Number(budgetRow[sbgCol]) || 0;
+          }
+
+          const utilisedBudget = matchingRows.length ? Number(matchingRows[matchingRows.length - 1][idx.cumulative]) || 0 : 0;
+
+          const availableBudget = sanctionedBudget - utilisedBudget;
+
           detailSheet.mergeCells('A1:E1');
+
           const detailTitle = detailSheet.getCell('A1');
-          detailTitle.value = `Statement of Expenditure in r/o ${station}\nUnder Head : (${serialMap[budgetName]}). ${budgetName}`;
-          detailTitle.font = { bold: true, size: 12, name: 'Calibri' };
-          detailTitle.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+
+          detailTitle.value = `Budget Expenditure Statement in r/o ${station}
+          Under Head : ${budgetName}`;
+
+          detailTitle.font = {
+            bold: true,
+            size: 11,
+            name: 'Calibri'
+          };
+
+          detailTitle.alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true
+          };
+
+          for (let col = 1; col <= 5; col++) {
+            detailSheet.getCell(1, col).border = {
+              bottom: {
+                style: 'medium',
+                color: { argb: 'FF000000' }
+              }
+            };
+          }
+
           detailSheet.getRow(1).height = 35;
 
-          detailSheet.columns = [{ width: 12 }, { width: 20 }, { width: 30 }, { width: 14 }, { width: 14 }];
+          // =========================================
+          // 🔥 SBG SUMMARY ROWS
+          // =========================================
+
+          detailSheet.mergeCells('A3:C3');
+          detailSheet.mergeCells('D3:E3');
+          detailSheet.getCell('A3').value = 'SBG Sanctioned (in Rs x 1000)';
+          detailSheet.getCell('D3').value = sanctionedBudget;
+
+          detailSheet.mergeCells('A4:C4');
+          detailSheet.mergeCells('D4:E4');
+          detailSheet.getCell('A4').value = 'SBG Utilised (in Rs x 1000)';
+          detailSheet.getCell('D4').value = utilisedBudget;
+
+          detailSheet.mergeCells('A5:C5');
+          detailSheet.mergeCells('D5:E5');
+          detailSheet.getCell('A5').value = 'SBG Available (in Rs x 1000)';
+          detailSheet.getCell('D5').value = availableBudget;
+
+          ['A3', 'A4', 'A5'].forEach((addr) => {
+            detailSheet.getCell(addr).font = {
+              bold: true,
+              size: 10
+            };
+          });
+
+          ['D3', 'D4', 'D5'].forEach((addr) => {
+            detailSheet.getCell(addr).font = {
+              bold: true,
+              size: 10
+            };
+            detailSheet.getCell(addr).numFmt = '0.000';
+          });
+
+          // =========================================
+          // 🔥 BORDERS FOR SUMMARY ROWS
+          // =========================================
+
+          [['A3:E3'], ['A4:E4'], ['A5:E5']].forEach(([range]) => {
+            const [start, end] = range.split(':');
+
+            const startCol = detailSheet.getCell(start).col;
+            const endCol = detailSheet.getCell(end).col;
+            const row = detailSheet.getCell(start).row;
+
+            for (let c = startCol; c <= endCol; c++) {
+              detailSheet.getCell(row, c).border = {
+                top: { style: 'thin', color: { argb: 'FF000000' } },
+                left: { style: 'thin', color: { argb: 'FF000000' } },
+                bottom: { style: 'thin', color: { argb: 'FF000000' } },
+                right: { style: 'thin', color: { argb: 'FF000000' } }
+              };
+            }
+          });
+
+          ['A3', 'A4', 'A5'].forEach((addr) => {
+            detailSheet.getCell(addr).alignment = {
+              horizontal: 'left',
+              vertical: 'middle'
+            };
+          });
+
+          ['C3', 'C4', 'C5'].forEach((addr) => {
+            detailSheet.getCell(addr).alignment = {
+              horizontal: 'left', // change from center/right
+              vertical: 'middle'
+            };
+          });
+          detailSheet.getRow(3).height = 16;
+          detailSheet.getRow(4).height = 16;
+          detailSheet.getRow(5).height = 16;
+
+          detailSheet.columns = [{ width: 12 }, { width: 37 }, { width: 56 }, { width: 14 }, { width: 14 }];
 
           const headers = ['Date', 'Bill / Invoice Details', 'Expenditure Details', 'Expdt. Amount (₹ in 000)', 'Prog Expdt. (₹ in 000)'];
-          const headerRow = detailSheet.getRow(2);
-          headerRow.height = 47;
+          const headerRow = detailSheet.getRow(7);
+          headerRow.height = 28;
           headers.forEach((h, i) => {
             const cell = headerRow.getCell(i + 1);
             cell.value = h;
-            cell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+            cell.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E78' } };
             cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
             cell.border = FULL_BORDER;
           });
 
           let runningTotal = 0;
-          let excelRow = 3;
+          let excelRow = 8;
 
           matchingRows.forEach((r) => {
             const row = detailSheet.getRow(excelRow++);
@@ -20920,7 +20893,7 @@
               const cell = row.getCell(i + 1);
               cell.value = v;
               cell.border = FULL_BORDER;
-              cell.font = { bold: false, size: 11 };
+              cell.font = { bold: false, size: 10 };
               cell.alignment = {
                 vertical: 'middle',
                 horizontal: typeof v === 'number' ? 'right' : 'left',
@@ -20938,7 +20911,7 @@
 
                 cell.font = {
                   bold: true,
-                  size: 12,
+                  size: 10,
                   color: { argb: isMatch ? 'FF008000' : 'FFFF0000' } // Green : Red
                 };
               }
@@ -20946,7 +20919,7 @@
           });
 
           detailSheet.views = [{ showGridLines: false }];
-          detailSheet.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printArea: `A1:E${excelRow - 1}`, margins: { left: 0.5, right: 0.25, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }, horizontalCentered: true, verticalCentered: false };
+          detailSheet.pageSetup = { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printArea: `A1:E${excelRow - 1}`, margins: { left: 0.5, right: 0.25, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }, horizontalCentered: true, verticalCentered: false };
         });
 
         // =========================================
@@ -27540,7 +27513,7 @@
 
         html += `
               <tr>
-                <td colspan="5" style="padding:0">
+                <td colspan="5" style="padding:0;">
                   <div
                     id="dutyChartNote"
                     contenteditable="true"
@@ -27553,9 +27526,13 @@
                       box-sizing:border-box;
                       outline:none;
                       border:none;
-                    ">
-                      No Change in duty chart allowed without prior permission of undersigned
-                  </div>
+                      padding:2px;
+                      display:block;
+                      white-space:pre-wrap;
+                      word-break:break-word;
+                      margin:0;
+                      line-height:1.2;
+                    ">No Change in duty chart allowed without prior permission of undersigned</div>
                 </td>
                 <td colspan="2"><h2 style="border-top:solid 2px black;align-content: center;margin:30px 10px 0px 10px">ASSISTANT ENGINEER</h2></td>
               </tr>
