@@ -716,67 +716,107 @@ def update_coff():
 
         sheet_data = fetch_cache(coff_sheet)
 
-        if not sheet_data:
-            sheet_data = [[
-                "Employee Name",
-                "Leave Type",
-                "Claimed Date",
-                "Duty Date",
-                "Actual Duty",
-                "Extra Duty",
-                "Details"
-            ]]
+        headers = [
+            "Employee Name",
+            "Leave Type",
+            "Claimed Date",
+            "Duty Date",
+            "Actual Duty",
+            "Extra Duty",
+            "Details"
+        ]
 
-        headers = sheet_data[0]
+        # Empty sheet
+        if not sheet_data:
+            coff_sheet.update("A1:G1", [headers])
+            sheet_data = [headers]
+
         existing_rows = sheet_data[1:]
 
-        claimed_idx = headers.index("Claimed Date")
+        # ==========================================
+        # Existing row lookup
+        # ==========================================
 
-        # Existing rows keyed by Claimed Date
         row_map = {}
 
-        for i, row in enumerate(existing_rows, start=2):
-            claimed_date = str(row[claimed_idx]).strip() if len(row) > claimed_idx else ""
+        for sheet_row_num, row in enumerate(existing_rows, start=2):
 
-            if claimed_date:
-                row_map[claimed_date] = i
+            employee = str(row[0]).strip() if len(row) > 0 else ""
+            leave_type = str(row[1]).strip() if len(row) > 1 else ""
+            claimed_date = str(row[2]).strip() if len(row) > 2 else ""
+            duty_date = str(row[3]).strip() if len(row) > 3 else ""
+
+            key = f"{employee}|{leave_type}|{claimed_date}|{duty_date}"
+
+            row_map[key] = {
+                "row_num": sheet_row_num,
+                "data": row
+            }
 
         updated_count = 0
+        appended_count = 0
+
+        # ==========================================
+        # Process incoming rows
+        # ==========================================
 
         for row in new_rows:
 
-            claimed_date = str(row[2]).strip()  # Claimed Date column
+            employee = str(row[0]).strip()
+            leave_type = str(row[1]).strip()
+            claimed_date = str(row[2]).strip()
+            duty_date = str(row[3]).strip()
 
-            if not claimed_date:
-                continue
+            key = f"{employee}|{leave_type}|{claimed_date}|{duty_date}"
 
-            # Existing row → update only if changed
-            if claimed_date in row_map:
+            # --------------------------------------
+            # Existing row
+            # --------------------------------------
 
-                sheet_row = row_map[claimed_date]
+            if key in row_map:
 
-                current = coff_sheet.row_values(sheet_row)
+                existing = row_map[key]["data"]
 
-                if current[:len(row)] != row:
+                existing = existing + [""] * (7 - len(existing))
+                incoming = row + [""] * (7 - len(row))
+
+                if existing[:7] != incoming[:7]:
+
+                    row_num = row_map[key]["row_num"]
 
                     coff_sheet.update(
-                        f"A{sheet_row}:G{sheet_row}",
-                        [row]
+                        f"A{row_num}:G{row_num}",
+                        [incoming[:7]]
                     )
 
                     updated_count += 1
 
+            # --------------------------------------
+            # New row
+            # --------------------------------------
+
             else:
-                # New record
+
                 coff_sheet.append_row(row)
 
-                updated_count += 1
+                appended_count += 1
+
+        # ==========================================
+        # Refresh Cache
+        # ==========================================
 
         COFF_CACHE = fetch_cache(coff_sheet)
 
+        print(
+            f"✅ Coff Sync Complete | "
+            f"Updated: {updated_count} | "
+            f"Added: {appended_count}"
+        )
+
         return jsonify({
             "status": "success",
-            "updated": updated_count
+            "updated": updated_count,
+            "added": appended_count
         })
 
     except Exception as e:
