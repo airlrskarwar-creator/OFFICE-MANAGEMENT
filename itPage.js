@@ -520,17 +520,7 @@ function initSalaryToggle() {
 }
 
 function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
-  console.log('==============================');
-  console.log('IT Employee HRIS:', empHRIS);
-  console.log('IT FY:', selectedFY);
-  console.log('Mode:', mode);
-
   const dbgEmpRow = window.empCalcRows.find((r) => String(r[window.empCalcHeaders.indexOf('HRIS')]).trim() === String(empHRIS).trim());
-
-  console.log('Selected Employee:', {
-    hris: dbgEmpRow?.[window.empCalcHeaders.indexOf('HRIS')],
-    name: dbgEmpRow?.[window.empCalcHeaders.indexOf('Employee Name')]
-  });
   const wrapper = qs('.ITtableWrapper');
   if (!wrapper) return;
   const ITfy = id('ITPage_FY').value;
@@ -538,7 +528,6 @@ function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
   wrapper.innerHTML = '';
 
   const { data, lastPBMonth } = buildProjectedFY(empHRIS, selectedFY, mode);
-  console.log('Projected Rows:', data.length);
 
   if (!data.length) {
     wrapper.innerHTML = '<h3 style="font-size:13px;background:#edebb7;width:100%;height:40px;background:#edebb7;color:red;padding-top:10px;">==============🚫 No Data 🚫==============</h3>';
@@ -1335,7 +1324,7 @@ function handleITChange() {
 
   const mode = toggle?.checked ? 'paid' : 'calculated';
 
-  console.log(`🔄 Salary Selected → ${mode}`);
+  //console.log(`🔄 Salary Selected → ${mode}`);
 
   // =========================
   // 🔄 LOADING STATE
@@ -1939,7 +1928,14 @@ async function exportITExcel(mode = 'single') {
   // =========================
   // 🔁 LOOP
   // =========================
-  const fileName = mode === 'single' ? `${selectedEmp}-${station}-FY-${selectedFY}-IT Calculation.xlsx` : `${station}-FY-${selectedFY}-IT Calculations.xlsx`;
+
+  const empHRIS = selectedEmp;
+
+  const empRow = pbData.rows.find((r) => String(r[hrisIndex]).trim() === String(empHRIS).trim());
+
+  const empName = empRow ? String(empRow[nameIndex]).trim() : String(empHRIS).trim();
+
+  const fileName = mode === 'single' ? `${empName}(${empHRIS})-${station}-FY-${selectedFY}-IT Calculation.xlsx` : `${station}-FY-${selectedFY}-IT Calculations.xlsx`;
 
   for (const empHRIS of employees) {
     const wrapper = qs('.ITtableWrapper');
