@@ -132,7 +132,7 @@ function renderEmpLeaveTable() {
   if (!empRow) {
     tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align:center;padding:20px;font-weight:600;color:#555;">
+                    <td colspan="6" style="text-align:center;padding:20px;font-weight:600;color:red;background:#edebb7">
                         ==============🚫No Data found🚫==============
                     </td>
                 </tr>
@@ -180,7 +180,7 @@ function renderEmpLeaveTable() {
   if (!records.length) {
     tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align:center;padding:20px;font-weight:600;color:#555;">
+                    <td colspan="6" style="text-align:center;padding:20px;font-weight:600;color:red;background:#edebb7">
                         ==============🚫No Data found🚫==============
                     </td>
                 </tr>
