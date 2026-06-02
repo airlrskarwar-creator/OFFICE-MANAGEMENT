@@ -38,118 +38,82 @@ function getYearsFromDutyData(dutyData) {
 // =========================
 // 🔥 YEAR DROPDOWN (CURRENT YEAR)
 // =========================
-function populateYearDropdown(dutyData) {
-  const years = getYearsFromDutyData(dutyData);
+function populateYearDropdown() {
   const yearSelect = id('DutyChartFYSelect');
 
   yearSelect.innerHTML = '';
 
-  years.forEach((y) => {
+  const currentWeekEnd = getCurrentWeekEnd();
+
+  const currentFY = currentWeekEnd.getMonth() >= 3 ? `${currentWeekEnd.getFullYear()}-${String(currentWeekEnd.getFullYear() + 1).slice(2)}` : `${currentWeekEnd.getFullYear() - 1}-${String(currentWeekEnd.getFullYear()).slice(2)}`;
+
+  const nextWeekEnd = new Date(currentWeekEnd);
+  nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
+
+  const nextFY = nextWeekEnd.getMonth() >= 3 ? `${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getFullYear() + 1).slice(2)}` : `${nextWeekEnd.getFullYear() - 1}-${String(nextWeekEnd.getFullYear()).slice(2)}`;
+
+  const fyList = [currentFY];
+
+  if (nextFY !== currentFY) {
+    fyList.push(nextFY);
+  }
+
+  fyList.forEach((fy) => {
     const opt = document.createElement('option');
-    opt.value = y;
-    opt.textContent = y;
+    opt.value = fy;
+    opt.textContent = fy;
     yearSelect.appendChild(opt);
   });
 
-  const currentYear = new Date().getFullYear();
+  yearSelect.value = currentFY;
 
-  let selectedYear = years.includes(currentYear) ? currentYear : Math.max(...years);
-
-  yearSelect.value = selectedYear;
-
-  populateMonthDropdown(selectedYear);
+  populateMonthDropdown(currentFY);
 }
 
 // =========================
 // 🔥 MONTH DROPDOWN (CURRENT MONTH)
 // =========================
-function populateMonthDropdown(year) {
+function populateMonthDropdown(fy) {
   const monthSelect = id('DutyChartMonthSelect');
 
-  const rows = normalizeDutyData(dutyData);
+  const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  monthSelect.innerHTML = '';
 
-  // =========================
-  // 🔥 FIND MIN MONTH WITH DATA
-  // =========================
-  let minMonth = null;
-
-  rows.forEach((r) => {
-    const d = parseDDMMYYYY(r.Date);
-    if (!d) return;
-
-    if (d.getFullYear() === Number(year)) {
-      const m = d.getMonth();
-
-      if (minMonth === null || m < minMonth) {
-        minMonth = m;
-      }
-    }
+  months.forEach((m, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = m;
+    monthSelect.appendChild(opt);
   });
 
-  // ❌ no data case
-  if (minMonth === null) {
-    monthSelect.innerHTML = '<option>No Data</option>';
-    return;
-  }
+  const nextWeekEnd = new Date(getCurrentWeekEnd());
+  nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
 
-  // =========================
-  // 🔥 BUILD MONTH LIST
-  // =========================
-  monthSelect.innerHTML = '';
+  const actualMonth = nextWeekEnd.getMonth();
 
-  // 🔥 get current week ending month
-  const weekEnd = getCurrentWeekEnd();
-  const currentWeekMonth = weekEnd.getMonth();
+  const fyMonth = actualMonth >= 3 ? actualMonth - 3 : actualMonth + 9;
 
-  // 🔥 FINAL START MONTH
-  const startMonth = Math.max(minMonth, currentWeekMonth);
+  monthSelect.value = fyMonth;
 
-  // =========================
-  // 🔥 BUILD MONTH LIST
-  // =========================
-  monthSelect.innerHTML = '';
-
-  for (let i = startMonth; i < 12; i++) {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = months[i];
-    monthSelect.appendChild(opt);
-  }
-
-  // =========================
-  // 🔥 DEFAULT SELECTION (FIXED)
-  // =========================
-  const today = new Date();
-
-  let selectedMonth;
-
-  // ✅ use WEEK END month (NOT today's month)
-  if (year == weekEnd.getFullYear()) {
-    const weekMonth = weekEnd.getMonth();
-
-    // ensure it's within available range
-    if (weekMonth >= minMonth) {
-      selectedMonth = weekMonth;
-    } else {
-      selectedMonth = minMonth;
-    }
-  } else {
-    // fallback → latest available month
-    selectedMonth = Number(monthSelect.options[monthSelect.options.length - 1].value);
-  }
-
-  monthSelect.value = selectedMonth;
-
-  // 🔥 IMPORTANT: pass number
-  populateWeekDropdown(year, Number(selectedMonth));
+  populateWeekDropdown(fy, fyMonth);
 }
 
 // =========================
 // 🔥 WEEK DROPDOWN (CURRENT WEEK)
 // =========================
 function populateWeekDropdown(year, month) {
+  month = Number(month);
+
+  const [fyStart] = String(year).split('-').map(Number);
+
+  const actualYear = month <= 8 ? fyStart : fyStart + 1;
+
+  const actualMonth = month <= 8 ? month + 3 : month - 9;
+
+  year = actualYear;
+  month = actualMonth;
+
   const weekSelect = id('DutyChartWeekSelect');
 
   year = Number(year);
@@ -162,59 +126,64 @@ function populateWeekDropdown(year, month) {
 
   let current = new Date(startDate);
 
-  // 🔥 first Saturday
+  // ==========================================
+  // FIRST SATURDAY
+  // ==========================================
   const dayDiff = (6 - current.getDay() + 7) % 7;
   current.setDate(current.getDate() + dayDiff);
-
-  let options = [];
 
   while (current <= endDate) {
     if (current.getMonth() === month && current.getFullYear() === year) {
       const val = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
 
       const opt = document.createElement('option');
+
       opt.value = val;
       opt.textContent = `Week Ending ${formatDutyChartDate(current)}`;
 
       weekSelect.appendChild(opt);
-      options.push(val);
     }
 
     current.setDate(current.getDate() + 7);
   }
 
+  // ==========================================
+  // DEFAULT SELECTION
+  // ==========================================
   const currentWeekEnd = getCurrentWeekEnd();
 
-  // 🔥 next Saturday
   const nextWeekEnd = new Date(currentWeekEnd);
   nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
 
-  const weekValue = `${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getMonth() + 1).padStart(2, '0')}-${String(nextWeekEnd.getDate()).padStart(2, '0')}`;
-
   let found = false;
 
-  Array.from(weekSelect.options).forEach((opt) => {
-    if (opt.value === weekValue) {
+  // Prefer next week
+  const nextWeekValue = `${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getMonth() + 1).padStart(2, '0')}-${String(nextWeekEnd.getDate()).padStart(2, '0')}`;
+
+  for (const opt of weekSelect.options) {
+    if (opt.value === nextWeekValue) {
       opt.selected = true;
       found = true;
+      break;
     }
-  });
-
-  // fallback → current week
-  if (!found) {
-    const currentValue = `${currentWeekEnd.getFullYear()}-${String(currentWeekEnd.getMonth() + 1).padStart(2, '0')}-${String(currentWeekEnd.getDate()).padStart(2, '0')}`;
-
-    Array.from(weekSelect.options).forEach((opt) => {
-      if (opt.value === currentValue) {
-        opt.selected = true;
-        found = true;
-      }
-    });
   }
 
-  // final fallback → last available
+  // Fallback → current week
+  if (!found) {
+    const currentWeekValue = `${currentWeekEnd.getFullYear()}-${String(currentWeekEnd.getMonth() + 1).padStart(2, '0')}-${String(currentWeekEnd.getDate()).padStart(2, '0')}`;
+
+    for (const opt of weekSelect.options) {
+      if (opt.value === currentWeekValue) {
+        opt.selected = true;
+        found = true;
+        break;
+      }
+    }
+  }
+
+  // Final fallback → first week of selected month
   if (!found && weekSelect.options.length > 0) {
-    weekSelect.options[weekSelect.options.length - 1].selected = true;
+    weekSelect.selectedIndex = 0;
   }
 }
 
@@ -936,7 +905,11 @@ function renderRequirementTableSeparate(data, weekStart, statusRow) {
   // =========================
   // 🔥 RENDER TABLE (NEW)
   // =========================
-  const isLocked = isPastWeek(weekStart);
+  const role = String(window.currentUser || '')
+    .trim()
+    .toUpperCase();
+
+  const isLocked = role === 'MASTER' ? false : isPastWeek(weekStart);
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   let html = `
               <table border="1">
@@ -1024,7 +997,12 @@ function renderRequirementTableSeparate(data, weekStart, statusRow) {
 
   setTimeout(() => {
     if (window.currentUser) {
-      const isLocked = isPastWeek(weekStart);
+      const role = String(window.currentUser || '')
+        .trim()
+        .toUpperCase();
+
+      const isLocked = role === 'MASTER' ? false : isPastWeek(weekStart);
+
       lockRequirementTableForUser(window.currentUser, isLocked);
     }
   }, 0);
@@ -1183,7 +1161,11 @@ function renderEditableRequirementTable(data, weekStart, statusRow) {
   // =========================
   // 🔥 RENDER TABLE
   // =========================
-  const isLocked = isPastWeek(weekStart);
+  const role = String(window.currentUser || '')
+    .trim()
+    .toUpperCase();
+
+  const isLocked = role === 'MASTER' ? false : isPastWeek(weekStart);
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   let html = `
@@ -1810,6 +1792,7 @@ async function saveDutyData() {
 
     if (result.status === 'success') {
       await syncDutyChartToCoffList();
+
       showCustomAlert('✅ Saved successfully');
     } else {
       showCustomAlert('❌ Save failed');
@@ -2012,17 +1995,47 @@ function buildCoffListRecords() {
 
           dutyDate = coffMatch[1];
 
-          const originalDuty = findDutyOnDate(empName, dutyDate);
+          const originalDuty = String(findDutyOnDate(empName, dutyDate) || '').toUpperCase();
 
           const timing = getDutyTimings(originalDuty);
 
-          actualDuty = timing.actual;
-          extraDuty = timing.extra;
+          const holidayInfo = window.holidayLookup?.[dutyDate];
+          const isHolidayDuty = holidayInfo?.H?.length > 0;
 
-          details = 'Double Duty';
+          // =====================================
+          // HOLIDAY DUTY
+          // =====================================
+          if (isHolidayDuty) {
+            // 🔥 Holiday Double Duty already shown
+            // in Holiday block → skip claimed entry
+            if (['MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(originalDuty)) {
+              return;
+            }
+
+            // 🔥 Holiday Single Duty claim
+            actualDuty = timing.actual;
+            extraDuty = '';
+            details = 'Holiday Duty';
+          }
+
+          // =====================================
+          // NORMAL DUTY
+          // =====================================
+          else {
+            actualDuty = timing.actual;
+            extraDuty = timing.extra;
+
+            details = timing.extra ? 'Double Duty' : 'Duty';
+          }
+
+          records.push([empName, leaveType, claimedDate, dutyDate, actualDuty, extraDuty, details]);
+
+          return;
         }
-
-        records.push([empName, leaveType, claimedDate, dutyDate, actualDuty, extraDuty, details]);
+        // =====================================
+        // NORMAL LEAVE ENTRY
+        // =====================================
+        records.push([empName, leaveType, claimedDate, '', '', '', 'Leave']);
 
         return;
       }
@@ -2040,25 +2053,14 @@ function buildCoffListRecords() {
       if (isHolidayDate && ['MOR', 'GEN', 'EVE', 'MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
         const timing = getDutyTimings(dutyValue);
 
-        // ----------------------------------
-        // Holiday Duty Entry
-        // ----------------------------------
+        // Holiday Single Duty
+        if (['MOR', 'GEN', 'EVE'].includes(dutyValue)) {
+          records.push([empName, 'C/O', '', currentDate, timing.actual, '', 'Holiday Duty']);
+        } else {
+          // 1️⃣ Holiday Duty
+          records.push([empName, 'C/O', '', currentDate, timing.actual, '', 'Holiday Duty']);
 
-        records.push([
-          empName,
-          'C/O',
-          '',
-          currentDate,
-          timing.actual,
-          '', // No extra duty
-          'Holiday Duty'
-        ]);
-
-        // ----------------------------------
-        // Holiday + Double Duty Entry
-        // ----------------------------------
-
-        if (['MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
+          // 2️⃣ Holiday Double Duty
           records.push([empName, 'C/O', '', currentDate, timing.actual, timing.extra, 'Holiday Double Duty']);
         }
 
@@ -2066,26 +2068,25 @@ function buildCoffListRecords() {
       }
 
       /* =====================================
-            🔥 UNCLAIMED DOUBLE DUTY
-            ===================================== */
+      🔥 UNCLAIMED DOUBLE DUTY
+      ===================================== */
 
       if (['MOR,GEN', 'MOR,EVE', 'GEN,EVE'].includes(dutyValue)) {
-        // Already claimed through C/O
+        // Holiday Double Duty already handled above
+        if (isHolidayDate) {
+          return;
+        }
+
+        // Already claimed through C/O(xxx)
         if (claimedCOFFDates.has(currentDate)) {
           return;
         }
 
         const timing = getDutyTimings(dutyValue);
 
-        records.push([
-          empName,
-          'C/O',
-          '', // not yet claimed
-          currentDate, // duty performed date
-          timing.actual,
-          timing.extra,
-          'Double Duty'
-        ]);
+        records.push([empName, 'C/O', '', currentDate, timing.actual, timing.extra, 'Double Duty']);
+
+        return;
       }
     });
   });
