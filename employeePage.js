@@ -1,7 +1,7 @@
 //================================================================================//
 //                🔥🔥🔥🔥🔥DATABASE SCRIPT🔥🔥🔥🔥🔥
 //=============================================================================//
-
+window.addEventListener('resize', moveIndicator);
 /* ===========  WITHIN DATABASE PAGE SWITCH TABLE ==================== */
 
 function showSheet(name, btn) {
