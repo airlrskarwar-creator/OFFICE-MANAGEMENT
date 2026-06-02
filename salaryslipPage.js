@@ -984,7 +984,17 @@ async function exportSalarySlipExcel(mode = 'single') {
   // =========================
   const buffer = await workbook.xlsx.writeBuffer();
 
-  const fileName = mode === 'single' ? `${selectedEmp}-${selectedMonth} SalarySlip.xlsx` : `${station}-${selectedMonth} SalarySlips.xlsx`;
+  let fileName;
+
+  if (mode === 'single') {
+    const emp = getEmployee(selectedEmp);
+
+    const empName = emp ? String(emp[window.empCalcHeaders.indexOf('Employee Name')]).trim() : String(selectedEmp).trim();
+
+    fileName = `${empName}(${selectedEmp})-${selectedMonth} SalarySlip.xlsx`;
+  } else {
+    fileName = `${station}-${selectedMonth} SalarySlips.xlsx`;
+  }
 
   saveAs(new Blob([buffer]), fileName);
 
