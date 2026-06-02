@@ -5,6 +5,236 @@ const id = document.getElementById.bind(document);
 const qs = document.querySelector.bind(document);
 const qsa = document.querySelectorAll.bind(document);
 
+/* ================================================================== 🔥🔥🔥🔥 HELPERS 🔥🔥🔥🔥 =====================================================================*/
+function createEl(tag, props = {}, children = []) {
+  const el = document.createElement(tag);
+
+  Object.entries(props).forEach(([k, v]) => {
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k === 'text') el.textContent = v;
+    else el.setAttribute(k, v);
+  });
+
+  children.forEach((child) => el.appendChild(child));
+  return el;
+}
+
+function clearEl(el) {
+  if (typeof el === 'string') el = id(el);
+  if (el) el.innerHTML = '';
+}
+
+/* ========================= CLASS HELPERS ========================= */
+function addClass(el, cls) {
+  if (typeof el === 'string') el = id(el);
+  el?.classList.add(cls);
+}
+
+function removeClass(el, cls) {
+  if (typeof el === 'string') el = id(el);
+  el?.classList.remove(cls);
+}
+
+function toggleClass(el, cls) {
+  if (typeof el === 'string') el = id(el);
+  el?.classList.toggle(cls);
+}
+
+/* ========================= EVENT HELPERS ========================= */
+function on(el, event, handler) {
+  if (typeof el === 'string') el = id(el);
+  el?.addEventListener(event, handler);
+}
+
+/* ========================= DATA HELPERS ========================= */
+function groupBy(arr, key) {
+  return arr.reduce((acc, obj) => {
+    const k = obj[key];
+    (acc[k] = acc[k] || []).push(obj);
+    return acc;
+  }, {});
+}
+
+function unique(arr, key) {
+  return [...new Map(arr.map((item) => [item[key], item])).values()];
+}
+
+/* ========================= FORMAT HELPERS ========================= */
+
+function formatNumber(num) {
+  return Number(num || 0).toLocaleString('en-IN');
+}
+
+function formatCurrency(num) {
+  return '₹ ' + formatNumber(num);
+}
+
+function CurrencytoNum(val) {
+  if (!val) return 0;
+
+  return (
+    Number(
+      String(val).replace(/[^0-9.-]+/g, '') // 🔥 remove ₹ , spaces etc
+    ) || 0
+  );
+}
+
+function setValue(input, val) {
+  if (!input) return;
+  input.dataset.raw = val;
+  input.value = formatCurrency(val);
+}
+
+function getNum(tr, col) {
+  const el = getCellInput(tr, col);
+  return num(el?.dataset?.raw ?? el?.value);
+}
+
+function parseMonthYear(str) {
+  if (!str || typeof str !== 'string') return 0;
+
+  const parts = str.split('-');
+  if (parts.length !== 2) return 0;
+
+  const [mon, year] = parts;
+
+  const months = {
+    Jan: 1,
+    Feb: 2,
+    Mar: 3,
+    Apr: 4,
+    May: 5,
+    Jun: 6,
+    Jul: 7,
+    Aug: 8,
+    Sep: 9,
+    Oct: 10,
+    Nov: 11,
+    Dec: 12
+  };
+
+  return parseInt(year) * 100 + (months[mon] || 0);
+}
+
+function formatMonthDisplay(val) {
+  if (!val) return '';
+
+  const [year, month] = val.split('-');
+  const d = new Date(year, month - 1);
+
+  const monthStr = d.toLocaleString('en-US', { month: 'short' });
+
+  return `${monthStr}-${year}`; // ✅ MMM-YYYY
+}
+
+function formatMonthForInput(val) {
+  if (!val) return '';
+
+  const d = new Date(val);
+  if (isNaN(d)) return '';
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+
+  return `${year}-${month}`; // ✅ correct YYYY-MM
+}
+
+function parseDOR(dorStr) {
+  if (!dorStr) return 0;
+
+  const months = {
+    Jan: 1,
+    Feb: 2,
+    Mar: 3,
+    Apr: 4,
+    May: 5,
+    Jun: 6,
+    Jul: 7,
+    Aug: 8,
+    Sep: 9,
+    Oct: 10,
+    Nov: 11,
+    Dec: 12
+  };
+
+  const parts = String(dorStr).split(',');
+  if (parts.length !== 2) return 0;
+
+  const year = parseInt(parts[1].trim());
+  const monPart = parts[0].split('-')[0];
+  const month = months[monPart];
+
+  return year * 100 + month;
+}
+
+function getCellInput(tr, colName, type = null) {
+  const normalize = (str) => String(str).replace(/\s+/g, '').toLowerCase();
+
+  const cells = tr.querySelectorAll('td');
+
+  for (let td of cells) {
+    const col = td.getAttribute('data-col');
+
+    if (normalize(col) === normalize(colName)) {
+      // 🔥 auto detect input/select
+      if (!type) {
+        return td.querySelector('input, select');
+      }
+
+      return td.querySelector(type);
+    }
+  }
+
+  return null;
+}
+
+function getCellValue(tr, colName) {
+  const input = getCellInput(tr, colName);
+
+  if (!input) return '';
+
+  // 🔥 ALWAYS prefer raw value
+  if (input.dataset && input.dataset.raw !== undefined) {
+    return input.dataset.raw;
+  }
+
+  return input.value;
+}
+/* ========================= AFE VALUE HELPERS ========================= */
+function val(v, def = '') {
+  return v === null || v === undefined ? def : v;
+}
+
+function num(v) {
+  return Number(String(v).replace(/[^\d.-]/g, '')) || 0;
+}
+
+function number(val) {
+  return String(val || '')
+    .replace(/[₹,]/g, '')
+    .trim();
+}
+
+/* ========================= VISIBILITY HELPERS ========================= */
+function show(el) {
+  if (typeof el === 'string') el = id(el);
+  if (el) el.style.display = 'block';
+}
+
+function hide(el) {
+  if (typeof el === 'string') el = id(el);
+  if (el) el.style.display = 'none';
+}
+
+function getColIndex(headers, name) {
+  return headers.findIndex((h) => h.toLowerCase().trim() === name.toLowerCase());
+}
+/* ========================= DEBUG ========================= */
+function log(...args) {
+  console.log(...args);
+}
+
 let financialYears = [];
 let GPF_MESSAGES = [];
 let isAddMode = false;
@@ -315,8 +545,6 @@ window.appState = 'UNINITIALIZED'; // 'UNINITIALIZED' | 'FETCHING' | 'READY'
 window.isUserLoggedIn = false;
 window.visualProgress = 0;
 window.backgroundLoadPromise = null;
-
-window.addEventListener('resize', moveIndicator);
 
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && window.appState === 'READY' && window.isUserLoggedIn) {
