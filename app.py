@@ -640,7 +640,6 @@ def update_duty():
         global DUTY_CACHE
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        role = (req_data.get("role") or "").upper()
         duty_mode = req_data.get("dutyMode", False)
 
         if not rows:
@@ -662,28 +661,69 @@ def update_duty():
             if not date:
                 continue
 
-            row_data = [""] * len(headers)
-            for idx, h in enumerate(headers):
-                if h == "Date":
-                    row_data[idx] = date
-                    continue
-
-                val = obj.get(h, "")
-                if role == "MASTER":
-                    if (duty_mode and h.endswith("Duty")) or (not duty_mode and ("Requirement" in h or "lieu" in h)):
-                        row_data[idx] = val
-                elif role == "ENGG" and h.endswith("Duty"):
-                    row_data[idx] = val
-                elif role not in ["MASTER", "ENGG"] and ("Requirement" in h or "lieu" in h):
-                    row_data[idx] = val
-
+            # ==========================================
+            # EXISTING ROW
+            # ==========================================
             if date in date_map:
                 row_num = date_map[date]
+
+                existing_row = body[row_num - 3][:]
+
+                if len(existing_row) < len(headers):
+                    existing_row += [""] * (len(headers) - len(existing_row))
+
+                for idx, h in enumerate(headers):
+                    if h == "Date":
+                        continue
+
+                    val = obj.get(h, "")
+                    col = str(h).strip()
+
+                    if duty_mode:
+
+                        if col.endswith(" Duty"):
+                            existing_row[idx] = val
+
+                    else:
+
+                        if (
+                            col.endswith(" Requirement")
+                            or col.endswith(" in lieu of")
+                        ):
+                            existing_row[idx] = val
+
                 updates.append({
                     "range": f"A{row_num}",
-                    "values": [row_data]
+                    "values": [existing_row]
                 })
+
+            # ==========================================
+            # NEW ROW
+            # ==========================================
             else:
+                row_data = [""] * len(headers)
+
+                for idx, h in enumerate(headers):
+                    if h == "Date":
+                        row_data[idx] = date
+                        continue
+
+                    val = obj.get(h, "")
+                    col = str(h).strip()
+
+                    if duty_mode:
+
+                        if col.endswith(" Duty"):
+                            row_data[idx] = val
+
+                    else:
+
+                        if (
+                            col.endswith(" Requirement")
+                            or col.endswith(" in lieu of")
+                        ):
+                            row_data[idx] = val
+
                 new_rows.append(row_data)
 
         if updates:
