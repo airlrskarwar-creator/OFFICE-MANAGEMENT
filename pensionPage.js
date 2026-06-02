@@ -1918,7 +1918,7 @@ async function exportPensionExcel(mode = 'single') {
 
   const empName = empRow?.[nameIndex] || selectedEmp;
 
-  const fileName = mode === 'single' ? `${empName}-${station}-Pension Calculation.xlsx` : `${station}-Pension Calculations.xlsx`;
+  const fileName = mode === 'single' ? `${empName}(${selectedEmp})-${station}-Pension Calculation.xlsx` : `${station}-Pension Calculations.xlsx`;
 
   // =========================
   // 🔁 EMP LOOP
