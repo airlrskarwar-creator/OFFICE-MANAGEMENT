@@ -44,7 +44,7 @@ function createPayBillViewTables(station, selectedFY, selectedMonth) {
                             <td style="text-align:center;
                                       color:red;
                                       font-weight:bold;
-                                      padding:20px;">
+                                      padding:20px;background:#edebb7">
                                 ==============🚫 No Data Found 🚫==============
                             </td>
                         </tr>
@@ -59,7 +59,7 @@ function createPayBillViewTables(station, selectedFY, selectedMonth) {
                             <td style="text-align:center;
                                       color:red;
                                       font-weight:bold;
-                                      padding:20px;">
+                                      padding:20px;background:#edebb7">
                                 ==============🚫 No Data Found 🚫==============
                             </td>
                         </tr>
