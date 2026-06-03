@@ -945,6 +945,9 @@ async function handlePostDataInitialization() {
     applyFilters();
     refreshPBView('view');
     lockRequirementTableForUser(window.currentUser);
+    requestAnimationFrame(() => {
+      handleSalarySlipChange();
+    });
     completeLoader();
     requestIdleCallback(() => renderDatabaseTables(false));
   } catch (err) {
@@ -2315,18 +2318,19 @@ function showConfirmBox({
   /* ===============================================
           🔥 BUTTONS
           =============================================== */
-
   const yesBtn = id('logoutYesBtn');
-
   const noBtn = id('logoutNoBtn');
 
   if (yesBtn) {
+    yesBtn.style.display = yesText ? 'block' : 'none';
+    yesBtn.disabled = false;
     yesBtn.textContent = yesText;
-
     yesBtn.style.background = yesColor;
   }
 
   if (noBtn) {
+    noBtn.style.display = noText ? 'block' : 'none';
+    noBtn.disabled = false;
     noBtn.textContent = noText;
   }
 
@@ -2335,7 +2339,6 @@ function showConfirmBox({
           =============================================== */
 
   confirmYesCallback = onYes;
-
   confirmNoCallback = onNo;
 
   /* ===============================================
@@ -2359,7 +2362,6 @@ function closeConfirmBox() {
 
 id('logoutYesBtn')?.addEventListener('click', () => {
   closeConfirmBox();
-
   confirmYesCallback?.();
 });
 
@@ -2369,7 +2371,6 @@ id('logoutYesBtn')?.addEventListener('click', () => {
 
 id('logoutNoBtn')?.addEventListener('click', () => {
   closeConfirmBox();
-
   confirmNoCallback?.();
 });
 
