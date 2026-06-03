@@ -702,17 +702,11 @@ async function updateSBGSheet(rows, mode = 'sync') {
         Date: r[0],
 
         Station: String(r[1]).trim(),
-
         'Bill / Invoice Details': String(r[2] || '').trim(),
-
         'SBG Expenditure Under': String(r[3]).trim(),
-
         'Expenditure Details': String(r[4]).trim(),
-
         'Expenditure Amount (₹ in 000)': Number(CurrencytoNum(r[5]) / 1000),
-
         'Monthly Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[6]) / 1000),
-
         'Cumulative Sum of Expenditure (₹ in 000)': Number(CurrencytoNum(r[7]) / 1000)
       }));
 
@@ -732,17 +726,8 @@ async function updateSBGSheet(rows, mode = 'sync') {
 
     const res = await fetch('https://office-management-f425.onrender.com/sbgexp/update', {
       method: 'POST',
-
-      headers: {
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify({
-        data: formattedRows,
-
-        // 🔥 IMPORTANT
-        mode
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: formattedRows, mode })
     });
 
     // =========================
@@ -822,11 +807,8 @@ async function calculateAndPushSBGBudget() {
     });
 
     if (!res.ok) throw new Error('Failed to update SBG DB');
-
     const result = await res.json();
-
     console.log('✅ SBG  : Sync Completed');
-
     clearSyncStatus('sbgDatabase', 'db', true);
   } catch (err) {
     console.error('❌ SBG : Sync Failed:', err);
@@ -838,12 +820,7 @@ async function reloadSBGExpData() {
   const res = await fetch('https://office-management-f425.onrender.com/sbgexp', { cache: 'no-store' });
   const data = await res.json();
 
-  sbgExpData = {
-    headers: data.headers,
-    rows: data.rows
-  };
-
-  //console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
+  sbgExpData = { headers: data.headers, rows: data.rows };
 }
 
 // =====================================================
@@ -1289,7 +1266,7 @@ function openSBGReportOptions(rowIndex, type = 'print') {
 
     noText: '',
 
-    yesColor: '#2563eb',
+    yesColor: '#ef4444',
 
     onYes: () => {
       closeConfirmBox?.();
@@ -1840,13 +1817,9 @@ function buildPrintSBGContingentHTML() {
 
       nestedSBG.querySelectorAll('td,th').forEach((cell) => {
         cell.style.wordBreak = 'break-word';
-
         cell.style.whiteSpace = 'normal';
-
         cell.style.verticalAlign = 'middle';
-
         cell.style.lineHeight = '1.1';
-
         cell.style.padding = '2px';
       });
     }
@@ -1879,11 +1852,8 @@ function buildPrintSBGContingentHTML() {
         ===================================================== */
 
   const page = doc.createElement('div');
-
   page.className = 'page';
-
   page.appendChild(container);
-
   doc.body.appendChild(page);
 
   /* =====================================================
@@ -3351,11 +3321,11 @@ function renderSBGDetailsTable(station, fy, selectedMonth) {
           </colgroup>
           <thead>
             <div style="font-size:12px;font-weight:bold;border:none;text-align:right;position:absolute;top:0;right:2px">${station} ${fy}</div>
-            <tr><th colspan="7" style="border:none;font-size:12px;padding:0">प्रसार भारती / PRASAR BHARATI</th></tr>
-            <tr><th colspan="7" style="border:none;padding:0">भारत के लोक सेवा प्रसारक / INDIA'S PUBLIC SERVICE BROADCASTER</th></tr>
-            <tr><th colspan="7" style="border:none;font-size:12px;padding:0">आकाशवाणी धारवाड़ / AKASHAVANI DHARWAD - 580 008</th></tr>
+            <tr><th colspan="7" style="border:none;font-size:12px;padding:0;height:20px">प्रसार भारती / PRASAR BHARATI</th></tr>
+            <tr><th colspan="7" style="border:none;padding:0;font-size:12px;height:20px">भारत के लोक सेवा प्रसारक / INDIA'S PUBLIC SERVICE BROADCASTER</th></tr>
+            <tr><th colspan="7" style="border:none;font-size:12px;padding:0;height:20px">आकाशवाणी धारवाड़ / AKASHAVANI DHARWAD - 580 008</th></tr>
             <tr class="sbg-title-row">
-              <th colspan="7" style="text-align:center;font-weight:bold;border:none;height:50px;padding-bottom:5px">
+              <th colspan="7" style="text-align:center;font-weight:bold;border:none;height:50px;padding-bottom:5px !important;vertical-align:bottom;">
                 STATEMENT SHOWING CONSOLIDATED MONTHLY EXPENDITURE UPTO THE MONTH OF : ${displayMonth}<br>
                 IN RESPECT OF DG : AIR STATIONS / OFFICES
               </th>
@@ -3553,7 +3523,7 @@ async function buildBudgetHTML() {
 
           @page{
             size:A4 portrait;
-            margin:10mm 5mm 5mm 5mm;
+            margin:10mm;
           }
 
           *{
@@ -3793,7 +3763,7 @@ function buildBudgetDetailHTML(budgetName, station, fy) {
                 <th colspan="4"
                   style="
                     border:2px solid #000;
-                    font-size:14px;
+                    font-size:12px;
                     font-weight:900;
                     text-align:center;
                     padding:10px;
@@ -3832,7 +3802,7 @@ function buildBudgetDetailHTML(budgetName, station, fy) {
                         text-align:center;
                         font-weight:700;
                     ">
-                      SBg Utilised (in Rs. x 1000)
+                      SBG Utilised (in Rs. x 1000)
                     </td>
 
                     <td style="
