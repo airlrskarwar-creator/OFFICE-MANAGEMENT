@@ -705,22 +705,24 @@ function renderFYBreakup(rowsData, totalArrear, totalRecovery, totalGross, total
 }
 
 function handleSalarySlipChange() {
-  qsa('.SSaction-group button').forEach((btn) => {
-    btn.disabled = false;
-  });
-
-  updateSSPrintMenuState();
-
+  const fyEl = id('SalSlipPage_FY');
   const month = id('SalSlipPage_SalMonth')?.value;
   const empHRIS = id('SalSlipPage_Emp')?.value;
+
+  // 🔥 Disable buttons when FY = "Select FY"
+  const disableActions = fyEl && fyEl.selectedIndex === 0;
+
+  qsa('.SSaction-group button').forEach((btn) => {
+    btn.disabled = disableActions;
+  });
 
   // 🔥 CLEAR IF NO EMPLOYEE
   if (!empHRIS || id('SalSlipPage_Emp')?.selectedIndex === -1) {
     resetSalarySlipFields();
 
     renderSalaryBreakup([], [], [], 0, 0, 0, true);
-
     renderFYBreakup([], 0, 0, 0, 0, true);
+    renderNoDataRow(id('SalaryFYDetailsTable'), 100);
 
     return;
   }
@@ -728,19 +730,18 @@ function handleSalarySlipChange() {
   // 🔥 CLEAR IF NO MONTH
   if (!month || id('SalSlipPage_SalMonth')?.selectedIndex === -1) {
     renderSalaryBreakup([], [], [], 0, 0, 0, true);
-
     renderFYBreakup([], 0, 0, 0, 0, true);
+    renderNoDataRow(id('SalaryFYDetailsTable'), 100);
 
     return;
   }
 
-  // 🔥 Update header
   id('SalarySlipHeaderMonth').textContent = formatMonthYear(month);
 
-  // 🔥 Fill data
   fillSalarySlip(empHRIS);
   buildSalaryBreakup(empHRIS);
   buildSalarySlipFYBreakup(empHRIS);
+  buildSalaryFYDetailsTable(empHRIS);
 }
 
 // =========================
@@ -1138,89 +1139,838 @@ function buildSalarySlipHTML(mode = 'single') {
   return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
 }
 
-const ssmenu = id('SSprintMenu');
-const ssprintBtn = id('SSprintBtn');
-const ssexcelBtn = id('SSexcelBtn');
+function buildSalaryFYDetailsTable(empHRIS) {
+  const skipCols = ['Employee Name', 'Designation on Salary Month', 'Pay Drawn Station', 'HRIS', 'Last Increment', 'DA%', 'TA Entitled', 'HRA Entitled', 'Qtrs Type', 'Disability', 'Level of Disability', 'Pay Level', '7CPC Index', 'TA Rate', 'DA on TA', 'DAA', 'DAA on TA', 'DAA on NPSE', 'DAA on NPSC', 'DAA on NPSE ded', 'Arrears Details', 'Recovery Details', 'Loan Recovery', 'Loan Type', 'Instalment Number'];
 
-// 🔹 PRINT BUTTON
-ssprintBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
+  const table = id('SalaryFYDetailsTable');
+  if (!table) return;
 
-  updateSSPrintMenuState();
+  const rows = getPBFYRows(empHRIS);
+  const h = pbData.headers;
 
-  qsa('.print-option').forEach((el) => (el.style.display = 'block'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
+  function getColumnStyle(colName) {
+    switch (String(colName).trim().toUpperCase()) {
+      case 'GROSS INCOME':
+        return {
+          color: '#0a008f',
+          bg: '#f0f6ff'
+        };
 
-  ssmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
+      case 'NET INCOME':
+        return {
+          color: '#166534',
+          bg: '#edfff3'
+        };
 
-// 🔹 EXCEL BUTTON
-ssexcelBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
+      case 'TOTAL DEDUCTION':
+        return {
+          color: '#9e0303',
+          bg: '#fff0f0'
+        };
 
-  updateSSPrintMenuState();
+      default:
+        return null;
+    }
+  }
 
-  qsa('.print-option').forEach((el) => (el.style.display = 'none'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
+  // ==========================
+  // EMPLOYEE NAME
+  // ==========================
+  const emp = getEmployee(empHRIS);
 
-  ssmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
+  const empName = emp ? emp[window.empCalcHeaders.indexOf('Employee Name')] : empHRIS;
 
-document.addEventListener('click', () => {
-  ssmenu.classList.remove('show');
-});
+  table.innerHTML = '';
 
-function updateSSPrintMenuState() {
-  const hasEmp = id('SalSlipPage_Emp')?.value;
+  // ==========================
+  // NO DATA
+  // ==========================
+  if (!rows.length) {
+    table.innerHTML = `
+      <tbody>
+      <tr>
+        <th colspan="${h.length}"
+            style="text-align:center;background:#d9edf7;font-weight:bold;">
+          Salary Details for the Financial Year ${id('SalSlipPage_FY')?.value || ''} in r/o of ${empName} (${empHRIS})
+        </th>
+      </tr>
+        <tr>
+          <td colspan="${h.length}"
+              style="text-align:center;padding:15px;color:red;font-weight:bold;font-size:13px;background:#edebb7">
+            <h3 style="margin:0;font-size:13px;">
+              ==============🚫 No Data 🚫==============
+            </h3>
+          </td>
+        </tr>
+      </tbody>
+    `;
+    return;
+  }
 
-  const printSS = id('ssPrintOption');
-  const excelSS = id('ssExcelOption'); // ✅ FIXED ID
+  // ==========================
+  // FIND NON-ZERO COLUMNS
+  // ==========================
+  const nonZeroCols = [];
 
-  [printSS, excelSS].forEach((opt) => {
-    if (!opt) return;
+  h.forEach((col, index) => {
+    if (skipCols.includes(col)) return;
 
-    if (hasEmp) {
-      opt.classList.remove('disabled');
-    } else {
-      opt.classList.add('disabled');
+    const hasValue = rows.some((r) => {
+      const value = Number(r[index]) || 0;
+      return value !== 0;
+    });
+
+    if (hasValue) {
+      nonZeroCols.push({
+        name: col,
+        index
+      });
     }
   });
-}
 
-qsa('.menu-option').forEach((opt) => {
-  opt.addEventListener('click', function () {
-    const type = this.dataset.type;
+  // ==========================
+  // SORT MONTHS (MAR → FEB)
+  // ==========================
+  const monthIndex = h.indexOf('Salary Month');
 
-    ssmenu.classList.remove('show');
+  sortFYMonths(rows, monthIndex);
 
-    // =====SALARY SLIP PRINT =====
-    if (type === 'pdf-singleSS') {
-      openPrintWindow(buildSalarySlipHTML('single'));
+  // ==========================
+  // HEADER
+  // ==========================
+  let html = `
+    <thead>
+      <tr>
+        <th colspan="${nonZeroCols.length + 1}"
+            style="text-align:center;background:white;font-weight:bold;">
+          Salary Details for the Financial Year ${id('SalSlipPage_FY')?.value || ''} in r/o of ${empName} (${empHRIS})
+        </th>
+      </tr>
+
+      <tr>
+        <th>Salary Month</th>
+        ${nonZeroCols
+          .map((c) => {
+            const style = getColumnStyle(c.name);
+
+            return `
+              <th style=" ${style ? ` color:${style.color}; background:${style.bg}; font-weight:bold;` : ''} ">
+                ${c.name}
+              </th>
+            `;
+          })
+          .join('')}
+      </tr>
+    </thead>
+
+    <tbody>
+  `;
+
+  // ==========================
+  // MONTH ROWS
+  // ==========================
+  rows.forEach((row) => {
+    html += `
+      <tr>
+        <td>${row[monthIndex]}</td>
+
+        ${nonZeroCols
+          .map((c) => {
+            const value = Number(row[c.index]) || 0;
+
+            const style = getColumnStyle(c.name);
+
+            return `
+              <td
+                style="
+                  text-align:right;
+                  ${style ? ` color:${style.color}; background:${style.bg}; font-weight:bold; ` : ''}" >
+                  ${value !== 0 ? value : ''}
+              </td>
+            `;
+          })
+          .join('')}
+      </tr>
+    `;
+  });
+
+  // ==========================
+  // TOTAL ROW
+  // ==========================
+  html += `
+    <tr style="font-weight:bold">
+      <td style="background:#f3f3f3">Total</td>
+    `;
+
+  nonZeroCols.forEach((c) => {
+    const total = rows.reduce((sum, r) => {
+      return sum + (Number(r[c.index]) || 0);
+    }, 0);
+
+    const style = getColumnStyle(c.name);
+
+    html += `
+      <td style=" text-align:right; background:${style?.bg || '#f3f3f3'}; color:${style?.color || '#000'}; font-weight:bold; " >
+        ${total !== 0 ? total : ''}
+      </td>
+    `;
+  });
+
+  const arrearsRemarkIndex = h.indexOf('Arrears Details');
+
+  const recoveryRemarkIndex = h.indexOf('Recovery Details');
+  const remarks = [];
+
+  rows.forEach((row) => {
+    const month = row[monthIndex] || '';
+
+    const arrearsRemark = arrearsRemarkIndex >= 0 ? String(row[arrearsRemarkIndex] || '').trim() : '';
+
+    const recoveryRemark = recoveryRemarkIndex >= 0 ? String(row[recoveryRemarkIndex] || '').trim() : '';
+
+    if (arrearsRemark) {
+      remarks.push({
+        type: 'Arrears',
+        month,
+        text: arrearsRemark
+      });
     }
 
-    // ===== ALL SALARY SLIP PRINT =====
-    if (type === 'pdf-allSS') {
+    if (recoveryRemark) {
+      remarks.push({
+        type: 'Recovery',
+        month,
+        text: recoveryRemark
+      });
+    }
+  });
+
+  if (remarks.length) {
+    html += `
+      <tr>
+        <td colspan="${nonZeroCols.length + 1}" style="height:0px;border:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="${nonZeroCols.length + 1}"
+            style="
+              font-weight:bold;
+              text-align:left;
+              background:white;
+              padding:5px;
+              color:black;
+              font-size:12px;
+              border:none;
+            ">
+          Arrears / Recovery Remarks
+        </td>
+      </tr>
+    `;
+
+    remarks.forEach((r, i) => {
+      html += `
+        <tr>
+          <td colspan="${nonZeroCols.length + 1}"
+              style="
+                text-align:left;
+                background:white;
+                padding:4px 8px;
+                border:none;
+              ">
+            ${i + 1}. <b>${r.month}</b>
+            [${r.type}] :
+            ${r.text}
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  html += `
+    </tbody>
+  `;
+
+  table.innerHTML = html;
+}
+
+function buildSalaryFYStatementHTML(mode = 'single') {
+  const table = id('SalaryFYDetailsTable');
+  const station = id('SalSlipPage_Station')?.value;
+  const selectedEmp = id('SalSlipPage_Emp')?.value;
+
+  if (!table) return '';
+
+  const h = pbData.headers;
+  const stationIndex = h.indexOf('Pay Drawn Station');
+  const hrisIndex = h.indexOf('HRIS');
+
+  // =========================
+  // EMPLOYEE LIST
+  // =========================
+  let employees = [];
+
+  if (mode === 'single') {
+    if (!selectedEmp) return '';
+    employees = [selectedEmp];
+  } else {
+    employees = [
+      ...new Set(
+        pbData.rows
+          .filter(
+            (r) =>
+              String(r[stationIndex] || '')
+                .trim()
+                .toUpperCase() ===
+              String(station || '')
+                .trim()
+                .toUpperCase()
+          )
+          .map((r) => String(r[hrisIndex]).trim())
+      )
+    ];
+
+    if (!employees.length) {
+      showCustomAlert('🚫 No employees found for selected station');
+      return '';
+    }
+  }
+
+  // =========================
+  // CREATE DOCUMENT
+  // =========================
+  const doc = document.implementation.createHTMLDocument('FY Statement');
+
+  qsa("style, link[rel='stylesheet']").forEach((el) => {
+    try {
+      doc.head.appendChild(el.cloneNode(true));
+    } catch (e) {}
+  });
+
+  const style = doc.createElement('style');
+
+  style.textContent = `
+    @page{
+      size:A4 landscape;
+      margin:10mm 5mm;
+    }
+
+    *{
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body{
+      margin:0;
+      background:#fff;
+    }
+
+    .page{
+      page-break-after:always;
+      padding:0;
+      padding-right:2px;
+    }
+
+    .page:last-child{
+      page-break-after:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+    }
+
+    th,td{
+      border:1px solid #000;
+      padding:4px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important
+    }
+
+    thead{
+      display:table-header-group;
+    }
+
+    tfoot{
+      display:table-footer-group;
+    }
+
+    tr{
+      page-break-inside:avoid;
+    }
+    #SalaryFYDetailsTable{
+      display:table !important;
+      visibility:visible !important;
+    }
+  `;
+
+  doc.head.appendChild(style);
+
+  // =========================
+  // EMPLOYEE LOOP
+  // =========================
+  employees.forEach((empHRIS) => {
+    buildSalaryFYDetailsTable(empHRIS);
+
+    const clone = table.cloneNode(true);
+
+    clone.style.display = 'table';
+    clone.hidden = false;
+    clone.removeAttribute('hidden');
+
+    const page = doc.createElement('div');
+    page.className = 'page';
+
+    // 🔥 Get station name
+    const emp = getEmployee(empHRIS);
+    // 🔥 Add header
+    page.appendChild(buildPrintHeader(doc, id('SalSlipPage_Station')?.value || ''));
+
+    // 🔥 Add FY table
+    page.appendChild(clone);
+
+    doc.body.appendChild(page);
+  });
+
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+}
+
+async function exportSalaryFYStatementExcel(mode = 'single') {
+  const workbook = new ExcelJS.Workbook();
+
+  const station = id('SalSlipPage_Station')?.value;
+  const selectedEmp = id('SalSlipPage_Emp')?.value;
+
+  const h = pbData.headers;
+  const stationIndex = h.indexOf('Pay Drawn Station');
+  const hrisIndex = h.indexOf('HRIS');
+
+  // =========================
+  // HELPERS
+  // =========================
+  function rgbToARGB(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m) return null;
+    return 'FF' + m.map((x) => (+x).toString(16).padStart(2, '0')).join('');
+  }
+
+  function isValidColor(cs) {
+    const bg = cs.backgroundColor;
+
+    if (!bg) return false;
+    if (bg === 'transparent') return false;
+    if (bg.includes('rgba') && bg.endsWith(', 0)')) return false;
+
+    return true;
+  }
+
+  function parseValue(text) {
+    if (!text) return ' ';
+
+    const clean = text.replace(/[,₹\s]/g, '');
+
+    return !isNaN(clean) && clean !== '' ? Number(clean) : text;
+  }
+
+  // =========================
+  // TABLE PROCESSOR
+  // =========================
+  function processTable(sheet, table, startRow = 1) {
+    let currentRow = startRow;
+
+    const rows = table.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tfoot > tr');
+
+    rows.forEach((tr) => {
+      let colIndex = 1;
+
+      const excelRow = sheet.getRow(currentRow);
+
+      tr.querySelectorAll('th,td').forEach((cell) => {
+        const text = cell.innerText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+
+        const cs = getComputedStyle(cell);
+
+        const colSpan = cell.colSpan || 1;
+        const rowSpan = cell.rowSpan || 1;
+
+        const excelCell = excelRow.getCell(colIndex);
+
+        excelCell.value = parseValue(text);
+
+        excelCell.font = {
+          name: 'Calibri',
+          size: 11,
+          bold: cs.fontWeight === 'bold' || parseInt(cs.fontWeight) >= 600
+        };
+
+        const isRemarkRow = tr.cells.length === 1 && tr.cells[0].colSpan > 1;
+
+        excelCell.alignment = {
+          horizontal: cs.textAlign || 'left',
+          vertical: 'middle',
+          wrapText: !isRemarkRow
+        };
+
+        if (isValidColor(cs)) {
+          const argb = rgbToARGB(cs.backgroundColor);
+
+          if (argb) {
+            excelCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb }
+            };
+          }
+        }
+
+        excelCell.border = {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+
+        if (rowSpan > 1 || colSpan > 1) {
+          sheet.mergeCells(currentRow, colIndex, currentRow + rowSpan - 1, colIndex + colSpan - 1);
+        }
+
+        colIndex += colSpan;
+      });
+
+      excelRow.commit();
+      currentRow++;
+    });
+
+    return currentRow;
+  }
+
+  // =========================
+  // EMPLOYEE LIST
+  // =========================
+  let employees = [];
+
+  if (mode === 'single') {
+    if (!selectedEmp) return;
+
+    employees = [selectedEmp];
+  } else {
+    employees = [
+      ...new Set(
+        pbData.rows
+          .filter(
+            (r) =>
+              String(r[stationIndex] || '')
+                .trim()
+                .toUpperCase() ===
+              String(station || '')
+                .trim()
+                .toUpperCase()
+          )
+          .map((r) => String(r[hrisIndex]).trim())
+      )
+    ];
+
+    if (!employees.length) {
+      showCustomAlert('🚫 No employees found for selected station');
+      return;
+    }
+  }
+
+  // =========================
+  // LOOP EMPLOYEES
+  // =========================
+  for (const empHRIS of employees) {
+    buildSalaryFYDetailsTable(empHRIS);
+
+    const table = id('SalaryFYDetailsTable');
+
+    if (!table) continue;
+
+    const emp = getEmployee(empHRIS);
+
+    const empName = emp ? emp[window.empCalcHeaders.indexOf('Employee Name')] : empHRIS;
+
+    const sheet = workbook.addWorksheet(mode === 'single' ? 'FY Statement' : String(empName).substring(0, 31));
+
+    const logoBase64 = await getBase64Image('https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l');
+
+    const imageId = workbook.addImage({
+      base64: logoBase64,
+      extension: 'png'
+    });
+
+    sheet.addImage(imageId, {
+      tl: { col: 0.2, row: 0.15 },
+      ext: { width: 50, height: 50 }
+    });
+
+    // =========================
+    // HEADER
+    // =========================
+    sheet.mergeCells(1, 1, 1, table.querySelectorAll('thead tr:nth-child(2) th').length);
+
+    const headerCell = sheet.getCell(1, 1);
+
+    const stationName = emp?.[window.empCalcHeaders.indexOf('Pay Drawn Station')] || station || '';
+
+    headerCell.value = `PRASAR BHARATI
+    INDIA'S PUBLIC SERVICE BROADCASTER
+    ALL INDIA RADIO
+    ${stationName}`;
+
+    headerCell.font = {
+      bold: true,
+      size: 12
+    };
+
+    headerCell.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+      wrapText: true
+    };
+
+    headerCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: {
+        argb: 'FFFFFFFF'
+      }
+    };
+
+    headerCell.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+
+    // Shift table down
+    const totalCols = table.querySelectorAll('thead tr:nth-child(2) th').length;
+
+    sheet.getColumn(1).width = 10;
+
+    for (let i = 2; i <= totalCols; i++) {
+      sheet.getColumn(i).width = 9;
+    }
+
+    sheet.getRow(1).height = 65;
+
+    const lastRow = processTable(sheet, table, 3);
+
+    // =========================
+    // SETTINGS
+    // =========================
+    sheet.views = [{ showGridLines: false }];
+
+    sheet.pageSetup = {
+      paperSize: 9,
+      orientation: 'landscape',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: false,
+      margins: {
+        left: 0.3,
+        right: 0.3,
+        top: 0.5,
+        bottom: 0.5,
+        header: 0.3,
+        footer: 0.3
+      }
+    };
+    sheet.pageSetup.printArea = `A1:${sheet.getColumn(sheet.columnCount).letter}${lastRow - 1}`;
+  }
+
+  // =========================
+  // DOWNLOAD
+  // =========================
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  let fileName;
+
+  if (mode === 'single') {
+    const emp = getEmployee(selectedEmp);
+
+    const empName = emp ? String(emp[window.empCalcHeaders.indexOf('Employee Name')]).trim() : String(selectedEmp).trim();
+
+    fileName = `${empName}(${selectedEmp})-FYStatement.xlsx`;
+  } else {
+    fileName = `${station}-FYStatements.xlsx`;
+  }
+
+  saveAs(new Blob([buffer]), fileName);
+}
+
+['SalSlipPage_Station', 'SalSlipPage_Emp', 'SalSlipPage_SalMonth', 'SalSlipPage_FY'].forEach((idName) => {
+  on(idName, 'change', () => {
+    setTimeout(handleSalarySlipChange, 0);
+  });
+});
+
+on('SSprintBtn', 'click', () => {
+  const hasEmp = !!id('SalSlipPage_Emp')?.value;
+
+  showConfirmBox({
+    title: 'Print Options',
+
+    icon: '🖨️',
+
+    message: `
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      ${
+        hasEmp
+          ? `
+        <button id="SS_PrintSlip"
+          class="reportTypeBtn">
+          🖨️ Print Salary Slip
+        </button>
+      `
+          : ''
+      }
+
+      <button id="SS_PrintStationSlip"
+        class="reportTypeBtn">
+        🖨️ Print Station Salary Slip
+      </button>
+
+      ${
+        hasEmp
+          ? `
+        <button id="SS_PrintFY"
+          class="reportTypeBtn">
+          📄 Print FY Statement
+        </button>
+      `
+          : ''
+      }
+
+      <button id="SS_PrintStationFY"
+        class="reportTypeBtn">
+        📄 Print Station FY Statement
+      </button>
+
+    </div>
+  `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#ef4444',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  // Hide default Yes/No buttons
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    on('SS_PrintSlip', 'click', () => {
+      closeConfirmBox();
+      openPrintWindow(buildSalarySlipHTML('single'));
+    });
+
+    on('SS_PrintStationSlip', 'click', () => {
+      closeConfirmBox();
       openPrintWindow(buildSalarySlipHTML('all'));
       resetSalarySlipFields();
       renderNoDataRow(id('SalarySlipBreakup')?.querySelector('tbody'), 7);
       renderNoDataRow(id('SalarySlipFYDetails')?.querySelector('tbody'), 7);
-    }
+    });
 
-    // ===== SALARY SLIP EXCEL ✅ FIXED =====
-    if (type === 'excel-singleSS') {
-      exportSalarySlipExcel('single');
-    }
+    on('SS_PrintFY', 'click', () => {
+      closeConfirmBox();
+      openPrintWindow(buildSalaryFYStatementHTML('single'));
+    });
 
-    // ===== ALL SALARY SLIP EXCEL =====
-    if (type === 'excel-allSS') {
-      exportSalarySlipExcel('all');
-    }
-  });
+    on('SS_PrintStationFY', 'click', () => {
+      closeConfirmBox();
+      openPrintWindow(buildSalaryFYStatementHTML('all'));
+    });
+  }, 0);
 });
-['SalSlipPage_Station', 'SalSlipPage_Emp', 'SalSlipPage_SalMonth', 'SalSlipPage_FY'].forEach((idName) => {
-  id(idName)?.addEventListener('change', () => {
-    setTimeout(() => {
-      handleSalarySlipChange(); // ✅ now reads updated value
-    }, 0);
+
+on('SSexcelBtn', 'click', () => {
+  const hasEmp = !!id('SalSlipPage_Emp')?.value;
+
+  showConfirmBox({
+    title: 'Excel Options',
+
+    icon: '📊',
+
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        ${
+          hasEmp
+            ? `
+          <button id="SS_ExcelSlip"
+            class="reportTypeBtn">
+            📊 Salary Slip Excel
+          </button>
+        `
+            : ''
+        }
+
+        <button id="SS_ExcelStationSlip"
+          class="reportTypeBtn">
+          📊 Station Salary Slip Excel
+        </button>
+
+        ${
+          hasEmp
+            ? `
+          <button id="SS_ExcelFY"
+            class="reportTypeBtn">
+            📈 FY Statement Excel
+          </button>
+        `
+            : ''
+        }
+
+        <button id="SS_ExcelStationFY"
+          class="reportTypeBtn">
+          📈 Station FY Statement Excel
+        </button>
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#ef4444',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
   });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    on('SS_ExcelSlip', 'click', () => {
+      closeConfirmBox();
+      exportSalarySlipExcel('single');
+    });
+
+    on('SS_ExcelStationSlip', 'click', () => {
+      closeConfirmBox();
+      exportSalarySlipExcel('all');
+    });
+
+    on('SS_ExcelFY', 'click', () => {
+      closeConfirmBox();
+      exportSalaryFYStatementExcel('single');
+    });
+
+    on('SS_ExcelStationFY', 'click', () => {
+      closeConfirmBox();
+      exportSalaryFYStatementExcel('all');
+    });
+  }, 0);
 });
