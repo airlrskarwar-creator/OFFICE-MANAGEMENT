@@ -1329,14 +1329,19 @@ option {
 
 .reportTypeBtn {
   border: solid 1px silver;
-  background: #dfdfdf;
-  color: black !important;
+  background: #2563eb;
+  color: white !important;
   font-weight: 700;
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  width: 100%;
+  width: 200px;
+  margin: auto;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
 }
 
 /* =============APP LAYOUT=========== */
@@ -3417,6 +3422,24 @@ body.logged-in.sidebar-collapsed .dashboard-footer {
   border-collapse: collapse;
   font-size: 12px !important;
   background-color: white;
+}
+
+#SalaryFYDetailsTable th {
+  max-width: 80px !important;
+  word-break: break-word;
+  word-wrap: break-word;
+}
+
+#SalaryFYDetailsTable td {
+  max-width: 80px !important;
+}
+
+#SalaryFYDetailsTable td:first-child,
+#SalaryFYDetailsTable th:first-child {
+  min-width: 70px !important;
+  max-width: 70px !important;
+  word-break: break-word;
+  word-wrap: break-word;
 }
 
 .SalarySlipTableWrapper td:first-child {
