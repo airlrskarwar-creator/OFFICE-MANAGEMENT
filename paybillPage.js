@@ -4764,109 +4764,6 @@ function openPrintWindow(html) {
   win.document.close();
 }
 
-const pbmenu = id('PBprintMenu');
-const pbprintBtn = id('PBprintBtn');
-const pbexcelBtn = id('PBexcelBtn');
-
-// 🔹 PRINT BUTTON
-pbprintBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-
-  updatePBPrintMenuState();
-
-  qsa('.print-option').forEach((el) => (el.style.display = 'block'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
-
-  pbmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
-
-// 🔹 EXCEL BUTTON
-pbexcelBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-
-  updatePBPrintMenuState();
-
-  qsa('.print-option').forEach((el) => (el.style.display = 'none'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
-
-  pbmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
-
-// 🔹 CLOSE
-document.addEventListener('click', () => {
-  pbmenu.classList.remove('show');
-});
-
-function updatePBPrintMenuState() {
-  const hasDAA = hasDAAData();
-
-  const printDAA = id('daaPrintOption');
-  const excelDAA = id('daaExcelOption'); // ✅ FIXED ID
-
-  [printDAA, excelDAA].forEach((opt) => {
-    if (!opt) return;
-
-    if (hasDAA) {
-      opt.classList.remove('disabled');
-    } else {
-      opt.classList.add('disabled');
-    }
-  });
-}
-
-qsa('.menu-option').forEach((opt) => {
-  opt.addEventListener('click', function () {
-    const type = this.dataset.type;
-
-    pbmenu.classList.remove('show');
-
-    // ===== PAY BILL PRINT =====
-    if (type === 'pdf-paybill') {
-      const goHTML = buildPrintPayBillTable('GO');
-      const npsHTML = buildPrintPayBillTable('NPS');
-
-      if (!goHTML) return showCustomAlert('🚫 No Pay Bill data');
-
-      openPrintWindow(buildPrintPayBillHTML(goHTML, npsHTML));
-    }
-
-    // ===== DAA PRINT =====
-    if (type === 'pdf-daa') {
-      refreshPBView('edit');
-      updateAndRenderDAA();
-
-      const daaGO = id('daaGOTableCalculation')?.outerHTML || '';
-      const daaNPS = id('daaNPSTableCalculation')?.outerHTML || '';
-
-      if (!daaGO && !daaNPS) {
-        showCustomAlert('🚫 No DAA data');
-        refreshPBView('view');
-        return;
-      }
-
-      openPrintWindow(buildPrintDAAHTML(daaGO, daaNPS));
-
-      setTimeout(() => refreshPBView('view'), 0);
-    }
-
-    // ===== PAY BILL EXCEL ✅ FIXED =====
-    if (type === 'excel-paybill') {
-      generatePayBillExcel(); // 🔥 NO async/await
-    }
-
-    // ===== DAA EXCEL =====
-    if (type === 'excel-daa') {
-      refreshPBView('edit');
-      updateAndRenderDAA();
-
-      setTimeout(() => {
-        generateDAAExcel(); // OK (sync)
-        refreshPBView('view');
-      }, 50);
-    }
-  });
-});
-
 function getBase64Image(url) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -5471,3 +5368,149 @@ async function generatePayBillExcel() {
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), `${station} PayBill ${month}.xlsx`);
 }
+
+on('PBprintBtn', 'click', () => {
+  const hasDAA = hasDAAData();
+
+  showConfirmBox({
+    title: 'Pay Bill Print Statement',
+
+    icon: '🖨️',
+
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <button id="PB_PrintPayBill"
+          class="reportTypeBtn">
+          🖨️ Pay Bill
+        </button>
+
+        ${
+          hasDAA
+            ? `
+          <button id="PB_PrintDAA"
+            class="reportTypeBtn">
+            🖨️ DA Arrears
+          </button>
+        `
+            : ''
+        }
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#ef4444',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    id('PB_PrintPayBill')?.addEventListener('click', () => {
+      closeConfirmBox();
+
+      const goHTML = buildPrintPayBillTable('GO');
+      const npsHTML = buildPrintPayBillTable('NPS');
+
+      if (!goHTML) {
+        showCustomAlert('🚫 No Pay Bill data');
+        return;
+      }
+
+      openPrintWindow(buildPrintPayBillHTML(goHTML, npsHTML));
+    });
+
+    id('PB_PrintDAA')?.addEventListener('click', () => {
+      closeConfirmBox();
+
+      refreshPBView('edit');
+      updateAndRenderDAA();
+
+      const daaGO = id('daaGOTableCalculation')?.outerHTML || '';
+
+      const daaNPS = id('daaNPSTableCalculation')?.outerHTML || '';
+
+      if (!daaGO && !daaNPS) {
+        showCustomAlert('🚫 No DAA data');
+        refreshPBView('view');
+        return;
+      }
+
+      openPrintWindow(buildPrintDAAHTML(daaGO, daaNPS));
+
+      setTimeout(() => refreshPBView('view'), 0);
+    });
+  }, 50);
+});
+
+on('PBexcelBtn', 'click', () => {
+  const hasDAA = hasDAAData();
+
+  showConfirmBox({
+    title: 'Pay Bill Excel Statement',
+
+    icon: '📊',
+
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <button id="PB_ExcelPayBill"
+          class="reportTypeBtn">
+          📊 Pay Bill
+        </button>
+
+        ${
+          hasDAA
+            ? `
+          <button id="PB_ExcelDAA"
+            class="reportTypeBtn">
+            📊 DA Arrears
+          </button>
+        `
+            : ''
+        }
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#2563eb',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    id('PB_ExcelPayBill')?.addEventListener('click', () => {
+      closeConfirmBox();
+      generatePayBillExcel();
+    });
+
+    id('PB_ExcelDAA')?.addEventListener('click', () => {
+      closeConfirmBox();
+
+      refreshPBView('edit');
+      updateAndRenderDAA();
+
+      setTimeout(() => {
+        generateDAAExcel();
+        refreshPBView('view');
+      }, 50);
+    });
+  }, 50);
+});
