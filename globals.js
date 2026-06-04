@@ -2426,3 +2426,22 @@ id('logoutBtn')?.addEventListener('click', () => {
     }
   });
 });
+
+function SyncAllPage() {
+  //================== Pay Bill Change ==================//
+  refreshPBView();
+  setDAPercent();
+  const fy = id('DGPage_FY')?.value?.trim();
+
+  id('DGPage_Month').disabled = !fy || fy === 'Select FY';
+  loadDGMonthsByFY();
+  renderEmpLeaveTable();
+  filterDGTable();
+  filterEBTable();
+
+  setTimeout(() => {
+    handleSalarySlipChange();
+    handleITChange();
+    handlePensionChange();
+  }, 0);
+}
