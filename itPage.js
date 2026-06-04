@@ -519,6 +519,16 @@ function initSalaryToggle() {
   on(toggle, 'change', updateToggle);
 }
 
+function resetITPanel() {
+  id('PanelGross').innerText = '-';
+  id('PanelRegime').innerText = '-';
+  id('PanelCalcIT').innerText = '-';
+  id('PanelTDS').innerText = '-';
+  id('PanelIT').innerText = '-';
+
+  id('PanelITHighlight').style.background = 'rgb(199, 221, 255)';
+}
+
 function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
   const dbgEmpRow = window.empCalcRows.find((r) => String(r[window.empCalcHeaders.indexOf('HRIS')]).trim() === String(empHRIS).trim());
   const wrapper = qs('.ITtableWrapper');
@@ -739,7 +749,7 @@ function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
 
     table.appendChild(tbody);
     wrapper.appendChild(table);
-
+    resetITPanel();
     return;
   }
 
@@ -1270,7 +1280,7 @@ function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
                     <tr><td colspan="5"><b>Monthly TDS (${oldCalcITperMonth} (IT) + ${oldCalcITCessperMonth} (Cess))</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldCalcTDSperMonth)}</b></td></tr>
                   `;
 
-      //Calcuklation for Panel Display
+      //Calculation for Panel Display
       const bestGross = Math.min(newTaxableIncome, oldTaxableIncome);
       const bestIT = Math.min(newNetTax, oldNetTax);
       let bestRegime = '';
@@ -1306,14 +1316,16 @@ function renderCalculatedITTable(empHRIS, selectedFY, mode = 'calculated') {
 });
 
 function handleITChange() {
-  qsa('.ITaction-group button').forEach((btn) => {
-    btn.disabled = false;
-  });
-
-  updateITPrintMenuState();
-
   const empHRIS = id('ITPage_Emp')?.value;
-  const selectedFY = id('ITPage_FY')?.value;
+  const fyEl = id('ITPage_FY');
+  const selectedFY = fyEl?.value;
+
+  // 🔥 Disable buttons when FY = "Select FY"
+  const disableActions = !fyEl || fyEl.selectedIndex === 0;
+
+  qsa('.ITaction-group button').forEach((btn) => {
+    btn.disabled = disableActions;
+  });
 
   if (!empHRIS || !selectedFY) return;
 
@@ -1324,36 +1336,19 @@ function handleITChange() {
 
   const mode = toggle?.checked ? 'paid' : 'calculated';
 
-  //console.log(`🔄 Salary Selected → ${mode}`);
-
   // =========================
   // 🔄 LOADING STATE
   // =========================
   const wrapper = qs('.ITtableWrapper');
-  if (wrapper) wrapper.innerHTML = 'Loading...';
+
+  if (wrapper) {
+    wrapper.innerHTML = 'Loading...';
+  }
 
   // =========================
   // 🔥 RENDER
   // =========================
   renderCalculatedITTable(empHRIS, selectedFY, mode);
-}
-
-function SyncAllPage() {
-  //================== Pay Bill Change ==================//
-  refreshPBView();
-  setDAPercent();
-  handleITChange();
-  handlePensionChange();
-  const fy = id('DGPage_FY')?.value?.trim();
-
-  id('DGPage_Month').disabled = !fy || fy === 'Select FY';
-  loadDGMonthsByFY();
-  filterDGTable();
-  filterEBTable();
-  //================== Salary Slip Change ==================//
-  setTimeout(() => {
-    handleSalarySlipChange();
-  }, 0);
 }
 
 function calculateMonthlyTDS(newPendingTDS, paidMonthCount) {
@@ -1946,16 +1941,7 @@ async function exportITExcel(mode = 'single') {
 
     if (mode === 'all') {
       wrapper.style.opacity = '0'; // 🔥
-      id('ITInfoPanel')
-        .querySelectorAll('span')
-        .forEach((el) => {
-          el.textContent = '0';
-        });
-      id('ITInfoPanel')
-        .querySelectorAll('.itPanelDiv')
-        .forEach((el) => {
-          el.style.background = 'rgba(43, 82, 145)';
-        });
+      resetITPanel();
     }
 
     // 🔥 RESTORE INPUT VALUE AFTER RENDER
@@ -2086,20 +2072,10 @@ async function exportITExcel(mode = 'single') {
     }
 
     if (wrapper) {
-      id('ITInfoPanel')
-        .querySelectorAll('span')
-        .forEach((el) => {
-          el.textContent = '0';
-        });
-
-      id('ITInfoPanel')
-        .querySelectorAll('.itPanelDiv')
-        .forEach((el) => {
-          el.style.background = 'rgba(0, 196, 7)';
-        });
+      resetITPanel();
       wrapper.innerHTML = ''; // 🔥 clear table UI
+      wrapper.style.opacity = '1';
     }
-    wrapper.style.opacity = '1';
   }
 }
 
@@ -2223,7 +2199,7 @@ async function buildITHTML(mode = 'single') {
                   margin-top: 5mm;
                   margin-right: 5mm;
                   margin-left: 5mm;
-                  margin-bottom: 20mm; /* 🔥 increase bottom */
+                  margin-bottom: 10mm; /* 🔥 increase bottom */
                 }
                 body {
                   margin: 0;
@@ -2246,7 +2222,7 @@ async function buildITHTML(mode = 'single') {
                   overflow: visible !important;
                   max-height: none !important;
                   height: auto !important;
-                  font-size:9px !important;
+                  font-size: 9px !important;
                 }
 
                 input{
@@ -2340,16 +2316,7 @@ async function buildITHTML(mode = 'single') {
 
     if (mode === 'all') {
       wrapper.style.opacity = '0'; // 🔥
-      id('ITInfoPanel')
-        .querySelectorAll('span')
-        .forEach((el) => {
-          el.textContent = '0';
-        });
-      id('ITInfoPanel')
-        .querySelectorAll('.itPanelDiv')
-        .forEach((el) => {
-          el.style.background = 'rgba(0, 196, 7)';
-        });
+      resetITPanel();
     }
 
     // 🔥 WAIT FOR DOM + CALCULATION
@@ -2436,72 +2403,142 @@ async function buildITHTML(mode = 'single') {
     }
 
     if (wrapper) {
-      id('ITInfoPanel')
-        .querySelectorAll('span')
-        .forEach((el) => {
-          el.textContent = '0';
-        });
-      id('ITInfoPanel')
-        .querySelectorAll('.itPanelDiv')
-        .forEach((el) => {
-          el.style.background = 'rgba(0, 196, 7)';
-        });
+      resetITPanel();
       wrapper.innerHTML = ''; // 🔥 clear table UI
+      wrapper.style.opacity = '1';
     }
-    wrapper.style.opacity = '1';
   }
-
   return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
 }
 
-function updateITPrintMenuState() {
-  const hasEmp = id('ITPage_Emp')?.value;
-  const hasFY = id('ITPage_FY')?.value;
+on('ITprintBtn', 'click', () => {
+  const hasEmp = !!id('ITPage_Emp')?.value;
 
-  const printIT = id('itPrintOption');
-  const excelIT = id('itExcelOption');
+  showConfirmBox({
+    title: 'IT Calculation Print Statement',
 
-  [printIT, excelIT].forEach((opt) => {
-    if (!opt) return;
+    icon: '🖨️',
 
-    if (hasEmp && hasFY) {
-      opt.classList.remove('disabled');
-    } else {
-      opt.classList.add('disabled');
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        ${
+          hasEmp
+            ? `
+          <button id="IT_PrintSingle"
+            class="reportTypeBtn">
+            🖨️ Selected Employee
+          </button>
+        `
+            : ''
+        }
+
+        <button id="IT_PrintAll"
+          class="reportTypeBtn">
+          🖨️ Station (All Employees)
+        </button>
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#ef4444',
+
+    onYes: () => {
+      closeConfirmBox();
     }
   });
-}
 
-const itmenu = id('ITprintMenu');
-const itprintBtn = id('ITprintBtn');
-const itexcelBtn = id('ITexcelBtn');
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
 
-// 🔹 PRINT BUTTON
-itprintBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
+  setTimeout(() => {
+    id('IT_PrintSingle')?.addEventListener('click', async () => {
+      closeConfirmBox();
 
-  updateITPrintMenuState();
+      const html = await buildITHTML('single');
 
-  qsa('.print-option').forEach((el) => (el.style.display = 'block'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
+      if (!html) {
+        showCustomAlert('🚫 No Data Found');
+        return;
+      }
 
-  itmenu.classList.add('show'); // ✅ ALWAYS OPEN
+      openPrintWindow(html);
+    });
+
+    id('IT_PrintAll')?.addEventListener('click', async () => {
+      closeConfirmBox();
+
+      const html = await buildITHTML('all');
+
+      if (!html) {
+        showCustomAlert('🚫 No Employees Found');
+        return;
+      }
+
+      openPrintWindow(html);
+    });
+  }, 50);
 });
 
-// 🔹 EXCEL BUTTON
-itexcelBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
+on('ITexcelBtn', 'click', () => {
+  const hasEmp = !!id('ITPage_Emp')?.value;
 
-  updateITPrintMenuState();
+  showConfirmBox({
+    title: 'IT Calculation Excel Statement',
 
-  qsa('.print-option').forEach((el) => (el.style.display = 'none'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
+    icon: '📊',
 
-  itmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
 
-document.addEventListener('click', () => {
-  itmenu.classList.remove('show');
+        ${
+          hasEmp
+            ? `
+          <button id="IT_ExcelSingle"
+            class="reportTypeBtn">
+            📊 Selected Employee
+          </button>
+        `
+            : ''
+        }
+
+        <button id="IT_ExcelAll"
+          class="reportTypeBtn">
+          📊 Station (All Employees)
+        </button>
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#2563eb',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    id('IT_ExcelSingle')?.addEventListener('click', () => {
+      closeConfirmBox();
+      exportITExcel('single');
+    });
+
+    id('IT_ExcelAll')?.addEventListener('click', () => {
+      closeConfirmBox();
+      exportITExcel('all');
+    });
+  }, 50);
 });
 
 on('salaryMode', 'change', () => {
@@ -2520,37 +2557,4 @@ on('salaryMode', 'change', () => {
   const mode = id('salaryMode')?.checked ? 'paid' : 'calculated';
 
   renderCalculatedITTable(empHRIS, selectedFY, mode);
-});
-
-qsa('.menu-option').forEach((opt) => {
-  opt.addEventListener('click', async function () {
-    const type = this.dataset.type;
-    const wrapper = qs('.ITtableWrapper');
-
-    itmenu.classList.remove('show');
-
-    // =====SALARY SLIP PRINT =====
-    if (type === 'pdf-singleIT') {
-      const html = await buildITHTML('single'); // ✅ FIX
-      openPrintWindow(html);
-      restoreNumberFormatting(wrapper);
-    }
-
-    // ===== ALL SALARY SLIP PRINT =====
-    if (type === 'pdf-allIT') {
-      const html = await buildITHTML('all'); // ✅ FIX
-      openPrintWindow(html);
-      restoreNumberFormatting(wrapper);
-    }
-
-    // ===== SALARY SLIP EXCEL ✅ FIXED =====
-    if (type === 'excel-singleIT') {
-      exportITExcel('single');
-    }
-
-    // ===== ALL SALARY SLIP EXCEL =====
-    if (type === 'excel-allIT') {
-      exportITExcel('all');
-    }
-  });
 });
