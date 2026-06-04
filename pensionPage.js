@@ -556,14 +556,13 @@ function renderPensionTable(empHRIS) {
   // 🔥 DA (FIXED)
   // =========================
   const headers = pbData.headers;
-  const daIdx = headers.indexOf('DA%');
+  const daIdx = pbData.headers.indexOf('DA%');
 
-  const latestMap = getLatestPBMap();
-  const latestPB = latestMap[empHRIS];
+  const lastRowWithDA = [...pbData.rows].reverse().find((r) => Number(r[daIdx]) > 0);
 
-  const lastDA = latestPB ? Number(latestPB[daIdx]) : 0;
+  const lastDA = lastRowWithDA ? Number(lastRowWithDA[daIdx]) : 0;
 
-  const daValue = Math.round((lastPay * lastDA) / 100);
+  const daValue = Math.round((Number(lastPay) * lastDA) / 100);
 
   // =========================
   // 🔥 CALCULATIONS
@@ -1243,95 +1242,12 @@ function renderPensionTable(empHRIS) {
   }
 }
 
-const pensionmenu = id('PensionprintMenu');
-const pensionprintBtn = id('PensionprintBtn');
-const pensionexcelBtn = id('PensionexcelBtn');
-
-// 🔹 PRINT BUTTON
-pensionprintBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-
-  updatePensionPrintMenuState();
-
-  qsa('.print-option').forEach((el) => (el.style.display = 'block'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'none'));
-
-  pensionmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
-
-// 🔹 EXCEL BUTTON
-pensionexcelBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-
-  updatePensionPrintMenuState();
-
-  qsa('.print-option').forEach((el) => (el.style.display = 'none'));
-  qsa('.excel-option').forEach((el) => (el.style.display = 'block'));
-
-  pensionmenu.classList.add('show'); // ✅ ALWAYS OPEN
-});
-
-document.addEventListener('click', () => {
-  pensionmenu.classList.remove('show');
-});
-
-function updatePensionPrintMenuState() {
-  const hasEmp = id('PensionPage_Emp')?.value;
-  const hasStation = id('PensionPage_Station')?.value;
-
-  const printPension = id('pensionPrintOption');
-  const excelPension = id('pensionExcelOption');
-
-  [printPension, excelPension].forEach((opt) => {
-    if (!opt) return;
-
-    if (hasStation && hasEmp) {
-      opt.classList.remove('disabled');
-    } else {
-      opt.classList.add('disabled');
-    }
-  });
-}
-
-qsa('.menu-option').forEach((opt) => {
-  opt.addEventListener('click', async function () {
-    const type = this.dataset.type;
-    const wrapper = qs('.PensionTableWrapper');
-
-    pensionmenu.classList.remove('show');
-
-    // ===== SINGLE PRINT =====
-    if (type === 'pdf-singlePension') {
-      const html = await buildPensionHTML('single'); // ✅ FIX
-      openPrintWindow(html);
-      restoreNumberFormatting(wrapper);
-    }
-
-    // ===== ALL PRINT =====
-    if (type === 'pdf-allPension') {
-      const html = await buildPensionHTML('all'); // ✅ FIX
-      openPrintWindow(html);
-      restoreNumberFormatting(wrapper);
-    }
-
-    // ===== EXCEL =====
-    if (type === 'excel-singlePension') {
-      exportPensionExcel('single');
-    }
-
-    if (type === 'excel-allPension') {
-      exportPensionExcel('all');
-    }
-  });
-});
-
 function handlePensionChange() {
   qsa('.Pensionaction-group button').forEach((btn) => {
     btn.disabled = false;
   });
 
   const empName = id('PensionPage_Emp').value;
-  updatePensionPrintMenuState();
   const empHRIS = id('PensionPage_Emp').value;
   renderPensionTable(empHRIS);
   updatePensionUI();
@@ -2100,3 +2016,133 @@ async function exportPensionExcel(mode = 'single') {
     wrapper.style.opacity = '1';
   }
 }
+
+on('PensionprintBtn', 'click', () => {
+  const hasEmp = !!id('PensionPage_Emp')?.value;
+
+  showConfirmBox({
+    title: 'Print Options',
+
+    icon: '🖨️',
+
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        ${
+          hasEmp
+            ? `
+          <button id="Pension_PrintSingle"
+            class="reportTypeBtn">
+            🖨️ Selected Employee
+          </button>
+        `
+            : ''
+        }
+
+        <button id="Pension_PrintAll"
+          class="reportTypeBtn">
+          🖨️ Station (All Employees)
+        </button>
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#ef4444',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    id('Pension_PrintSingle')?.addEventListener('click', async () => {
+      closeConfirmBox();
+
+      const html = await buildPensionHTML('single');
+
+      if (!html) {
+        showCustomAlert('🚫 No Data Found');
+        return;
+      }
+
+      openPrintWindow(html);
+    });
+
+    id('Pension_PrintAll')?.addEventListener('click', async () => {
+      closeConfirmBox();
+
+      const html = await buildPensionHTML('all');
+
+      if (!html) {
+        showCustomAlert('🚫 No Employees Found');
+        return;
+      }
+
+      openPrintWindow(html);
+    });
+  }, 50);
+});
+
+on('PensionexcelBtn', 'click', () => {
+  const hasEmp = !!id('PensionPage_Emp')?.value;
+
+  showConfirmBox({
+    title: 'Pension Calculation Excel Statement',
+
+    icon: '📊',
+
+    message: `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        ${
+          hasEmp
+            ? `
+          <button id="Pension_ExcelSingle"
+            class="reportTypeBtn">
+            📊 Selected Employee
+          </button>
+        `
+            : ''
+        }
+
+        <button id="Pension_ExcelAll"
+          class="reportTypeBtn">
+          📊 Station (All Employees)
+        </button>
+
+      </div>
+    `,
+
+    subMessage: '',
+
+    yesText: 'Close',
+    noText: '',
+    yesColor: '#2563eb',
+
+    onYes: () => {
+      closeConfirmBox();
+    }
+  });
+
+  id('logoutYesBtn').style.display = 'block';
+  id('logoutNoBtn').style.display = 'none';
+
+  setTimeout(() => {
+    id('Pension_ExcelSingle')?.addEventListener('click', () => {
+      closeConfirmBox();
+      exportPensionExcel('single');
+    });
+
+    id('Pension_ExcelAll')?.addEventListener('click', () => {
+      closeConfirmBox();
+      exportPensionExcel('all');
+    });
+  }, 50);
+});
