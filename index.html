@@ -84,7 +84,7 @@
               </span>
             </div>
           </div>
-          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: none" onclick="shortcut()">⚡ Shortcut</button>
+          <button id="shortcutBtn" style="background: lightgray; width: 100px; height: 40px; border-radius: 10px; cursor: pointer; z-index: 9999; display: block" onclick="shortcut()">⚡ Shortcut</button>
           <!-- LOGIN BUTTON -->
           <button id="loginBtn">
             <i class="material-icons">login</i>
@@ -506,13 +506,6 @@
                 <i data-lucide="circle-x"></i>
                 <span>Cancel</span>
               </button>
-              <div id="PBprintMenu">
-                <div class="print-option menu-option" data-type="pdf-paybill">🧾 Pay Bill Report PDF</div>
-                <div class="print-option menu-option" id="daaPrintOption" data-type="pdf-daa">📊 DAA Bill Report PDF</div>
-                <!-- EXCEL OPTIONS -->
-                <div class="excel-option menu-option" data-type="excel-paybill">⬇️ Pay Bill Excel</div>
-                <div class="excel-option menu-option" id="daaExcelOption" data-type="excel-daa">⬇️ DAA Bill Excel</div>
-              </div>
             </div>
           </div>
           <div class="PB-Table-Wrapper">
@@ -708,13 +701,6 @@
                 <i data-lucide="file-spreadsheet"></i>
                 <span>Excel</span>
               </button>
-              <div id="SSprintMenu">
-                <div class="print-option menu-option" id="ssPrintOption" data-type="pdf-singleSS">🧾 Employee Salary Slip PDF</div>
-                <div class="print-option menu-option" data-type="pdf-allSS">🧾 All Employee Salary Slip PDF</div>
-                <!-- EXCEL OPTIONS -->
-                <div class="excel-option menu-option" id="ssExcelOption" data-type="excel-singleSS">⬇️ Employee Salary Slip Excel</div>
-                <div class="excel-option menu-option" data-type="excel-allSS">⬇️ All Employee Salary Slip Excel</div>
-              </div>
             </div>
           </div>
 
@@ -945,13 +931,6 @@
                 <i data-lucide="file-spreadsheet"></i>
                 <span>Excel</span>
               </button>
-              <div id="ITprintMenu">
-                <div class="print-option menu-option" id="itPrintOption" data-type="pdf-singleIT">🧾 Employee IT Calculation PDF</div>
-                <div class="print-option menu-option" data-type="pdf-allIT">🧾 All Employee IT Calculation PDF</div>
-                <!-- EXCEL OPTIONS -->
-                <div class="excel-option menu-option" id="itExcelOption" data-type="excel-singleIT">⬇️ Employee IT Calculation Excel</div>
-                <div class="excel-option menu-option" data-type="excel-allIT">⬇️ All Employee IT Calculation Excel</div>
-              </div>
             </div>
           </div>
           <input type="hidden" id="paidMonthCountInput" />
@@ -1003,35 +982,6 @@
                   <i data-lucide="file-spreadsheet"></i>
                   <span>Excel</span>
                 </button>
-                <div id="PensionprintMenu">
-                  <div class="print-option menu-option" id="pensionPrintOption" data-type="pdf-singlePension">🧾 Employee Pension Benifits PDF</div>
-                  <div class="print-option menu-option" data-type="pdf-allPension">🧾 All Employee Pension Benifits PDF</div>
-                  <!-- EXCEL OPTIONS -->
-                  <div class="excel-option menu-option" id="pensionExcelOption" data-type="excel-singlePension">⬇️ Employee Pension Benifits Excel</div>
-                  <div class="excel-option menu-option" data-type="excel-allPension">⬇️ All Employee Pension Benifits Excel</div>
-                </div>
-              </div>
-            </div>
-            <div id="PensionInfoPanel">
-              <div class="pensionPanelDiv">
-                <label>Leave Encashment</label>
-                <span id="PanelLeaveEncash">0</span>
-              </div>
-              <div class="pensionPanelDiv">
-                <label>Gratuity</label>
-                <span id="PanelGratuity">0</span>
-              </div>
-              <div class="pensionPanelDiv">
-                <label>Commutation</label>
-                <span id="PanelCommutation">0</span>
-              </div>
-              <div class="pensionPanelDiv">
-                <label>Total Pension Benifits</label>
-                <span id="PanelTotBenifits">0</span>
-              </div>
-              <div class="pensionPanelDiv">
-                <label>Residual Pension</label>
-                <span id="PanelResidualPension">0</span>
               </div>
             </div>
             <div class="pensionMainInputDiv">
@@ -1061,6 +1011,28 @@
                 <label>HPL Available :</label>
                 <input type="number" id="PensionHPL" value="200" />
               </div>
+            </div>
+          </div>
+          <div id="PensionInfoPanel">
+            <div class="pensionPanelDiv">
+              <label>Leave Encashment</label>
+              <span id="PanelLeaveEncash">0</span>
+            </div>
+            <div class="pensionPanelDiv">
+              <label>Gratuity</label>
+              <span id="PanelGratuity">0</span>
+            </div>
+            <div class="pensionPanelDiv">
+              <label>Commutation</label>
+              <span id="PanelCommutation">0</span>
+            </div>
+            <div class="pensionPanelDiv">
+              <label>Total Pension Benifits</label>
+              <span id="PanelTotBenifits">0</span>
+            </div>
+            <div class="pensionPanelDiv">
+              <label>Residual Pension</label>
+              <span id="PanelResidualPension">0</span>
             </div>
           </div>
           <div class="PensionTableWrapper"></div>
